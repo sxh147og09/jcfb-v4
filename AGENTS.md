@@ -30,3 +30,18 @@ All V4 changes must stay inside this repository. The V3.3.3 repository, database
 
 A task may be marked complete only when its design is finalized, an engineering artifact exists, validation has completed, documentation is present, and Git traceability exists. Discussion alone is not completion evidence.
 
+## Constitutional Rules
+
+JCFB V4 is governed by [`docs/V4_CONSTITUTION.md`](docs/V4_CONSTITUTION.md). If an AGENTS instruction conflicts with `docs/V4_CONSTITUTION.md`, then `V4_CONSTITUTION.md` wins.
+
+The highest-priority operational rules are:
+
+- Verified objective data comes before prediction; unknown, unavailable, or unverified information is never guessed.
+- Objective facts and model interpretation remain separate.
+- Pre-match inputs must pass the declared cutoff and no-future-information boundary.
+- Frozen Input and Frozen Prediction are immutable; corrections and revisions are append-only.
+- Production, Shadow, and Experiment remain isolated, and Promotion requires evidence and manual approval.
+- Probability is not confidence; abstention is valid; five markets and score selection remain independently governed.
+- Secrets never enter Git, Public Web is read-only, and failures default to `BLOCKED` / fail closed.
+
+The full Articles, machine-oriented rule IDs, time policy, model lifecycle, correction workflow, and incident response are defined in the Constitution and its companion governance documents. Agents must not silently promote, rewrite history, or begin the next V4 task.

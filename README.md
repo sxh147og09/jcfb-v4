@@ -6,8 +6,7 @@ Status:
 EARLY DEVELOPMENT
 
 Current Build Stage:
-V4-001 ~ V4-004 COMPLETE
-V4-005 NEXT
+V4-005 Constitution 1.0
 
 Legacy Production:
 JCFB V3.3.3 remains independent and unchanged.
@@ -17,6 +16,16 @@ JCFB V3.3.3 remains independent and unchanged.
 JCFB V4.0 is an independent next-generation football prediction system. It is not a rename, replacement, or in-place rewrite of JCFB V3.3.3.
 
 V4 owns its own code, configuration, model versions, predictions, frozen predictions, reviews, and sample qualification. Objective facts may be shared only when they are canonical, timestamped, provenance-preserving, and safe from future leakage. Model outputs and conclusions remain isolated by model version.
+
+## Governance
+
+Governance:
+
+JCFB V4 is governed by:
+
+[`docs/V4_CONSTITUTION.md`](docs/V4_CONSTITUTION.md)
+
+The Constitution governs Production, Shadow, Experiment, data pipelines, engines, simulation, calibration, review, Tier A, promotion, Public Web, Codex Agents, and Human Operators.
 
 ## First-version architecture target
 
@@ -55,4 +64,4 @@ The architecture target is a design direction only at this bootstrap stage. Prod
 
 ## Current scope
 
-This repository contains the V4-001 through V4-003 bootstrap artifacts only. V4-004 Architecture Blueprint 1.0 is the next task and has not been implemented in this change.
+V4-001 through V4-004 are complete. V4-005 Constitution 1.0 is the current governance task; V4-006 Versioning Standard has not started.
