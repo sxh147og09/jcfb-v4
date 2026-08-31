@@ -1,6 +1,6 @@
 # JCFB V4 Constitution 1.0
 
-Status: V4-005 GOVERNANCE ARTIFACT
+Status: V4-005 COMPLETE
 
 ## Authority and scope
 

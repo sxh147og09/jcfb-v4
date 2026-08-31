@@ -6,7 +6,8 @@ Status:
 EARLY DEVELOPMENT
 
 Current Build Stage:
-V4-005 Constitution 1.0
+V4-005 COMPLETE
+V4-006 NEXT
 
 Legacy Production:
 JCFB V3.3.3 remains independent and unchanged.
@@ -64,4 +65,4 @@ The architecture target is a design direction only at this bootstrap stage. Prod
 
 ## Current scope
 
-V4-001 through V4-004 are complete. V4-005 Constitution 1.0 is the current governance task; V4-006 Versioning Standard has not started.
+V4-001 through V4-005 are complete. V4-006 Versioning Standard has not started.

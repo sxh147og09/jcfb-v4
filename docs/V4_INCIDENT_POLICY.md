@@ -1,6 +1,6 @@
 # JCFB V4 Incident Policy 1.0
 
-Status: V4-005 GOVERNANCE ARTIFACT
+Status: V4-005 COMPLETE
 
 ## 1. Purpose
 
@@ -100,4 +100,3 @@ An incident may close only when:
 8. follow-up actions have owners and due states
 
 An incident cannot be closed merely because the public page looks correct.
-

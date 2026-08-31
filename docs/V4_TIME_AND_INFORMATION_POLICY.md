@@ -1,6 +1,6 @@
 # JCFB V4 Time and Information Policy 1.0
 
-Status: V4-005 GOVERNANCE ARTIFACT
+Status: V4-005 COMPLETE
 
 ## 1. Purpose
 
@@ -100,4 +100,3 @@ The invalid run, source record, decision, and evidence remain available. Removin
 ## 9. Publication time boundary
 
 `canonical_latest_update_at` is derived only from the maximum real business-data update time in the read projection. Page build time, cache refresh time, and HTML generation time are not data timestamps and cannot be used to make a stale fact appear current.
-

@@ -1,6 +1,6 @@
 # JCFB V4 Model Governance 1.0
 
-Status: V4-005 GOVERNANCE ARTIFACT
+Status: V4-005 COMPLETE
 
 ## 1. Purpose
 
@@ -132,4 +132,3 @@ Retirement stops new Production use after an explicit decision. It does not dele
 - hiding model conflict through a simple average
 - replacing probability with confidence
 - deleting failed samples from promotion evidence
-

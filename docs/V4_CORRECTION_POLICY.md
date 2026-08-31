@@ -1,6 +1,6 @@
 # JCFB V4 Correction Policy 1.0
 
-Status: V4-005 GOVERNANCE ARTIFACT
+Status: V4-005 COMPLETE
 
 ## 1. Purpose
 
@@ -105,4 +105,3 @@ supersedes_id when applicable
 ## 10. Correction and public read projection
 
 The public projection may publish a new canonical latest revision only after the underlying correction and audit gates pass. It cannot rewrite an immutable prediction or use page build time as evidence of a business-data correction.
-

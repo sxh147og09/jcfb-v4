@@ -1,6 +1,6 @@
 # JCFB V4 Integrity Rules 1.0
 
-Status: V4-005 GOVERNANCE ARTIFACT
+Status: V4-005 COMPLETE
 
 ## Purpose
 
@@ -40,4 +40,3 @@ This catalogue translates Constitutional rules into checks that can be enforced 
 ## Minimum run evidence
 
 An eligible formal engine run references `model_version`, `engine_version`, `implementation_hash`, `config_hash`, `input_hash`, `output_hash`, `run_at`, `runtime_environment`, the cutoff, and the Frozen Input identity. A stochastic run additionally records `random_seed` and `simulation_version`.
-
