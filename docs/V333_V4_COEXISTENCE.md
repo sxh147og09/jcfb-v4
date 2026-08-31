@@ -1,6 +1,6 @@
 # JCFB V3.3.3 / V4 Coexistence Policy
 
-Status: V4-001 ARTIFACT VALIDATED; INITIAL COMMIT BLOCKED
+Status: V4-001 COMPLETE
 
 ## Independent model definitions
 

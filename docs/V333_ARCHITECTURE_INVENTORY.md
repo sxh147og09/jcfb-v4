@@ -1,6 +1,6 @@
 # JCFB V3.3.3 Architecture Inventory
 
-Status: V4-003 ARTIFACT VALIDATED; INITIAL COMMIT BLOCKED
+Status: V4-003 COMPLETE
 
 ## Purpose and evidence boundary
 

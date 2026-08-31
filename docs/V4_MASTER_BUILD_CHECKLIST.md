@@ -2,9 +2,9 @@
 
 ## Build status
 
-- [ ] V4-001 V3.3.3 与 V4 长期并存 (artifact and validation PASS; Git traceability BLOCKED)
-- [ ] V4-002 定义 V4 Next Generation 技术定位 (artifact and validation PASS; Git traceability BLOCKED)
-- [ ] V4-003 V3.3.3 Architecture Inventory (artifact and validation PASS; Git traceability BLOCKED)
+- [x] V4-001 V3.3.3 与 V4 长期并存
+- [x] V4-002 定义 V4 Next Generation 技术定位
+- [x] V4-003 V3.3.3 Architecture Inventory
 - [ ] V4-004 Architecture Blueprint 1.0
 - [ ] V4-005 Constitution 1.0
 - [ ] V4-006 Versioning Standard
@@ -32,4 +32,7 @@
 
 ## Traceability
 
-The first three artifacts pass content and boundary validation, but their checkboxes remain open until the bootstrap files are included in the initial Git commit. Future items must add their own artifact and validation evidence before being marked.
+The first three artifacts pass content and boundary validation and are included in the initial Git commit. This checklist confirmation is recorded in the follow-up documentation commit. Future items must add their own artifact and validation evidence before being marked.
+
+Initial Bootstrap Commit: `d2d51429cfe768ff47212f95066a0047b8fb766c`
+Checklist Confirmation Commit: this follow-up documentation commit

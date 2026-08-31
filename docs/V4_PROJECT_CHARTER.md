@@ -1,6 +1,6 @@
 # JCFB V4.0 Project Charter
 
-Status: V4-002 ARTIFACT VALIDATED; INITIAL COMMIT BLOCKED
+Status: V4-002 COMPLETE
 
 ## Formal definition
 
