@@ -1,6 +1,6 @@
 # JCFB V4.0 Shared Objective Facts Contract
 
-Status: V4-004 ARCHITECTURE ARTIFACT
+Status: V4-004 COMPLETE
 
 ## 1. Contract purpose
 
@@ -174,4 +174,3 @@ The contract is satisfied when:
 6. downstream predictions and model outputs remain isolated
 7. future-information risk is a hard gate
 8. fact corrections preserve old snapshot hashes
-

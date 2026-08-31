@@ -1,6 +1,6 @@
 # JCFB V4.0 Data Flow
 
-Status: V4-004 ARCHITECTURE ARTIFACT
+Status: V4-004 COMPLETE
 
 ## 1. Flow objective
 
@@ -168,4 +168,3 @@ Role labels are part of audit identity. A Shadow or Experiment result cannot be 
 ## 13. Deferred implementation
 
 This flow defines interfaces and gates only. It does not choose a database, implement ingestion, write model code, select a Score Engine algorithm, run simulation, import historical data, or publish a web page.
-

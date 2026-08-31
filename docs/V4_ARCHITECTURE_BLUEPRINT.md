@@ -1,6 +1,6 @@
 # JCFB V4.0 Architecture Blueprint 1.0
 
-Status: V4-004 ARCHITECTURE ARTIFACT
+Status: V4-004 COMPLETE
 
 ## 1. Purpose and scope
 
@@ -264,4 +264,3 @@ The following remain outside this Blueprint task:
 - historical odds, match, or Tier A import
 - V3.3.3 changes or migration
 - V4-005 Constitution 1.0 and later tasks
-

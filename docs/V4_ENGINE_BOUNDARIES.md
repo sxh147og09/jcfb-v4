@@ -1,6 +1,6 @@
 # JCFB V4 Engine and Layer Boundaries
 
-Status: V4-004 ARCHITECTURE ARTIFACT
+Status: V4-004 COMPLETE
 
 ## Purpose
 

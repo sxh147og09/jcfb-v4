@@ -6,8 +6,8 @@ Status:
 EARLY DEVELOPMENT
 
 Current Build Stage:
-V4-001 ~ V4-003 COMPLETE
-V4-004 NEXT
+V4-001 ~ V4-004 COMPLETE
+V4-005 NEXT
 
 Legacy Production:
 JCFB V3.3.3 remains independent and unchanged.

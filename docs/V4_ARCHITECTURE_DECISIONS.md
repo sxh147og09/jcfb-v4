@@ -1,6 +1,6 @@
 # JCFB V4.0 Architecture Decisions
 
-Status: V4-004 ARCHITECTURE ARTIFACT
+Status: V4-004 COMPLETE
 
 This file records the architecture decisions accepted for V4-004. These decisions define boundaries and interfaces; they do not claim that the corresponding implementation exists.
 
@@ -107,4 +107,3 @@ This file records the architecture decisions accepted for V4-004. These decision
 ## Decision boundary for later work
 
 These ADRs intentionally do not select a Production Score algorithm, model parameters, database, training method, simulation run count, or promotion threshold. Those decisions require later artifacts, validation, and formal review.
-
