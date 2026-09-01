@@ -43,3 +43,10 @@
 - Defined the seven-schema PostgreSQL/Supabase physical design for canonical core facts, market/context, model lineage, evaluation, governance, and Production-only public projections.
 - Added the table, constraint, index, RLS/security, trigger, view, and migration-plan catalogs, including append-only/revision rules, frozen immutability, no-future-leakage gates, role isolation, Tier A pair integrity, audit-chain fields, and canonical latest-update sourcing.
 - Added the design-only candidate SQL at `database/schema/v4_schema_blueprint.sql`; no database migration, Supabase write, SQL execution, model execution, or V3.3.3 change was performed.
+
+## V4-011 Database Migration Design 1.0
+
+- Defined the immutable `migration@20260901.001`–`.009` identity set, strict dependency graph, transaction boundaries, idempotency limits, preflight gate, roll-forward/forward-fix policy, schema version registry, and deployment roles.
+- Added design-only migration files `database/migrations/v4/0001_prerequisites.sql` through `0009_seed_and_smoke.sql`, with `PENDING_CANONICAL_HASH` and no automatic execution path.
+- Added the migration acceptance gate, 20-case smoke-test design, static migration-design validator, and explicit RLS/private-table, security-invoker, Production uniqueness, no-future-leakage, Tier A, audit, and V3.3.3 isolation checks.
+- No migration, SQL statement, Supabase write, model execution, Shadow/Experiment run, Production release, or V3.3.3 change was performed.

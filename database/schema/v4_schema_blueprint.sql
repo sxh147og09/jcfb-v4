@@ -1,4 +1,4 @@
--- BLUEPRINT ONLY - DO NOT APPLY
+-- DESIGN ONLY - DO NOT APPLY
 -- JCFB V4-010 Database Schema Blueprint 1.0
 --
 -- This file is a physical design artifact, not a migration. It must never be
@@ -58,7 +58,7 @@ CREATE TABLE governance.model_versions (
   migration_version text NOT NULL CHECK (btrim(migration_version) <> ''),
   hash_algorithm text NOT NULL DEFAULT 'SHA-256' CHECK (hash_algorithm = 'SHA-256'),
   hash_profile text NOT NULL DEFAULT 'v4-canonical-json@1.0',
-  compatibility_level text NOT NULL CHECK (compatibility_level IN ('MAJOR', 'MINOR', 'PATCH')),
+  compatibility_level text NOT NULL CHECK (compatibility_level IN ('PATCH_COMPATIBLE', 'MINOR_COMPATIBLE', 'MAJOR_BREAKING')),
   status text NOT NULL CHECK (status IN ('DRAFT', 'EXPERIMENT', 'SHADOW', 'PROMOTION_REVIEW', 'PRODUCTION', 'RETIRED', 'BLOCKED')),
   is_canonical_active boolean NOT NULL DEFAULT false,
   effective_at timestamptz,
@@ -100,7 +100,7 @@ CREATE TABLE governance.engine_versions (
   migration_version text NOT NULL CHECK (btrim(migration_version) <> ''),
   hash_algorithm text NOT NULL DEFAULT 'SHA-256' CHECK (hash_algorithm = 'SHA-256'),
   hash_profile text NOT NULL DEFAULT 'v4-canonical-json@1.0',
-  compatibility_level text NOT NULL CHECK (compatibility_level IN ('MAJOR', 'MINOR', 'PATCH')),
+  compatibility_level text NOT NULL CHECK (compatibility_level IN ('PATCH_COMPATIBLE', 'MINOR_COMPATIBLE', 'MAJOR_BREAKING')),
   status text NOT NULL CHECK (status IN ('DRAFT', 'EXPERIMENT', 'SHADOW', 'PROMOTION_REVIEW', 'PRODUCTION', 'RETIRED', 'BLOCKED')),
   is_canonical_active boolean NOT NULL DEFAULT false,
   effective_at timestamptz,

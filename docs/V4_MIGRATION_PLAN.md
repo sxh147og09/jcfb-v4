@@ -2,7 +2,7 @@
 
 Status: V4-010 MIGRATION ORDER BLUEPRINT (DESIGN-ONLY)
 
-This is a future deployment plan, not a migration. V4-010 does not create a migration file, connect to Supabase, execute SQL, seed data, or run smoke tests. An approved V4-011 task must assign an immutable `migration_version` before any database change.
+This is the V4-010 future deployment order reference, not an executable migration. V4-010 did not create a migration file, connect to Supabase, execute SQL, seed data, or run smoke tests. V4-011 now assigns the design-only immutable migration identities and deployment gates; no database change is authorized by this document.
 
 ## 1. Migration rules
 
@@ -165,4 +165,4 @@ Before V4-011 is allowed to design/apply a migration, confirm:
 - Secret Scan, advisor review, `git diff --check`, and V3.3.3 isolation pass;
 - no migration applies automatically from the blueprint SQL.
 
-V4-010 stops at this plan. The next task remains `V4-011 Database Migration Design 1.0`; no migration is executed here.
+V4-010 stops at this plan. V4-011 extends it with migration design, registry, preflight, roll-forward, smoke, and acceptance artifacts; no migration is executed here. The next task is `V4-012 Migration Dry-Run & Validation Harness Design 1.0`.

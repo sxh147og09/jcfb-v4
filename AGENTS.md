@@ -43,6 +43,9 @@ A task may be marked complete only when its design is finalized, an engineering 
 Database changes must originate from approved migrations.
 Blueprint SQL must never be auto-applied.
 Audit-critical tables are append-only unless a Constitution-approved correction path exists.
+Migration design files under `database/migrations/v4/` cannot be applied automatically or treated as deployment approval.
+Production database writes require explicit Human Approver authorization; an unattended agent may not approve and execute the same Production migration.
+Applied migrations are immutable and are repaired only by new forward migrations; do not edit an applied file or history row.
 
 ## Constitutional Rules
 

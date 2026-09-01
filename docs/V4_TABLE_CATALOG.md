@@ -54,7 +54,7 @@ Registry identity is immutable. Only controlled lifecycle/pointer metadata may b
 | `schema_version` | `text` | NOT NULL | Registry/output schema identity. |
 | `dataset_version` | `text` | NOT NULL | Exact accepted dataset identity. |
 | `migration_version` | `text` | NOT NULL | Storage identity used by the release. |
-| `compatibility_level` | `text` | NOT NULL | `MAJOR`, `MINOR`, or `PATCH`. |
+| `compatibility_level` | `text` | NOT NULL | `PATCH_COMPATIBLE`, `MINOR_COMPATIBLE`, or `MAJOR_BREAKING`, per the V4-006 identity contract. |
 | `status` | `text` | NOT NULL | `DRAFT`, `EXPERIMENT`, `SHADOW`, `PROMOTION_REVIEW`, `PRODUCTION`, `RETIRED`, `BLOCKED`. |
 | `is_canonical_active` | `boolean` | `NOT NULL DEFAULT false` | Pointer cache; true only for active Production. Partial unique index enforces one per family/channel. |
 | `effective_at` | `timestamptz` | nullable | Required for activation; must precede retirement. |
@@ -85,7 +85,7 @@ Unique: `(model_family, model_name, model_version, role, revision)`. Checks: Sem
 | `implementation_hash` | `text` | NOT NULL | V4 hash format. |
 | `config_version`, `config_hash` | `text` | NOT NULL | Non-secret config identity and hash. |
 | `schema_version`, `dataset_version`, `migration_version` | `text` | NOT NULL | Exact schema/data/storage identities. |
-| `compatibility_level` | `text` | NOT NULL | `MAJOR`, `MINOR`, or `PATCH`; must agree with the model registry contract. |
+| `compatibility_level` | `text` | NOT NULL | `PATCH_COMPATIBLE`, `MINOR_COMPATIBLE`, or `MAJOR_BREAKING`; must agree with the model registry contract. |
 | `hash_algorithm`, `hash_profile` | `text` | NOT NULL/default | `SHA-256` and `v4-canonical-json@1.0`; no hash computation is implied by the field. |
 | `status` | `text` | NOT NULL | Governed lifecycle state. |
 | `is_canonical_active` | `boolean` | `NOT NULL DEFAULT false` | Active Production pointer cache; controlled only. |
