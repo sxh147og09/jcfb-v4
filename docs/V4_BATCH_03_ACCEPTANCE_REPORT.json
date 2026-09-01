@@ -1,0 +1,1176 @@
+{
+  "audits": {
+    "cross_doc_consistency": {
+      "checks": [
+        "docs/V4_TASK_REGISTRY_001_100.md:registry maps BATCH-03 and preserves BATCH-04",
+        "docs/V4_EXECUTION_CLASSIFICATION.md:classification includes accepted tasks and next hard gate",
+        "docs/V4_MASTER_BUILD_CHECKLIST.md:checklist marks only accepted children",
+        "docs/V4_BATCH_EXECUTION_PLAN.md:batch plan keeps serial boundary",
+        "docs/V4_BATCH_ACCEPTANCE_RULES.md:acceptance rules advance next batch",
+        "docs/V4_TASK_DEPENDENCY_REGISTER.md:dependency register status is live",
+        "docs/V4_DEPENDENCY_GRAPH_012_100.md:dependency graph status is live",
+        "README.md:README status is live",
+        "docs/V4_STAGING_READINESS.md:readiness document states runtime and Production boundary",
+        "docs/V4_MIGRATION_ACCEPTANCE_PACKAGE.md:acceptance document states no-apply boundary",
+        "docs/V4_BATCH_03_IMPLEMENTATION.md:implementation map is live"
+      ],
+      "evidence_ref": "evidence/batch-03-cross-doc-consistency.json",
+      "failures": [],
+      "historical_snapshots_excluded": [
+        "docs/V4_TASK_RECOVERY_AUDIT.md",
+        "docs/V4_BATCH_02_ACCEPTANCE_REPORT.md"
+      ],
+      "status": "PASS"
+    },
+    "git_diff_check": {
+      "evidence_ref": "evidence/git-diff-check.txt",
+      "output": "",
+      "reason": "git diff --check passed",
+      "status": "PASS"
+    },
+    "self_audit": {
+      "evidence_ref": "evidence/batch-03-self-audit.json",
+      "issue_count": 0,
+      "issues": [],
+      "status": "PASS"
+    },
+    "unit_tests": {
+      "command": "python -m unittest discover -s tests/migration_harness -p test_*.py -q",
+      "failure_count": 0,
+      "status": "PASS",
+      "test_count": 48
+    }
+  },
+  "batch_id": "BATCH-03",
+  "batch_name": "Staging Readiness & Migration Acceptance Package",
+  "batch_status": "COMPLETE",
+  "blocking_reasons": [
+    "RUNTIME_PENDING_DISPOSABLE_DB",
+    "PENDING_CANONICAL_HASH",
+    "Production apply and approval are outside BATCH-03"
+  ],
+  "checklist_tasks_marked_complete": [
+    "V4-016",
+    "V4-017"
+  ],
+  "deployment_readiness": {
+    "connect_allowed": false,
+    "connector_invoked": false,
+    "database_connected": false,
+    "issues": [],
+    "production_apply_allowed": false,
+    "reason": "RUNTIME_PENDING_DISPOSABLE_DB",
+    "runtime_status": "RUNTIME_PENDING_DISPOSABLE_DB",
+    "status": "NOT_READY",
+    "target": {
+      "database_identity": {
+        "database_name": "pending-jcfb-v4-validation",
+        "project_or_cluster_ref": "pending-local-cluster-v4",
+        "server_name": "pending-disposable-server"
+      },
+      "environment": "DISPOSABLE_LOCAL",
+      "provider": "LOCAL_POSTGRES",
+      "target_id": "pending-disposable-target"
+    },
+    "target_identity_hash": "sha256:0f6e8e2629ce9c1b43e53c79a731e2b86e5cf1691c8e3621223e7f8d1d91cfeb"
+  },
+  "evidence_index": {
+    "entry_count": 80,
+    "issues": [],
+    "path": "config/migration_harness/v4_batch_03_evidence_index.json",
+    "status": "PASS"
+  },
+  "evidence_package": {
+    "approver": {
+      "approval_granted": false,
+      "role": "Human Approver",
+      "status": "PENDING"
+    },
+    "auditor": {
+      "reviewed": false,
+      "role": "Auditor",
+      "status": "PENDING"
+    },
+    "blockers": [
+      "RUNTIME_PENDING_DISPOSABLE_DB",
+      "PENDING_CANONICAL_HASH",
+      "Production apply and approval are outside BATCH-03"
+    ],
+    "config_hash": "sha256:3625e1b909a2a94212b32ce3d62e67b78d3cf92ec2591dc79a2db9b15175e3bd",
+    "contract_version": "v4-batch-03-evidence@1.0.0",
+    "executor": {
+      "executed": false,
+      "role": "Migration Executor",
+      "status": "PENDING"
+    },
+    "failures": [],
+    "git_commit": "eafa464",
+    "manifest_identity_hash": "sha256:5dd9eedf82d7acc96b710c37cae19d8632fe030b0f3ac38e048925251c19e05c",
+    "migration_ids_and_hashes": [
+      {
+        "evidence_ref": "database/migrations/v4/0001_prerequisites.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.001",
+        "migration_version": "migration@20260901.001",
+        "sequence": "0001",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0002_registries_core.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.002",
+        "migration_version": "migration@20260901.002",
+        "sequence": "0002",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0003_market_context.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.003",
+        "migration_version": "migration@20260901.003",
+        "sequence": "0003",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0004_frozen_runtime.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.004",
+        "migration_version": "migration@20260901.004",
+        "sequence": "0004",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0005_evaluation.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.005",
+        "migration_version": "migration@20260901.005",
+        "sequence": "0005",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0006_governance_audit.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.006",
+        "migration_version": "migration@20260901.006",
+        "sequence": "0006",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0007_security_rls.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.007",
+        "migration_version": "migration@20260901.007",
+        "sequence": "0007",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0008_views_projections.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.008",
+        "migration_version": "migration@20260901.008",
+        "sequence": "0008",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0009_seed_and_smoke.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.009",
+        "migration_version": "migration@20260901.009",
+        "sequence": "0009",
+        "status": "DRAFT"
+      }
+    ],
+    "preflight_outcomes": [
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-01",
+        "id": "PF-01",
+        "status": "BLOCKED"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-02",
+        "id": "PF-02",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-03",
+        "id": "PF-03",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-04",
+        "id": "PF-04",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-05",
+        "id": "PF-05",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-06",
+        "id": "PF-06",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-07",
+        "id": "PF-07",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-08",
+        "id": "PF-08",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-09",
+        "id": "PF-09",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-10",
+        "id": "PF-10",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-11",
+        "id": "PF-11",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-12",
+        "id": "PF-12",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-13",
+        "id": "PF-13",
+        "status": "BLOCKED"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-14",
+        "id": "PF-14",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-15",
+        "id": "PF-15",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-16",
+        "id": "PF-16",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-17",
+        "id": "PF-17",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      },
+      {
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight/PF-18",
+        "id": "PF-18",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      }
+    ],
+    "secret_values_present": false,
+    "target_identity_hash": "sha256:0f6e8e2629ce9c1b43e53c79a731e2b86e5cf1691c8e3621223e7f8d1d91cfeb",
+    "tests_executed": [
+      {
+        "count": 22,
+        "name": "negative_unit_refusal_contracts",
+        "status": "PASS"
+      },
+      {
+        "count": 48,
+        "name": "repository_unit_tests",
+        "status": "PASS"
+      }
+    ],
+    "tests_pending": [
+      {
+        "count": 20,
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#runtime/smoke",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "suite": "migration_smoke_runtime"
+      },
+      {
+        "count": 15,
+        "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#runtime/negative",
+        "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+        "suite": "database_enforcement_negative_runtime"
+      }
+    ],
+    "timestamp": "2026-09-01T00:00:00Z",
+    "tool_harness_version": "jcfb-v4-migration-harness@batch-03.1.0"
+  },
+  "execution_boundary": {
+    "automatic_batch_advance": false,
+    "automatic_promotion": false,
+    "connector_invoked": false,
+    "database_connected": false,
+    "migration_apply_invoked": false,
+    "model_predictions_executed": false,
+    "no_production_apply_in_this_batch": true,
+    "production_db_writes_performed": "NO",
+    "production_shadow_runtime_executed": false,
+    "sql_executed": false,
+    "supabase_writes_performed": "NO",
+    "v333_mutated": "NO"
+  },
+  "expected_schema_catalog": {
+    "actual_catalog_status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+    "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#schema-diff",
+    "expected_counts": {
+      "functions": 18,
+      "indexes": 64,
+      "policies": 1,
+      "rls_tables": 30,
+      "schemas": 7,
+      "tables": 36,
+      "triggers": 45,
+      "views": 6
+    },
+    "kinds": {
+      "functions": [
+        "governance.is_v4_hash",
+        "governance.reject_append_only_mutation",
+        "governance.protect_frozen_input_mutation",
+        "governance.guard_registry_update",
+        "governance.validate_source_separation",
+        "governance.validate_market_payload",
+        "governance.validate_context_evidence_lineage",
+        "governance.validate_revision_chain",
+        "governance.validate_frozen_input_lineage",
+        "governance.validate_runtime_lineage",
+        "governance.validate_prediction_engine_membership",
+        "governance.validate_frozen_prediction_lineage",
+        "governance.validate_prematch_gate",
+        "governance.validate_tier_a_pair",
+        "governance.validate_production_release",
+        "governance.validate_review_scope",
+        "governance.validate_incident_scope",
+        "governance.validate_public_projection"
+      ],
+      "indexes": [
+        "model_versions_identity_uq",
+        "engine_versions_identity_uq",
+        "competitions_source_key_uq",
+        "teams_source_key_uq",
+        "team_aliases_scope_uq",
+        "matches_daily_business_key_uq",
+        "matches_identity_key_idx",
+        "team_context_revision_uq",
+        "team_context_match_asof_idx",
+        "team_context_evidence_membership_uq",
+        "team_context_evidence_context_idx",
+        "team_context_evidence_evidence_idx",
+        "evidence_bundle_revision_uq",
+        "evidence_bundle_items_membership_uq",
+        "evidence_bundle_items_order_uq",
+        "evidence_match_published_idx",
+        "evidence_bundle_match_cutoff_idx",
+        "official_odds_dedup_uq",
+        "official_odds_match_captured_idx",
+        "official_odds_snapshot_hash_idx",
+        "external_market_dedup_uq",
+        "external_market_match_captured_idx",
+        "external_snapshot_hash_idx",
+        "frozen_inputs_match_revision_uq",
+        "frozen_inputs_hash_idx",
+        "frozen_input_official_odds_uq",
+        "frozen_input_external_markets_uq",
+        "frozen_input_contexts_uq",
+        "frozen_input_evidence_bundles_uq",
+        "frozen_input_model_refs_uq",
+        "frozen_input_engine_refs_uq",
+        "feature_bundles_identity_uq",
+        "engine_runs_lineage_idx",
+        "engine_runs_input_hash_idx",
+        "engine_runs_output_hash_idx",
+        "engine_runs_match_run_idx",
+        "predictions_logical_uq",
+        "predictions_match_role_idx",
+        "prediction_engine_runs_membership_uq",
+        "prediction_engine_runs_order_uq",
+        "frozen_predictions_revision_uq",
+        "frozen_predictions_match_freeze_idx",
+        "official_results_match_revision_uq",
+        "official_results_lineage_revision_uq",
+        "postmatch_reviews_revision_uq",
+        "postmatch_reviews_frozen_prediction_idx",
+        "tier_a_pair_uq",
+        "tier_a_shadow_qualified_idx",
+        "tier_a_frozen_input_hash_idx",
+        "tier_a_run_members_role_prediction_uq",
+        "tier_a_run_members_order_uq",
+        "promotion_reviews_revision_uq",
+        "promotion_review_samples_uq",
+        "calibration_records_identity_uq",
+        "incidents_revision_uq",
+        "incidents_severity_status_time_idx",
+        "incidents_entity_idx",
+        "audit_entry_hash_uq",
+        "audit_entity_time_idx",
+        "audit_prev_hash_idx",
+        "active_production_model_uq",
+        "active_production_engine_uq",
+        "public_projection_revision_uq",
+        "public_projection_business_latest_idx"
+      ],
+      "policies": [
+        "public_projection_published_read"
+      ],
+      "rls_tables": [
+        "core.competitions",
+        "core.teams",
+        "core.team_aliases",
+        "core.matches",
+        "market.official_odds_snapshots",
+        "market.external_market_snapshots",
+        "context.evidence_items",
+        "context.team_context_snapshots",
+        "context.team_context_evidence",
+        "context.evidence_bundles",
+        "context.evidence_bundle_items",
+        "model.frozen_inputs",
+        "model.feature_bundles",
+        "model.engine_runs",
+        "model.predictions",
+        "model.prediction_engine_runs",
+        "model.frozen_predictions",
+        "evaluation.official_results",
+        "evaluation.postmatch_reviews",
+        "evaluation.tier_a_samples",
+        "evaluation.tier_a_run_members",
+        "evaluation.promotion_reviews",
+        "evaluation.promotion_review_samples",
+        "evaluation.calibration_records",
+        "governance.model_versions",
+        "governance.engine_versions",
+        "governance.release_pointer_events",
+        "governance.incidents",
+        "governance.audit_logs",
+        "public.public_read_projections"
+      ],
+      "schemas": [
+        "core",
+        "market",
+        "context",
+        "model",
+        "evaluation",
+        "governance",
+        "public"
+      ],
+      "tables": [
+        "governance.model_versions",
+        "governance.engine_versions",
+        "core.competitions",
+        "core.teams",
+        "core.team_aliases",
+        "core.matches",
+        "context.evidence_items",
+        "context.team_context_snapshots",
+        "context.team_context_evidence",
+        "context.evidence_bundles",
+        "context.evidence_bundle_items",
+        "market.official_odds_snapshots",
+        "market.external_market_snapshots",
+        "model.frozen_inputs",
+        "model.frozen_input_official_odds",
+        "model.frozen_input_external_markets",
+        "model.frozen_input_contexts",
+        "model.frozen_input_evidence_bundles",
+        "model.frozen_input_model_refs",
+        "model.frozen_input_engine_refs",
+        "model.feature_bundles",
+        "model.engine_runs",
+        "model.predictions",
+        "model.prediction_engine_runs",
+        "model.frozen_predictions",
+        "evaluation.official_results",
+        "evaluation.postmatch_reviews",
+        "evaluation.tier_a_samples",
+        "evaluation.tier_a_run_members",
+        "evaluation.promotion_reviews",
+        "evaluation.promotion_review_samples",
+        "evaluation.calibration_records",
+        "governance.release_pointer_events",
+        "governance.incidents",
+        "governance.audit_logs",
+        "public.public_read_projections"
+      ],
+      "triggers": [
+        "model_registry_update_guard",
+        "engine_registry_update_guard",
+        "official_source_separation_gate",
+        "official_market_payload_gate",
+        "external_source_separation_gate",
+        "context_evidence_lineage_gate",
+        "official_odds_append_only",
+        "external_market_append_only",
+        "team_context_append_only",
+        "team_context_evidence_append_only",
+        "evidence_append_only",
+        "evidence_bundle_append_only",
+        "evidence_bundle_items_append_only",
+        "frozen_input_mutation_guard",
+        "feature_bundle_append_only",
+        "engine_run_append_only",
+        "prediction_append_only",
+        "prediction_engine_runs_append_only",
+        "prediction_engine_membership_gate",
+        "frozen_prediction_append_only",
+        "frozen_prediction_lineage_gate",
+        "official_result_append_only",
+        "review_append_only",
+        "review_scope_gate",
+        "tier_a_append_only",
+        "tier_a_members_append_only",
+        "promotion_review_append_only",
+        "promotion_samples_append_only",
+        "calibration_append_only",
+        "release_pointer_append_only",
+        "incident_append_only",
+        "incident_scope_gate",
+        "audit_append_only",
+        "evidence_revision_gate",
+        "context_revision_gate",
+        "bundle_revision_gate",
+        "frozen_input_lineage_gate",
+        "runtime_lineage_gate",
+        "prematch_prediction_gate",
+        "result_revision_gate",
+        "review_revision_gate",
+        "promotion_revision_gate",
+        "calibration_revision_gate",
+        "incident_revision_gate",
+        "tier_a_pair_gate"
+      ],
+      "views": [
+        "public.v_public_predictions",
+        "public.v_public_latest_odds",
+        "public.v_current_frozen_predictions",
+        "public.v_canonical_latest_update",
+        "public.v_tier_a_progress",
+        "public.v_model_registry_public"
+      ]
+    },
+    "source": "database/schema/v4_schema_blueprint.sql",
+    "source_is_authoritative": true,
+    "status": "PASS",
+    "unknown_catalog_status": "BLOCKED"
+  },
+  "failures": [],
+  "generated_at": "2026-09-01T00:00:00Z",
+  "git_commit": "eafa464",
+  "git_trace": {
+    "checklist_commit": "RECORDED_IN_SOURCE_COMMIT",
+    "report_commit": "RECORDED_AFTER_PACKAGE_ASSEMBLY",
+    "source_commit": "eafa464",
+    "working_tree_at_assembly": "CLEAN"
+  },
+  "manifest": {
+    "dependency_status": "PASS",
+    "entries": [
+      {
+        "evidence_ref": "database/migrations/v4/0001_prerequisites.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.001",
+        "migration_version": "migration@20260901.001",
+        "sequence": "0001",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0002_registries_core.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.002",
+        "migration_version": "migration@20260901.002",
+        "sequence": "0002",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0003_market_context.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.003",
+        "migration_version": "migration@20260901.003",
+        "sequence": "0003",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0004_frozen_runtime.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.004",
+        "migration_version": "migration@20260901.004",
+        "sequence": "0004",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0005_evaluation.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.005",
+        "migration_version": "migration@20260901.005",
+        "sequence": "0005",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0006_governance_audit.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.006",
+        "migration_version": "migration@20260901.006",
+        "sequence": "0006",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0007_security_rls.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.007",
+        "migration_version": "migration@20260901.007",
+        "sequence": "0007",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0008_views_projections.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.008",
+        "migration_version": "migration@20260901.008",
+        "sequence": "0008",
+        "status": "DRAFT"
+      },
+      {
+        "evidence_ref": "database/migrations/v4/0009_seed_and_smoke.sql",
+        "hash_status": "PENDING_CANONICAL_HASH",
+        "migration_hash": "PENDING_CANONICAL_HASH",
+        "migration_id": "migration@20260901.009",
+        "migration_version": "migration@20260901.009",
+        "sequence": "0009",
+        "status": "DRAFT"
+      }
+    ],
+    "entry_count": 9,
+    "hash_status": "PENDING_CANONICAL_HASH",
+    "history_validator": "PASS",
+    "identity_hash": "sha256:5dd9eedf82d7acc96b710c37cae19d8632fe030b0f3ac38e048925251c19e05c",
+    "pending_hash_count": 9,
+    "sequence_status": "PASS",
+    "source_manifest": "database/migrations/v4/0000_manifest.md",
+    "source_sql_directory": "database/migrations/v4"
+  },
+  "migration_history_integrity": {
+    "applied_history_mutation": "FORBIDDEN",
+    "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#migration-history-integrity",
+    "manifest_dependency_status": "PASS",
+    "manifest_hash_status": "PENDING_CANONICAL_HASH",
+    "manifest_sequence_status": "PASS",
+    "partial_state_policy": "PRESERVE_AND_BLOCK",
+    "pending_canonical_hash_count": 9,
+    "read_only_history_issues": [],
+    "read_only_history_validator": "PASS",
+    "target_history_runtime_status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+  },
+  "next_batch": "BATCH-04 �� Formal Schema Apply & Production DB Write HARD_GATE (V4-018�CV4-019)",
+  "no_future_leakage": {
+    "cases_registered": [
+      "SMOKE-06",
+      "NEG-11",
+      "SMOKE-18",
+      "NEG-21"
+    ],
+    "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#no-future-leakage",
+    "future_data_may_not_enter_prematch": true,
+    "runtime_evidence_required": true,
+    "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+  },
+  "no_production_apply_in_this_batch": true,
+  "preflight": {
+    "blocked_count": 2,
+    "check_count": 18,
+    "checks": [
+      {
+        "evidence_ref": "preflight/pf-01.json",
+        "id": "PF-01",
+        "reason": "An explicit non-production target descriptor is required",
+        "status": "BLOCKED",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-02.json",
+        "id": "PF-02",
+        "reason": "Database version requires a disposable catalog snapshot",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-03.json",
+        "id": "PF-03",
+        "reason": "Extension availability requires a disposable catalog snapshot",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-04.json",
+        "id": "PF-04",
+        "reason": "Security-invoker capability requires a disposable target",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-05.json",
+        "id": "PF-05",
+        "reason": "Runtime evidence is required: conflicting_objects",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-06.json",
+        "id": "PF-06",
+        "reason": "V3.3.3 isolation requires a read-only disposable catalog comparison",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-07.json",
+        "id": "PF-07",
+        "reason": "V4 namespace state requires a disposable catalog snapshot",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-08.json",
+        "id": "PF-08",
+        "reason": "Role and permission evidence requires a disposable target",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-09.json",
+        "id": "PF-09",
+        "reason": "Migration history requires a disposable catalog snapshot",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-10.json",
+        "id": "PF-10",
+        "reason": "Backup/snapshot decision requires target evidence",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-11.json",
+        "id": "PF-11",
+        "reason": "Maintenance window evidence requires target evidence",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-12.json",
+        "id": "PF-12",
+        "reason": "Current migration cleanliness requires target history evidence",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "details": {
+          "pending_hash_count": 9
+        },
+        "evidence_ref": "preflight/pf-13.json",
+        "id": "PF-13",
+        "reason": "Canonical migration hashes are pending; apply readiness is not proven",
+        "status": "BLOCKED",
+        "target_dependent": false
+      },
+      {
+        "evidence_ref": "preflight/pf-14.json",
+        "id": "PF-14",
+        "reason": "Runtime secret presence is not verifiable without an explicit disposable target",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-15.json",
+        "id": "PF-15",
+        "reason": "Runtime evidence is required: data_api_exposure_approved",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-16.json",
+        "id": "PF-16",
+        "reason": "Runtime evidence is required: default_privileges_closed",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-17.json",
+        "id": "PF-17",
+        "reason": "Function security/search_path evidence requires a disposable catalog snapshot",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      },
+      {
+        "evidence_ref": "preflight/pf-18.json",
+        "id": "PF-18",
+        "reason": "Production release state requires a read-only target evidence snapshot",
+        "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+        "target_dependent": true
+      }
+    ],
+    "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#preflight",
+    "fail_count": 0,
+    "not_run_reason": "No disposable PostgreSQL target/catalog was supplied; target-dependent checks are not a pass",
+    "pass_count": 0,
+    "pending_count": 16,
+    "secret_scan": {
+      "files_scanned": 132,
+      "hit_count": 0,
+      "hit_files": [],
+      "reason": "No high-signal credential material found",
+      "status": "PASS",
+      "values_logged": false
+    },
+    "status": "BLOCKED"
+  },
+  "production_db_writes_performed": "NO",
+  "readiness_contract": {
+    "contract_version": "v4-batch-03-readiness-contract@1.0.0",
+    "environment_count": 3,
+    "issues": [],
+    "readiness_states": [
+      "NOT_READY",
+      "READY_FOR_DISPOSABLE_DRY_RUN",
+      "READY_FOR_STAGING_DRY_RUN",
+      "READY_FOR_PRODUCTION_REVIEW",
+      "BLOCKED"
+    ],
+    "status": "PASS"
+  },
+  "registry_mapping_verified": "PASS",
+  "remote_push": "BLOCKED_ENV",
+  "report_contract_version": "v4-batch-03-acceptance-package@1.0.0",
+  "report_state": "ACCEPTANCE_PASS",
+  "roll_forward_drill": {
+    "database_connected": false,
+    "decision": "ROLL_FORWARD_ONLY",
+    "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#roll-forward-drill",
+    "executed": false,
+    "production_apply_allowed": false,
+    "rollback_decision": "NO_IN_PLACE_ROLLBACK_OR_HISTORY_REWRITE",
+    "simulation_only": true,
+    "sql_executed": false,
+    "status": "PASS",
+    "steps": [
+      {
+        "action": "bind_immutable_manifest",
+        "executed": false,
+        "result": "PASS",
+        "rule": "0001�C0009 remain the exact ordered manifest; pending canonical hashes remain pending",
+        "step": 1
+      },
+      {
+        "action": "simulate_failure_at_0004",
+        "executed": false,
+        "result": "PASS",
+        "rule": "Stop at the failed migration and do not continue the sequence",
+        "step": 2
+      },
+      {
+        "action": "retain_partial_history",
+        "executed": false,
+        "result": "PASS",
+        "rule": "Failed/partial history remains visible and blocks acceptance; no row is deleted or rewritten",
+        "step": 3
+      },
+      {
+        "action": "reconcile_read_only_then_create_forward_identity",
+        "executed": false,
+        "result": "PASS",
+        "rule": "Repair uses a new forward migration identity after review; applied history is immutable",
+        "step": 4
+      },
+      {
+        "action": "hold_for_independent_approval",
+        "executed": false,
+        "result": "PASS",
+        "rule": "Approval is requested but not granted; Production apply remains hard-blocked",
+        "step": 5
+      }
+    ]
+  },
+  "runtime_pending_breakdown": {
+    "database_enforcement_negative_runtime": 15,
+    "smoke_runtime": 20
+  },
+  "runtime_pending_cases_registered": 35,
+  "runtime_test_matrix": {
+    "disposable_or_staging_required": true,
+    "negative": {
+      "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#runtime/negative",
+      "pending_case_ids": [
+        "NEG-08",
+        "NEG-09",
+        "NEG-10",
+        "NEG-11",
+        "NEG-12",
+        "NEG-13",
+        "NEG-14",
+        "NEG-15",
+        "NEG-16",
+        "NEG-17",
+        "NEG-18",
+        "NEG-19",
+        "NEG-20",
+        "NEG-21",
+        "NEG-22"
+      ],
+      "registered_case_count": 22,
+      "runtime_required": 15,
+      "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "unit_contract_executed": 22,
+      "unit_contract_failed": 0,
+      "unit_contract_passed": 22
+    },
+    "pending_semantics": "PENDING_IS_NOT_PASS",
+    "pending_total": 35,
+    "production_approval_blocked_until_complete": true,
+    "smoke": {
+      "actually_executed": 0,
+      "catalog_case_count": 20,
+      "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#runtime/smoke",
+      "failed": 0,
+      "passed": 0,
+      "pending": 20,
+      "pending_case_ids": [
+        "SMOKE-01",
+        "SMOKE-02",
+        "SMOKE-03",
+        "SMOKE-04",
+        "SMOKE-05",
+        "SMOKE-06",
+        "SMOKE-07",
+        "SMOKE-08",
+        "SMOKE-09",
+        "SMOKE-10",
+        "SMOKE-11",
+        "SMOKE-12",
+        "SMOKE-13",
+        "SMOKE-14",
+        "SMOKE-15",
+        "SMOKE-16",
+        "SMOKE-17",
+        "SMOKE-18",
+        "SMOKE-19",
+        "SMOKE-20"
+      ],
+      "runtime_status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+    }
+  },
+  "schema_diff": {
+    "actual_counts": {
+      "functions": 0,
+      "indexes": 0,
+      "policies": 0,
+      "rls_tables": 0,
+      "schemas": 0,
+      "tables": 0,
+      "triggers": 0,
+      "views": 0
+    },
+    "classifications": [
+      {
+        "classification": "UNKNOWN_CATALOG",
+        "message": "No read-only pg_catalog snapshot was supplied"
+      }
+    ],
+    "evidence_ref": "evidence/schema-diff.json",
+    "expected_counts": {
+      "functions": 18,
+      "indexes": 64,
+      "policies": 1,
+      "rls_tables": 30,
+      "schemas": 7,
+      "tables": 36,
+      "triggers": 45,
+      "views": 6
+    },
+    "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+  },
+  "schema_diff_expectations": {
+    "actual_catalog_status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+    "auto_repair": false,
+    "evidence_ref": "evidence/schema-diff.json",
+    "expected_catalog_source": "database/schema/v4_schema_blueprint.sql",
+    "expected_counts": {
+      "functions": 18,
+      "indexes": 64,
+      "policies": 1,
+      "rls_tables": 30,
+      "schemas": 7,
+      "tables": 36,
+      "triggers": 45,
+      "views": 6
+    },
+    "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+    "unknown_catalog_action": "BLOCKED"
+  },
+  "secret_scan": "PASS",
+  "security_checks": {
+    "no_raw_secret_values": true,
+    "production_target_hard_block": "PASS",
+    "secret_scan": {
+      "files_scanned": 132,
+      "hit_count": 0,
+      "hit_files": [],
+      "reason": "No high-signal credential material found",
+      "status": "PASS",
+      "values_logged": false
+    },
+    "v333_isolation": {
+      "changed_paths": [],
+      "collisions": [],
+      "evidence_ref": "evidence/v333-isolation-audit.json",
+      "reason": "No V3.3.3 path is changed by BATCH-02",
+      "status": "PASS"
+    }
+  },
+  "separation_of_duties": {
+    "approval_granted": false,
+    "approval_requested": true,
+    "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#separation-of-duties",
+    "executor_may_self_approve_production": false,
+    "roles": {
+      "auditor": "PENDING_AUDITOR",
+      "human_approver": "PENDING_HUMAN_APPROVER",
+      "migration_executor": "PENDING_MIGRATION_EXECUTOR"
+    },
+    "roles_distinct": true,
+    "signoff": {
+      "auditor": {
+        "reviewed_at": null,
+        "signature": null,
+        "status": "PENDING"
+      },
+      "human_approver": {
+        "approved_at": null,
+        "signature": null,
+        "status": "PENDING"
+      },
+      "migration_executor": {
+        "executed_at": null,
+        "signature": null,
+        "status": "PENDING"
+      }
+    },
+    "status": "PASS"
+  },
+  "supabase_writes_performed": "NO",
+  "target_identity_snapshot": {
+    "database_identity": {
+      "database_name": "pending-jcfb-v4-validation",
+      "project_or_cluster_ref": "pending-local-cluster-v4",
+      "server_name": "pending-disposable-server"
+    },
+    "environment": "DISPOSABLE_LOCAL",
+    "identity_verified": false,
+    "provider": "LOCAL_POSTGRES",
+    "secret_values_present": false,
+    "status": "RUNTIME_PENDING_DISPOSABLE_DB",
+    "target_id": "pending-disposable-target",
+    "target_identity_hash": "sha256:0f6e8e2629ce9c1b43e53c79a731e2b86e5cf1691c8e3621223e7f8d1d91cfeb"
+  },
+  "task_ids": [
+    "V4-016",
+    "V4-017"
+  ],
+  "task_names": [
+    "V4-016��Staging Readiness & Disposable Target Contract 1.0",
+    "V4-017��Migration Acceptance Package & Roll-forward Drill 1.0"
+  ],
+  "task_results": [
+    {
+      "evidence": [
+        "config/migration_harness/v4_batch_03_readiness_contract.json",
+        "config/migration_harness/v4_batch_03_staging_target.template.json",
+        "tools/migration_harness/readiness.py",
+        "docs/V4_STAGING_READINESS.md",
+        "tests/migration_harness/test_batch_03.py"
+      ],
+      "notes": "Three environments, fail-closed states, target identity/isolation/reset/secrets rules, and Production hard block are validated locally; runtime target proof remains pending.",
+      "status": "PASS",
+      "task_id": "V4-016"
+    },
+    {
+      "evidence": [
+        "config/migration_harness/v4_batch_03_acceptance_package.schema.json",
+        "config/migration_harness/v4_batch_03_evidence_index.json",
+        "tools/migration_harness/acceptance.py",
+        "docs/V4_MIGRATION_ACCEPTANCE_PACKAGE.md",
+        "docs/V4_BATCH_03_IMPLEMENTATION.md",
+        "tests/migration_harness/test_batch_03.py"
+      ],
+      "notes": "The packet binds manifest/preflight/schema/smoke/negative/security/no-future/Tier-A/history evidence, records the forward-only drill, and requests but does not grant approval.",
+      "status": "PASS",
+      "task_id": "V4-017"
+    }
+  ],
+  "tests_executed": {
+    "command": "python -m unittest discover -s tests/migration_harness -p test_*.py -q",
+    "failure_count": 0,
+    "status": "PASS",
+    "test_count": 48
+  },
+  "tier_a_same_frozen_input": {
+    "evidence_ref": "config/migration_harness/v4_batch_03_evidence_index.json#tier-a-same-frozen-input",
+    "negative_case_refs": [
+      "SMOKE-11",
+      "NEG-15",
+      "SMOKE-12",
+      "NEG-16"
+    ],
+    "production_approval_blocked_until_complete": true,
+    "runtime_evidence_required": true,
+    "same_frozen_input_hash_required": true,
+    "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+  },
+  "v333_isolation": "PASS",
+  "validation_gates": {
+    "cross_doc_consistency": "PASS",
+    "disposable_environment_gate": "PASS",
+    "git_diff_check": "PASS",
+    "manifest_0001_0009": "PASS",
+    "migration_history_integrity": "PASS",
+    "no_future_leakage_runtime": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+    "preflight_contract": "PASS",
+    "production_apply_hard_block": "PASS",
+    "readiness_contract": "PASS",
+    "rls_trigger_view_security_runtime": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+    "roll_forward_drill": "PASS",
+    "schema_catalog_contract": "PASS",
+    "schema_diff_runtime": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+    "secret_handling": "PASS",
+    "self_audit": "PASS",
+    "separation_of_duties": "PASS",
+    "smoke_and_negative_matrix": "PASS",
+    "target_identity_and_isolation": "PASS",
+    "tier_a_same_frozen_input_runtime": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+    "unit_tests": "PASS",
+    "v333_isolation": "PASS"
+  },
+  "working_tree": "CLEAN"
+}
