@@ -20,10 +20,10 @@
   "secret_scan": "PASS",
   "self_audit": "PASS",
   "git_commits": [
-    "PENDING_LOCAL_COMMIT"
+    "3c80f7629ac71be0a6e57e8d326350d2b3d038f0"
   ],
   "remote_push": "BLOCKED_ENV",
-  "working_tree": "PENDING_COMMIT",
+  "working_tree": "CLEAN",
   "v4_018_v4_019_status_changed": "NO",
   "batch_04_executed": "NO",
   "runtime_sql_execution": "NOT_RUN_ENV_BLOCKED",
