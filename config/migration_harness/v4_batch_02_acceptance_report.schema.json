@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v4-batch-02-acceptance-report@1.0.0",
+  "title": "JCFB V4 BATCH-02 acceptance report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "report_contract_version", "batch_id", "batch_name", "task_ids", "task_names", "report_state",
+    "registry_mapping_verified", "task_results", "execution_boundary", "runner", "manifest", "preflight",
+    "schema_diff", "smoke", "negative_cases", "validation", "audits", "failures", "blocking_reasons",
+    "production_db_writes_performed", "supabase_writes_performed", "v333_isolation", "secret_scan", "self_audit",
+    "cross_doc_consistency", "tests_executed", "checklist_tasks_marked_complete", "git_trace", "remote_push",
+    "working_tree", "batch_status", "next_batch"
+  ],
+  "properties": {
+    "report_contract_version": {"const": "v4-batch-02-acceptance-report@1.0.0"},
+    "batch_id": {"const": "BATCH-02"},
+    "batch_name": {"type": "string"},
+    "task_ids": {"const": ["V4-013", "V4-014", "V4-015"]},
+    "task_names": {"type": "array", "minItems": 3, "maxItems": 3},
+    "report_state": {"enum": ["ACCEPTANCE_PASS", "PARTIAL", "BLOCKED"]},
+    "registry_mapping_verified": {"const": "PASS"},
+    "task_results": {"type": "array", "minItems": 3, "maxItems": 3},
+    "execution_boundary": {"$ref": "#/$defs/execution_boundary"},
+    "runner": {"type": "object"},
+    "manifest": {"type": "object"},
+    "preflight": {"type": "object"},
+    "schema_diff": {"type": "object"},
+    "smoke": {"type": "object"},
+    "negative_cases": {"type": "object"},
+    "validation": {"type": "object"},
+    "audits": {"type": "object"},
+    "failures": {"type": "array"},
+    "blocking_reasons": {"type": "array", "items": {"type": "string"}},
+    "production_db_writes_performed": {"const": "NO"},
+    "supabase_writes_performed": {"const": "NO"},
+    "v333_isolation": {"enum": ["PASS", "FAIL"]},
+    "secret_scan": {"enum": ["PASS", "FAIL"]},
+    "self_audit": {"enum": ["PASS", "FAIL"]},
+    "cross_doc_consistency": {"enum": ["PASS", "FAIL"]},
+    "tests_executed": {"type": "object"},
+    "checklist_tasks_marked_complete": {"type": "array", "items": {"type": "string"}},
+    "git_trace": {"type": "object"},
+    "remote_push": {"enum": ["PASS", "BLOCKED_ENV", "BLOCKED_AUTH"]},
+    "working_tree": {"enum": ["CLEAN", "DIRTY"]},
+    "batch_status": {"enum": ["COMPLETE", "PARTIAL", "BLOCKED"]},
+    "next_batch": {"type": "string"}
+  },
+  "$defs": {
+    "execution_boundary": {
+      "type": "object",
+      "required": ["sql_executed", "database_connected", "connector_invoked", "production_db_writes_performed", "supabase_writes_performed", "production_shadow_runtime_executed", "model_predictions_executed", "v333_mutated"],
+      "properties": {
+        "sql_executed": {"const": false},
+        "database_connected": {"const": false},
+        "connector_invoked": {"const": false},
+        "production_db_writes_performed": {"const": "NO"},
+        "supabase_writes_performed": {"const": "NO"},
+        "production_shadow_runtime_executed": {"const": false},
+        "model_predictions_executed": {"const": false},
+        "v333_mutated": {"const": "NO"}
+      }
+    }
+  }
+}

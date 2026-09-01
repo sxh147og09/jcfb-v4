@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v4-batch-02-harness-policy@1.0.0",
+  "title": "JCFB V4 BATCH-02 implementation policy",
+  "contract_version": "v4-batch-02-harness-policy@1.0.0",
+  "batch_id": "BATCH-02",
+  "task_ids": ["V4-013", "V4-014", "V4-015"],
+  "upstream": ["BATCH-01", "V4-012"],
+  "default_execution_mode": "PLAN_ONLY",
+  "allowed_execution_modes": ["PLAN_ONLY", "DRY_RUN"],
+  "blocked_execution_modes": ["APPLY", "PRODUCTION_APPLY"],
+  "allowed_target_environments": ["DISPOSABLE_LOCAL", "STAGING"],
+  "hard_block_target_environments": ["PRODUCTION"],
+  "database_access": {
+    "connector_implemented": false,
+    "connector_invoked": false,
+    "sql_executed": false,
+    "ddl_applied": false,
+    "requires_explicit_target": true,
+    "requires_explicit_connection_permission": true,
+    "requires_disposable_proof": true,
+    "automatic_installation": false,
+    "automatic_start": false,
+    "automatic_teardown": false,
+    "production_action": "BLOCK",
+    "supabase_write_action": "BLOCK",
+    "production_database_write_action": "BLOCK"
+  },
+  "runner_statuses": [
+    "PLANNED",
+    "PRECHECK_BLOCKED",
+    "READY_FOR_DISPOSABLE",
+    "APPLYING",
+    "VALIDATING",
+    "ACCEPTED",
+    "FAILED",
+    "PARTIAL_FAIL"
+  ],
+  "preflight_checks": [
+    "PF-01", "PF-02", "PF-03", "PF-04", "PF-05", "PF-06", "PF-07", "PF-08", "PF-09",
+    "PF-10", "PF-11", "PF-12", "PF-13", "PF-14", "PF-15", "PF-16", "PF-17", "PF-18"
+  ],
+  "negative_case_registry": "config/migration_harness/v4_negative_case_registry.json",
+  "smoke_catalog": "config/migration_harness/v4_smoke_test_catalog.json",
+  "runtime_result_policy": {
+    "missing_catalog": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+    "unknown_catalog": "BLOCKED",
+    "negative_database_case_without_target": "RUNTIME_NEGATIVE_TEST_PENDING",
+    "never_fabricate_pass": true
+  },
+  "report": {
+    "schema": "config/migration_harness/v4_batch_02_acceptance_report.schema.json",
+    "json": "docs/V4_BATCH_02_ACCEPTANCE_REPORT.json",
+    "markdown": "docs/V4_BATCH_02_ACCEPTANCE_REPORT.md"
+  }
+}

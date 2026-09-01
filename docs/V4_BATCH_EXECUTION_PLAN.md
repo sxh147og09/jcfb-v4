@@ -1,6 +1,6 @@
 # JCFB V4 Batch Execution Plan 1.0
 
-Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 NOT STARTED`
+Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS`
 
 Plan Identity: `v4-batch-execution-plan@1.0.0`
 Plan Revision: `r002`
@@ -19,7 +19,7 @@ The baseline repository and reachable Git history contained no original V4-013�
 - Exactly one primary batch exists for every task from V4-012 through V4-100.
 - A secondary parallel group may describe concurrency but never creates a second primary assignment.
 - A batch label is not a completion claim. Every child task still needs its own artifact, validation evidence, documentation, Git trace, and checklist decision.
-- V4-012 is accepted as the design-only BATCH-01 result. BATCH-02 remains the next implementation boundary.
+- V4-012 is accepted as the design-only BATCH-01 result. BATCH-02 / V4-013 through V4-015 is accepted as the no-write implementation boundary. BATCH-03 remains next.
 - Supabase writes, Production/Shadow runtime, Promotion, activation, pointer switching, and release remain separately gated.
 
 ## 3. Formal batch register
@@ -90,4 +90,4 @@ For each future batch: freeze the manifest; verify all source task IDs; validate
 
 ## 7. Next execution boundary
 
-Next execution batch: **BATCH-02 — Dry-Run, Preflight & Negative Test Harness**. V4-012 is COMPLETE as a design-only task; V4-013 through V4-015 remain TODO. Supabase Write = NO, Production/Shadow Execution = NO, Promotion = NO, and V3.3.3 Mutation = NO.
+Next execution batch: **BATCH-03 — Staging Readiness & Migration Acceptance Package**. V4-013 through V4-015 are COMPLETE with database runtime evidence explicitly pending. Supabase Write = NO, Production/Shadow Execution = NO, Promotion = NO, and V3.3.3 Mutation = NO.

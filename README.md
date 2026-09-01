@@ -3,7 +3,7 @@
 Next-Generation Football Prediction System
 
 Status:
-BLUEPRINT, MIGRATION DESIGN, AND BATCH-01 DESIGN COMPLETE / MIGRATION NOT APPLIED
+BLUEPRINT, MIGRATION DESIGN, AND BATCH-02 HARNESS COMPLETE / MIGRATION NOT APPLIED
 
 Current Build Stage:
 V4-006 COMPLETE
@@ -13,7 +13,10 @@ V4-009 COMPLETE
 V4-010 COMPLETE
 V4-011 COMPLETE
 V4-012 COMPLETE
-V4-013 NEXT
+V4-013 COMPLETE
+V4-014 COMPLETE
+V4-015 COMPLETE
+V4-016 NEXT
 
 Legacy Production:
 JCFB V3.3.3 remains independent and unchanged.
@@ -85,4 +88,4 @@ The architecture target is a design direction only at this bootstrap stage. Prod
 
 ## Current scope
 
-V4-001 through V4-012 are complete as governance and design artifacts. V4-011 defines the ordered PostgreSQL/Supabase migration architecture, and V4-012 defines the fail-closed dry-run/validation harness boundary only. No database migration, Supabase write, model execution, or V3.3.3 change was performed. V4-013 through V4-100 remain future work.
+V4-001 through V4-015 are complete as governance, design, and no-write harness artifacts. V4-011 defines the ordered PostgreSQL/Supabase migration architecture, V4-012 defines the fail-closed harness boundary, and BATCH-02 implements the local plan, preflight, schema-diff, smoke-contract, and negative-contract layers. No database migration, Supabase write, model execution, or V3.3.3 change was performed. V4-016 through V4-100 remain future work.

@@ -1,0 +1,205 @@
+{
+  "report_contract_version": "v4-batch-02-acceptance-report@1.0.0",
+  "batch_id": "BATCH-02",
+  "batch_name": "BATCH-02｜Dry-Run, Preflight & Negative Test Harness",
+  "task_ids": ["V4-013", "V4-014", "V4-015"],
+  "task_names": [
+    "V4-013｜Migration Dry-Run Harness Implementation 1.0",
+    "V4-014｜Migration Preflight & Schema-Diff Validator 1.0",
+    "V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0"
+  ],
+  "report_state": "ACCEPTANCE_PASS",
+  "registry_mapping_verified": "PASS",
+  "task_results": [
+    {
+      "task_id": "V4-013",
+      "status": "PASS",
+      "evidence": [
+        "tools/migration_harness/manifest.py",
+        "tools/migration_harness/runner.py",
+        "tests/migration_harness/test_harness.py"
+      ],
+      "acceptance": "PLAN_ONLY/no-write default, deterministic manifest plan, Production/Supabase hard block, V3.3.3 inaccessible"
+    },
+    {
+      "task_id": "V4-014",
+      "status": "PASS",
+      "evidence": [
+        "tools/migration_harness/preflight.py",
+        "tools/migration_harness/schema_diff.py",
+        "config/migration_harness/v4_batch_02_policy.json"
+      ],
+      "acceptance": "PF-01..PF-18 shape and fail-closed behavior implemented; schema diff reports unknown/missing/extra/type/constraint/security states"
+    },
+    {
+      "task_id": "V4-015",
+      "status": "PASS",
+      "evidence": [
+        "config/migration_harness/v4_smoke_test_catalog.json",
+        "config/migration_harness/v4_negative_case_registry.json",
+        "tools/migration_harness/negative.py"
+      ],
+      "acceptance": "20-case smoke catalog validated; 22 unit refusal contracts executed; database enforcement remains explicitly pending"
+    }
+  ],
+  "execution_boundary": {
+    "sql_executed": false,
+    "database_connected": false,
+    "connector_invoked": false,
+    "ddl_applied": false,
+    "production_db_writes_performed": "NO",
+    "supabase_writes_performed": "NO",
+    "production_shadow_runtime_executed": false,
+    "model_predictions_executed": false,
+    "v333_mutated": "NO"
+  },
+  "runner": {
+    "status": "PLANNED",
+    "default_mode": "PLAN_ONLY",
+    "default_status": "PLANNED",
+    "dry_run_without_target_status": "PRECHECK_BLOCKED",
+    "apply_mode_status": "PRECHECK_BLOCKED",
+    "steps": 9,
+    "transaction_boundary": "ONE_TRANSACTION_PER_MIGRATION",
+    "manifest_identity_hash": "sha256:5dd9eedf82d7acc96b710c37cae19d8632fe030b0f3ac38e048925251c19e05c",
+    "plan_hash": "sha256:e55b3d3388267f526c894111a50fbbc2153fd74cce10474021ae617255ecacc8",
+    "production_target_hard_block": "PASS",
+    "sql_executed": false,
+    "connector_invoked": false
+  },
+  "manifest": {
+    "source_manifest": "database/migrations/v4/0000_manifest.md",
+    "source_sql_directory": "database/migrations/v4",
+    "entry_count": 9,
+    "sequence_status": "PASS",
+    "dependency_status": "PASS",
+    "hash_status": "PENDING_CANONICAL_HASH",
+    "pending_hash_count": 9,
+    "identity_hash": "sha256:5dd9eedf82d7acc96b710c37cae19d8632fe030b0f3ac38e048925251c19e05c",
+    "status_policy": "DRAFT_ONLY_UNTIL_CANONICAL_HASH_AND_APPROVAL"
+  },
+  "preflight": {
+    "status": "BLOCKED",
+    "target": {"target_id": null, "environment": null, "provider": null},
+    "not_run_reason": "No disposable PostgreSQL target/catalog was supplied; target-dependent checks are not a pass",
+    "checks": [
+      {"id": "PF-01", "status": "BLOCKED", "reason": "Explicit disposable target identity is required"},
+      {"id": "PF-02", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "PostgreSQL compatibility requires a disposable catalog snapshot"},
+      {"id": "PF-03", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "Extension availability requires a disposable catalog snapshot"},
+      {"id": "PF-04", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "Security-invoker capability requires a disposable target"},
+      {"id": "PF-05", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "Schema/table conflict evidence requires a disposable catalog snapshot"},
+      {"id": "PF-06", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "V3.3.3 isolation requires a read-only disposable catalog comparison"},
+      {"id": "PF-07", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "V4 namespace state requires a disposable catalog snapshot"},
+      {"id": "PF-08", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "Role and permission evidence requires a disposable target"},
+      {"id": "PF-09", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "Migration history requires a disposable catalog snapshot"},
+      {"id": "PF-10", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "Backup/snapshot decision requires target evidence"},
+      {"id": "PF-11", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "Maintenance window evidence requires target evidence"},
+      {"id": "PF-12", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "Migration cleanliness requires target history evidence"},
+      {"id": "PF-13", "status": "BLOCKED", "reason": "All nine canonical migration hashes are PENDING_CANONICAL_HASH"},
+      {"id": "PF-14", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "Runtime secret presence is not verifiable without an explicit disposable target"},
+      {"id": "PF-15", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "Data API exposure requires runtime evidence"},
+      {"id": "PF-16", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "Default privilege closure requires runtime evidence"},
+      {"id": "PF-17", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "Function security/search_path evidence requires a disposable catalog snapshot"},
+      {"id": "PF-18", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "reason": "Production release state requires a read-only target evidence snapshot"}
+    ],
+    "secret_scan": {"status": "PASS", "hit_count": 0, "values_logged": false}
+  },
+  "schema_diff": {
+    "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+    "evidence_ref": "evidence/schema-diff.json",
+    "classifications": [{"classification": "UNKNOWN_CATALOG", "message": "No read-only pg_catalog snapshot was supplied"}],
+    "expected_counts": {"schemas": 7, "tables": 36, "indexes": 64, "rls_tables": 30, "policies": 1, "triggers": 45, "views": 6, "functions": 18},
+    "actual_counts": {"schemas": 0, "tables": 0, "indexes": 0, "rls_tables": 0, "policies": 0, "triggers": 0, "views": 0, "functions": 0}
+  },
+  "smoke": {
+    "catalog_source": "config/migration_harness/v4_smoke_test_catalog.json",
+    "catalog_shape_status": "PASS",
+    "required_case_count": 20,
+    "runtime": {
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "actually_executed": 0,
+      "passed": 0,
+      "failed": 0,
+      "pending": 20,
+      "pending_case_ids": ["SMOKE-01", "SMOKE-02", "SMOKE-03", "SMOKE-04", "SMOKE-05", "SMOKE-06", "SMOKE-07", "SMOKE-08", "SMOKE-09", "SMOKE-10", "SMOKE-11", "SMOKE-12", "SMOKE-13", "SMOKE-14", "SMOKE-15", "SMOKE-16", "SMOKE-17", "SMOKE-18", "SMOKE-19", "SMOKE-20"],
+      "reason": "No disposable PostgreSQL target or approved catalog capture was supplied"
+    }
+  },
+  "negative_cases": {
+    "registry_source": "config/migration_harness/v4_negative_case_registry.json",
+    "defined_count": 22,
+    "actually_executed_count": 22,
+    "pass_count": 22,
+    "fail_count": 0,
+    "runtime_pending_disposable_db_count": 15,
+    "unit_contract_only": true,
+    "runtime_pending_reason": "Database constraint/RLS/trigger/view behavior needs a proven disposable PostgreSQL target",
+    "cases": [
+      {"id": "NEG-01", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "NOT_APPLICABLE"},
+      {"id": "NEG-02", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "NOT_APPLICABLE"},
+      {"id": "NEG-03", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "NOT_APPLICABLE"},
+      {"id": "NEG-04", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "NOT_APPLICABLE"},
+      {"id": "NEG-05", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "NOT_APPLICABLE"},
+      {"id": "NEG-06", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "NOT_APPLICABLE"},
+      {"id": "NEG-07", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "NOT_APPLICABLE"},
+      {"id": "NEG-08", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-09", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-10", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-11", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-12", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-13", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-14", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-15", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-16", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-17", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-18", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-19", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-20", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-21", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"},
+      {"id": "NEG-22", "actual_result": "REJECTED", "unit_contract_status": "PASS", "runtime_status": "RUNTIME_NEGATIVE_TEST_PENDING"}
+    ]
+  },
+  "validation": {
+    "dry_run_runner": "PASS",
+    "preflight_validator": "PASS",
+    "schema_diff_contract": "PASS",
+    "smoke_catalog": "PASS",
+    "negative_harness": "PASS",
+    "fail_closed_behavior": "PASS",
+    "migration_history_integrity_checks": "PASS",
+    "production_target_hard_block": "PASS",
+    "v333_collision_protection": "PASS",
+    "secret_handling": "PASS",
+    "schema_catalog_runtime": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+    "constraint_runtime": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+    "rls_trigger_view_runtime": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+  },
+  "audits": {
+    "secret_scan": {"status": "PASS", "hit_count": 0, "values_logged": false},
+    "self_audit": {"status": "PASS", "issue_count": 0, "evidence_ref": "evidence/batch-02-self-audit.json"},
+    "cross_doc_consistency": {"status": "PASS", "evidence_ref": "evidence/batch-02-cross-doc-consistency.json"},
+    "git_diff_check": {"status": "PASS", "evidence_ref": "evidence/git-diff-check.txt"},
+    "v333_isolation": {"status": "PASS", "collisions": [], "evidence_ref": "evidence/v333-isolation-audit.json"},
+    "unit_tests": {"status": "PASS", "test_count": 41, "failure_count": 0, "command": "python -m unittest discover -s tests/migration_harness -p test_*.py -q"}
+  },
+  "failures": [],
+  "blocking_reasons": [
+    "No disposable PostgreSQL target was supplied",
+    "PF-01..PF-12 and PF-14..PF-18 remain target/runtime pending",
+    "PF-13 is BLOCKED because all nine canonical migration hashes are PENDING_CANONICAL_HASH",
+    "20 smoke cases and 15 database-enforcement negative cases remain runtime-pending"
+  ],
+  "production_db_writes_performed": "NO",
+  "supabase_writes_performed": "NO",
+  "v333_isolation": "PASS",
+  "secret_scan": "PASS",
+  "self_audit": "PASS",
+  "cross_doc_consistency": "PASS",
+  "tests_executed": {"status": "PASS", "test_count": 41, "failure_count": 0},
+  "checklist_tasks_marked_complete": ["V4-013", "V4-014", "V4-015"],
+  "git_trace": {"status": "RECORDED_IN_GIT", "commit_hash": null, "checklist_commit_hash": null, "commit_hash_recorded_outside_payload": true},
+  "remote_push": "BLOCKED_ENV",
+  "working_tree": "CLEAN",
+  "batch_status": "COMPLETE",
+  "next_batch": "BATCH-03 — Staging Readiness & Migration Acceptance Package (V4-016–V4-017)"
+}

@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v4-migration-negative-cases@1.0.0",
+  "title": "JCFB V4 BATCH-02 negative/refusal case registry",
+  "contract_version": "v4-migration-negative-cases@1.0.0",
+  "task_ids": ["V4-013", "V4-014", "V4-015"],
+  "authoritative_sources": [
+    "docs/V4_MIGRATION_PREFLIGHT.md",
+    "docs/V4_MIGRATION_SMOKE_TESTS.md",
+    "docs/V4_CONSTITUTION.md",
+    "docs/V4_RLS_SECURITY_BLUEPRINT.md",
+    "docs/V4_TRIGGER_BLUEPRINT.md"
+  ],
+  "execution_semantics": {
+    "unit_contract_pass_means": "The pure refusal contract rejected the invalid fixture",
+    "runtime_pending_means": "PostgreSQL constraint/RLS/trigger/view enforcement still requires a proven disposable target",
+    "secret_values_logged": false,
+    "production_target": "BLOCKED"
+  },
+  "cases": [
+    {
+      "id": "NEG-01",
+      "number": 1,
+      "name": "migration sequence missing",
+      "category": "MANIFEST",
+      "runtime_required": false,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-01-manifest-sequence-missing.json"
+    },
+    {
+      "id": "NEG-02",
+      "number": 2,
+      "name": "migration sequence duplicated",
+      "category": "MANIFEST",
+      "runtime_required": false,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-02-manifest-sequence-duplicate.json"
+    },
+    {
+      "id": "NEG-03",
+      "number": 3,
+      "name": "modified applied migration hash mismatch",
+      "category": "MIGRATION_HISTORY",
+      "runtime_required": false,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-03-applied-hash-mismatch.json"
+    },
+    {
+      "id": "NEG-04",
+      "number": 4,
+      "name": "production environment without explicit deployment approval",
+      "category": "TARGET_BOUNDARY",
+      "runtime_required": false,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-04-production-target.json"
+    },
+    {
+      "id": "NEG-05",
+      "number": 5,
+      "name": "missing required secret env reference",
+      "category": "SECRETS",
+      "runtime_required": false,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-05-missing-secret-env-reference.json"
+    },
+    {
+      "id": "NEG-06",
+      "number": 6,
+      "name": "invalid target identity",
+      "category": "TARGET_BOUNDARY",
+      "runtime_required": false,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-06-invalid-target-identity.json"
+    },
+    {
+      "id": "NEG-07",
+      "number": 7,
+      "name": "V3.3.3 object collision",
+      "category": "V333_ISOLATION",
+      "runtime_required": false,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-07-v333-collision.json"
+    },
+    {
+      "id": "NEG-08",
+      "number": 8,
+      "name": "available official market missing payload",
+      "category": "MARKET_PAYLOAD",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-08-available-market-payload.json"
+    },
+    {
+      "id": "NEG-09",
+      "number": 9,
+      "name": "unavailable market missing reason",
+      "category": "MARKET_PAYLOAD",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-09-unavailable-market-reason.json"
+    },
+    {
+      "id": "NEG-10",
+      "number": 10,
+      "name": "RQSPF available but handicap missing",
+      "category": "MARKET_PAYLOAD",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-10-rqspf-handicap.json"
+    },
+    {
+      "id": "NEG-11",
+      "number": 11,
+      "name": "post-kickoff production run attempt",
+      "category": "NO_FUTURE_LEAKAGE",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-11-post-kickoff-run.json"
+    },
+    {
+      "id": "NEG-12",
+      "number": 12,
+      "name": "frozen_input mutation attempt",
+      "category": "IMMUTABILITY",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-12-frozen-input-mutation.json"
+    },
+    {
+      "id": "NEG-13",
+      "number": 13,
+      "name": "frozen_prediction update/delete contract",
+      "category": "IMMUTABILITY",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-13-frozen-prediction-mutation.json"
+    },
+    {
+      "id": "NEG-14",
+      "number": 14,
+      "name": "review/result cross-match mismatch",
+      "category": "LINEAGE",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-14-review-cross-match.json"
+    },
+    {
+      "id": "NEG-15",
+      "number": 15,
+      "name": "Tier A production/shadow different frozen_input_hash",
+      "category": "TIER_A",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-15-tier-a-hash-mismatch.json"
+    },
+    {
+      "id": "NEG-16",
+      "number": 16,
+      "name": "experiment marked forward Tier A",
+      "category": "ROLE_ISOLATION",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-16-experiment-tier-a.json"
+    },
+    {
+      "id": "NEG-17",
+      "number": 17,
+      "name": "shadow/experiment leaking to public projection",
+      "category": "PUBLIC_PROJECTION",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-17-public-role-leak.json"
+    },
+    {
+      "id": "NEG-18",
+      "number": 18,
+      "name": "two active Production revisions",
+      "category": "PRODUCTION_UNIQUENESS",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-18-two-production-revisions.json"
+    },
+    {
+      "id": "NEG-19",
+      "number": 19,
+      "name": "unsafe SECURITY DEFINER search_path",
+      "category": "SECURITY",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-19-unsafe-definer.json"
+    },
+    {
+      "id": "NEG-20",
+      "number": 20,
+      "name": "anon/authenticated internal write grant",
+      "category": "RLS",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-20-public-internal-write.json"
+    },
+    {
+      "id": "NEG-21",
+      "number": 21,
+      "name": "canonical latest update using page/deploy time",
+      "category": "TIMESTAMP",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-21-canonical-latest-time.json"
+    },
+    {
+      "id": "NEG-22",
+      "number": 22,
+      "name": "silent UNKNOWN to FALSE/0/default coercion",
+      "category": "MISSINGNESS",
+      "runtime_required": true,
+      "expected_result": "REJECTED",
+      "evidence_ref": "negative/NEG-22-unknown-coercion.json"
+    }
+  ]
+}

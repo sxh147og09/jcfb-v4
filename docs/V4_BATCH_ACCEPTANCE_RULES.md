@@ -1,15 +1,15 @@
 # JCFB V4 Batch Acceptance Rules 1.0
 
-Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 NOT STARTED`
+Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS`
 
 Rules Identity: `v4-batch-acceptance-rules@1.0.0`
 Revision: `r002`
 Audit Date: `2026-09-01` (`Asia/Shanghai`)
-Execution Declaration: **V4-012 EXECUTED DESIGN-ONLY; NO DATABASE EXECUTION**
+Execution Declaration: **V4-012 DESIGN-ONLY ACCEPTED; BATCH-02 NO-WRITE HARNESS/CONTRACTS EXECUTED; NO DATABASE EXECUTION**
 
 ## 1. Purpose, authority, and source of truth
 
-These rules govern grouping, execution, acceptance, commit traceability, and promotion. They do not authorize BATCH-02 or later database writes, model execution, Shadow, Promotion, Production activation, public release, or any V3.3.3 change.
+These rules govern grouping, execution, acceptance, commit traceability, and promotion. BATCH-02 may implement and run repository-local no-write contract tests; these rules do not authorize BATCH-02 or later database writes, model execution, Shadow, Promotion, Production activation, public release, or any V3.3.3 change.
 
 Authority order:
 
@@ -65,11 +65,11 @@ Missing approval evidence means BLOCKED, not PASS. An unattended agent cannot ap
 
 ## 4. Database and runtime isolation
 
-The following remain forbidden in this recovery and in ordinary planning batches:
+The following remain forbidden in this recovery and in ordinary planning batches. BATCH-02's repository-local no-write harness and unit contracts are the explicit implementation exception; they do not create database evidence:
 
 - applying `database/migrations/v4/` to Production or Supabase;
 - treating blueprint SQL or a registry entry as authorization;
-- creating or running a migration harness;
+- connecting a migration harness to a database without a proven disposable target and approved runtime adapter;
 - writing a registry row, canonical fact, model row, or any database row;
 - importing, rewriting, deleting, or migrating historical formal data;
 - executing a model or producing a match prediction;
@@ -127,6 +127,6 @@ The safe outcome is BLOCKED, RUN_INVALID, or NOT_VERIFIED with retained evidence
 
 ## 9. Checklist and current disposition
 
-V4-012 may be marked `[x]` only after its independent design artifact, static validation, documentation, and Git trace pass. V4-013 through V4-100 remain unchecked and are not started. BATCH-02 requires a new independent acceptance decision.
+V4-012 through V4-015 may be marked `[x]` only after each independent artifact, validation, documentation, and Git trace passes. V4-016 through V4-100 remain unchecked and are not started. BATCH-02 is accepted with target-dependent database evidence explicitly pending.
 
-Next execution batch: **BATCH-02 — Dry-Run, Preflight & Negative Test Harness**. BATCH-01 / V4-012 is accepted as design-only; no database or Supabase execution occurred.
+Next execution batch: **BATCH-03 — Staging Readiness & Migration Acceptance Package**. BATCH-02 / V4-013 through V4-015 is accepted as a no-write implementation batch; no database or Supabase execution occurred.

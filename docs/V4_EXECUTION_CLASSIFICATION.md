@@ -1,6 +1,6 @@
 # JCFB V4 Execution Classification 012–100 1.0
 
-Status: `PASS` for complete classification and unique primary mapping; `V4-012 COMPLETE`; V4-013+ execution remains not started.
+Status: `PASS` for complete classification and unique primary mapping; `V4-012–V4-015 COMPLETE`; V4-016+ execution remains not started.
 
 Classification Identity: `v4-execution-classification-012-100@1.0.0`
 Revision: `r002`
@@ -22,9 +22,9 @@ The classification below is a complete register, not a candidate envelope. Every
 | Task ID | Task Name | Classification | Primary Batch | Upstream Dependencies | Supabase Write Allowed? | Production/Shadow Runtime Allowed? | Explicit User Approval Required? | Status |
 |---|---|---|---|---|---|---|---|---|
 | V4-012 | Migration Dry-Run & Validation Harness Design 1.0 | BATCHABLE + SERIAL | BATCH-01 | V4-011 | NO | NO | NO | COMPLETE |
-| V4-013 | V4-013｜Migration Dry-Run Harness Implementation 1.0 | BATCHABLE + SERIAL | BATCH-02 | V4-012 | NO | NO | NO | TODO |
-| V4-014 | V4-014｜Migration Preflight & Schema-Diff Validator 1.0 | BATCHABLE + PARALLEL | BATCH-02 | V4-013 | NO | NO | NO | TODO |
-| V4-015 | V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCHABLE + PARALLEL | BATCH-02 | V4-013 | NO | NO | NO | TODO |
+| V4-013 | V4-013｜Migration Dry-Run Harness Implementation 1.0 | BATCHABLE + SERIAL | BATCH-02 | V4-012 | NO | NO | NO | COMPLETE |
+| V4-014 | V4-014｜Migration Preflight & Schema-Diff Validator 1.0 | BATCHABLE + PARALLEL | BATCH-02 | V4-013 | NO | NO | NO | COMPLETE |
+| V4-015 | V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCHABLE + PARALLEL | BATCH-02 | V4-013 | NO | NO | NO | COMPLETE |
 | V4-016 | V4-016｜Staging Readiness & Disposable Target Contract 1.0 | BATCHABLE + SERIAL | BATCH-03 | V4-014, V4-015 | NO | NO | NO | TODO |
 | V4-017 | V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | SERIAL | BATCH-03 | V4-016 | NO | NO | NO | TODO |
 | V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-04 | V4-017 | YES | NO | YES | TODO |
@@ -128,4 +128,4 @@ The classification below is a complete register, not a candidate envelope. Every
 
 ## 4. Batch mapping disposition
 
-The mapping remains the authoritative classification register. V4-012 is independently accepted as a design-only task; V4-013 through V4-100 remain TODO and no downstream batch is authorized by this status update.
+The mapping remains the authoritative classification register. V4-012 is independently accepted as a design-only task and V4-013 through V4-015 are independently accepted as BATCH-02 implementation tasks; V4-016 through V4-100 remain TODO and no downstream batch is authorized by this status update.
