@@ -53,4 +53,4 @@ The Human Approver explicitly authorizes the first V4 migration. The Migration E
 
 ## 7. Current execution declaration
 
-Acceptance gate executed in V4-011: **NO**. All target-dependent gates are design requirements, not claimed runtime evidence. No database write was performed. V4-011 is complete as a design artifact only; V4-012 is not started.
+Acceptance gate executed in V4-011: **NO**. All target-dependent gates are design requirements, not claimed runtime evidence. No database write was performed. V4-011 is complete as a design artifact only; V4-012 is complete only as a design artifact and has not executed the acceptance gate.

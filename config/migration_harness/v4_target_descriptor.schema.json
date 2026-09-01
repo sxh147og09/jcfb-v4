@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v4-migration-target-descriptor@1.0.0",
+  "title": "JCFB V4 isolated migration target descriptor",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "descriptor_version",
+    "target_id",
+    "environment",
+    "provider",
+    "database_identity",
+    "disposable",
+    "contains_v333_objects",
+    "contains_production_data",
+    "credential_env_name",
+    "allow_network",
+    "connect_permission"
+  ],
+  "properties": {
+    "descriptor_version": {
+      "const": "v4-migration-target-descriptor@1.0.0"
+    },
+    "target_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"
+    },
+    "environment": {
+      "type": "string",
+      "enum": [
+        "DISPOSABLE_LOCAL",
+        "STAGING",
+        "PRODUCTION"
+      ]
+    },
+    "provider": {
+      "type": "string",
+      "enum": [
+        "LOCAL_POSTGRES",
+        "DOCKER_POSTGRES",
+        "STAGING_POSTGRES",
+        "STAGING_SUPABASE",
+        "PRODUCTION_SUPABASE"
+      ]
+    },
+    "database_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "server_name",
+        "database_name",
+        "project_or_cluster_ref"
+      ],
+      "properties": {
+        "server_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "database_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "project_or_cluster_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "disposable": {
+      "type": "boolean"
+    },
+    "contains_v333_objects": {
+      "type": "boolean"
+    },
+    "contains_production_data": {
+      "type": "boolean"
+    },
+    "credential_env_name": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]{1,127}$"
+    },
+    "allow_network": {
+      "type": "boolean"
+    },
+    "connect_permission": {
+      "type": "string",
+      "enum": [
+        "EXPLICITLY_GRANTED",
+        "NOT_GRANTED",
+        "BLOCKED"
+      ]
+    },
+    "reset_and_teardown_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reset_before_run",
+        "destroy_after_evidence",
+        "operator_owned"
+      ],
+      "properties": {
+        "reset_before_run": {
+          "type": "boolean"
+        },
+        "destroy_after_evidence": {
+          "type": "boolean"
+        },
+        "operator_owned": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "environment": {
+            "const": "PRODUCTION"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "connect_permission": {
+            "const": "BLOCKED"
+          },
+          "allow_network": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "environment": {
+            "const": "DISPOSABLE_LOCAL"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "disposable": {
+            "const": true
+          },
+          "contains_v333_objects": {
+            "const": false
+          },
+          "contains_production_data": {
+            "const": false
+          }
+        }
+      }
+    }
+  ]
+}

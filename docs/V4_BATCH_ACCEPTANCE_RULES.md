@@ -1,15 +1,15 @@
 # JCFB V4 Batch Acceptance Rules 1.0
 
-Status: `V4-012–V4-100 PLANNING AUDIT PASS` / `EXECUTION NOT AUTHORIZED`
+Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 NOT STARTED`
 
 Rules Identity: `v4-batch-acceptance-rules@1.0.0`
 Revision: `r002`
 Audit Date: `2026-09-01` (`Asia/Shanghai`)
-Execution Declaration: **NO V4-012+ TASK EXECUTED**
+Execution Declaration: **V4-012 EXECUTED DESIGN-ONLY; NO DATABASE EXECUTION**
 
 ## 1. Purpose, authority, and source of truth
 
-These rules govern future grouping, execution, acceptance, commit traceability, and promotion. They do not authorize V4-012, database writes, model execution, Shadow, Promotion, Production activation, public release, or any V3.3.3 change.
+These rules govern grouping, execution, acceptance, commit traceability, and promotion. They do not authorize BATCH-02 or later database writes, model execution, Shadow, Promotion, Production activation, public release, or any V3.3.3 change.
 
 Authority order:
 
@@ -127,6 +127,6 @@ The safe outcome is BLOCKED, RUN_INVALID, or NOT_VERIFIED with retained evidence
 
 ## 9. Checklist and current disposition
 
-Planning may update the mapping and registry, but may not mark V4-012–V4-100 `[x]`. The current registry and batch plan now provide complete definitions and unique primary mapping, so the planning audit is PASS. Execution remains NOT_STARTED.
+V4-012 may be marked `[x]` only after its independent design artifact, static validation, documentation, and Git trace pass. V4-013 through V4-100 remain unchecked and are not started. BATCH-02 requires a new independent acceptance decision.
 
-Next execution batch: **BATCH-01 — Migration Dry-Run & Validation Harness**. No task from that batch has begun.
+Next execution batch: **BATCH-02 — Dry-Run, Preflight & Negative Test Harness**. BATCH-01 / V4-012 is accepted as design-only; no database or Supabase execution occurred.

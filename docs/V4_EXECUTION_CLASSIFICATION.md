@@ -1,12 +1,12 @@
 # JCFB V4 Execution Classification 012–100 1.0
 
-Status: `PASS` for complete classification and unique primary mapping; `EXECUTION NOT AUTHORIZED`
+Status: `PASS` for complete classification and unique primary mapping; `V4-012 COMPLETE`; V4-013+ execution remains not started.
 
 Classification Identity: `v4-execution-classification-012-100@1.0.0`
 Revision: `r002`
 Audit Date: `2026-09-01` (`Asia/Shanghai`)
 Source of truth: `docs/V4_TASK_REGISTRY_001_100.md`
-Execution Declaration: **NO V4-012+ TASK EXECUTED**
+Execution Declaration: **V4-012 EXECUTED DESIGN-ONLY; NO DATABASE EXECUTION**
 
 ## 1. Classification semantics
 
@@ -21,7 +21,7 @@ The classification below is a complete register, not a candidate envelope. Every
 
 | Task ID | Task Name | Classification | Primary Batch | Upstream Dependencies | Supabase Write Allowed? | Production/Shadow Runtime Allowed? | Explicit User Approval Required? | Status |
 |---|---|---|---|---|---|---|---|---|
-| V4-012 | Migration Dry-Run & Validation Harness Design 1.0 | BATCHABLE + SERIAL | BATCH-01 | V4-011 | NO | NO | NO | TODO |
+| V4-012 | Migration Dry-Run & Validation Harness Design 1.0 | BATCHABLE + SERIAL | BATCH-01 | V4-011 | NO | NO | NO | COMPLETE |
 | V4-013 | V4-013｜Migration Dry-Run Harness Implementation 1.0 | BATCHABLE + SERIAL | BATCH-02 | V4-012 | NO | NO | NO | TODO |
 | V4-014 | V4-014｜Migration Preflight & Schema-Diff Validator 1.0 | BATCHABLE + PARALLEL | BATCH-02 | V4-013 | NO | NO | NO | TODO |
 | V4-015 | V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCHABLE + PARALLEL | BATCH-02 | V4-013 | NO | NO | NO | TODO |
@@ -128,4 +128,4 @@ The classification below is a complete register, not a candidate envelope. Every
 
 ## 4. Batch mapping disposition
 
-The mapping is accepted as a planning register. It does not mark any checklist item complete and does not authorize BATCH-01.
+The mapping remains the authoritative classification register. V4-012 is independently accepted as a design-only task; V4-013 through V4-100 remain TODO and no downstream batch is authorized by this status update.

@@ -1,0 +1,110 @@
+{
+  "$schema": "../config/migration_harness/v4_acceptance_report.schema.json",
+  "report_contract_version": "v4-migration-acceptance-report@1.0.0",
+  "batch_id": "BATCH-01",
+  "task_ids": ["V4-012"],
+  "report_state": "DESIGN_ACCEPTED",
+  "task_results": [
+    {
+      "task_id": "V4-012",
+      "task_name": "Migration Dry-Run & Validation Harness Design 1.0",
+      "status": "PASS",
+      "acceptance_criteria": "Design is complete and validated without creating or running a harness, contacting Supabase, or writing a database.",
+      "evidence": [
+        "docs/V4_MIGRATION_DRY_RUN_HARNESS.md",
+        "config/migration_harness/v4_harness_policy.json",
+        "config/migration_harness/v4_target_descriptor.schema.json",
+        "config/migration_harness/v4_manifest_contract.schema.json",
+        "config/migration_harness/v4_manifest_loader_fixture.json",
+        "config/migration_harness/v4_smoke_test_catalog.json",
+        "config/migration_harness/v4_schema_snapshot_contract.json",
+        "config/migration_harness/v4_acceptance_report.schema.json",
+        "scripts/validate_v4_migration_harness_design.ps1"
+      ]
+    }
+  ],
+  "execution_boundary": {
+    "design_only": true,
+    "sql_executed": false,
+    "database_connected": false,
+    "production_db_writes_performed": "NO",
+    "supabase_writes_performed": "NO",
+    "v333_mutated": "NO",
+    "model_or_runtime_executed": false
+  },
+  "manifest": {
+    "source_manifest": "database/migrations/v4/0000_manifest.md",
+    "sql_directory": "database/migrations/v4",
+    "loader_mode": "TEXT_METADATA_ONLY",
+    "sequence_status": "PASS",
+    "dependency_status": "PASS",
+    "hash_status": "BLOCKED",
+    "status_policy": "DRAFT_ONLY_UNTIL_CANONICAL_HASH_AND_APPROVAL"
+  },
+  "target": {
+    "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+    "environment": null,
+    "target_id": null,
+    "connector_invoked": false
+  },
+  "preflight": {
+    "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+    "checks": [
+      {"id": "PF-01", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-02", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-03", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-04", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-05", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-06", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-07", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-08", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-09", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-10", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-11", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-12", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-13", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-14", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-15", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-16", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-17", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true},
+      {"id": "PF-18", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "target_dependent": true}
+    ],
+    "not_run_reason": "V4-012 is design-only; no target descriptor was supplied and no database connector was invoked."
+  },
+  "migration_sequence": [
+    {"sequence": "0001", "migration_id": "migration@20260901.001", "file": "database/migrations/v4/0001_prerequisites.sql", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"},
+    {"sequence": "0002", "migration_id": "migration@20260901.002", "file": "database/migrations/v4/0002_registries_core.sql", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"},
+    {"sequence": "0003", "migration_id": "migration@20260901.003", "file": "database/migrations/v4/0003_market_context.sql", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"},
+    {"sequence": "0004", "migration_id": "migration@20260901.004", "file": "database/migrations/v4/0004_frozen_runtime.sql", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"},
+    {"sequence": "0005", "migration_id": "migration@20260901.005", "file": "database/migrations/v4/0005_evaluation.sql", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"},
+    {"sequence": "0006", "migration_id": "migration@20260901.006", "file": "database/migrations/v4/0006_governance_audit.sql", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"},
+    {"sequence": "0007", "migration_id": "migration@20260901.007", "file": "database/migrations/v4/0007_security_rls.sql", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"},
+    {"sequence": "0008", "migration_id": "migration@20260901.008", "file": "database/migrations/v4/0008_views_projections.sql", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"},
+    {"sequence": "0009", "migration_id": "migration@20260901.009", "file": "database/migrations/v4/0009_seed_and_smoke.sql", "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"}
+  ],
+  "apply_status": "NOT_EXECUTED",
+  "validation": {
+    "schema_catalog": {"status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "runtime_required": true, "evidence_ref": "config/migration_harness/v4_schema_snapshot_contract.json", "notes": "Static expected catalog matches the blueprint; actual pg_catalog was not captured."},
+    "constraints": {"status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "runtime_required": true, "evidence_ref": "docs/V4_DATABASE_SCHEMA_BLUEPRINT.md", "notes": "FK, unique, check, and revision behaviors require a disposable database."},
+    "rls_security": {"status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "runtime_required": true, "evidence_ref": "docs/V4_MIGRATION_PREFLIGHT.md", "notes": "Role and grant behavior require target catalog and caller tests."},
+    "triggers_views": {"status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "runtime_required": true, "evidence_ref": "config/migration_harness/v4_smoke_test_catalog.json", "notes": "Trigger and view behavior is catalog/runtime evidence, not inferred from SQL text."},
+    "no_future_leakage": {"status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "runtime_required": true, "evidence_ref": "docs/V4_CONSTITUTION.md", "notes": "Cutoff, kickoff, run, freeze, result, and event data require a target test."},
+    "role_isolation": {"status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "runtime_required": true, "evidence_ref": "docs/V4_MIGRATION_SMOKE_TESTS.md", "notes": "Production, Shadow, Experiment, and public boundaries require caller tests."},
+    "tier_a_same_frozen_input": {"status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "runtime_required": true, "evidence_ref": "config/migration_harness/v4_smoke_test_catalog.json", "notes": "Same-match and same-frozen_input_hash pairing requires runtime data."},
+    "security_definer_search_path": {"status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "runtime_required": true, "evidence_ref": "docs/V4_MIGRATION_ACCEPTANCE_GATE.md", "notes": "Function owner, search_path, actor checks, and execute grants require catalog evidence."},
+    "security_invoker_views": {"status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "runtime_required": true, "evidence_ref": "docs/V4_DATABASE_SCHEMA_BLUEPRINT.md", "notes": "View options and safe grants require target evidence."},
+    "canonical_latest_update": {"status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "runtime_required": true, "evidence_ref": "docs/V4_DATABASE_SCHEMA_BLUEPRINT.md", "notes": "Business timestamp derivation requires seeded projection data."},
+    "smoke_catalog": {"status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "runtime_required": true, "evidence_ref": "config/migration_harness/v4_smoke_test_catalog.json", "notes": "All 20 cases are catalogued and statically cross-checked; none was run."},
+    "schema_diff": {"status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB", "runtime_required": true, "evidence_ref": "config/migration_harness/v4_schema_snapshot_contract.json", "notes": "Actual catalog and diff are unavailable without an isolated target."}
+  },
+  "failures": [],
+  "blocking_reasons": [
+    "No disposable local or staging target was supplied; target-dependent preflight and database evidence were not executed.",
+    "All migration entries remain DRAFT with PENDING_CANONICAL_HASH; no apply is authorized by V4-012."
+  ],
+  "secret_scan": {"status": "PASS", "evidence_ref": "scripts/validate_v4_migration_harness_design.ps1; scripts/validate_v4_data_contracts.ps1; scripts/validate_v4_versioning.ps1", "notes": "No high-signal credential pattern found; no secret value was read or persisted."},
+  "self_audit": {"status": "PASS", "evidence_ref": "docs/V4_MIGRATION_DRY_RUN_HARNESS.md; static design validator", "notes": "Scope, task mapping, dependency order, fail-closed policy, no-write boundary, and downstream stop are explicit."},
+  "cross_doc_consistency": {"status": "PASS", "evidence_ref": "static design validator; existing V4-011/data/versioning validators", "notes": "Registry, plan, classification, checklist, migration design, Constitution, versioning, manifest, and blueprint contracts agree."},
+  "git_trace": {"status": "RECORDED_IN_GIT", "commit_required": true, "commit_hash_recorded_outside_payload": true},
+  "requires_disposable_db_later": true
+}

@@ -1,0 +1,208 @@
+{
+  "$schema": "config/migration_harness/v4_manifest_contract.schema.json",
+  "contract_version": "v4-migration-manifest-contract@1.0.0",
+  "source_manifest": "database/migrations/v4/0000_manifest.md",
+  "source_sql_directory": "database/migrations/v4",
+  "schema_contract_version": "v4-database-schema@1.0.0",
+  "parse_mode": "TEXT_METADATA_ONLY",
+  "authoritative": false,
+  "purpose": "Non-authoritative static projection used to validate the future loader contract; the Markdown manifest remains the only source of truth.",
+  "entries": [
+    {
+      "sequence": "0001",
+      "file": "database/migrations/v4/0001_prerequisites.sql",
+      "migration_id": "migration@20260901.001",
+      "migration_version": "migration@20260901.001",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
+      "name": "v4-prerequisites",
+      "depends_on": [],
+      "expected_objects": [
+        "approved extension candidate",
+        "seven schemas",
+        "hash helper",
+        "migration/schema registries"
+      ],
+      "migration_hash": "PENDING_CANONICAL_HASH",
+      "status": "DRAFT"
+    },
+    {
+      "sequence": "0002",
+      "file": "database/migrations/v4/0002_registries_core.sql",
+      "migration_id": "migration@20260901.002",
+      "migration_version": "migration@20260901.002",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
+      "name": "v4-registries-core",
+      "depends_on": [
+        "migration@20260901.001"
+      ],
+      "expected_objects": [
+        "model/engine versions",
+        "competitions",
+        "teams",
+        "aliases",
+        "matches"
+      ],
+      "migration_hash": "PENDING_CANONICAL_HASH",
+      "status": "DRAFT"
+    },
+    {
+      "sequence": "0003",
+      "file": "database/migrations/v4/0003_market_context.sql",
+      "migration_id": "migration@20260901.003",
+      "migration_version": "migration@20260901.003",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
+      "name": "v4-market-context",
+      "depends_on": [
+        "migration@20260901.002"
+      ],
+      "expected_objects": [
+        "official/external markets",
+        "context",
+        "evidence",
+        "bundles and joins"
+      ],
+      "migration_hash": "PENDING_CANONICAL_HASH",
+      "status": "DRAFT"
+    },
+    {
+      "sequence": "0004",
+      "file": "database/migrations/v4/0004_frozen_runtime.sql",
+      "migration_id": "migration@20260901.004",
+      "migration_version": "migration@20260901.004",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
+      "name": "v4-frozen-runtime",
+      "depends_on": [
+        "migration@20260901.003"
+      ],
+      "expected_objects": [
+        "Frozen Inputs",
+        "selections",
+        "features",
+        "runs",
+        "predictions",
+        "freezes"
+      ],
+      "migration_hash": "PENDING_CANONICAL_HASH",
+      "status": "DRAFT"
+    },
+    {
+      "sequence": "0005",
+      "file": "database/migrations/v4/0005_evaluation.sql",
+      "migration_id": "migration@20260901.005",
+      "migration_version": "migration@20260901.005",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
+      "name": "v4-evaluation",
+      "depends_on": [
+        "migration@20260901.004"
+      ],
+      "expected_objects": [
+        "results",
+        "reviews",
+        "Tier A",
+        "promotion",
+        "calibration"
+      ],
+      "migration_hash": "PENDING_CANONICAL_HASH",
+      "status": "DRAFT"
+    },
+    {
+      "sequence": "0006",
+      "file": "database/migrations/v4/0006_governance_audit.sql",
+      "migration_id": "migration@20260901.006",
+      "migration_version": "migration@20260901.006",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
+      "name": "v4-governance-audit",
+      "depends_on": [
+        "migration@20260901.005"
+      ],
+      "expected_objects": [
+        "release events",
+        "incidents",
+        "audit log",
+        "active indexes"
+      ],
+      "migration_hash": "PENDING_CANONICAL_HASH",
+      "status": "DRAFT"
+    },
+    {
+      "sequence": "0007",
+      "file": "database/migrations/v4/0007_security_rls.sql",
+      "migration_id": "migration@20260901.007",
+      "migration_version": "migration@20260901.007",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
+      "name": "v4-security-rls",
+      "depends_on": [
+        "migration@20260901.006"
+      ],
+      "expected_objects": [
+        "validators",
+        "triggers",
+        "RLS",
+        "revokes",
+        "controlled grants"
+      ],
+      "migration_hash": "PENDING_CANONICAL_HASH",
+      "status": "DRAFT"
+    },
+    {
+      "sequence": "0008",
+      "file": "database/migrations/v4/0008_views_projections.sql",
+      "migration_id": "migration@20260901.008",
+      "migration_version": "migration@20260901.008",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
+      "name": "v4-views-projections",
+      "depends_on": [
+        "migration@20260901.007"
+      ],
+      "expected_objects": [
+        "projection ledger",
+        "six read views"
+      ],
+      "migration_hash": "PENDING_CANONICAL_HASH",
+      "status": "DRAFT"
+    },
+    {
+      "sequence": "0009",
+      "file": "database/migrations/v4/0009_seed_and_smoke.sql",
+      "migration_id": "migration@20260901.009",
+      "migration_version": "migration@20260901.009",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
+      "name": "v4-seed-smoke",
+      "depends_on": [
+        "migration@20260901.008"
+      ],
+      "expected_objects": [
+        "static registry seed",
+        "smoke manifest",
+        "acceptance snapshot"
+      ],
+      "migration_hash": "PENDING_CANONICAL_HASH",
+      "status": "DRAFT"
+    }
+  ],
+  "dependency_graph": {
+    "ordered_sequences": [
+      "0001",
+      "0002",
+      "0003",
+      "0004",
+      "0005",
+      "0006",
+      "0007",
+      "0008",
+      "0009"
+    ],
+    "acyclic_required": true,
+    "parallel_execution_allowed": false,
+    "missing_parent_action": "BLOCK"
+  }
+}

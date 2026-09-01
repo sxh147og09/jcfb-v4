@@ -1,0 +1,296 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v4-migration-acceptance-report@1.0.0",
+  "title": "JCFB V4 migration dry-run acceptance report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "report_contract_version",
+    "batch_id",
+    "task_ids",
+    "report_state",
+    "task_results",
+    "execution_boundary",
+    "manifest",
+    "target",
+    "preflight",
+    "migration_sequence",
+    "apply_status",
+    "validation",
+    "failures",
+    "blocking_reasons",
+    "secret_scan",
+    "self_audit",
+    "cross_doc_consistency",
+    "git_trace",
+    "requires_disposable_db_later"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "report_contract_version": {
+      "const": "v4-migration-acceptance-report@1.0.0"
+    },
+    "batch_id": {
+      "const": "BATCH-01"
+    },
+    "task_ids": {
+      "const": ["V4-012"]
+    },
+    "report_state": {
+      "type": "string",
+      "enum": [
+        "DESIGN_ACCEPTED",
+        "PARTIAL",
+        "BLOCKED",
+        "NOT_VERIFIED"
+      ]
+    },
+    "task_results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/task_result"
+      }
+    },
+    "execution_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "design_only",
+        "sql_executed",
+        "database_connected",
+        "production_db_writes_performed",
+        "supabase_writes_performed",
+        "v333_mutated",
+        "model_or_runtime_executed"
+      ],
+      "properties": {
+        "design_only": {"const": true},
+        "sql_executed": {"const": false},
+        "database_connected": {"const": false},
+        "production_db_writes_performed": {"const": "NO"},
+        "supabase_writes_performed": {"const": "NO"},
+        "v333_mutated": {"const": "NO"},
+        "model_or_runtime_executed": {"const": false}
+      }
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_manifest",
+        "sql_directory",
+        "loader_mode",
+        "sequence_status",
+        "dependency_status",
+        "hash_status",
+        "status_policy"
+      ],
+      "properties": {
+        "source_manifest": {"const": "database/migrations/v4/0000_manifest.md"},
+        "sql_directory": {"const": "database/migrations/v4"},
+        "loader_mode": {"const": "TEXT_METADATA_ONLY"},
+        "sequence_status": {"$ref": "#/$defs/status"},
+        "dependency_status": {"$ref": "#/$defs/status"},
+        "hash_status": {"$ref": "#/$defs/status"},
+        "status_policy": {"const": "DRAFT_ONLY_UNTIL_CANONICAL_HASH_AND_APPROVAL"}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "environment",
+        "target_id",
+        "connector_invoked"
+      ],
+      "properties": {
+        "status": {"$ref": "#/$defs/status"},
+        "environment": {
+          "type": ["string", "null"],
+          "enum": ["DISPOSABLE_LOCAL", "STAGING", "PRODUCTION", null]
+        },
+        "target_id": {
+          "type": ["string", "null"]
+        },
+        "connector_invoked": {"const": false}
+      }
+    },
+    "preflight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "checks", "not_run_reason"],
+      "properties": {
+        "status": {"$ref": "#/$defs/status"},
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/preflight_check"
+          }
+        },
+        "not_run_reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "migration_sequence": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {
+        "$ref": "#/$defs/migration_step"
+      }
+    },
+    "apply_status": {
+      "type": "string",
+      "enum": [
+        "NOT_EXECUTED",
+        "BLOCKED",
+        "APPLIED",
+        "FAILED"
+      ]
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_catalog",
+        "constraints",
+        "rls_security",
+        "triggers_views",
+        "no_future_leakage",
+        "role_isolation",
+        "tier_a_same_frozen_input",
+        "security_definer_search_path",
+        "security_invoker_views",
+        "canonical_latest_update",
+        "smoke_catalog",
+        "schema_diff"
+      ],
+      "properties": {
+        "schema_catalog": {"$ref": "#/$defs/validation_result"},
+        "constraints": {"$ref": "#/$defs/validation_result"},
+        "rls_security": {"$ref": "#/$defs/validation_result"},
+        "triggers_views": {"$ref": "#/$defs/validation_result"},
+        "no_future_leakage": {"$ref": "#/$defs/validation_result"},
+        "role_isolation": {"$ref": "#/$defs/validation_result"},
+        "tier_a_same_frozen_input": {"$ref": "#/$defs/validation_result"},
+        "security_definer_search_path": {"$ref": "#/$defs/validation_result"},
+        "security_invoker_views": {"$ref": "#/$defs/validation_result"},
+        "canonical_latest_update": {"$ref": "#/$defs/validation_result"},
+        "smoke_catalog": {"$ref": "#/$defs/validation_result"},
+        "schema_diff": {"$ref": "#/$defs/validation_result"}
+      }
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "message"],
+        "properties": {
+          "code": {"type": "string", "minLength": 1},
+          "message": {"type": "string", "minLength": 1},
+          "sequence": {"type": ["string", "null"]},
+          "evidence_ref": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "blocking_reasons": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "secret_scan": {"$ref": "#/$defs/check_result"},
+    "self_audit": {"$ref": "#/$defs/check_result"},
+    "cross_doc_consistency": {"$ref": "#/$defs/check_result"},
+    "git_trace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "commit_required", "commit_hash_recorded_outside_payload"],
+      "properties": {
+        "status": {"const": "RECORDED_IN_GIT"},
+        "commit_required": {"const": true},
+        "commit_hash_recorded_outside_payload": {"const": true}
+      }
+    },
+    "requires_disposable_db_later": {
+      "const": true
+    }
+  },
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL",
+        "BLOCKED",
+        "NOT_RUN",
+        "NOT_VERIFIED",
+        "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"
+      ]
+    },
+    "task_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["task_id", "task_name", "status", "acceptance_criteria", "evidence"],
+      "properties": {
+        "task_id": {"const": "V4-012"},
+        "task_name": {"const": "Migration Dry-Run & Validation Harness Design 1.0"},
+        "status": {"const": "PASS"},
+        "acceptance_criteria": {"type": "string", "minLength": 1},
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "preflight_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "target_dependent"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^PF-[0-9]{2}$"},
+        "status": {"$ref": "#/$defs/status"},
+        "target_dependent": {"type": "boolean"},
+        "evidence_ref": {"type": ["string", "null"]}
+      }
+    },
+    "migration_step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sequence", "migration_id", "file", "status"],
+      "properties": {
+        "sequence": {"type": "string", "pattern": "^000[1-9]$"},
+        "migration_id": {"type": "string", "pattern": "^migration@20260901\\.00[1-9]$"},
+        "file": {"type": "string", "minLength": 1},
+        "status": {"const": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"}
+      }
+    },
+    "validation_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "runtime_required", "evidence_ref"],
+      "properties": {
+        "status": {"$ref": "#/$defs/status"},
+        "runtime_required": {"type": "boolean"},
+        "evidence_ref": {"type": "string", "minLength": 1},
+        "notes": {"type": "string"}
+      }
+    },
+    "check_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "evidence_ref"],
+      "properties": {
+        "status": {"$ref": "#/$defs/status"},
+        "evidence_ref": {"type": "string", "minLength": 1},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 # JCFB V4 Master Checklist Recovery Audit 1.0
 
-Status: `COMPLETE` for registry recovery/reconstruction and planning audit; `NO V4-012+ TASK EXECUTED`
+Status: `COMPLETE` for registry recovery/reconstruction and planning audit; `NO V4-012+ TASK EXECUTED DURING THIS RECOVERY AUDIT`
 
 Audit Identity: `v4-task-recovery-audit@1.0.0`
 Revision: `r001`
@@ -11,7 +11,7 @@ Baseline reviewed: `1d418e6`
 
 ## 1. Audit boundary
 
-This audit first inspected the repository and reachable Git history, then constructed the authoritative registry and planning documents. It did not execute V4-012, any V4-013+ task, a migration harness, Supabase/database write, model, prediction, Shadow run, Promotion, Production release, or V3.3.3 operation.
+This audit first inspected the repository and reachable Git history, then constructed the authoritative registry and planning documents. During this recovery audit it did not execute V4-012, any V4-013+ task, a migration harness, Supabase/database write, model, prediction, Shadow run, Promotion, Production release, or V3.3.3 operation.
 
 The actual repository audited and changed was `C:/Users/Administrator/Documents/Codex/2026-08-31/zhi/jcfb-v4`. The projectless conversation directory and a second non-Git directory with the same leaf name were not used.
 
@@ -46,7 +46,7 @@ The baseline checklist contained V4-001–V4-011 only. Reachable history contain
 | HARD_GATE tasks | 6 |
 | Primary batches for V4-012–V4-100 | 30; 89/89 mapped exactly once |
 | V4-001–V4-011 preservation | PASS; names and COMPLETE states retained |
-| V4-012 definition preservation | PASS; name retained and TODO |
+| V4-012 definition preservation | PASS; name retained and TODO at recovery-audit time |
 | V3.3.3 isolation | PASS; no file, history, output, or data path modified |
 
 ## 5. Capability coverage audit
@@ -101,4 +101,4 @@ The baseline checklist contained V4-001–V4-011 only. Reachable history contain
 
 ## 7. Boundary result
 
-Recovery is complete because the registry is complete, provenance is honest, the mapping is unique, and the dependency graph is acyclic. This result does **not** authorize BATCH-01. The next execution batch is BATCH-01, and it remains pending human-directed execution under the acceptance rules.
+Recovery is complete because the registry is complete, provenance is honest, the mapping is unique, and the dependency graph is acyclic. This historical result did **not** authorize BATCH-01 at the time of the audit. Current follow-on status is recorded in the BATCH-01 acceptance report: V4-012 is accepted as design-only, with BATCH-02 as the next execution boundary.

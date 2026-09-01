@@ -1,11 +1,11 @@
 # JCFB V4 Dependency Graph 012–100 1.0
 
-Status: `DEPENDENCY GRAPH PASS` / `EXECUTION NOT AUTHORIZED`
+Status: `DEPENDENCY GRAPH PASS` / `V4-012 DESIGN ACCEPTED` / `BATCH-02 NOT STARTED`
 
 Graph Identity: `v4-dependency-graph-012-100@1.0.0`
 Revision: `r002`
 Audit Date: `2026-09-01` (`Asia/Shanghai`)
-Execution Declaration: **NO V4-012+ TASK EXECUTED**
+Execution Declaration: **NO DATABASE OR HARNESS RUNTIME EXECUTION; V4-012 DESIGN-ONLY ACCEPTED**
 
 ## 1. Scope and evidence boundary
 
@@ -17,7 +17,7 @@ V4-011 -> V4-012 is the only predecessor edge recovered from repository history.
 
 ```mermaid
 flowchart TD
-  T11["V4-011 Migration Design COMPLETE"] --> T12["V4-012 Dry-Run Design TODO"]
+  T11["V4-011 Migration Design COMPLETE"] --> T12["V4-012 Dry-Run Design COMPLETE"]
   T12 --> T13["V4-013 Harness"] --> T14["V4-014 Preflight"]
   T13 --> T15["V4-015 Smoke/RLS/Trigger"]
   T14 --> T16["V4-016 Staging"]
@@ -129,4 +129,4 @@ The fan-out groups are parallel development opportunities only after their upstr
 - Kahn-style cycle check: all task and batch nodes removed; residual nodes `0`; dependency cycles `0`.
 - The only historical edge is V4-011 -> V4-012. All later edges are explicitly reconstructed planning edges.
 
-No graph edge authorizes execution. The next execution batch is BATCH-01, but V4-012 remains TODO and this recovery round performs no task work.
+No graph edge authorizes execution. BATCH-01 / V4-012 is accepted as a design-only result; the next execution batch is BATCH-02, and no database or harness runtime execution occurred.

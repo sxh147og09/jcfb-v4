@@ -3,9 +3,9 @@
 ## Registry status
 
 - Registry Version: `v4-task-registry-001-100@1.0.0`
-- Recovery Status: `COMPLETE` for task registration and batch planning; execution remains not started.
+- Recovery Status: `COMPLETE` for task registration and batch planning; `V4-012` is COMPLETE; V4-013 through V4-100 remain not started.
 - Source of truth: `docs/V4_TASK_REGISTRY_001_100.md` is the authoritative task-definition registry. This checklist is the execution-status view.
-- Planning status: `V4-012–V4-100 Batch Planning = PASS`; no V4-012+ task was executed in this recovery.
+- Planning status: `V4-012–V4-100 Batch Planning = PASS`; BATCH-01 / V4-012 design-only acceptance = PASS.
 
 ## Build status
 
@@ -20,7 +20,7 @@
 - [x] V4-009 Canonical Data Model 1.0
 - [x] V4-010 Database Schema Blueprint 1.0
 - [x] V4-011 Database Migration Design 1.0
-- [ ] V4-012 Migration Dry-Run & Validation Harness Design 1.0
+- [x] V4-012 Migration Dry-Run & Validation Harness Design 1.0
 - [ ] V4-013｜Migration Dry-Run Harness Implementation 1.0
 - [ ] V4-014｜Migration Preflight & Schema-Diff Validator 1.0
 - [ ] V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0
@@ -120,7 +120,7 @@
 4. Documentation completed
 5. Git traceability exists
 
-A batch name, registry entry, or planning PASS is not task completion. No V4-012–V4-100 item may be marked `[x]` by this recovery.
+A batch name, registry entry, or planning PASS is not task completion. V4-012 is marked `[x]` only because its independent design artifact, validation, documentation, and Git traceability passed. V4-013 through V4-100 remain unchecked.
 
 ## 1. Task Name / Primary Batch / Classification mapping
 
@@ -137,7 +137,7 @@ A batch name, registry entry, or planning PASS is not task completion. No V4-012
 | [x] | V4-009 | Canonical Data Model 1.0 | BASELINE | SERIAL | RECOVERED_FROM_REPO_HISTORY |
 | [x] | V4-010 | Database Schema Blueprint 1.0 | BASELINE | SERIAL | RECOVERED_FROM_REPO_HISTORY |
 | [x] | V4-011 | Database Migration Design 1.0 | BASELINE | SERIAL | RECOVERED_FROM_REPO_HISTORY |
-| [ ] | V4-012 | Migration Dry-Run & Validation Harness Design 1.0 | BATCH-01 | BATCHABLE + SERIAL | RECOVERED_FROM_REPO_HISTORY |
+| [x] | V4-012 | Migration Dry-Run & Validation Harness Design 1.0 | BATCH-01 | BATCHABLE + SERIAL | RECOVERED_FROM_REPO_HISTORY |
 | [ ] | V4-013 | V4-013｜Migration Dry-Run Harness Implementation 1.0 | BATCH-02 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-014 | V4-014｜Migration Preflight & Schema-Diff Validator 1.0 | BATCH-02 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-015 | V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCH-02 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
@@ -245,7 +245,15 @@ The following V4-001–V4-011 evidence remains unchanged from the baseline check
 | V4-010 | Schema blueprint, catalog, constraints, indexes, RLS, triggers, views, migration plan, and blueprint SQL | Schema and governance checks; blueprint-only/no-write boundary; PASS |
 | V4-011 | Migration design, dependency/preflight/roll-forward/smoke/registry/acceptance documents and pending migration files | Migration identity, dependency, preflight, smoke, RLS/trigger/view, no-future, V3 isolation, Secret Scan, `git diff --check`, and no-write checks; PASS |
 
-## 3. Recovery and batch references
+## 3. BATCH-01 acceptance evidence
+
+| Task | Engineering artifact | Validation evidence | Status |
+|---|---|---|---|
+| V4-012 | `docs/V4_MIGRATION_DRY_RUN_HARNESS.md`; target, manifest, smoke, schema-diff, policy, and acceptance-report contracts under `config/migration_harness/`; static validator | Manifest/SQL metadata, 20-case catalog, blueprint object inventory, fail-closed boundary, existing V4-011/data/versioning validators, Secret Scan, `git diff --check`, and no-write boundary | PASS; design-only |
+
+Runtime preflight, migration execution, catalog capture, RLS, triggers, views, advisor, and smoke evidence remain `NOT_EXECUTED_REQUIRES_DISPOSABLE_DB`.
+
+## 4. Recovery and batch references
 
 - Task definitions and provenance: `docs/V4_TASK_REGISTRY_001_100.md`
 - Recovery evidence and self-audit: `docs/V4_TASK_RECOVERY_AUDIT.md`
@@ -255,4 +263,4 @@ The following V4-001–V4-011 evidence remains unchanged from the baseline check
 - Classification register: `docs/V4_EXECUTION_CLASSIFICATION.md`
 - Acceptance rules: `docs/V4_BATCH_ACCEPTANCE_RULES.md`
 
-Next execution batch: **BATCH-01 — Migration Dry-Run & Validation Harness**. It is planned but not started; V4-012 remains `[ ]`.
+Next execution batch: **BATCH-02 — Dry-Run, Preflight & Negative Test Harness**. BATCH-01 / V4-012 is accepted as design-only; V4-013 through V4-015 remain `[ ]`.

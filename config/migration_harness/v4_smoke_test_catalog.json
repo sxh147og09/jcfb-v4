@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v4-migration-smoke-catalog@1.0.0",
+  "title": "JCFB V4 migration smoke-test catalog",
+  "catalog_version": "v4-migration-smoke-catalog@1.0.0",
+  "task_id": "V4-012",
+  "source_document": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+  "status": "DESIGN_ONLY",
+  "authoritative": false,
+  "runtime_required": true,
+  "runtime_status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+  "execution_boundary": {
+    "allowed_target_environments": [
+      "DISPOSABLE_LOCAL",
+      "STAGING"
+    ],
+    "production_target": "BLOCKED",
+    "v333_target_or_payload": "BLOCKED",
+    "failure_action": "BLOCK_AND_STOP"
+  },
+  "evidence_fields": [
+    "migration_id",
+    "schema_contract_version",
+    "target_id",
+    "caller_role",
+    "test_transaction_id",
+    "expected_result",
+    "actual_result",
+    "evidence_hash"
+  ],
+  "cases": [
+    {
+      "id": "SMOKE-01",
+      "source_case": 1,
+      "name": "valid core.matches insert",
+      "category": ["CONSTRAINT", "AUDIT"],
+      "caller_roles": ["executor"],
+      "expected_result": "valid canonical match insert succeeds and an attributable audit event exists",
+      "gates": ["CONSTRAINT_PASS", "MIGRATION_HISTORY_RECORDED"]
+    },
+    {
+      "id": "SMOKE-02",
+      "source_case": 2,
+      "name": "duplicate canonical business key",
+      "category": ["CONSTRAINT"],
+      "caller_roles": ["executor"],
+      "expected_result": "duplicate data_date and official_match_no is rejected",
+      "gates": ["CONSTRAINT_PASS"]
+    },
+    {
+      "id": "SMOKE-03",
+      "source_case": 3,
+      "name": "official market explicitly unavailable",
+      "category": ["CONSTRAINT", "TRIGGER"],
+      "caller_roles": ["executor"],
+      "expected_result": "snapshot is accepted with UNAVAILABLE and no payload for that market",
+      "gates": ["CONSTRAINT_PASS", "TRIGGER_PASS"]
+    },
+    {
+      "id": "SMOKE-04",
+      "source_case": 4,
+      "name": "available market without payload",
+      "category": ["TRIGGER"],
+      "caller_roles": ["executor"],
+      "expected_result": "write is rejected or retained only as BLOCKED; no fabricated payload is accepted",
+      "gates": ["TRIGGER_PASS"]
+    },
+    {
+      "id": "SMOKE-05",
+      "source_case": 5,
+      "name": "available rqspf without handicap line",
+      "category": ["TRIGGER"],
+      "caller_roles": ["executor"],
+      "expected_result": "write is rejected or blocked and no RQSPF selection is created",
+      "gates": ["TRIGGER_PASS"]
+    },
+    {
+      "id": "SMOKE-06",
+      "source_case": 6,
+      "name": "Production engine run after kickoff",
+      "category": ["NO_FUTURE_LEAKAGE"],
+      "caller_roles": ["executor", "backend"],
+      "expected_result": "run is rejected or INVALID and cannot qualify for Tier A or promotion",
+      "gates": ["NO_FUTURE_LEAKAGE_GATE_PASS"]
+    },
+    {
+      "id": "SMOKE-07",
+      "source_case": 7,
+      "name": "frozen input mutation",
+      "category": ["TRIGGER", "IMMUTABILITY"],
+      "caller_roles": ["executor"],
+      "expected_result": "update after immutable or FROZEN is rejected",
+      "gates": ["TRIGGER_PASS"]
+    },
+    {
+      "id": "SMOKE-08",
+      "source_case": 8,
+      "name": "frozen prediction update or delete",
+      "category": ["TRIGGER", "IMMUTABILITY"],
+      "caller_roles": ["executor"],
+      "expected_result": "update and delete, including a no-op update, are rejected",
+      "gates": ["TRIGGER_PASS"]
+    },
+    {
+      "id": "SMOKE-09",
+      "source_case": 9,
+      "name": "official result correction",
+      "category": ["CONSTRAINT", "APPEND_ONLY"],
+      "caller_roles": ["executor", "auditor"],
+      "expected_result": "new result revision with predecessor, reason, and evidence is required; predecessor is unchanged",
+      "gates": ["CONSTRAINT_PASS"]
+    },
+    {
+      "id": "SMOKE-10",
+      "source_case": 10,
+      "name": "review with mismatched match identity",
+      "category": ["CONSTRAINT", "LINEAGE"],
+      "caller_roles": ["executor"],
+      "expected_result": "review is rejected or BLOCKED and no valid review exists",
+      "gates": ["CONSTRAINT_PASS"]
+    },
+    {
+      "id": "SMOKE-11",
+      "source_case": 11,
+      "name": "Tier A pair with different frozen input hashes",
+      "category": ["TIER_A", "LINEAGE"],
+      "caller_roles": ["executor", "auditor"],
+      "expected_result": "pair is rejected or permanently ineligible with tier_a_eligible=false",
+      "gates": ["TIER_A_PAIR_INTEGRITY"]
+    },
+    {
+      "id": "SMOKE-12",
+      "source_case": 12,
+      "name": "Experiment used as forward Tier A member",
+      "category": ["ROLE_ISOLATION"],
+      "caller_roles": ["executor"],
+      "expected_result": "write is rejected or BLOCKED; Experiment never qualifies",
+      "gates": ["ROLE_VIOLATION"]
+    },
+    {
+      "id": "SMOKE-13",
+      "source_case": 13,
+      "name": "Shadow or Experiment public projection",
+      "category": ["VIEW", "ROLE_ISOLATION"],
+      "caller_roles": ["anon", "authenticated"],
+      "expected_result": "projection trigger rejects it and public views return no Shadow or Experiment row",
+      "gates": ["VIEW_PASS"]
+    },
+    {
+      "id": "SMOKE-14",
+      "source_case": 14,
+      "name": "two active Production revisions",
+      "category": ["CONSTRAINT", "PRODUCTION_ISOLATION"],
+      "caller_roles": ["executor", "backend"],
+      "expected_result": "second active pointer is rejected by the partial unique rule or activation guard",
+      "gates": ["CONSTRAINT_PASS"]
+    },
+    {
+      "id": "SMOKE-15",
+      "source_case": 15,
+      "name": "anon or authenticated internal-table write",
+      "category": ["RLS", "PERMISSION"],
+      "caller_roles": ["anon", "authenticated"],
+      "expected_result": "write is denied with the expected privilege failure where applicable",
+      "gates": ["RLS_PASS"]
+    },
+    {
+      "id": "SMOKE-16",
+      "source_case": 16,
+      "name": "approved backend controlled write",
+      "category": ["RLS", "TRIGGER"],
+      "caller_roles": ["backend", "service_role"],
+      "expected_result": "valid write succeeds only through reviewed grants or functions and critical triggers still run",
+      "gates": ["RLS_PASS", "TRIGGER_PASS"]
+    },
+    {
+      "id": "SMOKE-17",
+      "source_case": 17,
+      "name": "security definer advisor review",
+      "category": ["ADVISOR", "SECURITY"],
+      "caller_roles": ["auditor"],
+      "expected_result": "every security definer has a fixed search_path, actor check, restricted execute, or the finding is BLOCKED",
+      "gates": ["ADVISOR_REVIEW_PASS"]
+    },
+    {
+      "id": "SMOKE-18",
+      "source_case": 18,
+      "name": "canonical latest update business timestamps",
+      "category": ["VIEW", "TIMESTAMP"],
+      "caller_roles": ["anon", "authenticated", "auditor"],
+      "expected_result": "canonical_latest_update_at equals the maximum real source business timestamp and not page or build time",
+      "gates": ["VIEW_PASS"]
+    },
+    {
+      "id": "SMOKE-19",
+      "source_case": 19,
+      "name": "lifecycle audit coverage",
+      "category": ["AUDIT", "APPEND_ONLY"],
+      "caller_roles": ["executor", "auditor"],
+      "expected_result": "critical lifecycle events append actor, action, entity, before, after, time, previous hash, and entry hash",
+      "gates": ["TRIGGER_PASS"]
+    },
+    {
+      "id": "SMOKE-20",
+      "source_case": 20,
+      "name": "V3.3.3 boundary before and after comparison",
+      "category": ["V333_ISOLATION"],
+      "caller_roles": ["auditor"],
+      "expected_result": "no V3.3.3 path, table, row, parameter, output, result, review, sample, or audit history changes",
+      "gates": ["V333_ISOLATION_PASS"]
+    }
+  ]
+}

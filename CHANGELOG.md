@@ -50,3 +50,10 @@
 - Added design-only migration files `database/migrations/v4/0001_prerequisites.sql` through `0009_seed_and_smoke.sql`, with `PENDING_CANONICAL_HASH` and no automatic execution path.
 - Added the migration acceptance gate, 20-case smoke-test design, static migration-design validator, and explicit RLS/private-table, security-invoker, Production uniqueness, no-future-leakage, Tier A, audit, and V3.3.3 isolation checks.
 - No migration, SQL statement, Supabase write, model execution, Shadow/Experiment run, Production release, or V3.3.3 change was performed.
+
+## V4-012 Migration Dry-Run & Validation Harness Design 1.0
+
+- Defined the fail-closed `PLAN_ONLY`/`DRY_RUN` boundary, explicit disposable-local and staging target contract, hard-blocked Production adapter, environment-only secret reference, and no automatic installation/start path.
+- Added deterministic manifest-loader, preflight, transaction/failure, validation, 20-case smoke, schema snapshot/diff, append-only history, RLS/security, trigger/view, no-future-leakage, role-isolation, Tier A same-frozen-input, and canonical-latest-update interfaces.
+- Added machine-readable harness policy, target/manifest/smoke/schema-diff/acceptance-report contracts and a local static design validator; V4-012 is accepted design-only and requires a disposable database later for runtime evidence.
+- No database connection, SQL execution, migration apply, Supabase write, model/runtime run, Shadow/Experiment run, Production operation, or V3.3.3 change was performed.

@@ -152,10 +152,10 @@ The first executable rehearsal is a separate, optional staging/local PostgreSQL 
 5. Produce a schema-only dump/diff and archive the migration history, acceptance snapshot, smoke evidence, advisor output, and diff hashes.
 6. Resolve every drift or failure with a new forward-fix design. Only after the disposable run, diff, smoke suite, advisor review, and V3.3.3 isolation evidence pass may a Human Approver authorize a named Production deployment.
 
-This dry-run strategy is design-only in V4-011. No local, staging, Supabase, or Production database was contacted or modified here; the validation harness belongs to the next task and is not started.
+This dry-run strategy was design-only in V4-011. V4-012 now records the separate fail-closed harness contracts, still without contacting or modifying a local, staging, Supabase, or Production database; runtime implementation begins at BATCH-02.
 
 ## 12. Current execution declaration
 
 Database writes performed in this task: **NO**.
 
-No Supabase project was contacted, no SQL was run, no migration was applied, no registry row was inserted into a real database, and no V3.3.3 artifact was read for mutation or changed. V4-011 is complete only as migration architecture and deployment-gate design. The next task is `V4-012 Migration Dry-Run & Validation Harness Design 1.0`; it is not started by this document.
+No Supabase project was contacted, no SQL was run, no migration was applied, no registry row was inserted into a real database, and no V3.3.3 artifact was read for mutation or changed. V4-011 remains complete as migration architecture and deployment-gate design. V4-012 is the separately accepted design-only harness task; its runtime implementation begins at BATCH-02.

@@ -1,12 +1,12 @@
 # JCFB V4 Batch Execution Plan 1.0
 
-Status: `PLANNING AUDIT PASS` / `EXECUTION NOT AUTHORIZED`
+Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 NOT STARTED`
 
 Plan Identity: `v4-batch-execution-plan@1.0.0`
 Plan Revision: `r002`
 Audit Date: `2026-09-01` (`Asia/Shanghai`)
 Baseline Revision: `1d418e6` (`main`); the recovery commit is the next documentation revision.
-Execution Declaration: **NO V4-012+ TASK EXECUTED**
+Execution Declaration: **BATCH-01 / V4-012 EXECUTED DESIGN-ONLY; NO DATABASE EXECUTION**
 
 ## 1. Decision and source of truth
 
@@ -19,14 +19,14 @@ The baseline repository and reachable Git history contained no original V4-013�
 - Exactly one primary batch exists for every task from V4-012 through V4-100.
 - A secondary parallel group may describe concurrency but never creates a second primary assignment.
 - A batch label is not a completion claim. Every child task still needs its own artifact, validation evidence, documentation, Git trace, and checklist decision.
-- V4-012 begins BATCH-01 in the future. This planning audit does not start it.
+- V4-012 is accepted as the design-only BATCH-01 result. BATCH-02 remains the next implementation boundary.
 - Supabase writes, Production/Shadow runtime, Promotion, activation, pointer switching, and release remain separately gated.
 
 ## 3. Formal batch register
 
 | Batch ID | Included Task IDs | Task Names | Batch Classification | Upstream Batch Dependencies | Parallelism | Hard Gate? | Supabase Write Allowed? | Production/Shadow Runtime Allowed? | Deliverables | Acceptance Criteria | Next Batch |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| BATCH-01 | V4-012 | Migration Dry-Run & Validation Harness<br>Migration Dry-Run & Validation Harness Design 1.0 | BATCHABLE + SERIAL | V4-011 | NO | NO | NO | NO | V4-012 design; disposable target, runner, and evidence contracts | Design-only artifact complete; no harness or database write; V4-012 remains TODO. | BATCH-02 |
+| BATCH-01 | V4-012 | Migration Dry-Run & Validation Harness<br>Migration Dry-Run & Validation Harness Design 1.0 | BATCHABLE + SERIAL | V4-011 | NO | NO | NO | NO | V4-012 design; disposable target, runner, and evidence contracts | Design-only artifact complete and accepted; no harness or database write; V4-012 COMPLETE. | BATCH-02 |
 | BATCH-02 | V4-013–V4-015 | Dry-Run, Preflight & Negative Test Harness<br>V4-013｜Migration Dry-Run Harness Implementation 1.0<br>V4-014｜Migration Preflight & Schema-Diff Validator 1.0<br>V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCHABLE + PARALLEL + SERIAL | BATCH-01 | YES inside frozen manifest | NO | NO | NO | Dry-run runner, preflight/schema diff, smoke/RLS/trigger/constraint tests | Each child has independent evidence; all failures fail closed; no apply. | BATCH-03 |
 | BATCH-03 | V4-016–V4-017 | Staging Readiness & Migration Acceptance Package<br>V4-016｜Staging Readiness & Disposable Target Contract 1.0<br>V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | BATCHABLE + SERIAL | BATCH-02 | NO | NO | NO | NO | Disposable target contract; acceptance packet; roll-forward drill | Target and manifest are isolated and reviewable; approval is requested, not granted. | BATCH-04 |
 | BATCH-04 | V4-018–V4-019 | Formal Schema Apply & Production DB Write HARD_GATE<br>V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0<br>V4-019｜Production Database Write Activation HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-03 | NO | YES | YES only after approval | YES only after approval | Named apply event; V4 production write boundary; schema/role audit | Separate explicit approval for formal apply and production write activation; V3.3.3 untouched. | BATCH-05 |
@@ -90,4 +90,4 @@ For each future batch: freeze the manifest; verify all source task IDs; validate
 
 ## 7. Next execution boundary
 
-Next execution batch: **BATCH-01 — Migration Dry-Run & Validation Harness**. It is planned only. The next task remains V4-012 TODO, Supabase Write = NO in the current recovery, Production/Shadow Execution = NO, Promotion = NO, and V3.3.3 Mutation = NO.
+Next execution batch: **BATCH-02 — Dry-Run, Preflight & Negative Test Harness**. V4-012 is COMPLETE as a design-only task; V4-013 through V4-015 remain TODO. Supabase Write = NO, Production/Shadow Execution = NO, Promotion = NO, and V3.3.3 Mutation = NO.

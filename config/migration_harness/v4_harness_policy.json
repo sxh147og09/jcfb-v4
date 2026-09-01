@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v4-migration-harness-policy@1.0.0",
+  "title": "JCFB V4 migration dry-run harness policy",
+  "contract_version": "v4-migration-harness-policy@1.0.0",
+  "task_id": "V4-012",
+  "status": "DESIGN_ONLY",
+  "authoritative_task_registry": "docs/V4_TASK_REGISTRY_001_100.md",
+  "batch_plan": "docs/V4_BATCH_EXECUTION_PLAN.md",
+  "scope": {
+    "purpose": "Define a fail-closed, isolated contract for future migration validation.",
+    "current_task_delivers": "Interfaces, policies, static catalogs, and evidence schemas only.",
+    "current_task_does_not_deliver": [
+      "database connector implementation",
+      "SQL execution",
+      "migration apply",
+      "Supabase access",
+      "Production or Shadow runtime",
+      "V3.3.3 inspection or mutation"
+    ],
+    "next_implementation_boundary": "BATCH-02"
+  },
+  "database_access": {
+    "default_state": "BLOCKED_UNTIL_EXPLICIT_REQUEST",
+    "allowed_environments": [
+      "DISPOSABLE_LOCAL",
+      "STAGING"
+    ],
+    "hard_block_environments": [
+      "PRODUCTION"
+    ],
+    "allowed_execution_modes": [
+      "PLAN_ONLY",
+      "DRY_RUN"
+    ],
+    "blocked_execution_modes": [
+      "APPLY",
+      "PRODUCTION_APPLY"
+    ],
+    "require_explicit_target_for_database": true,
+    "require_explicit_environment_for_database": true,
+    "require_explicit_execution_mode": true,
+    "connect_without_target": false,
+    "connect_without_environment": false,
+    "connect_without_provider_allowlist": false,
+    "automatic_installation": false,
+    "automatic_start": false,
+    "automatic_teardown": false,
+    "unknown_target_action": "BLOCK",
+    "unknown_environment_action": "BLOCK",
+    "production_action": "BLOCK",
+    "supabase_write_action": "BLOCK",
+    "production_database_write_action": "BLOCK"
+  },
+  "target_adapters": {
+    "future_adapter_types": [
+      "LOCAL_POSTGRES",
+      "DOCKER_POSTGRES",
+      "STAGING_POSTGRES",
+      "STAGING_SUPABASE"
+    ],
+    "production_adapter_type": "BLOCKED_NULL_ADAPTER",
+    "adapter_must_receive_target_descriptor": true,
+    "adapter_must_not_install_or_start_runtime": true,
+    "adapter_must_not_accept_raw_secret_values": true
+  },
+  "runner_contract": {
+    "manifest_read_mode": "TEXT_METADATA_ONLY",
+    "sql_execution_in_v4_012": false,
+    "ddl_apply_in_v4_012": false,
+    "connector_invocations_in_v4_012": false,
+    "apply_requires_future_task": "V4-013+",
+    "stop_on_first_failure": true,
+    "continue_after_failure": false,
+    "terminal_outcomes": [
+      "PRECHECK_FAIL",
+      "APPLY_FAIL",
+      "PARTIAL_FAIL",
+      "VALIDATION_FAIL",
+      "ACCEPTED"
+    ]
+  },
+  "secrets": {
+    "source": "PROCESS_ENVIRONMENT_ONLY",
+    "reference_field": "credential_env_name",
+    "reference_pattern": "^[A-Z][A-Z0-9_]{1,127}$",
+    "persist_values": false,
+    "log_values": false,
+    "report_values": false,
+    "repository_values": false,
+    "example_file": ".env.example",
+    "example_values_must_be_empty": true
+  },
+  "v333_isolation": {
+    "allowed_read_scope": [
+      "database/migrations/v4/0000_manifest.md",
+      "database/migrations/v4/0001_prerequisites.sql",
+      "database/migrations/v4/0002_registries_core.sql",
+      "database/migrations/v4/0003_market_context.sql",
+      "database/migrations/v4/0004_frozen_runtime.sql",
+      "database/migrations/v4/0005_evaluation.sql",
+      "database/migrations/v4/0006_governance_audit.sql",
+      "database/migrations/v4/0007_security_rls.sql",
+      "database/migrations/v4/0008_views_projections.sql",
+      "database/migrations/v4/0009_seed_and_smoke.sql",
+      "database/schema/v4_schema_blueprint.sql",
+      "config/migration_harness"
+    ],
+    "forbidden_read_or_write_scope": [
+      "V3.3.3 repository",
+      "V3.3.3 database",
+      "V3.3.3 migration history",
+      "V3.3.3 predictions, reviews, samples, or audit history"
+    ],
+    "conflict_action": "BLOCK",
+    "automatic_repair": false,
+    "automatic_copy_or_rename": false
+  },
+  "migration_history": {
+    "future_table": "governance.schema_migrations",
+    "verification_mode": "APPEND_ONLY",
+    "applied_row_update": false,
+    "applied_row_delete": false,
+    "mismatch_action": "BLOCK",
+    "repair_action": "NEW_FORWARD_MIGRATION_ID_ONLY",
+    "pending_hash_is_applied": false
+  },
+  "artifact_contracts": {
+    "manifest_projection": "config/migration_harness/v4_manifest_loader_fixture.json",
+    "manifest_schema": "config/migration_harness/v4_manifest_contract.schema.json",
+    "target_schema": "config/migration_harness/v4_target_descriptor.schema.json",
+    "schema_snapshot_contract": "config/migration_harness/v4_schema_snapshot_contract.json",
+    "smoke_catalog": "config/migration_harness/v4_smoke_test_catalog.json",
+    "acceptance_report_schema": "config/migration_harness/v4_acceptance_report.schema.json",
+    "design_validator": "scripts/validate_v4_migration_harness_design.ps1"
+  }
+}

@@ -1,6 +1,6 @@
 # JCFB V4 Task Dependency Register 001–100 1.0
 
-Status: `PASS` for registry coverage and acyclic planning graph; `EXECUTION NOT AUTHORIZED`
+Status: `PASS` for registry coverage and acyclic planning graph; `V4-012 COMPLETE (DESIGN-ONLY)`; downstream execution remains `NOT AUTHORIZED`
 
 Dependency Identity: `v4-task-dependency-register-001-100@1.0.0`
 Revision: `r001`
@@ -27,7 +27,7 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 | V4-009 | Canonical Data Model 1.0 | BASELINE | V4-008 | V4-010 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-010 | Database Schema Blueprint 1.0 | BASELINE | V4-009 | V4-011 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-011 | Database Migration Design 1.0 | BASELINE | V4-010 | V4-012 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
-| V4-012 | Migration Dry-Run & Validation Harness Design 1.0 | BATCH-01 | V4-011 | V4-013 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
+| V4-012 | Migration Dry-Run & Validation Harness Design 1.0 | BATCH-01 | V4-011 | V4-013 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-013 | V4-013｜Migration Dry-Run Harness Implementation 1.0 | BATCH-02 | V4-012 | V4-014, V4-015 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-014 | V4-014｜Migration Preflight & Schema-Diff Validator 1.0 | BATCH-02 | V4-013 | V4-016 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-015 | V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCH-02 | V4-013 | V4-016 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
