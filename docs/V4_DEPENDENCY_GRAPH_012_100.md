@@ -1,11 +1,11 @@
 # JCFB V4 Dependency Graph 012–100 1.0
 
-Status: `DEPENDENCY GRAPH PASS` / `V4-012 DESIGN ACCEPTED` / `BATCH-02 NOT STARTED`
+Status: `DEPENDENCY GRAPH PASS` / `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS` / `BATCH-04 HARD_GATE NEXT`
 
 Graph Identity: `v4-dependency-graph-012-100@1.0.0`
 Revision: `r002`
 Audit Date: `2026-09-01` (`Asia/Shanghai`)
-Execution Declaration: **NO DATABASE OR HARNESS RUNTIME EXECUTION; V4-012 DESIGN-ONLY ACCEPTED**
+Execution Declaration: **BATCH-03 READINESS/PACKAGE STATIC-ONLY ACCEPTED; NO DATABASE OR HARNESS RUNTIME EXECUTION**
 
 ## 1. Scope and evidence boundary
 
@@ -129,4 +129,4 @@ The fan-out groups are parallel development opportunities only after their upstr
 - Kahn-style cycle check: all task and batch nodes removed; residual nodes `0`; dependency cycles `0`.
 - The only historical edge is V4-011 -> V4-012. All later edges are explicitly reconstructed planning edges.
 
-No graph edge authorizes execution. BATCH-01 / V4-012 is accepted as a design-only result; the next execution batch is BATCH-02, and no database or harness runtime execution occurred.
+No graph edge authorizes execution. BATCH-01 / V4-012, BATCH-02 / V4-013 through V4-015, and BATCH-03 / V4-016 through V4-017 are accepted within their no-write scopes; the next execution batch is BATCH-04, a separate HARD_GATE. No database or harness runtime execution occurred.

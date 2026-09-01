@@ -1,0 +1,495 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v4-batch-03-evidence-index@1.0.0",
+  "title": "JCFB V4 BATCH-03 evidence reference index",
+  "contract_version": "v4-batch-03-evidence-index@1.0.0",
+  "batch_id": "BATCH-03",
+  "status": "DESIGN_AND_PENDING_RUNTIME",
+  "description": "Every package evidence reference resolves to a checked-in source contract or document. Runtime entries remain pending and are not claims of database execution.",
+  "secret_policy": {
+    "raw_secret_values_present": false,
+    "environment_variable_names_only": true
+  },
+  "entries": [
+    {
+      "ref": "readiness-contract",
+      "source": "config/migration_harness/v4_batch_03_readiness_contract.json",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "staging-target-template",
+      "source": "config/migration_harness/v4_batch_03_staging_target.template.json",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "acceptance-package-schema",
+      "source": "config/migration_harness/v4_batch_03_acceptance_package.schema.json",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "manifest",
+      "source": "database/migrations/v4/0000_manifest.md",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "schema-diff",
+      "source": "config/migration_harness/v4_schema_snapshot_contract.json",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "smoke-catalog",
+      "source": "config/migration_harness/v4_smoke_test_catalog.json",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "negative-registry",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "preflight-contract",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "rls-trigger-view-security",
+      "source": "docs/V4_MIGRATION_ACCEPTANCE_GATE.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "no-future-leakage",
+      "source": "docs/V4_CONSTITUTION.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "tier-a-same-frozen-input",
+      "source": "docs/V4_FROZEN_INPUT_CONTRACT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "migration-history-integrity",
+      "source": "docs/V4_MIGRATION_ROLLFORWARD_POLICY.md",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "roll-forward-drill",
+      "source": "docs/V4_MIGRATION_ROLLFORWARD_POLICY.md",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "separation-of-duties",
+      "source": "docs/V4_RUNTIME_ROLE_BOUNDARY.md",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "v333-isolation",
+      "source": "docs/V333_V4_COEXISTENCE.md",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "secret-scan",
+      "source": "AGENTS.md",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "self-audit",
+      "source": "tools/migration_harness/acceptance.py",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "cross-doc-consistency",
+      "source": "docs/V4_BATCH_EXECUTION_PLAN.md",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "git-diff-check",
+      "source": "tools/migration_harness/acceptance.py",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "unit-tests",
+      "source": "tests/migration_harness/test_harness.py",
+      "status": "PASS",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "preflight/PF-01",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-02",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-03",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-04",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-05",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-06",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-07",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-08",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-09",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-10",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-11",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-12",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-13",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "BLOCKED",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-14",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-15",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-16",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-17",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "preflight/PF-18",
+      "source": "docs/V4_MIGRATION_PREFLIGHT.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-01",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-02",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-03",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-04",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-05",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-06",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-07",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-08",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-09",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-10",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-11",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-12",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-13",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-14",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-15",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-16",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-17",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-18",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-19",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/smoke/SMOKE-20",
+      "source": "docs/V4_MIGRATION_SMOKE_TESTS.md",
+      "status": "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-01",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "NOT_APPLICABLE",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "runtime/negative/NEG-02",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "NOT_APPLICABLE",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "runtime/negative/NEG-03",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "NOT_APPLICABLE",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "runtime/negative/NEG-04",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "NOT_APPLICABLE",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "runtime/negative/NEG-05",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "NOT_APPLICABLE",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "runtime/negative/NEG-06",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "NOT_APPLICABLE",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "runtime/negative/NEG-07",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "NOT_APPLICABLE",
+      "kind": "STATIC"
+    },
+    {
+      "ref": "runtime/negative/NEG-08",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-09",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-10",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-11",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-12",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-13",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-14",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-15",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-16",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-17",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-18",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-19",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-20",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-21",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    },
+    {
+      "ref": "runtime/negative/NEG-22",
+      "source": "config/migration_harness/v4_negative_case_registry.json",
+      "status": "RUNTIME_NEGATIVE_TEST_PENDING",
+      "kind": "RUNTIME_PENDING"
+    }
+  ]
+}

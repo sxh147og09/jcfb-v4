@@ -1,0 +1,92 @@
+{
+  "$schema": "./v4_batch_03_readiness_contract.json",
+  "manifest_version": "v4-staging-target-manifest@1.0.0",
+  "target_id": "pending-disposable-target",
+  "environment": "DISPOSABLE_LOCAL",
+  "provider": "LOCAL_POSTGRES",
+  "target_state": "RUNTIME_PENDING",
+  "non_production": true,
+  "disposable": true,
+  "non_secret_database_identity": {
+    "server_name": "pending-disposable-server",
+    "database_name": "pending-jcfb-v4-validation",
+    "project_or_cluster_ref": "pending-local-cluster-v4"
+  },
+  "ownership": {
+    "human_approver": "PENDING_HUMAN_APPROVER",
+    "migration_executor": "PENDING_MIGRATION_EXECUTOR",
+    "auditor": "PENDING_AUDITOR",
+    "ownership_confirmed": false
+  },
+  "database": {
+    "postgres_major_version": "PENDING_RUNTIME_EVIDENCE",
+    "compatibility_status": "PENDING_RUNTIME_EVIDENCE",
+    "extensions": [
+      {
+        "name": "pgcrypto",
+        "approved": false,
+        "version": "PENDING_RUNTIME_EVIDENCE",
+        "owner": "PENDING"
+      }
+    ]
+  },
+  "network_security": {
+    "allow_network": false,
+    "ssl_mode": "RUNTIME_PENDING",
+    "ssl_verified": false,
+    "certificate_source": "PENDING_RUNTIME_EVIDENCE"
+  },
+  "permissions": {
+    "required_roles": ["backend", "executor", "auditor"],
+    "permission_boundary_status": "PENDING_RUNTIME_EVIDENCE",
+    "default_privileges_closed": false
+  },
+  "namespace_isolation": {
+    "v4_namespaces": ["core", "market", "context", "model", "evaluation", "governance", "public"],
+    "namespace_conflicts": [],
+    "v333_objects_present": false,
+    "production_data_present": false,
+    "production_pointer_state": "PENDING_RUNTIME_EVIDENCE"
+  },
+  "migration_history": {
+    "history_state": "RUNTIME_PENDING",
+    "partial_state_detected": false,
+    "dirty_state_detected": false,
+    "matches_manifest": false,
+    "rows": []
+  },
+  "backup_snapshot": {
+    "decision": "RUNTIME_PENDING",
+    "backup_id": null,
+    "no_backup_approved": false
+  },
+  "partial_state": {
+    "detected": false,
+    "unresolved_objects": []
+  },
+  "reset_and_teardown": {
+    "reset_before_run": true,
+    "destroy_after_evidence": true,
+    "operator_owned": true,
+    "method": "PENDING_OPERATOR_PROCEDURE"
+  },
+  "secret_source": {
+    "mode": "PROCESS_ENVIRONMENT_ONLY",
+    "credential_env_name": "JCFB_V4_TEST_DATABASE_URL",
+    "values_persisted": false,
+    "values_logged": false,
+    "values_reported": false
+  },
+  "retention": {
+    "evidence_retention_days": "PENDING_RUNTIME_EVIDENCE",
+    "target_destroy_after_evidence": true,
+    "logs_exclude_secrets": true
+  },
+  "runtime_evidence": {
+    "status": "RUNTIME_PENDING_DISPOSABLE_DB",
+    "read_only_catalog_verified": false,
+    "target_identity_verified": false,
+    "connector_invoked": false
+  },
+  "connect_permission": "NOT_GRANTED"
+}

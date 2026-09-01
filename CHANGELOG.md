@@ -1,5 +1,11 @@
 # Changelog
 
+## V4-016 / V4-017 — BATCH-03 Staging Readiness & Migration Acceptance Package
+
+- Added the three-environment staging/disposable target readiness contract with fail-closed states, explicit identity/isolation/reset/teardown/retention rules, environment-only secret references, and a Production hard block.
+- Added the no-write acceptance package schema, evidence index, manifest 0001–0009 binding, preflight/smoke/negative/runtime-pending matrix, schema/RLS/trigger/view/security/no-future/Tier-A/history expectations, roll-forward control-flow drill, and separated signoff placeholders.
+- Recorded `RUNTIME_PENDING_DISPOSABLE_DB`, `NO_PRODUCTION_APPLY_IN_THIS_BATCH`, and no database/Supabase/Production/Shadow/V3.3.3 execution.
+
 ## V4 Bootstrap
 
 - Established V3.3.3 / V4 coexistence policy

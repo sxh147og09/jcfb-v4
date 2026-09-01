@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v4-batch-03-readiness-contract@1.0.0",
+  "title": "JCFB V4 BATCH-03 staging readiness and disposable target contract",
+  "contract_version": "v4-batch-03-readiness-contract@1.0.0",
+  "batch_id": "BATCH-03",
+  "task_id": "V4-016",
+  "status": "DESIGN_ONLY",
+  "authoritative_sources": [
+    "docs/V4_TASK_REGISTRY_001_100.md",
+    "docs/V4_BATCH_EXECUTION_PLAN.md",
+    "docs/V4_EXECUTION_CLASSIFICATION.md",
+    "docs/V4_DATABASE_MIGRATION_DESIGN.md",
+    "docs/V4_MIGRATION_PREFLIGHT.md",
+    "docs/V4_MIGRATION_ACCEPTANCE_GATE.md",
+    "docs/V4_CONSTITUTION.md",
+    "docs/V4_VERSIONING_STANDARD.md"
+  ],
+  "environments": [
+    {
+      "environment": "DISPOSABLE_LOCAL",
+      "purpose": "Isolated local PostgreSQL target that can be reset and destroyed after evidence capture",
+      "provider_allowlist": ["LOCAL_POSTGRES", "DOCKER_POSTGRES"],
+      "non_production_required": true,
+      "disposable_required": true,
+      "network_policy": "OFF_OR_OPERATOR_APPROVED_LOCAL_ONLY",
+      "connection_policy": "EXPLICIT_OPERATOR_PERMISSION_ONLY"
+    },
+    {
+      "environment": "STAGING",
+      "purpose": "Named non-production staging target with verified identity and full TLS when networked",
+      "provider_allowlist": ["STAGING_POSTGRES", "STAGING_SUPABASE"],
+      "non_production_required": true,
+      "disposable_required": false,
+      "network_policy": "REQUIRE_VERIFY_FULL_WHEN_NETWORKED",
+      "connection_policy": "EXPLICIT_OPERATOR_PERMISSION_ONLY"
+    },
+    {
+      "environment": "PRODUCTION",
+      "purpose": "Reference-only classification in this batch",
+      "provider_allowlist": ["PRODUCTION_SUPABASE"],
+      "non_production_required": false,
+      "disposable_required": false,
+      "network_policy": "HARD_BLOCKED",
+      "connection_policy": "HARD_BLOCKED"
+    }
+  ],
+  "deployment_readiness_states": {
+    "NOT_READY": "Required identity, isolation, permission, or runtime evidence is missing.",
+    "READY_FOR_DISPOSABLE_DRY_RUN": "A disposable local target has complete explicit read-only readiness evidence; this is not an apply authorization.",
+    "READY_FOR_STAGING_DRY_RUN": "A non-production staging target has complete explicit read-only readiness evidence; this is not an apply authorization.",
+    "READY_FOR_PRODUCTION_REVIEW": "Evidence may be assembled for independent human review only; no Production connection or write is permitted in BATCH-03.",
+    "BLOCKED": "A safety, identity, isolation, permission, hash, or partial-state rule failed. Stop and retain evidence."
+  },
+  "prohibited_states": ["READY_FOR_PRODUCTION_APPLY"],
+  "required_target_evidence": [
+    "target identity and ownership",
+    "non-production assertion and provider identity",
+    "PostgreSQL major version and compatibility approval",
+    "approved extension inventory including pgcrypto",
+    "network and SSL/certificate policy",
+    "role and default-privilege boundary",
+    "V4 namespace inventory and conflict result",
+    "V3.3.3 object and data isolation result",
+    "migration history and partial-state result",
+    "backup or disposable no-backup decision",
+    "reset and teardown contract",
+    "environment-only credential reference"
+  ],
+  "runtime_policy": {
+    "runtime_evidence_required_for_ready_state": true,
+    "missing_runtime_evidence": "RUNTIME_PENDING_DISPOSABLE_DB",
+    "pending_never_counts_as_pass": true,
+    "unknown_target_must_not_connect": true,
+    "supplied_evidence_must_be_read_only": true,
+    "production_deployment_approval_requires_runtime_evidence": true
+  },
+  "secret_policy": {
+    "source": "PROCESS_ENVIRONMENT_ONLY",
+    "reference_format": "UPPERCASE_ENVIRONMENT_VARIABLE_NAME",
+    "persist_values": false,
+    "log_values": false,
+    "report_values": false,
+    "scan_evidence_for_raw_values": true
+  },
+  "execution_boundary": {
+    "connector_invoked": false,
+    "database_connected": false,
+    "sql_executed": false,
+    "migration_apply_invoked": false,
+    "production_db_writes_performed": "NO",
+    "supabase_writes_performed": "NO",
+    "production_shadow_runtime_executed": false,
+    "model_predictions_executed": false,
+    "v333_mutated": "NO",
+    "automatic_promotion": false,
+    "automatic_batch_advance": false
+  },
+  "operator_approval": {
+    "approval_requested": true,
+    "approval_granted": false,
+    "human_approver_required": true,
+    "same_agent_may_not_approve_and_execute_production": true
+  }
+}

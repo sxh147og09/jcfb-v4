@@ -3,7 +3,7 @@
 Next-Generation Football Prediction System
 
 Status:
-BLUEPRINT, MIGRATION DESIGN, AND BATCH-02 HARNESS COMPLETE / MIGRATION NOT APPLIED
+BLUEPRINT, MIGRATION DESIGN, BATCH-02 HARNESS, AND BATCH-03 READINESS/ACCEPTANCE PACKAGE COMPLETE / MIGRATION NOT APPLIED
 
 Current Build Stage:
 V4-006 COMPLETE
@@ -16,7 +16,9 @@ V4-012 COMPLETE
 V4-013 COMPLETE
 V4-014 COMPLETE
 V4-015 COMPLETE
-V4-016 NEXT
+V4-016 COMPLETE
+V4-017 COMPLETE
+V4-018 NEXT
 
 Legacy Production:
 JCFB V3.3.3 remains independent and unchanged.
@@ -49,7 +51,7 @@ V4-010 physical schema design is documented in [`docs/V4_DATABASE_SCHEMA_BLUEPRI
 
 V4-011 migration architecture is documented in [`docs/V4_DATABASE_MIGRATION_DESIGN.md`](docs/V4_DATABASE_MIGRATION_DESIGN.md), [`docs/V4_MIGRATION_DEPENDENCY_GRAPH.md`](docs/V4_MIGRATION_DEPENDENCY_GRAPH.md), [`docs/V4_MIGRATION_PREFLIGHT.md`](docs/V4_MIGRATION_PREFLIGHT.md), [`docs/V4_MIGRATION_ROLLFORWARD_POLICY.md`](docs/V4_MIGRATION_ROLLFORWARD_POLICY.md), [`docs/V4_MIGRATION_SMOKE_TESTS.md`](docs/V4_MIGRATION_SMOKE_TESTS.md), [`docs/V4_SCHEMA_VERSION_REGISTRY.md`](docs/V4_SCHEMA_VERSION_REGISTRY.md), and [`docs/V4_MIGRATION_ACCEPTANCE_GATE.md`](docs/V4_MIGRATION_ACCEPTANCE_GATE.md). The candidate migration files under [`database/migrations/v4/`](database/migrations/v4/) are design-only, use pending canonical hashes, and cannot be applied without explicit deployment approval.
 
-V4-012 is complete as a design-only artifact in [`docs/V4_MIGRATION_DRY_RUN_HARNESS.md`](docs/V4_MIGRATION_DRY_RUN_HARNESS.md) with machine-readable target, manifest, smoke, schema-diff, policy, and acceptance-report contracts under [`config/migration_harness/`](config/migration_harness/). No harness was run and no database or Supabase was contacted.
+V4-012 is complete as a design-only artifact in [`docs/V4_MIGRATION_DRY_RUN_HARNESS.md`](docs/V4_MIGRATION_DRY_RUN_HARNESS.md) with machine-readable target, manifest, smoke, schema-diff, policy, and acceptance-report contracts under [`config/migration_harness/`](config/migration_harness/). BATCH-03 adds [`docs/V4_STAGING_READINESS.md`](docs/V4_STAGING_READINESS.md), [`docs/V4_MIGRATION_ACCEPTANCE_PACKAGE.md`](docs/V4_MIGRATION_ACCEPTANCE_PACKAGE.md), and the no-write acceptance harness. No database or Supabase was contacted.
 
 ## First-version architecture target
 
@@ -88,4 +90,4 @@ The architecture target is a design direction only at this bootstrap stage. Prod
 
 ## Current scope
 
-V4-001 through V4-015 are complete as governance, design, and no-write harness artifacts. V4-011 defines the ordered PostgreSQL/Supabase migration architecture, V4-012 defines the fail-closed harness boundary, and BATCH-02 implements the local plan, preflight, schema-diff, smoke-contract, and negative-contract layers. No database migration, Supabase write, model execution, or V3.3.3 change was performed. V4-016 through V4-100 remain future work.
+V4-001 through V4-017 are complete as governance, design, no-write harness, readiness, and acceptance-package artifacts. V4-011 defines the ordered PostgreSQL/Supabase migration architecture; BATCH-02 implements plan/preflight/schema-diff/smoke/negative contracts; BATCH-03 packages isolated target readiness and later acceptance evidence. No database migration, Supabase write, model execution, or V3.3.3 change was performed. V4-018 through V4-100 remain future work.

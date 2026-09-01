@@ -1,6 +1,6 @@
 # JCFB V4 Task Dependency Register 001–100 1.0
 
-Status: `PASS` for registry coverage and acyclic planning graph; `V4-012 COMPLETE (DESIGN-ONLY)`; downstream execution remains `NOT AUTHORIZED`
+Status: `PASS` for registry coverage and acyclic planning graph; `V4-012` through `V4-017 COMPLETE`; BATCH-04 remains the next separate HARD_GATE.
 
 Dependency Identity: `v4-task-dependency-register-001-100@1.0.0`
 Revision: `r001`
@@ -28,11 +28,11 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 | V4-010 | Database Schema Blueprint 1.0 | BASELINE | V4-009 | V4-011 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-011 | Database Migration Design 1.0 | BASELINE | V4-010 | V4-012 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-012 | Migration Dry-Run & Validation Harness Design 1.0 | BATCH-01 | V4-011 | V4-013 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
-| V4-013 | V4-013｜Migration Dry-Run Harness Implementation 1.0 | BATCH-02 | V4-012 | V4-014, V4-015 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-014 | V4-014｜Migration Preflight & Schema-Diff Validator 1.0 | BATCH-02 | V4-013 | V4-016 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-015 | V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCH-02 | V4-013 | V4-016 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-016 | V4-016｜Staging Readiness & Disposable Target Contract 1.0 | BATCH-03 | V4-014, V4-015 | V4-017 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-017 | V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | BATCH-03 | V4-016 | V4-018 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
+| V4-013 | V4-013｜Migration Dry-Run Harness Implementation 1.0 | BATCH-02 | V4-012 | V4-014, V4-015 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
+| V4-014 | V4-014｜Migration Preflight & Schema-Diff Validator 1.0 | BATCH-02 | V4-013 | V4-016 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
+| V4-015 | V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCH-02 | V4-013 | V4-016 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
+| V4-016 | V4-016｜Staging Readiness & Disposable Target Contract 1.0 | BATCH-03 | V4-014, V4-015 | V4-017 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
+| V4-017 | V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | BATCH-03 | V4-016 | V4-018 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | BATCH-04 | V4-017 | V4-019 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-019 | V4-019｜Production Database Write Activation HARD_GATE 1.0 | BATCH-04 | V4-018 | V4-020 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCH-05 | V4-019 | V4-021, V4-022, V4-023 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |

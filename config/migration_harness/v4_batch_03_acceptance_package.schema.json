@@ -1,0 +1,239 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v4-batch-03-acceptance-package@1.0.0",
+  "title": "JCFB V4 BATCH-03 migration acceptance package",
+  "type": "object",
+  "required": [
+    "report_contract_version",
+    "batch_id",
+    "batch_name",
+    "task_ids",
+    "task_names",
+    "task_results",
+    "report_state",
+    "readiness_contract",
+    "deployment_readiness",
+    "target_identity_snapshot",
+    "manifest",
+    "expected_schema_catalog",
+    "preflight",
+    "schema_diff",
+    "runtime_test_matrix",
+    "validation_gates",
+    "security_checks",
+    "no_future_leakage",
+    "tier_a_same_frozen_input",
+    "migration_history_integrity",
+    "schema_diff_expectations",
+    "roll_forward_drill",
+    "separation_of_duties",
+    "evidence_package",
+    "evidence_index",
+    "audits",
+    "execution_boundary",
+    "failures",
+    "blocking_reasons",
+    "production_db_writes_performed",
+    "supabase_writes_performed",
+    "no_production_apply_in_this_batch",
+    "next_batch",
+    "batch_status"
+  ],
+  "properties": {
+    "report_contract_version": {
+      "const": "v4-batch-03-acceptance-package@1.0.0"
+    },
+    "batch_id": {
+      "const": "BATCH-03"
+    },
+    "batch_name": {
+      "const": "Staging Readiness & Migration Acceptance Package"
+    },
+    "task_ids": {
+      "const": ["V4-016", "V4-017"]
+    },
+    "task_names": {
+      "type": "array",
+      "minItems": 2,
+      "items": {"type": "string"}
+    },
+    "report_state": {
+      "enum": ["ACCEPTANCE_PASS", "PARTIAL", "BLOCKED"]
+    },
+    "registry_mapping_verified": {
+      "const": "PASS"
+    },
+    "deployment_readiness": {
+      "type": "object",
+      "required": ["status", "runtime_status", "connect_allowed", "production_apply_allowed"],
+      "properties": {
+        "status": {
+          "enum": ["NOT_READY", "READY_FOR_DISPOSABLE_DRY_RUN", "READY_FOR_STAGING_DRY_RUN", "READY_FOR_PRODUCTION_REVIEW", "BLOCKED"]
+        },
+        "runtime_status": {
+          "type": "string"
+        },
+        "connect_allowed": {
+          "type": "boolean"
+        },
+        "production_apply_allowed": {
+          "const": false
+        }
+      },
+      "additionalProperties": true
+    },
+    "target_identity_snapshot": {
+      "type": "object",
+      "required": ["status", "target_id", "environment", "provider", "database_identity", "target_identity_hash", "secret_values_present"],
+      "properties": {
+        "status": {"type": "string"},
+        "target_id": {"type": ["string", "null"]},
+        "environment": {"type": ["string", "null"]},
+        "provider": {"type": ["string", "null"]},
+        "database_identity": {"type": "object"},
+        "target_identity_hash": {"pattern": "^sha256:[0-9a-f]{64}$"},
+        "secret_values_present": {"const": false}
+      },
+      "additionalProperties": true
+    },
+    "readiness_contract": {
+      "type": "object",
+      "required": ["status", "contract_version", "issues"],
+      "additionalProperties": true
+    },
+    "manifest": {
+      "type": "object",
+      "required": ["entry_count", "sequence_status", "dependency_status", "hash_status", "identity_hash", "entries"],
+      "properties": {
+        "entry_count": {"const": 9},
+        "sequence_status": {"const": "PASS"},
+        "dependency_status": {"const": "PASS"},
+        "hash_status": {"enum": ["PENDING_CANONICAL_HASH", "PASS"]},
+        "identity_hash": {"pattern": "^sha256:[0-9a-f]{64}$"},
+        "entries": {"type": "array", "minItems": 9, "maxItems": 9}
+      },
+      "additionalProperties": true
+    },
+    "expected_schema_catalog": {
+      "type": "object",
+      "required": ["source", "status", "expected_counts", "kinds"],
+      "additionalProperties": true
+    },
+    "preflight": {
+      "type": "object",
+      "required": ["status", "checks", "pending_count", "blocked_count"],
+      "properties": {
+        "status": {"enum": ["PASS", "BLOCKED", "FAIL"]},
+        "checks": {"type": "array", "minItems": 18, "maxItems": 18}
+      },
+      "additionalProperties": true
+    },
+    "runtime_test_matrix": {
+      "type": "object",
+      "required": ["smoke", "negative", "pending_total", "production_approval_blocked_until_complete"],
+      "properties": {
+        "smoke": {"type": "object"},
+        "negative": {"type": "object"},
+        "pending_total": {"type": "integer", "minimum": 0},
+        "production_approval_blocked_until_complete": {"const": true}
+      },
+      "additionalProperties": true
+    },
+    "validation_gates": {
+      "type": "object",
+      "additionalProperties": {"type": "string"}
+    },
+    "security_checks": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "no_future_leakage": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "tier_a_same_frozen_input": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "migration_history_integrity": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "schema_diff_expectations": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "roll_forward_drill": {
+      "type": "object",
+      "required": ["status", "executed", "decision", "steps", "production_apply_allowed"],
+      "properties": {
+        "status": {"enum": ["PASS", "BLOCKED", "NOT_EXECUTED_REQUIRES_DISPOSABLE_DB"]},
+        "executed": {"const": false},
+        "decision": {"enum": ["ROLL_FORWARD_ONLY", "BLOCKED_PENDING_REVIEW"]},
+        "steps": {"type": "array", "minItems": 1},
+        "production_apply_allowed": {"const": false}
+      },
+      "additionalProperties": true
+    },
+    "separation_of_duties": {
+      "type": "object",
+      "required": ["status", "roles", "approval_requested", "approval_granted"],
+      "properties": {
+        "status": {"const": "PASS"},
+        "roles": {"type": "object"},
+        "approval_requested": {"const": true},
+        "approval_granted": {"const": false}
+      },
+      "additionalProperties": true
+    },
+    "evidence_package": {
+      "type": "object",
+      "required": ["contract_version", "manifest_identity_hash", "migration_ids_and_hashes", "tool_harness_version", "git_commit", "config_hash", "target_identity_hash", "preflight_outcomes", "tests_executed", "tests_pending", "failures", "blockers", "timestamp", "approver", "executor", "auditor"],
+      "properties": {
+        "contract_version": {"const": "v4-batch-03-evidence@1.0.0"},
+        "manifest_identity_hash": {"pattern": "^sha256:[0-9a-f]{64}$"},
+        "migration_ids_and_hashes": {"type": "array", "minItems": 9, "maxItems": 9},
+        "tool_harness_version": {"type": "string"},
+        "git_commit": {"type": "string"},
+        "config_hash": {"pattern": "^sha256:[0-9a-f]{64}$"},
+        "target_identity_hash": {"pattern": "^sha256:[0-9a-f]{64}$"},
+        "preflight_outcomes": {"type": "array"},
+        "tests_executed": {"type": "array"},
+        "tests_pending": {"type": "array"},
+        "failures": {"type": "array"},
+        "blockers": {"type": "array"},
+        "timestamp": {"type": "string"},
+        "approver": {"type": "object"},
+        "executor": {"type": "object"},
+        "auditor": {"type": "object"}
+      },
+      "additionalProperties": true
+    },
+    "execution_boundary": {
+      "type": "object",
+      "required": ["connector_invoked", "database_connected", "sql_executed", "production_db_writes_performed", "supabase_writes_performed", "v333_mutated", "no_production_apply_in_this_batch"],
+      "properties": {
+        "connector_invoked": {"const": false},
+        "database_connected": {"const": false},
+        "sql_executed": {"const": false},
+        "production_db_writes_performed": {"const": "NO"},
+        "supabase_writes_performed": {"const": "NO"},
+        "v333_mutated": {"const": "NO"},
+        "no_production_apply_in_this_batch": {"const": true}
+      },
+      "additionalProperties": true
+    },
+    "failures": {"type": "array"},
+    "blocking_reasons": {"type": "array"},
+    "production_db_writes_performed": {"const": "NO"},
+    "supabase_writes_performed": {"const": "NO"},
+    "no_production_apply_in_this_batch": {"const": true},
+    "next_batch": {"type": "string"},
+    "batch_status": {"enum": ["COMPLETE", "PARTIAL", "BLOCKED"]},
+    "tests_executed": {"type": "object"},
+    "checklist_tasks_marked_complete": {"const": ["V4-016", "V4-017"]},
+    "remote_push": {"enum": ["PASS", "BLOCKED_ENV", "BLOCKED_AUTH"]},
+    "working_tree": {"enum": ["CLEAN", "DIRTY"]}
+  },
+  "additionalProperties": true
+}

@@ -3,7 +3,7 @@
 ## Registry status
 
 - Registry Version: `v4-task-registry-001-100@1.0.0`
-- Recovery Status: `COMPLETE` for task registration and batch planning; `V4-012` through `V4-015` are COMPLETE; V4-016 through V4-100 remain not started.
+- Recovery Status: `COMPLETE` for task registration and batch planning; `V4-012` through `V4-017` are COMPLETE; V4-018 through V4-100 remain not started.
 - Source of truth: `docs/V4_TASK_REGISTRY_001_100.md` is the authoritative task-definition registry. This checklist is the execution-status view.
 - Planning status: `V4-012–V4-100 Batch Planning = PASS`; BATCH-01 / V4-012 design-only acceptance = PASS.
 
@@ -24,8 +24,8 @@
 - [x] V4-013｜Migration Dry-Run Harness Implementation 1.0
 - [x] V4-014｜Migration Preflight & Schema-Diff Validator 1.0
 - [x] V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0
-- [ ] V4-016｜Staging Readiness & Disposable Target Contract 1.0
-- [ ] V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0
+- [x] V4-016｜Staging Readiness & Disposable Target Contract 1.0
+- [x] V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0
 - [ ] V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0
 - [ ] V4-019｜Production Database Write Activation HARD_GATE 1.0
 - [ ] V4-020｜Canonical Match Identity & Schedule Intake 1.0
@@ -120,7 +120,7 @@
 4. Documentation completed
 5. Git traceability exists
 
-A batch name, registry entry, or planning PASS is not task completion. V4-012 through V4-015 are marked `[x]` only because each has an independent engineering artifact, validation evidence, documentation, and Git traceability. V4-016 through V4-100 remain unchecked.
+A batch name, registry entry, or planning PASS is not task completion. V4-012 through V4-017 are marked `[x]` only because each has an independent engineering artifact, validation evidence, documentation, and Git traceability. V4-018 through V4-100 remain unchecked.
 
 ## 1. Task Name / Primary Batch / Classification mapping
 
@@ -141,8 +141,8 @@ A batch name, registry entry, or planning PASS is not task completion. V4-012 th
 | [x] | V4-013 | V4-013｜Migration Dry-Run Harness Implementation 1.0 | BATCH-02 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [x] | V4-014 | V4-014｜Migration Preflight & Schema-Diff Validator 1.0 | BATCH-02 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [x] | V4-015 | V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCH-02 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
-| [ ] | V4-016 | V4-016｜Staging Readiness & Disposable Target Contract 1.0 | BATCH-03 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
-| [ ] | V4-017 | V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | BATCH-03 | SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
+| [x] | V4-016 | V4-016｜Staging Readiness & Disposable Target Contract 1.0 | BATCH-03 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
+| [x] | V4-017 | V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | BATCH-03 | SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | BATCH-04 | SERIAL + HARD_GATE | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-019 | V4-019｜Production Database Write Activation HARD_GATE 1.0 | BATCH-04 | SERIAL + HARD_GATE | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCH-05 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
@@ -263,6 +263,15 @@ Runtime preflight, migration execution, catalog capture, RLS, triggers, views, a
 
 Runtime PostgreSQL/Supabase migration execution, catalog capture, RLS, triggers, views, advisor, and 20-case smoke evidence remain `NOT_EXECUTED_REQUIRES_DISPOSABLE_DB`. Unit contract PASS does not claim database runtime PASS.
 
+## 6. BATCH-03 acceptance evidence
+
+| Task | Engineering artifact | Validation evidence | Status |
+|---|---|---|---|
+| V4-016 | `tools/migration_harness/readiness.py`; readiness contract and staging target template | Three-environment state contract; target identity/isolation/reset/secrets validator; Production hard block; runtime target remains `RUNTIME_PENDING_DISPOSABLE_DB` | PASS |
+| V4-017 | `tools/migration_harness/acceptance.py`; acceptance schema and evidence index | Manifest 0001–0009; PF-01..PF-18; 20 smoke/22 negative matrix; RLS/trigger/view/security/no-future/Tier-A/history/schema-diff references; roll-forward control-flow drill; separate signoff placeholders | PASS |
+
+Runtime disposable/staging PostgreSQL evidence remains explicitly pending: 20 smoke cases and 15 database-enforcement negative cases are not counted as PASS. `NO_PRODUCTION_APPLY_IN_THIS_BATCH = TRUE`.
+
 ## 4. Recovery and batch references
 
 - Task definitions and provenance: `docs/V4_TASK_REGISTRY_001_100.md`
@@ -273,4 +282,4 @@ Runtime PostgreSQL/Supabase migration execution, catalog capture, RLS, triggers,
 - Classification register: `docs/V4_EXECUTION_CLASSIFICATION.md`
 - Acceptance rules: `docs/V4_BATCH_ACCEPTANCE_RULES.md`
 
-Next execution batch: **BATCH-03 — Staging Readiness & Migration Acceptance Package**. BATCH-02 / V4-013 through V4-015 are accepted with runtime database evidence explicitly pending; no Production or Supabase write occurred.
+Next execution batch: **BATCH-04 — Formal Schema Apply & Production DB Write HARD_GATE**. BATCH-03 / V4-016 through V4-017 are accepted for static readiness and evidence packaging with runtime database evidence explicitly pending; no Production or Supabase write occurred.
