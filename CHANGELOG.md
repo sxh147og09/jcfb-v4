@@ -18,6 +18,13 @@
 - Defined Production uniqueness, strict Promotion Path, manual Promotion Gate, append-only rollback, Public Web isolation, Tier A eligibility, and the role-scoped access matrix.
 - Added docs/V4_RUNTIME_ROLE_BOUNDARY.md, docs/V4_PRODUCTION_POLICY.md, docs/V4_SHADOW_POLICY.md, docs/V4_EXPERIMENT_POLICY.md, docs/V4_PROMOTION_PATH.md, and docs/V4_RUNTIME_ACCESS_MATRIX.md.
 
+## V4-008 Data Contract 1.0
+
+- Defined versioned, stable, hashable contracts for Canonical Facts, official/external odds, Team Context, Evidence, Frozen Input, Feature Bundle, Engine Output, Prediction/Frozen Prediction, Official Result, and Postmatch Review.
+- Defined explicit UNKNOWN / UNAVAILABLE / NOT_VERIFIED / BLOCKED / NOT_APPLICABLE / NULL semantics, timezone-aware time boundaries, no-future-leakage checks, enum governance, ID policy, and canonical hash serialization.
+- Defined independent five-market prediction interfaces, a shared Engine Output envelope, Production/Shadow/Experiment role lineage, and Model Evaluation versus Match Explanation separation.
+- Added the ten V4-008 contract documents and `scripts/validate_v4_data_contracts.ps1`.
+
 - Defined the auditable JCFB, model, engine, selector, config, schema, migration, dataset, Frozen, Shadow, and Experiment identities.
 - Defined implementation, config, input, output, and Frozen Input hash boundaries.
 - Defined compatibility, breaking-change, Promotion, Retirement, and release naming rules.

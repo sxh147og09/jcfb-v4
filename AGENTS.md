@@ -30,6 +30,7 @@ V4-006 establishes the exact version identity contract in [`docs/V4_VERSIONING_S
 - `PRODUCTION`, `SHADOW`, and `EXPERIMENT` identities remain isolated. A role revision cannot be copied into another role.
 - `latest`, `current`, `default`, or an equivalent nickname is never a model, engine, selector, config, dataset, release, or run identity.
 - Version, revision, status, compatibility, and hash changes are append-only and require the evidence and promotion rules defined by the linked contracts.
+- Production/Shadow/Experiment code must consume versioned contracts; free-form unversioned payloads are forbidden in formal paths.
 
 ## Repository boundary
 

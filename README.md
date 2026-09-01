@@ -8,7 +8,8 @@ EARLY DEVELOPMENT
 Current Build Stage:
 V4-006 COMPLETE
 V4-007 COMPLETE
-V4-008 NEXT
+V4-008 COMPLETE
+V4-009 NEXT
 
 Legacy Production:
 JCFB V3.3.3 remains independent and unchanged.
@@ -32,6 +33,8 @@ Exact version identity, hash, compatibility, and release naming are governed by 
 The Constitution governs Production, Shadow, Experiment, data pipelines, engines, simulation, calibration, review, Tier A, promotion, Public Web, Codex Agents, and Human Operators.
 
 Runtime role boundaries, Production uniqueness, Shadow forward evidence, Experiment isolation, Promotion, rollback, and role-scoped access are defined in docs/V4_RUNTIME_ROLE_BOUNDARY.md, docs/V4_PRODUCTION_POLICY.md, docs/V4_SHADOW_POLICY.md, docs/V4_EXPERIMENT_POLICY.md, docs/V4_PROMOTION_PATH.md, and docs/V4_RUNTIME_ACCESS_MATRIX.md.
+
+The V4-008 versioned data interfaces are defined in [`docs/V4_DATA_CONTRACT.md`](docs/V4_DATA_CONTRACT.md) and its Canonical Facts, Odds Snapshot, Team Context, Evidence, Frozen Input, Feature Bundle, Engine Output, Prediction, and Result/Review companion contracts. Formal Production, Shadow, and Experiment paths must consume these contracts; free-form unversioned payloads are forbidden.
 
 ## First-version architecture target
 
@@ -61,7 +64,7 @@ The architecture target is a design direction only at this bootstrap stage. Prod
 
 ## Repository layout
 
-- `docs/` — project charter, coexistence policy, architecture inventory, and build checklist
+- `docs/` — project charter, coexistence policy, architecture, data contracts, and build checklist
 - `src/` — reserved boundaries for data, intelligence, markets, models, scoring, simulation, consensus, risk, freeze, and review
 - `config/` — reserved engine, league, and model configuration boundaries
 - `database/` — reserved migration and schema boundaries
@@ -70,4 +73,4 @@ The architecture target is a design direction only at this bootstrap stage. Prod
 
 ## Current scope
 
-V4-001 through V4-007 are complete. V4-008 has not started.
+V4-001 through V4-008 are complete. V4-009 has not started.
