@@ -12,6 +12,7 @@
 - [x] V4-008 Data Contract 1.0
 - [x] V4-009 Canonical Data Model 1.0
 - [x] V4-010 Database Schema Blueprint 1.0
+- [x] V4-011 Database Migration Design 1.0
 
 ## Completion rule
 
@@ -41,13 +42,17 @@
 | V4-009 | `docs/V4_CANONICAL_DATA_MODEL.md`, `docs/V4_ENTITY_RELATIONSHIP_MODEL.md`, `docs/V4_PERSISTENCE_BOUNDARIES.md`, `docs/V4_APPEND_ONLY_POLICY.md`, `docs/V4_MODEL_DATA_ISOLATION.md`, `docs/V4_DATA_LIFECYCLE.md`, `docs/V4_FUTURE_SUPABASE_BLUEPRINT.md`, `AGENTS.md`, `README.md`, and `CHANGELOG.md` | Entity/relationship coverage, stable PK/business-key separation, Frozen Input lineage, same-hash A/B, append-only/revision chains, role isolation, no-future-leakage persistence, Tier A/public boundaries, Cross-Contract Consistency, Constitution compatibility, Secret Scan, `git diff --check`, and V3.3.3 protection; PASS |
 | V4-010 | `docs/V4_DATABASE_SCHEMA_BLUEPRINT.md`, `docs/V4_TABLE_CATALOG.md`, `docs/V4_CONSTRAINT_CATALOG.md`, `docs/V4_INDEX_BLUEPRINT.md`, `docs/V4_RLS_SECURITY_BLUEPRINT.md`, `docs/V4_TRIGGER_BLUEPRINT.md`, `docs/V4_VIEW_BLUEPRINT.md`, `docs/V4_MIGRATION_PLAN.md`, `database/schema/v4_schema_blueprint.sql`, `AGENTS.md`, `README.md`, and `CHANGELOG.md` | Namespace/table/PK/FK/unique/check coverage, append-only and frozen immutability, no-future-leakage DB gates, Production/Shadow/Experiment isolation, Tier A same-hash integrity, RLS/security-invoker/public read isolation, audit chain, canonical latest-update source, migration phases 0–8, Cross-Doc Consistency, Constitution compatibility, Secret Scan, `git diff --check`, and V3.3.3 protection; PASS |
 
+| V4-011 | `docs/V4_DATABASE_MIGRATION_DESIGN.md`, `docs/V4_MIGRATION_DEPENDENCY_GRAPH.md`, `docs/V4_MIGRATION_PREFLIGHT.md`, `docs/V4_MIGRATION_ROLLFORWARD_POLICY.md`, `docs/V4_MIGRATION_SMOKE_TESTS.md`, `docs/V4_SCHEMA_VERSION_REGISTRY.md`, `docs/V4_MIGRATION_ACCEPTANCE_GATE.md`, `database/migrations/v4/0000_manifest.md`, `0001`-`0009`, `scripts/validate_v4_migration_design.ps1`, and synchronized governance references | Migration identity/hash, dependency/cycle, preflight, dry-run, transaction/roll-forward, 20 smoke cases, RLS/trigger/view/advisor, no-future-leakage, Tier A, V3.3.3 isolation, Secret Scan, `git diff --check`, and no-database-write checks; PASS |
+
 ## Traceability
 
 V4-007 Runtime Boundary Commit: 4f77bda
 V4-008 Data Contract Commit: `32646cb45377126f1816a0285934d705b4f9cec4`
 
-V4-001 through V4-010 artifacts pass content, boundary, and governance validation and are included in Git commits. V4-005 is recorded in the Constitution commit and this follow-up documentation commit. Future items must add their own artifact and validation evidence before being marked.
+V4-001 through V4-011 artifacts pass content, boundary, and governance validation and are included in Git commits. V4-005 is recorded in the Constitution commit and this follow-up documentation commit. Future items must add their own artifact and validation evidence before being marked.
 
+V4-011 Database Migration Design Commit: `cd7ebfd5135275536c2d54ca1ecd980bb386dcfa`
+V4-011 Checklist Confirmation Commit: this follow-up documentation commit
 Initial Bootstrap Commit: `d2d51429cfe768ff47212f95066a0047b8fb766c`
 Checklist Confirmation Commit: this follow-up documentation commit
 V4-004 Architecture Commit: `271b999fe6152b9e87e4442aae95f8810327ce23`
