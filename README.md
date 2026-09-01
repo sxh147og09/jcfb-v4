@@ -30,6 +30,8 @@ Exact version identity, hash, compatibility, and release naming are governed by 
 
 The Constitution governs Production, Shadow, Experiment, data pipelines, engines, simulation, calibration, review, Tier A, promotion, Public Web, Codex Agents, and Human Operators.
 
+Runtime role boundaries, Production uniqueness, Shadow forward evidence, Experiment isolation, Promotion, rollback, and role-scoped access are defined in docs/V4_RUNTIME_ROLE_BOUNDARY.md, docs/V4_PRODUCTION_POLICY.md, docs/V4_SHADOW_POLICY.md, docs/V4_EXPERIMENT_POLICY.md, docs/V4_PROMOTION_PATH.md, and docs/V4_RUNTIME_ACCESS_MATRIX.md.
+
 ## First-version architecture target
 
 Canonical Data

@@ -11,6 +11,13 @@
 
 ## V4-006 Versioning Standard
 
+## V4-007 Runtime Role Boundary
+
+- Defined isolated PRODUCTION, SHADOW, and EXPERIMENT runtime roles and identities.
+- Defined the same-frozen-input Forward A/B rule, pre-kickoff Shadow eligibility, and Experiment isolation.
+- Defined Production uniqueness, strict Promotion Path, manual Promotion Gate, append-only rollback, Public Web isolation, Tier A eligibility, and the role-scoped access matrix.
+- Added docs/V4_RUNTIME_ROLE_BOUNDARY.md, docs/V4_PRODUCTION_POLICY.md, docs/V4_SHADOW_POLICY.md, docs/V4_EXPERIMENT_POLICY.md, docs/V4_PROMOTION_PATH.md, and docs/V4_RUNTIME_ACCESS_MATRIX.md.
+
 - Defined the auditable JCFB, model, engine, selector, config, schema, migration, dataset, Frozen, Shadow, and Experiment identities.
 - Defined implementation, config, input, output, and Frozen Input hash boundaries.
 - Defined compatibility, breaking-change, Promotion, Retirement, and release naming rules.
