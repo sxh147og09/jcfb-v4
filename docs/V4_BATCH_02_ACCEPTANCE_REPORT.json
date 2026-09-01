@@ -197,7 +197,7 @@
   "cross_doc_consistency": "PASS",
   "tests_executed": {"status": "PASS", "test_count": 41, "failure_count": 0},
   "checklist_tasks_marked_complete": ["V4-013", "V4-014", "V4-015"],
-  "git_trace": {"status": "RECORDED_IN_GIT", "commit_hash": null, "checklist_commit_hash": null, "commit_hash_recorded_outside_payload": true},
+  "git_trace": {"status": "RECORDED_IN_GIT", "commit_hash": "c6b8966", "checklist_commit_hash": "c6b8966", "commit_hash_recorded_outside_payload": false},
   "remote_push": "BLOCKED_ENV",
   "working_tree": "CLEAN",
   "batch_status": "COMPLETE",
