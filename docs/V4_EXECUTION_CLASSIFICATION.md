@@ -1,202 +1,131 @@
-# JCFB V4 Execution Classification 1.0
+# JCFB V4 Execution Classification 012–100 1.0
 
-Status: V4-012–V4-100 CLASSIFICATION AUDIT BLOCKED (SOURCE TASK REGISTER INCOMPLETE)
+Status: `PASS` for complete classification and unique primary mapping; `EXECUTION NOT AUTHORIZED`
 
-Classification Identity: `v4-execution-classification@1.0.0`
-
-Revision: `r001`
-
+Classification Identity: `v4-execution-classification-012-100@1.0.0`
+Revision: `r002`
 Audit Date: `2026-09-01` (`Asia/Shanghai`)
-
+Source of truth: `docs/V4_TASK_REGISTRY_001_100.md`
 Execution Declaration: **NO V4-012+ TASK EXECUTED**
 
-## 1. Allowed classification vocabulary
+## 1. Classification semantics
 
-| Label | Meaning | Use rule |
-|---|---|---|
-| `BATCHABLE` | The task can share a controlled implementation batch with adjacent tasks. | It still receives an independent child-task PASS and evidence record. |
-| `PARALLEL` | The task can be implemented or validated concurrently with other tasks after the declared upstream contract is ready. | Parallelism never crosses a dependency or approval boundary. |
-| `SERIAL` | The task must follow a named upstream task or batch in dependency order. | A successful sibling cannot bypass this order. |
-| `HARD_GATE` | The task or operation requires a separate acceptance decision and explicit Human Approver authorization. | It cannot be silently completed by a normal batch. |
+- `BATCHABLE`: may share a controlled implementation cycle with adjacent tasks.
+- `PARALLEL`: may develop concurrently after its declared upstream contract is ready.
+- `SERIAL`: acceptance must follow its declared dependency order.
+- `HARD_GATE`: separate evidence, acceptance, and explicit approval are required; ordinary batch success cannot cross it.
 
-A task may have more than one allowed label. `BATCHABLE + SERIAL`, for example, means that the task may share a batch envelope but must still execute after its upstream dependency. No task with an unresolved source name is assigned a permitted label.
+The classification below is a complete register, not a candidate envelope. Every row is a TODO task and every row has exactly one primary batch.
 
-## 2. Source-register audit
+## 2. Complete classification register
+
+| Task ID | Task Name | Classification | Primary Batch | Upstream Dependencies | Supabase Write Allowed? | Production/Shadow Runtime Allowed? | Explicit User Approval Required? | Status |
+|---|---|---|---|---|---|---|---|---|
+| V4-012 | Migration Dry-Run & Validation Harness Design 1.0 | BATCHABLE + SERIAL | BATCH-01 | V4-011 | NO | NO | NO | TODO |
+| V4-013 | V4-013｜Migration Dry-Run Harness Implementation 1.0 | BATCHABLE + SERIAL | BATCH-02 | V4-012 | NO | NO | NO | TODO |
+| V4-014 | V4-014｜Migration Preflight & Schema-Diff Validator 1.0 | BATCHABLE + PARALLEL | BATCH-02 | V4-013 | NO | NO | NO | TODO |
+| V4-015 | V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCHABLE + PARALLEL | BATCH-02 | V4-013 | NO | NO | NO | TODO |
+| V4-016 | V4-016｜Staging Readiness & Disposable Target Contract 1.0 | BATCHABLE + SERIAL | BATCH-03 | V4-014, V4-015 | NO | NO | NO | TODO |
+| V4-017 | V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | SERIAL | BATCH-03 | V4-016 | NO | NO | NO | TODO |
+| V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-04 | V4-017 | YES | NO | YES | TODO |
+| V4-019 | V4-019｜Production Database Write Activation HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-04 | V4-018 | YES | YES | YES | TODO |
+| V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCHABLE + SERIAL | BATCH-05 | V4-019 | YES | NO | NO | TODO |
+| V4-021 | V4-021｜Canonical Fact Envelope & Availability Semantics 1.0 | BATCHABLE + PARALLEL | BATCH-05 | V4-020 | YES | NO | NO | TODO |
+| V4-022 | V4-022｜Cutoff, Timestamp & Provenance Lineage 1.0 | BATCHABLE + PARALLEL | BATCH-05 | V4-020, V4-021 | YES | NO | NO | TODO |
+| V4-023 | V4-023｜Canonical Intake Orchestrator & Deduplication 1.0 | BATCHABLE + SERIAL | BATCH-05 | V4-020, V4-021, V4-022 | YES | NO | NO | TODO |
+| V4-024 | V4-024｜Official Lottery Five-Market Feed Adapter 1.0 | BATCHABLE + PARALLEL | BATCH-06 | V4-023 | YES | NO | NO | TODO |
+| V4-025 | V4-025｜Official Screenshot Intake & OCR Verification 1.0 | BATCHABLE + PARALLEL | BATCH-06 | V4-023 | YES | NO | NO | TODO |
+| V4-026 | V4-026｜Official Market Availability & Missingness Gate 1.0 | BATCHABLE + SERIAL | BATCH-06 | V4-024, V4-025 | YES | NO | NO | TODO |
+| V4-027 | V4-027｜Official Odds Timestamp & Provenance Ledger 1.0 | BATCHABLE + SERIAL | BATCH-06 | V4-024, V4-025, V4-026 | YES | NO | NO | TODO |
+| V4-028 | V4-028｜External European 1X2 Intake 1.0 | BATCHABLE + PARALLEL | BATCH-07 | V4-023 | YES | NO | NO | TODO |
+| V4-029 | V4-029｜External Asian Handicap Intake 1.0 | BATCHABLE + PARALLEL | BATCH-07 | V4-023 | YES | NO | NO | TODO |
+| V4-030 | V4-030｜External O/U Intake 1.0 | BATCHABLE + PARALLEL | BATCH-07 | V4-023 | YES | NO | NO | TODO |
+| V4-031 | V4-031｜External Source-Time Normalization 1.0 | BATCHABLE + SERIAL | BATCH-07 | V4-028, V4-029, V4-030 | YES | NO | NO | TODO |
+| V4-032 | V4-032｜Team Context Intake & Identity Linker 1.0 | BATCHABLE + SERIAL | BATCH-08 | V4-023 | YES | NO | NO | TODO |
+| V4-033 | V4-033｜Availability, Injury & Suspension Intake 1.0 | BATCHABLE + PARALLEL | BATCH-08 | V4-032 | YES | NO | NO | TODO |
+| V4-034 | V4-034｜Lineup, Coach & Tactical Context Intake 1.0 | BATCHABLE + PARALLEL | BATCH-08 | V4-032 | YES | NO | NO | TODO |
+| V4-035 | V4-035｜Schedule, Travel, Weather & Pitch Context Intake 1.0 | BATCHABLE + PARALLEL | BATCH-08 | V4-032 | YES | NO | NO | TODO |
+| V4-036 | V4-036｜Evidence Graph Claim & Evidence Model 1.0 | BATCHABLE + SERIAL | BATCH-09 | V4-034 | YES | NO | NO | TODO |
+| V4-037 | V4-037｜Source Quality, Expiry & Conflict Resolver 1.0 | BATCHABLE + SERIAL | BATCH-09 | V4-036 | YES | NO | NO | TODO |
+| V4-038 | V4-038｜Feature Bundle Contract & Version Registry 1.0 | BATCHABLE + SERIAL | BATCH-10 | V4-021, V4-022, V4-027, V4-031, V4-037 | YES | NO | NO | TODO |
+| V4-039 | V4-039｜Feature Snapshot Hash & Reproducibility 1.0 | BATCHABLE + SERIAL | BATCH-10 | V4-038 | YES | NO | NO | TODO |
+| V4-040 | V4-040｜Feature Assembly & Schema Adapter Layer 1.0 | SERIAL | BATCH-10 | V4-039 | YES | NO | NO | TODO |
+| V4-041 | V4-041｜Dynamic Team Rating Feature Engine 1.0 | BATCHABLE + PARALLEL | BATCH-11 | V4-040 | YES | NO | NO | TODO |
+| V4-042 | V4-042｜Attack, Defence & Home Advantage Model 1.0 | BATCHABLE + PARALLEL | BATCH-11 | V4-040 | YES | NO | NO | TODO |
+| V4-043 | V4-043｜Opponent Adjustment, Form Decay & League Strength 1.0 | BATCHABLE + SERIAL | BATCH-11 | V4-041, V4-042 | YES | NO | NO | TODO |
+| V4-044 | V4-044｜Football Intelligence Engine 4.0 1.0 | BATCHABLE + SERIAL | BATCH-12 | V4-040, V4-043 | YES | NO | NO | TODO |
+| V4-045 | V4-045｜Football Context Feature Integration 1.0 | BATCHABLE + PARALLEL | BATCH-12 | V4-044 | YES | NO | NO | TODO |
+| V4-046 | V4-046｜Market Intelligence Engine 4.0 1.0 | BATCHABLE + SERIAL | BATCH-13 | V4-040, V4-027, V4-031 | YES | NO | NO | TODO |
+| V4-047 | V4-047｜Market Movement, Velocity & Divergence Features 1.0 | BATCHABLE + PARALLEL | BATCH-13 | V4-046 | YES | NO | NO | TODO |
+| V4-048 | V4-048｜Market Heat & Trap-Risk Interpretation 1.0 | BATCHABLE + PARALLEL | BATCH-13 | V4-046, V4-047 | YES | NO | NO | TODO |
+| V4-049 | V4-049｜Tactical Matchup & League Profile Features 1.0 | BATCHABLE + PARALLEL | BATCH-14 | V4-040, V4-045, V4-037 | YES | NO | NO | TODO |
+| V4-050 | V4-050｜Data Quality Engine 4.0 1.0 | BATCHABLE + SERIAL | BATCH-14 | V4-021, V4-022, V4-027, V4-031, V4-037 | YES | NO | NO | TODO |
+| V4-051 | V4-051｜Provenance & Quality Gate Enforcement 1.0 | SERIAL | BATCH-14 | V4-049, V4-050 | YES | NO | NO | TODO |
+| V4-052 | V4-052｜Outcome Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | YES | NO | NO | TODO |
+| V4-053 | V4-053｜Handicap Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | YES | NO | NO | TODO |
+| V4-054 | V4-054｜Goals Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | YES | NO | NO | TODO |
+| V4-055 | V4-055｜HTFT Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | YES | NO | NO | TODO |
+| V4-056 | V4-056｜Dynamic Lambda Engine 4.0 1.0 | BATCHABLE + SERIAL | BATCH-16 | V4-041, V4-042, V4-043, V4-052, V4-054 | YES | NO | NO | TODO |
+| V4-057 | V4-057｜Score Distribution Candidate Ensemble 4.0 | BATCHABLE + PARALLEL | BATCH-16 | V4-056 | YES | NO | NO | TODO |
+| V4-058 | V4-058｜Score Variance, Correlation, BTTS & Clean Sheet Layer 4.0 | BATCHABLE + PARALLEL | BATCH-16 | V4-056, V4-057 | YES | NO | NO | TODO |
+| V4-059 | V4-059｜Score Distribution Interface Validation 4.0 | SERIAL | BATCH-16 | V4-056, V4-057, V4-058 | YES | NO | NO | TODO |
+| V4-060 | V4-060｜Score Matrix 4.0 | BATCHABLE + SERIAL | BATCH-17 | V4-059 | YES | NO | NO | TODO |
+| V4-061 | V4-061｜Score Candidate Generator 4.0 | BATCHABLE + PARALLEL | BATCH-17 | V4-060 | YES | NO | NO | TODO |
+| V4-062 | V4-062｜Score Re-ranker 4.0 | BATCHABLE + SERIAL | BATCH-17 | V4-057, V4-059, V4-061 | YES | NO | NO | TODO |
+| V4-063 | V4-063｜Exact Score Selector 4.0 | BATCHABLE + SERIAL | BATCH-17 | V4-062 | YES | NO | NO | TODO |
+| V4-064 | V4-064｜Scenario Diversity Selector 4.0 | SERIAL | BATCH-17 | V4-062, V4-063 | YES | NO | NO | TODO |
+| V4-065 | V4-065｜Match Simulation Engine 1.0 | BATCHABLE + SERIAL | BATCH-18 | V4-052, V4-056, V4-059 | YES | NO | NO | TODO |
+| V4-066 | V4-066｜Simulation Reproducibility & Performance Harness 1.0 | BATCHABLE + PARALLEL | BATCH-18 | V4-065 | YES | NO | NO | TODO |
+| V4-067 | V4-067｜Match Script Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-18 | V4-044, V4-045, V4-065 | YES | NO | NO | TODO |
+| V4-068 | V4-068｜Upset Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-18 | V4-052, V4-065, V4-067 | YES | NO | NO | TODO |
+| V4-069 | V4-069｜Cross-Model Consensus Engine 4.0 1.0 | BATCHABLE + SERIAL | BATCH-19 | V4-052, V4-053, V4-054, V4-055, V4-064, V4-065, V4-068 | YES | NO | NO | TODO |
+| V4-070 | V4-070｜Model Disagreement Index 1.0 | BATCHABLE + PARALLEL | BATCH-19 | V4-069 | YES | NO | NO | TODO |
+| V4-071 | V4-071｜Uncertainty Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-19 | V4-069, V4-070, V4-065 | YES | NO | NO | TODO |
+| V4-072 | V4-072｜Risk & Abstention Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-19 | V4-069, V4-070, V4-071, V4-068, V4-051 | YES | NO | NO | TODO |
+| V4-073 | V4-073｜Prediction Consistency Engine 1.0 | SERIAL | BATCH-19 | V4-052, V4-053, V4-054, V4-055, V4-064, V4-069, V4-070 | YES | NO | NO | TODO |
+| V4-074 | V4-074｜Five-Market Orchestrator 4.0 1.0 | BATCHABLE + SERIAL | BATCH-20 | V4-052, V4-053, V4-054, V4-055, V4-064, V4-073 | YES | NO | NO | TODO |
+| V4-075 | V4-075｜Final Prediction Gate 4.0 1.0 | BATCHABLE + SERIAL | BATCH-20 | V4-074, V4-072 | YES | NO | NO | TODO |
+| V4-076 | V4-076｜Frozen Input & Immutable Lineage 4.0 1.0 | BATCHABLE + SERIAL | BATCH-20 | V4-022, V4-038, V4-039, V4-075 | YES | NO | NO | TODO |
+| V4-077 | V4-077｜Frozen Prediction & Revision Chain 4.0 1.0 | SERIAL | BATCH-20 | V4-076 | YES | NO | NO | TODO |
+| V4-078 | V4-078｜Official Result Intake 1.0 | BATCHABLE + SERIAL | BATCH-21 | V4-077 | YES | NO | NO | TODO |
+| V4-079 | V4-079｜Postmatch Review Engine 4.0 1.0 | BATCHABLE + SERIAL | BATCH-21 | V4-077, V4-078 | YES | NO | NO | TODO |
+| V4-080 | V4-080｜Model Evaluation & Match Explanation Separation 1.0 | BATCHABLE + PARALLEL | BATCH-21 | V4-079 | YES | NO | NO | TODO |
+| V4-081 | V4-081｜Error Attribution Engine 1.0 | SERIAL | BATCH-21 | V4-079, V4-080 | YES | NO | NO | TODO |
+| V4-082 | V4-082｜Calibration Engine & Reliability Metrics 1.0 | BATCHABLE + PARALLEL | BATCH-22 | V4-079, V4-081 | YES | NO | NO | TODO |
+| V4-083 | V4-083｜League Profiles & Sample Quality 1.0 | BATCHABLE + PARALLEL | BATCH-22 | V4-079, V4-081 | YES | NO | NO | TODO |
+| V4-084 | V4-084｜Regression Suite & Performance Benchmarks 1.0 | BATCHABLE + PARALLEL | BATCH-22 | V4-082, V4-083 | YES | NO | NO | TODO |
+| V4-085 | V4-085｜Forward Shadow Pair Infrastructure 1.0 | BATCHABLE + SERIAL | BATCH-23 | V4-077, V4-084 | YES | NO | NO | TODO |
+| V4-086 | V4-086｜V4 Tier A Qualification Contract 1.0 | BATCHABLE + SERIAL | BATCH-23 | V4-085, V4-078, V4-079 | YES | NO | NO | TODO |
+| V4-087 | V4-087｜Forward Sample Registration Interface 1.0 | SERIAL | BATCH-23 | V4-086 | YES | NO | NO | TODO |
+| V4-088 | V4-088｜Cross-Version Benchmark V3.3.3 vs V4 1.0 | BATCHABLE + SERIAL | BATCH-24 | V4-082, V4-084, V4-086 | YES | NO | NO | TODO |
+| V4-089 | V4-089｜Promotion Evaluation Evidence Package 1.0 | SERIAL | BATCH-24 | V4-088, V4-087 | YES | NO | NO | TODO |
+| V4-090 | V4-090｜Public Read Projection 1.0 | BATCHABLE + SERIAL | BATCH-25 | V4-077, V4-088 | YES | NO | NO | TODO |
+| V4-091 | V4-091｜Canonical Data Center API 1.0 | SERIAL | BATCH-25 | V4-090 | YES | NO | NO | TODO |
+| V4-092 | V4-092｜Public UI, Data Center & Prediction Pages 1.0 | BATCHABLE + SERIAL | BATCH-26 | V4-091 | YES | NO | NO | TODO |
+| V4-093 | V4-093｜Observability, PostHog & Web Vitals 1.0 | BATCHABLE + PARALLEL | BATCH-26 | V4-092 | YES | NO | NO | TODO |
+| V4-094 | V4-094｜Caching & Compute Once Read Many 1.0 | BATCHABLE + PARALLEL | BATCH-26 | V4-090, V4-091, V4-093 | YES | NO | NO | TODO |
+| V4-095 | V4-095｜Security Hardening & Audit Integrity 1.0 | BATCHABLE + PARALLEL | BATCH-27 | V4-088, V4-094 | NO | NO | NO | TODO |
+| V4-096 | V4-096｜Disaster Recovery, Release Candidate & Operator Runbook 1.0 | BATCHABLE + SERIAL | BATCH-27 | V4-095 | NO | NO | NO | TODO |
+| V4-097 | V4-097｜End-to-End Dry Run & Production Readiness Review HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-27 | V4-095, V4-096, V4-088, V4-089, V4-094 | NO | NO | YES | TODO |
+| V4-098 | V4-098｜Shadow-Only Pilot & Promotion Review HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-28 | V4-097, V4-085, V4-087, V4-089 | YES | YES | YES | TODO |
+| V4-099 | V4-099｜Production Activation & Rollback HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-29 | V4-098, V4-097 | YES | YES | YES | TODO |
+| V4-100 | V4-100｜Final Production Release, Canonical Pointer Switch & Post-Release Closure HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-30 | V4-099, V4-090, V4-092, V4-093 | YES | YES | YES | TODO |
+
+## 3. Classification audit
 
 | Check | Result | Evidence |
 |---|---|---|
-| Master Checklist task entries | `V4-001` through `V4-011` only | `docs/V4_MASTER_BUILD_CHECKLIST.md` contains 67 lines and no V4-013–V4-100 task entries. |
-| V4-012 name | VERIFIED | README and V4-011 migration documents name `V4-012 Migration Dry-Run & Validation Harness Design 1.0`. |
-| V4-013–V4-100 names | NOT FOUND | Repository-wide non-Git search, tracked files, reachable branches/tags, and visible history found no source task register. |
-| Runtime boundary path | PATH MISMATCH | Requested `docs/V4_RUNTIME_BOUNDARY.md` is absent; governed path is `docs/V4_RUNTIME_ROLE_BOUNDARY.md`. |
-| V3.3.3 mutation | NOT PERFORMED | This audit is documentation-only and does not touch V3.3.3 artifacts. |
+| Requested scope | PASS: V4-012–V4-100, 89 tasks | Registry and this complete table |
+| Missing IDs | PASS: 0 | Exact sequence V4-012 through V4-100 |
+| Duplicate IDs | PASS: 0 | One row per task ID |
+| Missing classification | PASS: 0 | Every row has one or more permitted labels |
+| Primary batch uniqueness | PASS: 0 conflicts | Every row has one primary Batch ID |
+| Orphan tasks | PASS: 0 | Every task appears in registry, checklist, classification, and batch plan |
+| HARD_GATE explicit | PASS: 6 tasks | V4-018, V4-019, V4-097, V4-098, V4-099, V4-100 |
+| Supabase write isolation | PASS | Writes are conditional and downstream of named gate; current recovery performs none |
+| Production/Shadow isolation | PASS | Runtime YES appears only on approved V4-098, V4-099, V4-100 paths; current recovery performs none |
+| V3.3.3 isolation | PASS | Benchmark is read-only and no task mutates V3.3.3 |
 
-The missing register is a planning blocker, not permission to infer names from architecture nouns. The user-provided batch directions are preserved as candidate batch envelopes, but they are not treated as the original task list.
+## 4. Batch mapping disposition
 
-## 3. Task-level classification register
-
-The requested range contains 89 IDs. Each ID is listed exactly once below. Only V4-012 has a repository-verified task name. The `UNRESOLVED` state is intentionally outside the allowed classification vocabulary so the audit cannot report a false PASS.
-
-| Task ID | Task name from authoritative source | Classification | Primary batch | Audit state / evidence |
-|---|---|---|---|---|
-| V4-012 | Migration Dry-Run & Validation Harness Design 1.0 | `BATCHABLE + SERIAL` | BATCH-01 | VERIFIED from README and V4-011 migration documents; design-only and not started. |
-| V4-013 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-014 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-015 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-016 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-017 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-018 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-019 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-020 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-021 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-022 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-023 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-024 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-025 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-026 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-027 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-028 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-029 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-030 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-031 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-032 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-033 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-034 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-035 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-036 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-037 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-038 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-039 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-040 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-041 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-042 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-043 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-044 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-045 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-046 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-047 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-048 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-049 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-050 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-051 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-052 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-053 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-054 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-055 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-056 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-057 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-058 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-059 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-060 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-061 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-062 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-063 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-064 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-065 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-066 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-067 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-068 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-069 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-070 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-071 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-072 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-073 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-074 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-075 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-076 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-077 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-078 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-079 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-080 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-081 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-082 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-083 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-084 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-085 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-086 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-087 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-088 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-089 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-090 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-091 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-092 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-093 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-094 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-095 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-096 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-097 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-098 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-099 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-| V4-100 | NOT PRESENT IN MASTER CHECKLIST | UNRESOLVED (NO PERMITTED TAG ASSIGNED) | UNASSIGNED | Source task name and dependencies are absent; assigning a label would invent project history. |
-
-### 3.1 Task-level audit result
-
-| Metric | Result |
-|---|---|
-| Requested task IDs | 89 (`V4-012` through `V4-100`) |
-| IDs listed exactly once | PASS (89/89 rows present) |
-| IDs with a verified source name | 1/89 |
-| IDs with one of the four permitted labels | 1/89 |
-| IDs with a verified primary batch | 1/89 |
-| All Tasks Classified | FAIL — V4-013–V4-100 are unresolved |
-| Unique Batch Mapping | FAIL — 88 IDs cannot be assigned without a source register |
-
-## 4. Candidate batch-envelope classification
-
-This table classifies the 30 candidate envelopes described in `docs/V4_BATCH_EXECUTION_PLAN.md`. It does not convert an envelope into a task mapping when the source task is absent.
-
-| Batch ID | Candidate batch name | Candidate classification | Upstream | Hard Gate? |
-|---|---|---|---|---|
-| BATCH-01 | Migration Dry-Run & Validation Harness | `BATCHABLE + SERIAL` | V4-011 | NO |
-| BATCH-02 | Preflight / Smoke / Constraint / RLS / Trigger Test Harness | `BATCHABLE + PARALLEL + SERIAL` | BATCH-01 | NO |
-| BATCH-03 | Database Deployment Readiness | `BATCHABLE + SERIAL` | BATCH-02 | NO |
-| BATCH-04 | Production DB Migration Apply / Supabase Schema Apply | `SERIAL + HARD_GATE` | BATCH-03 | YES |
-| BATCH-05 | Canonical Data Intake Pipeline | `BATCHABLE + SERIAL` | BATCH-04 | NO |
-| BATCH-06 | Official Odds Intake | `BATCHABLE + PARALLEL` | BATCH-05 | NO |
-| BATCH-07 | External Market Intake | `BATCHABLE + PARALLEL` | BATCH-05 | NO |
-| BATCH-08 | Team Context Intake | `BATCHABLE + PARALLEL` | BATCH-05 | NO |
-| BATCH-09 | Evidence Graph | `BATCHABLE + PARALLEL` | BATCH-08 | NO |
-| BATCH-10 | Feature Representation Layer | `BATCHABLE + SERIAL` | BATCH-06, BATCH-07, BATCH-09 | NO |
-| BATCH-11 | Statistical Feature Engines | `BATCHABLE + PARALLEL` | BATCH-10 | NO |
-| BATCH-12 | Football Feature Engines | `BATCHABLE + PARALLEL` | BATCH-10 | NO |
-| BATCH-13 | Market Feature Engines | `BATCHABLE + PARALLEL` | BATCH-06, BATCH-07, BATCH-10 | NO |
-| BATCH-14 | Tactical / Quality Feature Engines | `BATCHABLE + PARALLEL` | BATCH-08, BATCH-09, BATCH-10 | NO |
-| BATCH-15 | Core Prediction Engines: Outcome / Handicap / Goals / HTFT | `BATCHABLE + PARALLEL + SERIAL` | BATCH-11, BATCH-12, BATCH-13, BATCH-14 | NO |
-| BATCH-16 | Score Engine Part A: Lambda / Distributions / Variance / Correlation | `BATCHABLE + SERIAL` | BATCH-11, BATCH-15 | NO |
-| BATCH-17 | Score Engine Part B: Candidate Generation / Reranker / Selector / Scenario Diversity | `BATCHABLE + SERIAL` | BATCH-16 | NO |
-| BATCH-18 | Match Simulation / Match Script / Upset | `BATCHABLE + PARALLEL` | BATCH-15, BATCH-16, BATCH-17 | NO |
-| BATCH-19 | Consensus / Disagreement / Uncertainty / Risk / Abstention / Consistency | `BATCHABLE + SERIAL` | BATCH-15, BATCH-17, BATCH-18 | NO |
-| BATCH-20 | Final Prediction Gate / Frozen Input / Frozen Prediction | `BATCHABLE + SERIAL` | BATCH-19 | NO |
-| BATCH-21 | Official Result / Postmatch Review / Error Attribution | `BATCHABLE + SERIAL` | BATCH-20 | NO |
-| BATCH-22 | Calibration / League Profiles / Regression Evaluation | `BATCHABLE + SERIAL` | BATCH-21 | NO |
-| BATCH-23 | Forward Shadow Pair / Tier A Collection Infrastructure | `BATCHABLE + SERIAL` | BATCH-20, BATCH-22 | NO |
-| BATCH-24 | Benchmark / Promotion Evaluation | `BATCHABLE + SERIAL` | BATCH-22, BATCH-23 | NO |
-| BATCH-25 | Public Read Projection / API / Data Center | `BATCHABLE + SERIAL` | BATCH-20, BATCH-24 | NO |
-| BATCH-26 | UI / Observability / PostHog / Performance | `BATCHABLE + PARALLEL` | BATCH-25 | NO |
-| BATCH-27 | Production Readiness & Frozen/Historical Integrity Gate | `SERIAL + HARD_GATE` | BATCH-24, BATCH-25, BATCH-26 | YES |
-| BATCH-28 | Shadow → Promotion Review | `SERIAL + HARD_GATE` | BATCH-23, BATCH-24, BATCH-27 | YES |
-| BATCH-29 | Promotion Review → Production / Production Model Activation | `SERIAL + HARD_GATE` | BATCH-28 | YES |
-| BATCH-30 | Public Production Release / Canonical Output Pointer Switch | `SERIAL + HARD_GATE` | BATCH-25, BATCH-26, BATCH-29 | YES |
-
-## 5. Hard-gate classification registry
-
-| Gate type | Candidate batch | Required classification | Ordinary task batching allowed? |
-|---|---|---|---|
-| Production DB Migration Apply | BATCH-04 | `SERIAL + HARD_GATE` | NO |
-| Supabase formal Schema Apply / write | BATCH-04 | `SERIAL + HARD_GATE` | NO |
-| Production Model Activation | BATCH-29 | `SERIAL + HARD_GATE` | NO |
-| Shadow → Promotion Review | BATCH-28 | `SERIAL + HARD_GATE` | NO |
-| Promotion Review → Production | BATCH-29 | `SERIAL + HARD_GATE` | NO |
-| Frozen Prediction / Historical Integrity migration | BATCH-27 gate-only path | `SERIAL + HARD_GATE` | NO |
-| Any operation that may modify historical formal data | BATCH-27 gate-only path | `SERIAL + HARD_GATE` | NO |
-| Public Production Release / canonical output pointer switch | BATCH-30 | `SERIAL + HARD_GATE` | NO |
-
-A hard gate may be represented as a gate-only batch envelope, but each gate event still needs its own approval, evidence, and acceptance result. A normal child task cannot satisfy or cross it.
-
-## 6. Correction required before acceptance
-
-Add the authoritative V4-012–V4-100 task register to the Master Checklist or supply it as a reviewed source document. Then replace each `UNRESOLVED` row with the exact task name, permitted classification label(s), one primary Batch ID, upstream dependency, and evidence boundary. Until that correction is made, this classification audit is not complete and V4-012 must remain NOT_STARTED.
-
-## 7. Boundary declaration
-
-No migration harness was created or run. No database or Supabase write occurred. No model, match prediction, Shadow run, Production activation, Promotion, public release, or V3.3.3 modification occurred.
+The mapping is accepted as a planning register. It does not mark any checklist item complete and does not authorize BATCH-01.
