@@ -3,14 +3,15 @@
 Next-Generation Football Prediction System
 
 Status:
-EARLY DEVELOPMENT
+BLUEPRINT COMPLETE / MIGRATION NOT APPLIED
 
 Current Build Stage:
 V4-006 COMPLETE
 V4-007 COMPLETE
 V4-008 COMPLETE
 V4-009 COMPLETE
-V4-010 NEXT
+V4-010 COMPLETE
+V4-011 NEXT
 
 Legacy Production:
 JCFB V3.3.3 remains independent and unchanged.
@@ -38,6 +39,8 @@ Runtime role boundaries, Production uniqueness, Shadow forward evidence, Experim
 The V4-008 versioned data interfaces are defined in [`docs/V4_DATA_CONTRACT.md`](docs/V4_DATA_CONTRACT.md) and its Canonical Facts, Odds Snapshot, Team Context, Evidence, Frozen Input, Feature Bundle, Engine Output, Prediction, and Result/Review companion contracts. Formal Production, Shadow, and Experiment paths must consume these contracts; free-form unversioned payloads are forbidden.
 
 The V4-009 logical persistence model is defined in [`docs/V4_CANONICAL_DATA_MODEL.md`](docs/V4_CANONICAL_DATA_MODEL.md), [`docs/V4_ENTITY_RELATIONSHIP_MODEL.md`](docs/V4_ENTITY_RELATIONSHIP_MODEL.md), [`docs/V4_PERSISTENCE_BOUNDARIES.md`](docs/V4_PERSISTENCE_BOUNDARIES.md), [`docs/V4_APPEND_ONLY_POLICY.md`](docs/V4_APPEND_ONLY_POLICY.md), [`docs/V4_MODEL_DATA_ISOLATION.md`](docs/V4_MODEL_DATA_ISOLATION.md), [`docs/V4_DATA_LIFECYCLE.md`](docs/V4_DATA_LIFECYCLE.md), and [`docs/V4_FUTURE_SUPABASE_BLUEPRINT.md`](docs/V4_FUTURE_SUPABASE_BLUEPRINT.md). These are design-only artifacts; no database migration or Supabase write has been executed.
+
+V4-010 physical schema design is documented in [`docs/V4_DATABASE_SCHEMA_BLUEPRINT.md`](docs/V4_DATABASE_SCHEMA_BLUEPRINT.md), [`docs/V4_TABLE_CATALOG.md`](docs/V4_TABLE_CATALOG.md), [`docs/V4_CONSTRAINT_CATALOG.md`](docs/V4_CONSTRAINT_CATALOG.md), [`docs/V4_INDEX_BLUEPRINT.md`](docs/V4_INDEX_BLUEPRINT.md), [`docs/V4_RLS_SECURITY_BLUEPRINT.md`](docs/V4_RLS_SECURITY_BLUEPRINT.md), [`docs/V4_TRIGGER_BLUEPRINT.md`](docs/V4_TRIGGER_BLUEPRINT.md), [`docs/V4_VIEW_BLUEPRINT.md`](docs/V4_VIEW_BLUEPRINT.md), and [`docs/V4_MIGRATION_PLAN.md`](docs/V4_MIGRATION_PLAN.md). The candidate SQL at [`database/schema/v4_schema_blueprint.sql`](database/schema/v4_schema_blueprint.sql) is blueprint-only and must never be auto-applied; V4-011 is the separate migration-design task.
 
 ## First-version architecture target
 
@@ -76,4 +79,4 @@ The architecture target is a design direction only at this bootstrap stage. Prod
 
 ## Current scope
 
-V4-001 through V4-009 are complete. V4-010 has not started.
+V4-001 through V4-010 are complete. V4-010 defines the PostgreSQL/Supabase physical schema, constraints, indexes, RLS, triggers, read projections, migration order, and future smoke validation only. No database migration, Supabase write, model execution, or V3.3.3 change was performed.

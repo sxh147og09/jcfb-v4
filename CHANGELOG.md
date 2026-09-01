@@ -37,3 +37,9 @@
 - Defined stable UUID primary keys, separate business keys, typed cross-entity relationships, same-match and same-`frozen_input_hash` checks, revision/supersedes chains, no-future-leakage persistence, and explicit Production/Shadow/Experiment isolation.
 - Defined append-only boundaries, correction/deletion policy, lifecycle stages, index planning, and the future Supabase/Postgres blueprint with RLS, security-invoker view, trigger, and service-role boundaries.
 - Added the seven V4-009 design documents; no database migration, Supabase write, model execution, or V3.3.3 change was performed.
+
+## V4-010 Database Schema Blueprint 1.0
+
+- Defined the seven-schema PostgreSQL/Supabase physical design for canonical core facts, market/context, model lineage, evaluation, governance, and Production-only public projections.
+- Added the table, constraint, index, RLS/security, trigger, view, and migration-plan catalogs, including append-only/revision rules, frozen immutability, no-future-leakage gates, role isolation, Tier A pair integrity, audit-chain fields, and canonical latest-update sourcing.
+- Added the design-only candidate SQL at `database/schema/v4_schema_blueprint.sql`; no database migration, Supabase write, SQL execution, model execution, or V3.3.3 change was performed.

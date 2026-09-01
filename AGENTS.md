@@ -40,6 +40,10 @@ All V4 changes must stay inside this repository. The V3.3.3 repository, database
 
 A task may be marked complete only when its design is finalized, an engineering artifact exists, validation has completed, documentation is present, and Git traceability exists. Discussion alone is not completion evidence.
 
+Database changes must originate from approved migrations.
+Blueprint SQL must never be auto-applied.
+Audit-critical tables are append-only unless a Constitution-approved correction path exists.
+
 ## Constitutional Rules
 
 JCFB V4 is governed by [`docs/V4_CONSTITUTION.md`](docs/V4_CONSTITUTION.md). If an AGENTS instruction conflicts with `docs/V4_CONSTITUTION.md`, then `V4_CONSTITUTION.md` wins.
