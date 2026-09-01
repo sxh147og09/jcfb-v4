@@ -10,6 +10,7 @@
 - [x] V4-006 Versioning Standard
 - [x] V4-007 Production / Shadow / Experiment Boundary
 - [x] V4-008 Data Contract 1.0
+- [x] V4-009 Canonical Data Model 1.0
 
 ## Completion rule
 
@@ -36,13 +37,14 @@
 
 | V4-007 | six runtime boundary contracts under docs/, AGENTS.md, README.md, and CHANGELOG.md | Production uniqueness, role isolation, same-frozen-input A/B, pre-kickoff Shadow, Experiment exclusion, Promotion Gate, rollback, Public Web, access matrix, Self Audit, Secret Scan, git diff --check, and V3.3.3 protection; PASS |
 | V4-008 | `docs/V4_DATA_CONTRACT.md`, the nine companion contract documents, `AGENTS.md`, `README.md`, `CHANGELOG.md`, and `scripts/validate_v4_data_contracts.ps1` | Required fields, JSON examples, JSON duplicate/structure check, Cross-Contract Consistency, UNKNOWN/UNAVAILABLE separation, five-market completeness, official/external odds isolation, timezone/cutoff, immutable Frozen Input/Frozen Prediction, role/hash/version checks, Model Evaluation/Match Explanation separation, Secret Scan, `git diff --check`, and V3.3.3 protection; PASS |
+| V4-009 | `docs/V4_CANONICAL_DATA_MODEL.md`, `docs/V4_ENTITY_RELATIONSHIP_MODEL.md`, `docs/V4_PERSISTENCE_BOUNDARIES.md`, `docs/V4_APPEND_ONLY_POLICY.md`, `docs/V4_MODEL_DATA_ISOLATION.md`, `docs/V4_DATA_LIFECYCLE.md`, `docs/V4_FUTURE_SUPABASE_BLUEPRINT.md`, `AGENTS.md`, `README.md`, and `CHANGELOG.md` | Entity/relationship coverage, stable PK/business-key separation, Frozen Input lineage, same-hash A/B, append-only/revision chains, role isolation, no-future-leakage persistence, Tier A/public boundaries, Cross-Contract Consistency, Constitution compatibility, Secret Scan, `git diff --check`, and V3.3.3 protection; PASS |
 
 ## Traceability
 
 V4-007 Runtime Boundary Commit: 4f77bda
 V4-008 Data Contract Commit: `32646cb45377126f1816a0285934d705b4f9cec4`
 
-V4-001 through V4-008 artifacts pass content, boundary, and governance validation and are included in Git commits. V4-005 is recorded in the Constitution commit and this follow-up documentation commit. Future items must add their own artifact and validation evidence before being marked.
+V4-001 through V4-009 artifacts pass content, boundary, and governance validation and are included in Git commits. V4-005 is recorded in the Constitution commit and this follow-up documentation commit. Future items must add their own artifact and validation evidence before being marked.
 
 Initial Bootstrap Commit: `d2d51429cfe768ff47212f95066a0047b8fb766c`
 Checklist Confirmation Commit: this follow-up documentation commit
@@ -52,3 +54,5 @@ V4-006 Versioning Commit: `2f58974582d08edbb05c11d61d5605727c391c16`
 V4-006 Checklist Confirmation Commit: this follow-up documentation commit
 V4-007 Checklist Confirmation Commit: this follow-up documentation commit
 V4-008 Checklist Confirmation Commit: this follow-up documentation commit
+V4-009 Canonical Data Model Commit: `2dddc6c358cf873ccd3356be4f38e5a743fc476d`
+V4-009 Checklist Confirmation Commit: this follow-up documentation commit
