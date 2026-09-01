@@ -55,6 +55,7 @@ The highest-priority operational rules are:
 - Experiment cannot count as Forward Tier A evidence or be relabeled as Shadow.
 - Promotion requires manual review and an explicit Production release identity; auto-promotion is prohibited.
 - Probability is not confidence; abstention is valid; five markets and score selection remain independently governed.
+- Formal persistence paths must respect append-only history, role isolation, and Frozen Input lineage; directly overwriting audit-critical records is prohibited.
 - Secrets never enter Git, Public Web is read-only, and failures default to `BLOCKED` / fail closed.
 
 The full Articles, machine-oriented rule IDs, time policy, runtime role boundary, access matrix, model lifecycle, correction workflow, and incident response are defined in the Constitution and its companion governance documents, including docs/V4_RUNTIME_ROLE_BOUNDARY.md, docs/V4_PRODUCTION_POLICY.md, docs/V4_SHADOW_POLICY.md, docs/V4_EXPERIMENT_POLICY.md, docs/V4_PROMOTION_PATH.md, and docs/V4_RUNTIME_ACCESS_MATRIX.md. Agents must not silently promote, rewrite history, or begin the next V4 task.

@@ -9,7 +9,8 @@ Current Build Stage:
 V4-006 COMPLETE
 V4-007 COMPLETE
 V4-008 COMPLETE
-V4-009 NEXT
+V4-009 COMPLETE
+V4-010 NEXT
 
 Legacy Production:
 JCFB V3.3.3 remains independent and unchanged.
@@ -35,6 +36,8 @@ The Constitution governs Production, Shadow, Experiment, data pipelines, engines
 Runtime role boundaries, Production uniqueness, Shadow forward evidence, Experiment isolation, Promotion, rollback, and role-scoped access are defined in docs/V4_RUNTIME_ROLE_BOUNDARY.md, docs/V4_PRODUCTION_POLICY.md, docs/V4_SHADOW_POLICY.md, docs/V4_EXPERIMENT_POLICY.md, docs/V4_PROMOTION_PATH.md, and docs/V4_RUNTIME_ACCESS_MATRIX.md.
 
 The V4-008 versioned data interfaces are defined in [`docs/V4_DATA_CONTRACT.md`](docs/V4_DATA_CONTRACT.md) and its Canonical Facts, Odds Snapshot, Team Context, Evidence, Frozen Input, Feature Bundle, Engine Output, Prediction, and Result/Review companion contracts. Formal Production, Shadow, and Experiment paths must consume these contracts; free-form unversioned payloads are forbidden.
+
+The V4-009 logical persistence model is defined in [`docs/V4_CANONICAL_DATA_MODEL.md`](docs/V4_CANONICAL_DATA_MODEL.md), [`docs/V4_ENTITY_RELATIONSHIP_MODEL.md`](docs/V4_ENTITY_RELATIONSHIP_MODEL.md), [`docs/V4_PERSISTENCE_BOUNDARIES.md`](docs/V4_PERSISTENCE_BOUNDARIES.md), [`docs/V4_APPEND_ONLY_POLICY.md`](docs/V4_APPEND_ONLY_POLICY.md), [`docs/V4_MODEL_DATA_ISOLATION.md`](docs/V4_MODEL_DATA_ISOLATION.md), [`docs/V4_DATA_LIFECYCLE.md`](docs/V4_DATA_LIFECYCLE.md), and [`docs/V4_FUTURE_SUPABASE_BLUEPRINT.md`](docs/V4_FUTURE_SUPABASE_BLUEPRINT.md). These are design-only artifacts; no database migration or Supabase write has been executed.
 
 ## First-version architecture target
 
@@ -73,4 +76,4 @@ The architecture target is a design direction only at this bootstrap stage. Prod
 
 ## Current scope
 
-V4-001 through V4-008 are complete. V4-009 has not started.
+V4-001 through V4-009 are complete. V4-010 has not started.

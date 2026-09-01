@@ -30,3 +30,10 @@
 - Defined compatibility, breaking-change, Promotion, Retirement, and release naming rules.
 - Added `docs/V4_VERSIONING_STANDARD.md`, `docs/V4_VERSION_IDENTITY_CONTRACT.md`, `docs/V4_COMPATIBILITY_POLICY.md`, and `docs/V4_RELEASE_NAMING.md`.
 - Added `scripts/validate_v4_versioning.ps1` and synchronized README, AGENTS, Constitution, architecture, model governance, integrity rules, and Checklist references.
+
+## V4-009 Canonical Data Model 1.0
+
+- Defined the logical entity catalog for canonical facts, snapshots, Frozen Input, Feature Bundles, Engine Runs, Predictions, Frozen Predictions, Results, Reviews, Tier A, Promotion, Calibration, Incidents, Audit Logs, and the Production-only public projection.
+- Defined stable UUID primary keys, separate business keys, typed cross-entity relationships, same-match and same-`frozen_input_hash` checks, revision/supersedes chains, no-future-leakage persistence, and explicit Production/Shadow/Experiment isolation.
+- Defined append-only boundaries, correction/deletion policy, lifecycle stages, index planning, and the future Supabase/Postgres blueprint with RLS, security-invoker view, trigger, and service-role boundaries.
+- Added the seven V4-009 design documents; no database migration, Supabase write, model execution, or V3.3.3 change was performed.
