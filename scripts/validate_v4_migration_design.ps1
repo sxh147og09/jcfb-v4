@@ -185,7 +185,8 @@ elseif (($sequences | Sort-Object) -join ',' -ne '1,2,3,4,5,6,7,8,9') { Add-Fail
 else { Add-Pass 'Migration sequences unique and ordered' }
 
 $allSql = @(
-    (Get-ChildItem -LiteralPath (RepoPath 'database') -Recurse -File -Filter '*.sql')
+    (Get-ChildItem -LiteralPath (RepoPath 'database') -Recurse -File -Filter '*.sql' |
+        Where-Object { $_.FullName -notlike (Join-Path $migrationDir.Replace('\migrations\v4', '\migrations\v4_runtime_candidate') '*') })
 )
 foreach ($sql in $allSql) {
     $content = Get-Content -LiteralPath $sql.FullName -Raw -Encoding utf8
@@ -193,7 +194,7 @@ foreach ($sql in $allSql) {
         Add-Failure "SQL safety marker missing: $($sql.FullName)"
     }
 }
-if ($failures.Count -eq 0) { Add-Pass 'All repository SQL files carry the design-only marker' }
+if ($failures.Count -eq 0) { Add-Pass 'All design SQL files carry the design-only marker; runtime candidates are validated separately' }
 
 $manifest = RepoPath 'database/migrations/v4/0000_manifest.md'
 if (Test-Path -LiteralPath $manifest -PathType Leaf) {

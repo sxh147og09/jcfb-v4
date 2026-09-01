@@ -1,6 +1,7 @@
 .env
 .env.*
 !.env.example
+!.env.runtime-validation.example
 
 .venv/
 venv/
@@ -35,4 +36,3 @@ Thumbs.db
 secrets/
 *.pem
 *.key
-

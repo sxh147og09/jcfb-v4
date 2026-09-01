@@ -1,0 +1,237 @@
+{
+  "$id": "v4-runtime-candidate-manifest@1.0.0",
+  "title": "JCFB V4 disposable runtime validation candidate manifest",
+  "task": "PRE-BATCH-04 REMEDIATION",
+  "candidate_directory": "database/migrations/v4_runtime_candidate",
+  "source_manifest": "database/migrations/v4/0000_manifest.md",
+  "source_manifest_commit": "cd7ebfd5135275536c2d54ca1ecd980bb386dcfa",
+  "promotion_commit": "1e907c7490b5e102dea69372f22073ef3970ca6a",
+  "candidate_count": 9,
+  "environment_allowlist": [
+    "DISPOSABLE_LOCAL",
+    "STAGING"
+  ],
+  "production_apply": "HARD_BLOCK",
+  "canonical_hash_status": "PENDING_CANONICAL_HASH",
+  "candidates": [
+    {
+      "sequence": 1,
+      "name": "v4-prerequisites",
+      "source_design_file": "database/migrations/v4/0001_prerequisites.sql",
+      "source_design_commit": "cd7ebfd5135275536c2d54ca1ecd980bb386dcfa",
+      "candidate_file": "database/migrations/v4_runtime_candidate/0001_prerequisites.sql",
+      "candidate_identity": "v4-runtime-candidate@20260901.001",
+      "migration_id": "migration@20260901.001",
+      "depends_on": [],
+      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
+      "content_sha256_noncanonical": "08e71b93c214e2172b9cb56611fb684bec33987bc768bd2bfc30aab317ded4b2",
+      "status": "RUNTIME_VALIDATION_CANDIDATE",
+      "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
+    },
+    {
+      "sequence": 2,
+      "name": "v4-registries-core",
+      "source_design_file": "database/migrations/v4/0002_registries_core.sql",
+      "source_design_commit": "cd7ebfd5135275536c2d54ca1ecd980bb386dcfa",
+      "candidate_file": "database/migrations/v4_runtime_candidate/0002_registries_core.sql",
+      "candidate_identity": "v4-runtime-candidate@20260901.002",
+      "migration_id": "migration@20260901.002",
+      "depends_on": [
+        "migration@20260901.001"
+      ],
+      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
+      "content_sha256_noncanonical": "05d8d491dddb11a87a7b3647ee5959453b9d7b368a90921fcd2c31d4611f7f55",
+      "status": "RUNTIME_VALIDATION_CANDIDATE",
+      "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
+    },
+    {
+      "sequence": 3,
+      "name": "v4-market-context",
+      "source_design_file": "database/migrations/v4/0003_market_context.sql",
+      "source_design_commit": "cd7ebfd5135275536c2d54ca1ecd980bb386dcfa",
+      "candidate_file": "database/migrations/v4_runtime_candidate/0003_market_context.sql",
+      "candidate_identity": "v4-runtime-candidate@20260901.003",
+      "migration_id": "migration@20260901.003",
+      "depends_on": [
+        "migration@20260901.002"
+      ],
+      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
+      "content_sha256_noncanonical": "fcc97c21136f01427f8421aed262394d583bfa3deaa062b639c18640e90cc4bd",
+      "status": "RUNTIME_VALIDATION_CANDIDATE",
+      "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
+    },
+    {
+      "sequence": 4,
+      "name": "v4-frozen-runtime",
+      "source_design_file": "database/migrations/v4/0004_frozen_runtime.sql",
+      "source_design_commit": "cd7ebfd5135275536c2d54ca1ecd980bb386dcfa",
+      "candidate_file": "database/migrations/v4_runtime_candidate/0004_frozen_runtime.sql",
+      "candidate_identity": "v4-runtime-candidate@20260901.004",
+      "migration_id": "migration@20260901.004",
+      "depends_on": [
+        "migration@20260901.003"
+      ],
+      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
+      "content_sha256_noncanonical": "eed5c84d6b315756389eb265e1d1af94ec3f4defc286a728ec6edff1cbf177f3",
+      "status": "RUNTIME_VALIDATION_CANDIDATE",
+      "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
+    },
+    {
+      "sequence": 5,
+      "name": "v4-evaluation",
+      "source_design_file": "database/migrations/v4/0005_evaluation.sql",
+      "source_design_commit": "cd7ebfd5135275536c2d54ca1ecd980bb386dcfa",
+      "candidate_file": "database/migrations/v4_runtime_candidate/0005_evaluation.sql",
+      "candidate_identity": "v4-runtime-candidate@20260901.005",
+      "migration_id": "migration@20260901.005",
+      "depends_on": [
+        "migration@20260901.004"
+      ],
+      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
+      "content_sha256_noncanonical": "7e6b11c886bf69df3448d866001cc012856023d5756e0d38d3b818f5539e976e",
+      "status": "RUNTIME_VALIDATION_CANDIDATE",
+      "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
+    },
+    {
+      "sequence": 6,
+      "name": "v4-governance-audit",
+      "source_design_file": "database/migrations/v4/0006_governance_audit.sql",
+      "source_design_commit": "cd7ebfd5135275536c2d54ca1ecd980bb386dcfa",
+      "candidate_file": "database/migrations/v4_runtime_candidate/0006_governance_audit.sql",
+      "candidate_identity": "v4-runtime-candidate@20260901.006",
+      "migration_id": "migration@20260901.006",
+      "depends_on": [
+        "migration@20260901.005"
+      ],
+      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
+      "content_sha256_noncanonical": "ea6561889e6eb405ce281f0bcac98e4cf1c05c910216ae9cca5a9bf014f286b6",
+      "status": "RUNTIME_VALIDATION_CANDIDATE",
+      "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
+    },
+    {
+      "sequence": 7,
+      "name": "v4-security-rls",
+      "source_design_file": "database/migrations/v4/0007_security_rls.sql",
+      "source_design_commit": "cd7ebfd5135275536c2d54ca1ecd980bb386dcfa",
+      "candidate_file": "database/migrations/v4_runtime_candidate/0007_security_rls.sql",
+      "candidate_identity": "v4-runtime-candidate@20260901.007",
+      "migration_id": "migration@20260901.007",
+      "depends_on": [
+        "migration@20260901.006"
+      ],
+      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
+      "content_sha256_noncanonical": "f75b579fbc402de74e33f8fd1d5a3a6e670784ba8731a5854bd49d039d1274d8",
+      "status": "RUNTIME_VALIDATION_CANDIDATE",
+      "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
+    },
+    {
+      "sequence": 8,
+      "name": "v4-views-projections",
+      "source_design_file": "database/migrations/v4/0008_views_projections.sql",
+      "source_design_commit": "cd7ebfd5135275536c2d54ca1ecd980bb386dcfa",
+      "candidate_file": "database/migrations/v4_runtime_candidate/0008_views_projections.sql",
+      "candidate_identity": "v4-runtime-candidate@20260901.008",
+      "migration_id": "migration@20260901.008",
+      "depends_on": [
+        "migration@20260901.007"
+      ],
+      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
+      "content_sha256_noncanonical": "1264ab43d7f32e3f387aede6e537dbf3934c2dee6efbf9b7b8418d97bcbcece9",
+      "status": "RUNTIME_VALIDATION_CANDIDATE",
+      "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
+    },
+    {
+      "sequence": 9,
+      "name": "v4-seed-smoke",
+      "source_design_file": "database/migrations/v4/0009_seed_and_smoke.sql",
+      "source_design_commit": "cd7ebfd5135275536c2d54ca1ecd980bb386dcfa",
+      "candidate_file": "database/migrations/v4_runtime_candidate/0009_seed_and_smoke.sql",
+      "candidate_identity": "v4-runtime-candidate@20260901.009",
+      "migration_id": "migration@20260901.009",
+      "depends_on": [
+        "migration@20260901.008"
+      ],
+      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
+      "content_sha256_noncanonical": "3ee7af8c3b4357c87fcada758cfaefb283b319f328548103170090bd688fbdec",
+      "status": "RUNTIME_VALIDATION_CANDIDATE",
+      "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
+    }
+  ],
+  "dependency_graph": [
+    {
+      "migration_id": "migration@20260901.001",
+      "depends_on": []
+    },
+    {
+      "migration_id": "migration@20260901.002",
+      "depends_on": [
+        "migration@20260901.001"
+      ]
+    },
+    {
+      "migration_id": "migration@20260901.003",
+      "depends_on": [
+        "migration@20260901.002"
+      ]
+    },
+    {
+      "migration_id": "migration@20260901.004",
+      "depends_on": [
+        "migration@20260901.003"
+      ]
+    },
+    {
+      "migration_id": "migration@20260901.005",
+      "depends_on": [
+        "migration@20260901.004"
+      ]
+    },
+    {
+      "migration_id": "migration@20260901.006",
+      "depends_on": [
+        "migration@20260901.005"
+      ]
+    },
+    {
+      "migration_id": "migration@20260901.007",
+      "depends_on": [
+        "migration@20260901.006"
+      ]
+    },
+    {
+      "migration_id": "migration@20260901.008",
+      "depends_on": [
+        "migration@20260901.007"
+      ]
+    },
+    {
+      "migration_id": "migration@20260901.009",
+      "depends_on": [
+        "migration@20260901.008"
+      ]
+    }
+  ],
+  "disposable_safe_decisions": [
+    "Fresh local PostgreSQL 16 container only; no production connection string is accepted.",
+    "pgcrypto is installed in public; extension availability/version in production remains PRODUCTION_REVIEW_REQUIRED.",
+    "V4 schemas are new local namespaces; production coexistence/ownership remains PRODUCTION_REVIEW_REQUIRED.",
+    "Session timezone is explicitly UTC.",
+    "No-login local roles are created without passwords; service_role BYPASSRLS is disposable-only.",
+    "security_invoker views require the disposable PostgreSQL 16 baseline; production support remains PRODUCTION_REVIEW_REQUIRED.",
+    "Audit entry hashes use disposable-runtime-audit-envelope@1.0; canonical production audit profile remains PRODUCTION_REVIEW_REQUIRED."
+  ],
+  "production_review_required": [
+    "Canonical migration byte profile and real migration hashes.",
+    "Supabase extension availability/version and schema ownership/namespace coexistence.",
+    "Production role mapping, ownership, service_role policy, and security_invoker support.",
+    "Production audit envelope/hash profile and controlled release executor identity.",
+    "Reconciliation of the existing V4-012 schema snapshot catalog with the migration history/audit tables retained by 0001/0009."
+  ],
+  "runtime_execution_policy": {
+    "allowed_target_identity": "DISPOSABLE_LOCAL or explicitly approved STAGING",
+    "production_apply": "FORBIDDEN",
+    "v333_mutation": "FORBIDDEN",
+    "business_seed_data": "NONE",
+    "next_gate": "Pre-BATCH-04 Runtime Validation Gate after disposable DB bootstrap"
+  }
+}
