@@ -65,3 +65,14 @@ V4-009 Canonical Data Model Commit: `2dddc6c358cf873ccd3356be4f38e5a743fc476d`
 V4-009 Checklist Confirmation Commit: this follow-up documentation commit
 V4-010 Database Schema Blueprint Commit: `3ac871b`
 V4-010 Checklist Confirmation Commit: this follow-up documentation commit
+
+## V4-012–V4-100 Batch Mapping
+
+Planning Audit Status: `BLOCKED` — the current repository contains no authoritative task entries for V4-013–V4-100. This section records the gap without changing any checklist completion state.
+
+| Task ID range | Source task name status | Candidate Batch ID | Classification status |
+|---|---|---|---|
+| V4-012 | Verified: Migration Dry-Run & Validation Harness Design 1.0 | BATCH-01 (provisional) | `BATCHABLE + SERIAL` |
+| V4-013–V4-100 | No source entries found in this checklist, repository, or reachable Git history | `UNASSIGNED` | `UNRESOLVED` — no permitted label assigned |
+
+The complete per-ID audit is in `docs/V4_EXECUTION_CLASSIFICATION.md`. No V4-012+ item is marked `[x]`; this mapping is not permission to begin V4-012.
