@@ -1,6 +1,6 @@
 # JCFB V4 Runtime Access Matrix 1.0
 
-Status: V4-007 ACCEPTANCE PENDING
+Status: V4-007 COMPLETE
 
 ## 1. Purpose and scope
 

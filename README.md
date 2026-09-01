@@ -7,7 +7,8 @@ EARLY DEVELOPMENT
 
 Current Build Stage:
 V4-006 COMPLETE
-V4-007 NEXT
+V4-007 COMPLETE
+V4-008 NEXT
 
 Legacy Production:
 JCFB V3.3.3 remains independent and unchanged.
@@ -69,4 +70,4 @@ The architecture target is a design direction only at this bootstrap stage. Prod
 
 ## Current scope
 
-V4-001 through V4-006 are complete. V4-007 Production / Shadow / Experiment Boundary has not started.
+V4-001 through V4-007 are complete. V4-008 has not started.
