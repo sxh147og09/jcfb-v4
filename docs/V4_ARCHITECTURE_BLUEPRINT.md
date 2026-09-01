@@ -213,6 +213,8 @@ Before Frozen Prediction, `Frozen Input 4.0` freezes match identity, odds snapsh
 
 `Frozen Prediction 4.0` stores the five-market outputs, engine-output references, score-distribution reference, simulation summary, consensus, disagreement, uncertainty, risk, model version, input hash, output hash, and `frozen_at`. It is immutable. A later correction is a new append-only revision with a `supersedes` pointer and complete audit trail.
 
+The complete product/component version tuple, selector identity, config/schema/migration/dataset versions, role-scoped revisions, and hash contract are defined in `docs/V4_VERSIONING_STANDARD.md` and `docs/V4_VERSION_IDENTITY_CONTRACT.md`. Compatibility and release naming are governed by the companion V4-006 policies.
+
 ## 12. Roles and lifecycle after freeze
 
 | Role | Purpose | Allowed effect |
@@ -263,4 +265,4 @@ The following remain outside this Blueprint task:
 - Production or Shadow execution
 - historical odds, match, or Tier A import
 - V3.3.3 changes or migration
-- V4-005 Constitution 1.0 and later tasks
+- V4-007 Production / Shadow / Experiment Boundary and later tasks

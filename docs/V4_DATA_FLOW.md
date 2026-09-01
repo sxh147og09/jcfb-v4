@@ -126,6 +126,8 @@ The provenance record must make it possible to answer which source observation, 
 
 The frozen record produces `frozen_input_hash`. Production, Shadow, and Experiment runs may be compared only when they use the same frozen input hash and declare their separate role.
 
+Each run also retains the exact `dataset_version`, component versions, config/schema/migration versions, role-scoped revision, and required hashes defined by `docs/V4_VERSION_IDENTITY_CONTRACT.md`.
+
 ## 9. Feature and engine handoff
 
 Only validated and time-eligible data enters the Feature Representation Layer. It emits versioned bundles for statistical, football-context, market, league, tactical, score, and quality features. Engines consume feature bundles rather than arbitrary raw source rows.

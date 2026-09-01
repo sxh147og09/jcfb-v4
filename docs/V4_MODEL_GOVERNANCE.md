@@ -47,6 +47,8 @@ Every registered model or engine must declare:
 
 Every formal run must additionally record `config_hash`, `input_hash`, `output_hash`, `run_at`, and `runtime_environment`. A random simulation records `random_seed` and `simulation_version`.
 
+The complete field-level identity envelope, role-scoped revisions, canonical hash boundaries, compatibility outcomes, and release naming rules are defined in `docs/V4_VERSION_IDENTITY_CONTRACT.md`, `docs/V4_VERSIONING_STANDARD.md`, `docs/V4_COMPATIBILITY_POLICY.md`, and `docs/V4_RELEASE_NAMING.md`.
+
 Changing an algorithm, feature, weight, selector, calibration method, simulation behavior, league profile, or threshold creates a new implementation/config/version identity. A parameter change cannot be hidden under an old version number.
 
 ## 4. Roles

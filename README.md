@@ -6,8 +6,8 @@ Status:
 EARLY DEVELOPMENT
 
 Current Build Stage:
-V4-005 COMPLETE
-V4-006 NEXT
+V4-006 COMPLETE
+V4-007 NEXT
 
 Legacy Production:
 JCFB V3.3.3 remains independent and unchanged.
@@ -25,6 +25,8 @@ Governance:
 JCFB V4 is governed by:
 
 [`docs/V4_CONSTITUTION.md`](docs/V4_CONSTITUTION.md)
+
+Exact version identity, hash, compatibility, and release naming are governed by [`docs/V4_VERSIONING_STANDARD.md`](docs/V4_VERSIONING_STANDARD.md), [`docs/V4_VERSION_IDENTITY_CONTRACT.md`](docs/V4_VERSION_IDENTITY_CONTRACT.md), [`docs/V4_COMPATIBILITY_POLICY.md`](docs/V4_COMPATIBILITY_POLICY.md), and [`docs/V4_RELEASE_NAMING.md`](docs/V4_RELEASE_NAMING.md).
 
 The Constitution governs Production, Shadow, Experiment, data pipelines, engines, simulation, calibration, review, Tier A, promotion, Public Web, Codex Agents, and Human Operators.
 
@@ -65,4 +67,4 @@ The architecture target is a design direction only at this bootstrap stage. Prod
 
 ## Current scope
 
-V4-001 through V4-005 are complete. V4-006 Versioning Standard has not started.
+V4-001 through V4-006 are complete. V4-007 Production / Shadow / Experiment Boundary has not started.

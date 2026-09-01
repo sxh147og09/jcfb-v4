@@ -145,6 +145,8 @@ At minimum, a model run references:
 
 The same `frozen_input_hash` is required for valid Production / Shadow / Experiment A/B comparisons. A different fact snapshot, feature bundle, cutoff, or configuration is a different run even when the match identity is the same.
 
+The full V4 run identity, including dataset/schema/migration versions, role-scoped revisions, and hash canonicalization, is defined in `docs/V4_VERSION_IDENTITY_CONTRACT.md` and must remain private to the consuming model line.
+
 ## 10. Isolation and benchmark rules
 
 V3.3.3 and V4 may produce independent predictions for the same canonical match. A Cross-Version Benchmark may read both frozen records and the official result to calculate comparison metrics. It must not:

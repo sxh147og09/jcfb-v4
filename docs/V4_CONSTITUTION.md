@@ -8,7 +8,7 @@ This Constitution is the highest governance rule for JCFB V4. It binds every Pro
 
 If an implementation, instruction, convenience, performance optimization, or human preference conflicts with this Constitution, the Constitution wins. A conflict is recorded as `BLOCKED` until formally resolved through a new, auditable governance decision.
 
-This document defines integrity and governance rules. It does not implement a model, select Production parameters, create a database schema, run a prediction, or authorize V4-006.
+This document defines integrity and governance rules. It does not implement a model, select Production parameters, create a database schema, run a prediction, or authorize later implementation tasks.
 
 ## Article 1 — Truth Before Prediction
 
@@ -87,6 +87,8 @@ Same implementation, same configuration, and same Frozen Input must produce the 
 “Latest model”, “the model just changed”, and “the current version” are not auditable identities. Every model and engine must identify `model_name`, `major`, `minor`, `patch`, `revision`, `engine_version`, `config_version`, and `status`.
 
 Examples include `JCFB V4.0.0`, `Score Engine 4.0.0`, and `Exact Score Selector 4.0.0`. A parameter, feature, algorithm, selector, threshold, or calibration change cannot remain under the same version identity silently.
+
+The field-level identity contract, hash boundaries, compatibility policy, and release grammar are defined in `docs/V4_VERSIONING_STANDARD.md`, `docs/V4_VERSION_IDENTITY_CONTRACT.md`, `docs/V4_COMPATIBILITY_POLICY.md`, and `docs/V4_RELEASE_NAMING.md`.
 
 ## Article 9 — No Silent Defaults
 
@@ -290,4 +292,4 @@ JCFB V4 must not modify JCFB V3.3.3 code, model parameters, predictions, Frozen 
 
 ## Enforcement and precedence
 
-Constitutional violations default to `BLOCKED`, `RUN_INVALID`, or `NOT_VERIFIED` according to the affected lifecycle. No downstream layer may silently repair or hide a violation. Machine-oriented rules are catalogued in `docs/V4_INTEGRITY_RULES.md`; temporal decisions are defined in `docs/V4_TIME_AND_INFORMATION_POLICY.md`; lifecycle, correction, and incident handling are defined in the companion governance documents.
+Constitutional violations default to `BLOCKED`, `RUN_INVALID`, or `NOT_VERIFIED` according to the affected lifecycle. No downstream layer may silently repair or hide a violation. Machine-oriented rules are catalogued in `docs/V4_INTEGRITY_RULES.md`; temporal decisions are defined in `docs/V4_TIME_AND_INFORMATION_POLICY.md`; lifecycle, correction, incident, and exact version handling are defined in `docs/V4_MODEL_GOVERNANCE.md`, `docs/V4_CORRECTION_POLICY.md`, `docs/V4_INCIDENT_POLICY.md`, and the V4-006 versioning documents.

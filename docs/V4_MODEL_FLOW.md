@@ -82,6 +82,8 @@ run_at
 runtime_ms
 ```
 
+The complete V4 run identity additionally includes product, model, selector, config, schema, migration, dataset, Frozen, role-scoped revision, lifecycle, compatibility, and runtime fields defined in `docs/V4_VERSION_IDENTITY_CONTRACT.md`.
+
 An engine output must identify its role as `PRODUCTION`, `SHADOW`, or `EXPERIMENT`. Raw output is retained even when a downstream gate rejects it.
 
 ## 5. Statistical and intelligence inputs

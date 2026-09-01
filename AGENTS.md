@@ -22,6 +22,15 @@ These rules apply to all work inside the JCFB V4 repository.
 13. A completed checklist item requires engineering evidence.
 14. If information is unknown, record `UNKNOWN` / `BLOCKED` / `NOT_IMPLEMENTED`. Never invent completion.
 
+## Version governance
+
+V4-006 establishes the exact version identity contract in [`docs/V4_VERSIONING_STANDARD.md`](docs/V4_VERSIONING_STANDARD.md), [`docs/V4_VERSION_IDENTITY_CONTRACT.md`](docs/V4_VERSION_IDENTITY_CONTRACT.md), [`docs/V4_COMPATIBILITY_POLICY.md`](docs/V4_COMPATIBILITY_POLICY.md), and [`docs/V4_RELEASE_NAMING.md`](docs/V4_RELEASE_NAMING.md).
+
+- Every formal artifact uses explicit `jcfb_version`, model/engine/selector/config/schema/migration/dataset versions, role-scoped revisions, lifecycle `status`, and the required hashes.
+- `PRODUCTION`, `SHADOW`, and `EXPERIMENT` identities remain isolated. A role revision cannot be copied into another role.
+- `latest`, `current`, `default`, or an equivalent nickname is never a model, engine, selector, config, dataset, release, or run identity.
+- Version, revision, status, compatibility, and hash changes are append-only and require the evidence and promotion rules defined by the linked contracts.
+
 ## Repository boundary
 
 All V4 changes must stay inside this repository. The V3.3.3 repository, database history, frozen predictions, historical predictions, reviews, and model parameters are protected external assets. They must not be copied, migrated, renamed, or edited as part of V4 bootstrap work.

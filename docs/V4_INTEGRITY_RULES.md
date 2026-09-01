@@ -28,6 +28,8 @@ This catalogue translates Constitutional rules into checks that can be enforced 
 | INT-016 | `TIER_A_NO_CHERRY_PICKING`: V4 Tier A uses predeclared complete samples beginning at Sample #001 | CRITICAL | Tier A Registration | `TIER_A_ELIGIBLE=FALSE` |
 | INT-017 | `PUBLIC_WEB_READ_ONLY`: Public Web reads a projection and never executes or mutates a model | HIGH | Publication, Web boundary | Publication blocked; incident if exposed |
 | INT-018 | `V333_ISOLATION`: V4 cannot modify V3.3.3 code, history, outputs, samples, or parameters | CRITICAL | Repository, Data, Benchmark | Operation blocked; isolation incident |
+| INT-019 | `VERSION_IDENTITY_COMPLETE`: every registered component and formal run carries the exact V4 version tuple, role-scoped revision, lifecycle state, and required lineage fields | CRITICAL | Registry, Run Admission, Freeze, Promotion | `NOT_AUDITABLE`; `BLOCKED` |
+| INT-020 | `COMPATIBILITY_DECLARED`: every released or promoted artifact declares compatibility level and required schema/migration/adapter evidence | HIGH | Release, Adapter, Promotion Review | `COMPATIBILITY_BLOCKED`; `BLOCKED` |
 
 ## Enforcement semantics
 
@@ -39,4 +41,4 @@ This catalogue translates Constitutional rules into checks that can be enforced 
 
 ## Minimum run evidence
 
-An eligible formal engine run references `model_version`, `engine_version`, `implementation_hash`, `config_hash`, `input_hash`, `output_hash`, `run_at`, `runtime_environment`, the cutoff, and the Frozen Input identity. A stochastic run additionally records `random_seed` and `simulation_version`.
+An eligible formal engine run references `jcfb_version`, `model_name`, `model_version`, `major`, `minor`, `patch`, `revision`, `engine_version`, `selector_version` when applicable, `config_version`, `schema_version`, `migration_version`, `dataset_version`, role-scoped revisions, `implementation_hash`, `config_hash`, `input_hash`, `output_hash`, `run_at`, `runtime_environment`, the cutoff, and the Frozen Input identity. A stochastic run additionally records `random_seed` and `simulation_version`. The field-level requirements are defined in `docs/V4_VERSION_IDENTITY_CONTRACT.md`; compatibility is defined in `docs/V4_COMPATIBILITY_POLICY.md`.
