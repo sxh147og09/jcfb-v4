@@ -60,7 +60,9 @@ $env:PYTHONPYCACHEPREFIX
 
 `F:\Projects\jcfb-v4\.runtime\postgres\`
 
-因此以后从该 compose 文件启动的临时 PostgreSQL 数据落在 F 盘。现有 Docker 命名卷 `jcfb-v4-disposable-pg-data` 不会被自动删除；它可能仍占用 Docker Desktop 的默认存储位置，只有确认不再需要后才应单独处理。
+因此以后从该 compose 文件启动的临时 PostgreSQL 数据落在 F 盘。当前运行时不再声明 Docker 命名卷；如果旧版本留下了 `jcfb-v4-disposable-pg-data`，它不属于当前运行时，且本次修复不会自动删除或迁移它。
+
+该 compose 使用项目范围内的普通 bridge network，不使用 `internal: true`，以避免 Docker Desktop/WSL2 下声明的 host binding 没有落到实际 `NetworkSettings.Ports`。主机端口仍固定只绑定 `127.0.0.1:55432`，因此不会产生公网监听。
 
 运行入口仍是：
 

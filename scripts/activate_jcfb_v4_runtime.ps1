@@ -129,8 +129,8 @@ function Import-JcfbV4RuntimeEnvironment {
     if ([string]$values['JCFB_V4_RUNTIME_DB_HOST'] -ne '127.0.0.1') {
         throw 'Disposable runtime database host must be 127.0.0.1.'
     }
-    if ([string]$values['JCFB_V4_RUNTIME_DB_PORT'] -ne '5433') {
-        throw 'Disposable runtime database host port must be 5433.'
+    if ([string]$values['JCFB_V4_RUNTIME_DB_PORT'] -ne '55432') {
+        throw 'Disposable runtime database host port must be 55432.'
     }
     if ([string]$values['JCFB_V4_RUNTIME_DB_SSLMODE'] -notin @('disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full')) {
         throw 'Disposable runtime database sslmode is not supported.'

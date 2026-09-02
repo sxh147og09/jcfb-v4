@@ -24,9 +24,9 @@ written. No Production Supabase target was inspected.
 - docker-compose.runtime-validation.yml
   - PostgreSQL 16 Alpine baseline
   - explicit local container name jcfb-v4-disposable-pg
-  - host binding 127.0.0.1:5433 only
-  - internal-only Compose network
-  - named disposable volume jcfb-v4-disposable-pg-data
+  - host binding 127.0.0.1:55432 only
+  - project-scoped ordinary bridge network
+  - F-drive bind at .runtime/postgres
   - healthcheck and no restart policy
 - .env.runtime-validation.example
   - database and owner placeholders
@@ -56,17 +56,32 @@ committed. Its password is not present in this repository or in the report.
 
    .\scripts\v4_disposable_runtime.ps1 -Action readiness
 
-The wrapper uses only DISPOSABLE_LOCAL, binds only to localhost port 5433,
+The wrapper uses only DISPOSABLE_LOCAL, binds only to localhost port 55432,
 and does not contain a Production Supabase connection path. It will report a
 blocked status instead of bypassing a missing prerequisite.
 
+## Network and actual-port safety
+
+The disposable PostgreSQL service uses the Compose project's ordinary bridge
+network. It intentionally does not use `internal: true`: operator evidence on
+Docker Desktop/WSL2 showed that the internal network could leave the declared
+host binding in `HostConfig.PortBindings` while the actual
+`NetworkSettings.Ports` remained empty. The wrapper now requires both actual
+`NetworkSettings.Ports` and `docker port` to report exactly
+`127.0.0.1:55432 -> 5432` before readiness can pass.
+
+Isolation is provided by the disposable project network, the loopback-only
+host binding, fresh ephemeral credentials, the F-drive data bind, and the
+Production hard-block. Removing `internal: true` does not create a public host
+listener; the published host address remains fixed to `127.0.0.1`.
+
 ## Cleanup
 
-Stop while preserving the temporary volume:
+Stop while preserving the F-drive data bind:
 
 .\scripts\v4_disposable_runtime.ps1 -Action stop
 
-Destroy the named temporary container and volume after validation:
+Destroy the named temporary container and its F-drive data directory after validation:
 
 .\scripts\v4_disposable_runtime.ps1 -Action destroy -ConfirmDestroy
 

@@ -28,6 +28,7 @@ REQUIRED_FILES = (
     "tools/migration_harness/runtime_audit.py",
     "scripts/v4_run_prebatch04_runtime_validation.ps1",
     "scripts/v4_prebatch04_readiness_gate.psm1",
+    "scripts/v4_disposable_runtime_contract.psm1",
     "tests/migration_harness/test_prebatch04_readiness_gate.ps1",
     "docs/V4_CANONICAL_MIGRATION_HASH.md",
     "docs/V4_RUNTIME_EXECUTOR.md",
@@ -40,6 +41,7 @@ ACTIVE_STORAGE_FILES = (
     "docker-compose.runtime-validation.yml",
     ".env.runtime-validation.example",
     "scripts/v4_disposable_runtime.ps1",
+    "scripts/v4_disposable_runtime_contract.psm1",
     "scripts/activate_jcfb_v4_runtime.ps1",
     "scripts/v4_run_prebatch04_runtime_validation.ps1",
     "docs/JCFB_V4_LOCAL_STORAGE.md",
@@ -102,11 +104,23 @@ def _storage_policy(repo_root: Path) -> Dict[str, Any]:
     compose = (repo_root / "docker-compose.runtime-validation.yml").read_text(encoding="utf-8") if (repo_root / "docker-compose.runtime-validation.yml").is_file() else ""
     activate = (repo_root / "scripts/activate_jcfb_v4_runtime.ps1").read_text(encoding="utf-8") if (repo_root / "scripts/activate_jcfb_v4_runtime.ps1").is_file() else ""
     wrapper = (repo_root / "scripts/v4_run_prebatch04_runtime_validation.ps1").read_text(encoding="utf-8") if (repo_root / "scripts/v4_run_prebatch04_runtime_validation.ps1").is_file() else ""
+    helper = (repo_root / "scripts/v4_disposable_runtime.ps1").read_text(encoding="utf-8") if (repo_root / "scripts/v4_disposable_runtime.ps1").is_file() else ""
+    port_contract = (repo_root / "scripts/v4_disposable_runtime_contract.psm1").read_text(encoding="utf-8") if (repo_root / "scripts/v4_disposable_runtime_contract.psm1").is_file() else ""
     example = (repo_root / ".env.runtime-validation.example").read_text(encoding="utf-8") if (repo_root / ".env.runtime-validation.example").is_file() else ""
     if "./.runtime/postgres" not in compose:
         issues.append("POSTGRES_PATH_NOT_REPO_RELATIVE")
-    if '"127.0.0.1:5433:5432"' not in compose:
+    if '"127.0.0.1:55432:5432"' not in compose:
         issues.append("POSTGRES_HOST_PORT_NOT_LOCALHOST")
+    if "driver: bridge" not in compose:
+        issues.append("DISPOSABLE_NETWORK_NOT_PROJECT_BRIDGE")
+    if "internal: true" in compose:
+        issues.append("DISPOSABLE_NETWORK_INTERNAL_BLOCK_RISK")
+    if "0.0.0.0" in compose:
+        issues.append("POSTGRES_HOST_PORT_WILDCARD_BINDING")
+    if ".NetworkSettings.Ports" not in helper:
+        issues.append("POSTGRES_ACTUAL_PORT_INSPECTION_MISSING")
+    if "& docker port" not in helper or "Test-DisposableHostPortEvidence" not in helper or "NetworkSettings.Ports" not in port_contract:
+        issues.append("POSTGRES_DOCKER_PORT_CHECK_MISSING")
     if ".runtime" not in activate:
         issues.append("RUNTIME_ENV_NOT_PROJECT_SCOPED")
     if "Import-JcfbV4RuntimeEnvironment" not in activate or "LoadRuntimeEnvironment" not in activate:
@@ -121,6 +135,10 @@ def _storage_policy(repo_root: Path) -> Dict[str, Any]:
     ):
         if required_name not in example:
             issues.append(f"RUNTIME_ENV_EXAMPLE_MISSING:{required_name}")
+    if "JCFB_V4_RUNTIME_DB_HOST=127.0.0.1" not in example:
+        issues.append("RUNTIME_ENV_EXAMPLE_HOST_NOT_LOOPBACK")
+    if "JCFB_V4_RUNTIME_DB_PORT=55432" not in example:
+        issues.append("RUNTIME_ENV_EXAMPLE_PORT_NOT_55432")
     if "JCFB_V4_PYTHON_VENV" not in wrapper or "Get-Command python" in wrapper:
         issues.append("RUNTIME_PYTHON_FALLBACK_OR_PATH_MISSING")
     return {"status": "PASS" if not issues else "FAIL", "files": inspected, "issues": issues}

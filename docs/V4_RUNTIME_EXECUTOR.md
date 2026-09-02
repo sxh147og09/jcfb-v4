@@ -110,7 +110,9 @@ socket is reported as an invoked connector failure rather than as
 
 Passwords, URLs, and driver exception text are never serialized. The
 disposable PowerShell readiness helper separately blocks a healthy container
-when `127.0.0.1:5433 -> 5432` is absent or bound to any non-loopback address.
+unless both actual `NetworkSettings.Ports` and `docker port` report
+`127.0.0.1:55432 -> 5432`; any missing, empty, wildcard, or other host
+binding is blocked.
 
 ## Runtime case adapter
 

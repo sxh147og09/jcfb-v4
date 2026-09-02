@@ -12,16 +12,22 @@ if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
 $RepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 $composeFile = Join-Path $RepoRoot 'docker-compose.runtime-validation.yml'
 $localEnvFile = Join-Path $RepoRoot '.env.runtime-validation.local'
+$portContractModule = Join-Path $PSScriptRoot 'v4_disposable_runtime_contract.psm1'
 $containerName = 'jcfb-v4-disposable-pg'
 $projectRuntimeRoot = Join-Path $RepoRoot '.runtime'
 $postgresDataDir = Join-Path $projectRuntimeRoot 'postgres'
 $expectedHostAddress = '127.0.0.1'
-$expectedHostPort = '5433'
+$expectedHostPort = '55432'
 $expectedContainerPort = '5432'
+
+if (-not (Test-Path -LiteralPath $portContractModule -PathType Leaf)) {
+    throw 'The disposable runtime host-port contract module is missing.'
+}
+Import-Module -Name $portContractModule -Force
 
 # The compose file uses a repository-relative bind mount. Create the host
 # directory explicitly so the runtime cannot fall back to a Docker named
-# volume whose storage location is controlled by Docker Desktop.
+# Docker-managed named storage whose location is controlled by Docker Desktop.
 $null = New-Item -ItemType Directory -Force -Path $postgresDataDir
 
 function Stop-WithStatus {
@@ -60,31 +66,22 @@ function Test-DisposableHostPort {
         }
     }
 
-    $containerKey = '{0}/tcp' -f $expectedContainerPort
-    $bindings = @($ports.$containerKey)
-    if ($null -eq $ports -or $bindings.Count -eq 0 -or $null -eq $bindings[0]) {
+    $dockerPortLines = @(& docker port $containerName $expectedContainerPort 2>$null)
+    $dockerPortExitCode = $LASTEXITCODE
+    if ($dockerPortExitCode -ne 0) {
         return [pscustomobject]@{
             Passed = $false
             Status = 'BLOCKED_DISPOSABLE_POSTGRES_HOST_PORT_MISSING'
-            Message = 'The disposable PostgreSQL container does not publish its port to the host.'
+            Message = 'docker port could not report an actual PostgreSQL host port mapping.'
         }
     }
 
-    foreach ($binding in $bindings) {
-        if ([string]$binding.HostIp -ne $expectedHostAddress -or [string]$binding.HostPort -ne $expectedHostPort) {
-            return [pscustomobject]@{
-                Passed = $false
-                Status = 'BLOCKED_DISPOSABLE_POSTGRES_HOST_PORT_NOT_LOCALHOST'
-                Message = 'The disposable PostgreSQL port must be bound only to 127.0.0.1:5433.'
-            }
-        }
-    }
-
-    return [pscustomobject]@{
-        Passed = $true
-        Status = 'PASS'
-        Message = 'The disposable PostgreSQL host port is bound to 127.0.0.1:5433.'
-    }
+    return Test-DisposableHostPortEvidence `
+        -NetworkSettingsPorts $ports `
+        -DockerPortLines $dockerPortLines `
+        -ExpectedHostAddress $expectedHostAddress `
+        -ExpectedHostPort $expectedHostPort `
+        -ExpectedContainerPort $expectedContainerPort
 }
 
 if (-not (Test-Path -LiteralPath $composeFile -PathType Leaf)) {
@@ -129,10 +126,14 @@ switch ($Action) {
         if ($LASTEXITCODE -ne 0) {
             Stop-WithStatus 'BLOCKED_DISPOSABLE_RUNTIME_START' 'Docker Compose could not start the local disposable PostgreSQL container.'
         }
+        $hostPortCheck = Test-DisposableHostPort
+        if (-not $hostPortCheck.Passed) {
+            Stop-WithStatus $hostPortCheck.Status $hostPortCheck.Message
+        }
         Write-Output 'DISPOSABLE_RUNTIME_START=PASS'
         Write-Output 'TARGET_IDENTITY=DISPOSABLE_LOCAL'
         Write-Output 'CONTAINER=jcfb-v4-disposable-pg'
-        Write-Output 'BOUND_ADDRESS=127.0.0.1:5433->5432'
+        Write-Output 'BOUND_ADDRESS=127.0.0.1:55432->5432'
         Write-Output 'MIGRATIONS_APPLIED=NO'
     }
     'readiness' {
@@ -153,7 +154,7 @@ switch ($Action) {
         }
         Write-Output 'DISPOSABLE_RUNTIME_READINESS=PASS'
         Write-Output 'TARGET_IDENTITY=DISPOSABLE_LOCAL'
-        Write-Output 'DISPOSABLE_RUNTIME_HOST_PORT=127.0.0.1:5433->5432'
+        Write-Output 'DISPOSABLE_RUNTIME_HOST_PORT=127.0.0.1:55432->5432'
         Write-Output 'MIGRATIONS_APPLIED=NO'
         exit 0
     }
@@ -163,7 +164,7 @@ switch ($Action) {
             Stop-WithStatus 'BLOCKED_DISPOSABLE_RUNTIME_STOP' 'Docker Compose could not stop the local disposable PostgreSQL container.'
         }
         Write-Output 'DISPOSABLE_RUNTIME_STOP=PASS'
-        Write-Output 'VOLUME_PRESERVED=YES'
+        Write-Output 'DATA_BIND_PRESERVED=YES'
     }
     'destroy' {
         if (-not $ConfirmDestroy) {

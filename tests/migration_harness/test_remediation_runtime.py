@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import tempfile
 import unittest
@@ -234,7 +235,7 @@ class RemediationRuntimeTests(unittest.TestCase):
 
     def test_connector_connection_failure_is_invoked_and_classified(self):
         adapter = _ConnectFailureAdapter(TimeoutError("local socket timed out"))
-        settings = ConnectionSettings("127.0.0.1", 5433, "db", "user", "test-secret", "disable")
+        settings = ConnectionSettings("127.0.0.1", 55432, "db", "user", "test-secret", "disable")
         report = RuntimeExecutor(self.repo_root, connection_adapter=adapter).execute(
             target=default_disposable_target(),
             mode=ExecutionMode.APPLY,
@@ -252,7 +253,7 @@ class RemediationRuntimeTests(unittest.TestCase):
     def test_mocked_psycopg_connector_path_reaches_runtime_pass(self):
         driver = _MockPsycopg()
         adapter = PostgresConnectionAdapter(driver=driver, driver_name="psycopg")
-        settings = ConnectionSettings("127.0.0.1", 5433, "db", "user", "test-secret", "disable")
+        settings = ConnectionSettings("127.0.0.1", 55432, "db", "user", "test-secret", "disable")
         with patch.object(
             RuntimeExecutor,
             "_runtime_preflight",
@@ -279,23 +280,52 @@ class RemediationRuntimeTests(unittest.TestCase):
         self.assertTrue(report["execution_boundary"]["database_connected"])
         self.assertEqual("CONNECTED", report["connection"]["status"])
         self.assertEqual("127.0.0.1", driver.kwargs["host"])
-        self.assertEqual(5433, driver.kwargs["port"])
+        self.assertEqual(55432, driver.kwargs["port"])
         self.assertNotIn("url", driver.kwargs)
         self.assertNotIn("test-secret", json.dumps(report))
 
     def test_disposable_host_port_guard_is_localhost_only_and_fail_closed(self):
         compose = (self.repo_root / "docker-compose.runtime-validation.yml").read_text(encoding="utf-8")
         helper = (self.repo_root / "scripts/v4_disposable_runtime.ps1").read_text(encoding="utf-8")
-        self.assertIn('"127.0.0.1:5433:5432"', compose)
+        contract = (self.repo_root / "scripts/v4_disposable_runtime_contract.psm1").read_text(encoding="utf-8")
+        self.assertIn('"127.0.0.1:55432:5432"', compose)
         self.assertIn("Test-DisposableHostPort", helper)
-        self.assertIn("BLOCKED_DISPOSABLE_POSTGRES_HOST_PORT_MISSING", helper)
-        self.assertIn("BLOCKED_DISPOSABLE_POSTGRES_HOST_PORT_NOT_LOCALHOST", helper)
+        self.assertIn("BLOCKED_DISPOSABLE_POSTGRES_HOST_PORT_MISSING", contract)
+        self.assertIn("BLOCKED_DISPOSABLE_POSTGRES_HOST_PORT_NOT_LOCALHOST", contract)
         self.assertIn("127.0.0.1", helper)
+
+    def test_disposable_compose_contract_is_loopback_f_drive_bridge(self):
+        compose = (self.repo_root / "docker-compose.runtime-validation.yml").read_text(encoding="utf-8")
+        published = re.search(
+            r'(?m)^\s*-\s*"(?P<host_ip>[^:]+):(?P<host_port>\d+):(?P<container_port>\d+)"\s*$',
+            compose,
+        )
+        self.assertIsNotNone(published)
+        self.assertEqual("127.0.0.1", published.group("host_ip"))
+        self.assertEqual("55432", published.group("host_port"))
+        self.assertEqual("5432", published.group("container_port"))
+        self.assertIn("source: ./.runtime/postgres", compose)
+        self.assertIn("driver: bridge", compose)
+        self.assertNotRegex(compose, r"(?m)^\s*internal:\s*true\s*$")
+        self.assertNotIn("0.0.0.0", compose)
+
+    def test_disposable_readiness_checks_both_actual_port_surfaces(self):
+        helper = (self.repo_root / "scripts/v4_disposable_runtime.ps1").read_text(encoding="utf-8")
+        contract = (self.repo_root / "scripts/v4_disposable_runtime_contract.psm1").read_text(encoding="utf-8")
+        example = (self.repo_root / ".env.runtime-validation.example").read_text(encoding="utf-8")
+        activation = (self.repo_root / "scripts/activate_jcfb_v4_runtime.ps1").read_text(encoding="utf-8")
+        self.assertIn(".NetworkSettings.Ports", helper)
+        self.assertIn("& docker port", helper)
+        self.assertIn("Test-DisposableHostPortEvidence", helper)
+        self.assertIn("NetworkSettings.Ports", contract)
+        self.assertIn("docker port", contract)
+        self.assertIn("JCFB_V4_RUNTIME_DB_PORT=55432", example)
+        self.assertIn("must be 55432", activation)
 
     def test_connection_settings_redact_password(self):
         settings = ConnectionSettings(
             host="127.0.0.1",
-            port=5433,
+            port=55432,
             database="jcfb_v4_runtime",
             user="local_owner",
             password="test-secret",
@@ -357,7 +387,7 @@ class RemediationRuntimeTests(unittest.TestCase):
                 return object()
 
         driver = Driver()
-        settings = ConnectionSettings("127.0.0.1", 5433, "db", "user", "secret", "disable")
+        settings = ConnectionSettings("127.0.0.1", 55432, "db", "user", "secret", "disable")
         PostgresConnectionAdapter(driver=driver).connect(settings)
         self.assertEqual("127.0.0.1", driver.kwargs["host"])
         self.assertNotIn("url", driver.kwargs)

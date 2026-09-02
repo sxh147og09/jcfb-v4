@@ -42,13 +42,21 @@ settings as well as the database, owner, and password values:
 
 ```text
 JCFB_V4_RUNTIME_DB_HOST=127.0.0.1
-JCFB_V4_RUNTIME_DB_PORT=5433
+JCFB_V4_RUNTIME_DB_PORT=55432
 JCFB_V4_RUNTIME_DB_SSLMODE=disable
 ```
 
-The compose file publishes only `127.0.0.1:5433` to container port `5432`.
-Readiness now checks the actual container mapping, so an older container that
-shows healthy but has no host port is blocked before the Python connector.
+The compose file publishes only `127.0.0.1:55432` to container port `5432`.
+The service uses a project-scoped ordinary bridge network; it intentionally
+does not use `internal: true` because the prior Docker Desktop/WSL2 evidence
+showed the declared binding without an actual `NetworkSettings.Ports` entry.
+Readiness checks both actual `NetworkSettings.Ports` and `docker port`, so an
+older container that shows healthy but has no exact loopback host port is
+blocked before the Python connector.
+
+The disposable network, loopback-only host binding, ephemeral credentials,
+F-drive data bind, and Production hard-block together provide the isolation
+boundary. Removing `internal: true` does not expose a public host port.
 
 Start and check the local container explicitly:
 

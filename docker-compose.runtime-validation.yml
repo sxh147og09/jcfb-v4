@@ -7,7 +7,8 @@ services:
       POSTGRES_USER: ${JCFB_V4_RUNTIME_OWNER:-jcfb_v4_runtime_owner}
       POSTGRES_PASSWORD: ${JCFB_V4_RUNTIME_PASSWORD:?Set JCFB_V4_RUNTIME_PASSWORD in the local environment}
     ports:
-      - "127.0.0.1:5433:5432"
+      # Host exposure is loopback-only; the container port remains PostgreSQL's 5432.
+      - "127.0.0.1:55432:5432"
     volumes:
       # Relative bind mounts resolve from this repository, so disposable
       # PostgreSQL data is kept under F:\Projects\jcfb-v4\.runtime\postgres.
@@ -28,4 +29,7 @@ services:
 
 networks:
   jcfb-v4-local-only:
-    internal: true
+    # A project-scoped bridge is required for Docker Desktop to materialize
+    # the loopback host publish. Isolation is provided by the project network,
+    # loopback-only binding, ephemeral credentials, and the Production gate.
+    driver: bridge
