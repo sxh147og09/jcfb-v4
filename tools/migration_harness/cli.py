@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+from .canonical_hash import load_candidate_manifest, verify_candidate_hashes, write_candidate_hashes
 from .manifest import load_manifest
 from .models import ExecutionMode
 from .negative import run_negative_cases
@@ -15,6 +16,8 @@ from .report import build_batch_02_report
 from .acceptance import build_batch_03_report, render_batch_03_markdown, validate_batch_03_static
 from .readiness import assess_readiness, load_readiness_contract, load_staging_target_template, readiness_contract_summary, validate_target_manifest
 from .runner import DryRunRunner
+from .runtime_executor import RuntimeExecutor, default_disposable_target, write_runtime_report
+from .runtime_audit import run_remediation_self_audit
 from .schema_diff import compare_schema_snapshot, load_expected_snapshot
 from .smoke import load_smoke_catalog, runtime_pending_smoke_report
 
@@ -47,6 +50,18 @@ def build_parser() -> argparse.ArgumentParser:
     batch_report.add_argument("--generated-at", help="fixed ISO timestamp for reproducible evidence fixtures")
     batch_md = sub.add_parser("batch-03-markdown", help="render a BATCH-03 JSON package as Markdown")
     batch_md.add_argument("--report-json", required=True, help="path to an existing BATCH-03 JSON package")
+    hashes = sub.add_parser("canonical-hash", help="verify candidate canonical migration hashes")
+    hashes.add_argument("--write", action="store_true", help="explicitly write generated hashes to runtime candidates")
+    runtime = sub.add_parser("runtime-validate", help="plan or explicitly apply runtime candidates to a non-production target")
+    runtime.add_argument("--mode", choices=["PLAN_ONLY", "DRY_RUN", "APPLY", "PRODUCTION_APPLY"], help="explicit execution mode")
+    runtime.add_argument("--plan-only", action="store_true", help="explicit no-write plan mode (the default)")
+    runtime.add_argument("--dry-run", action="store_true", help="explicit no-write dry-run mode")
+    runtime.add_argument("--apply", action="store_true", help="explicitly allow an approved non-production apply")
+    runtime.add_argument("--production-apply", action="store_true", help="always hard-blocked compatibility switch")
+    runtime.add_argument("--target-json", help="explicit non-secret target descriptor")
+    runtime.add_argument("--database-name", default="jcfb_v4_runtime", help="non-secret local database identity used for the default disposable target")
+    runtime.add_argument("--write-report", action="store_true", help="write the redacted JSON and Markdown report under .runtime/reports")
+    sub.add_parser("remediation-audit", help="run the static PRE-BATCH-04 remediation self-audit without a connector")
     return parser
 
 
@@ -85,6 +100,27 @@ def main(argv=None) -> int:
             source_git_commit=args.source_git_commit,
             generated_at=args.generated_at,
         )
+    elif args.command == "canonical-hash":
+        value = write_candidate_hashes(repo_root) if args.write else verify_candidate_hashes(repo_root)
+    elif args.command == "runtime-validate":
+        mode_switches = [
+            ("PLAN_ONLY", args.plan_only),
+            ("DRY_RUN", args.dry_run),
+            ("APPLY", args.apply),
+            ("PRODUCTION_APPLY", args.production_apply),
+        ]
+        selected_switches = [mode for mode, selected in mode_switches if selected]
+        if args.mode and selected_switches:
+            raise SystemExit("Use --mode or one explicit runtime mode switch, not both")
+        if len(selected_switches) > 1:
+            raise SystemExit("Choose only one explicit runtime mode switch")
+        runtime_mode = args.mode or (selected_switches[0] if selected_switches else "PLAN_ONLY")
+        target = _load_target(args.target_json) if args.target_json else default_disposable_target(args.database_name)
+        value = RuntimeExecutor(repo_root).execute(target=target, mode=ExecutionMode(runtime_mode))
+        if args.write_report:
+            value["report_paths"] = write_runtime_report(value, repo_root)
+    elif args.command == "remediation-audit":
+        value = run_remediation_self_audit(repo_root)
     else:
         report_path = Path(args.report_json)
         value = render_batch_03_markdown(json.loads(report_path.read_text(encoding="utf-8")))

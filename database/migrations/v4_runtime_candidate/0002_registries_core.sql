@@ -6,7 +6,7 @@
 -- source_design_file: database/migrations/v4/0002_registries_core.sql
 -- source_design_commit: cd7ebfd5135275536c2d54ca1ecd980bb386dcfa
 -- candidate_manifest: database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.md
--- canonical_migration_hash: PENDING_CANONICAL_HASH
+-- canonical_migration_hash: sha256:7edfc9c4c2c0085f63d0e0860f0d2f74f6a1e85d9b1ac4e602571347e5dd332a
 -- production_status: PRODUCTION_REVIEW_REQUIRED
 --
 -- migration_id: migration@20260901.002
@@ -16,7 +16,7 @@
 -- depends_on: [migration@20260901.001]
 -- schema_contract_version: v4-database-schema@1.0.0
 -- authored_at: 2026-09-01T00:00:00+08:00
--- migration_hash: PENDING_CANONICAL_HASH
+-- migration_hash: sha256:7edfc9c4c2c0085f63d0e0860f0d2f74f6a1e85d9b1ac4e602571347e5dd332a
 -- status: DRAFT
 -- This candidate creates schema only; it seeds no business/runtime rows.
 

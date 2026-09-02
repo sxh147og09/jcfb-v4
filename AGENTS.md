@@ -47,6 +47,8 @@ Migration design files under `database/migrations/v4/` cannot be applied automat
 Production database writes require explicit Human Approver authorization; an unattended agent may not approve and execute the same Production migration.
 Applied migrations are immutable and are repaired only by new forward migrations; do not edit an applied file or history row.
 
+The Pre-BATCH-04 remediation package is documented in `docs/V4_CANONICAL_MIGRATION_HASH.md`, `docs/V4_RUNTIME_EXECUTOR.md`, and `docs/V4_PRE_BATCH_04_LOCAL_EXECUTION.md`. Its executor is plan-only by default, accepts only an explicit disposable/staging target, reads credentials from environment variables, and hard-blocks Production. It does not change V4-018/V4-019 or authorize BATCH-04; a pending or absent runtime case hook is never a pass.
+
 ## Constitutional Rules
 
 JCFB V4 is governed by [`docs/V4_CONSTITUTION.md`](docs/V4_CONSTITUTION.md). If an AGENTS instruction conflicts with `docs/V4_CONSTITUTION.md`, then `V4_CONSTITUTION.md` wins.

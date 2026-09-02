@@ -6,7 +6,7 @@
 -- source_design_file: database/migrations/v4/0004_frozen_runtime.sql
 -- source_design_commit: cd7ebfd5135275536c2d54ca1ecd980bb386dcfa
 -- candidate_manifest: database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.md
--- canonical_migration_hash: PENDING_CANONICAL_HASH
+-- canonical_migration_hash: sha256:660e64c210a370ac2e9d2ab13f7ac08b784caa0821df1ad0c4c81db7457ff7bb
 -- production_status: PRODUCTION_REVIEW_REQUIRED
 --
 -- migration_id: migration@20260901.004
@@ -16,7 +16,7 @@
 -- depends_on: [migration@20260901.003]
 -- schema_contract_version: v4-database-schema@1.0.0
 -- authored_at: 2026-09-01T00:00:00+08:00
--- migration_hash: PENDING_CANONICAL_HASH
+-- migration_hash: sha256:660e64c210a370ac2e9d2ab13f7ac08b784caa0821df1ad0c4c81db7457ff7bb
 -- status: DRAFT
 -- This candidate creates Frozen Input/runtime schema only; it performs no model execution.
 

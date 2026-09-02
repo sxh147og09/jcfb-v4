@@ -6,7 +6,7 @@
 -- source_design_file: database/migrations/v4/0005_evaluation.sql
 -- source_design_commit: cd7ebfd5135275536c2d54ca1ecd980bb386dcfa
 -- candidate_manifest: database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.md
--- canonical_migration_hash: PENDING_CANONICAL_HASH
+-- canonical_migration_hash: sha256:b4c5b6a276b42117a0dd830c56c8a8856f273c13016bf200838ba690b5e80394
 -- production_status: PRODUCTION_REVIEW_REQUIRED
 --
 -- migration_id: migration@20260901.005
@@ -16,7 +16,7 @@
 -- depends_on: [migration@20260901.004]
 -- schema_contract_version: v4-database-schema@1.0.0
 -- authored_at: 2026-09-01T00:00:00+08:00
--- migration_hash: PENDING_CANONICAL_HASH
+-- migration_hash: sha256:b4c5b6a276b42117a0dd830c56c8a8856f273c13016bf200838ba690b5e80394
 -- status: DRAFT
 -- Candidate postmatch/evaluation DDL only; no results or reviews are seeded.
 

@@ -78,8 +78,6 @@ for ($i = 0; $i -lt $expectedNames.Count; $i++) {
         'RUNTIME VALIDATION CANDIDATE',
         'DISPOSABLE/STAGING ONLY',
         'NOT APPROVED FOR PRODUCTION',
-        'canonical_migration_hash: PENDING_CANONICAL_HASH',
-        'migration_hash: PENDING_CANONICAL_HASH',
         'status: DRAFT',
         'production_status: PRODUCTION_REVIEW_REQUIRED'
     )) {
@@ -92,6 +90,8 @@ for ($i = 0; $i -lt $expectedNames.Count; $i++) {
     Assert-Check ($text -match ('(?m)^-- sequence: ' + $expectedSequence + '$')) ("{0} has incorrect sequence" -f $relative)
     Assert-Check ($text -match ('(?m)^-- name: ' + [regex]::Escape($expectedMigrationNames[$i]) + '$')) ("{0} has incorrect migration name" -f $relative)
     Assert-Check ($text -match '(?m)^-- schema_contract_version: v4-database-schema@1\.0\.0$') ("{0} has incorrect schema contract version" -f $relative)
+    Assert-Check ($text -match '(?m)^-- canonical_migration_hash: sha256:[0-9a-f]{64}$') ("{0} has no generated canonical_migration_hash" -f $relative)
+    Assert-Check ($text -match '(?m)^-- migration_hash: sha256:[0-9a-f]{64}$') ("{0} has no generated migration_hash" -f $relative)
     Assert-Check (([regex]::Matches($text, '(?im)^\s*BEGIN;\s*$')).Count -eq 1) ("{0} must contain one top-level BEGIN" -f $relative)
     Assert-Check (([regex]::Matches($text, '(?im)^\s*COMMIT;\s*$')).Count -eq 1) ("{0} must contain one top-level COMMIT" -f $relative)
     Assert-Check (([regex]::Matches($text, '\$\$')).Count % 2 -eq 0) ("{0} has unbalanced dollar-quoted blocks" -f $relative)
@@ -164,7 +164,9 @@ if (Test-Path -LiteralPath $jsonManifestPath -PathType Leaf) {
         Assert-Check ($manifest.candidate_directory -eq 'database/migrations/v4_runtime_candidate') 'Manifest candidate directory is incorrect'
         Assert-Check ($manifest.candidate_count -eq 9) 'Manifest candidate count is not 9'
         Assert-Check ($manifest.production_apply -eq 'HARD_BLOCK') 'Manifest production apply is not hard-blocked'
-        Assert-Check ($manifest.canonical_hash_status -eq 'PENDING_CANONICAL_HASH') 'Manifest canonical hash status is not pending'
+        Assert-Check ($manifest.canonical_hash_status -eq 'GENERATED_CANONICAL_HASHES') 'Manifest canonical hash status is not generated'
+        Assert-Check ($manifest.canonicalization.version -eq 'v4-canonical-migration@1.0.0') 'Manifest canonicalization version is invalid'
+        Assert-Check ($manifest.canonicalization.algorithm -eq 'SHA-256') 'Manifest canonicalization algorithm is invalid'
         Assert-Check (@($manifest.environment_allowlist) -contains 'DISPOSABLE_LOCAL') 'Manifest omits DISPOSABLE_LOCAL'
         Assert-Check (@($manifest.environment_allowlist) -contains 'STAGING') 'Manifest omits STAGING'
 
@@ -179,7 +181,10 @@ if (Test-Path -LiteralPath $jsonManifestPath -PathType Leaf) {
             Assert-Check ($item.candidate_file -eq ('database/migrations/v4_runtime_candidate/' + $expectedNames[$i])) ("Manifest candidate path mismatch at index {0}" -f $i)
             Assert-Check ($item.status -eq 'RUNTIME_VALIDATION_CANDIDATE') ("Manifest candidate status mismatch at index {0}" -f $i)
             Assert-Check ($item.production_approval -eq 'NOT_APPROVED_FOR_PRODUCTION') ("Manifest production approval mismatch at index {0}" -f $i)
-            Assert-Check ($item.canonical_migration_hash -eq 'PENDING_CANONICAL_HASH') ("Manifest canonical hash is not pending at index {0}" -f $i)
+            Assert-Check ($item.canonical_migration_hash -match '^sha256:[0-9a-f]{64}$') ("Manifest canonical hash is not generated at index {0}" -f $i)
+            Assert-Check ($item.migration_version -eq $item.migration_id) ("Manifest migration version is missing at index {0}" -f $i)
+            Assert-Check ($item.schema_contract_version -eq 'v4-database-schema@1.0.0') ("Manifest schema contract is missing at index {0}" -f $i)
+            Assert-Check ($item.authored_at -eq '2026-09-01T00:00:00+08:00') ("Manifest authored_at is missing at index {0}" -f $i)
         Assert-Check ($item.source_design_commit -match '^[0-9a-f]{40}$') ("Manifest source commit is invalid at index {0}" -f $i)
         Assert-Check (@($item.depends_on).Count -eq $expectedDependency.Count) ("Manifest dependency count mismatch at index {0}" -f $i)
         if ($expectedDependency.Count -eq 1) {
@@ -209,7 +214,8 @@ if (Test-Path -LiteralPath $markdownManifestPath -PathType Leaf) {
         'RUNTIME VALIDATION CANDIDATE',
         'DISPOSABLE/STAGING ONLY',
         'Production apply: HARD BLOCK',
-        'Canonical migration hashes: PENDING_CANONICAL_HASH',
+        'Canonical migration hashes: GENERATED_CANONICAL_HASHES',
+        'v4-canonical-migration@1.0.0',
         'The original database/migrations/v4/0001-0009 design files remain immutable design artifacts.'
     )) {
         Assert-Check ($markdownManifest.Contains($manifestMarker)) ("Markdown manifest is missing marker: {0}" -f $manifestMarker)
@@ -247,6 +253,18 @@ if ($null -ne $python) {
     }
     catch {
         $failures.Add("Secret scan output could not be parsed: $($_.Exception.Message)")
+    }
+
+    $hashOutput = & python -c "import json; from pathlib import Path; from tools.migration_harness.canonical_hash import verify_candidate_hashes; print(json.dumps(verify_candidate_hashes(Path(r'$RepoRoot'))))"
+    try {
+        $hashResult = ($hashOutput -join [Environment]::NewLine) | ConvertFrom-Json
+        Assert-Check ($hashResult.status -eq 'PASS') 'Canonical candidate hash verifier failed'
+        Assert-Check ($hashResult.matched_count -eq 9) 'Canonical candidate hash verifier did not match 9/9 candidates'
+        Assert-Check ($hashResult.pending_count -eq 0) 'Canonical candidate hash verifier still reports pending hashes'
+        Assert-Check ($hashResult.dependency_status -eq 'PASS') 'Canonical candidate dependency verification failed'
+    }
+    catch {
+        $failures.Add("Canonical hash verifier output could not be parsed: $($_.Exception.Message)")
     }
 }
 

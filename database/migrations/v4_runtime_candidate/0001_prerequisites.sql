@@ -6,7 +6,7 @@
 -- source_design_file: database/migrations/v4/0001_prerequisites.sql
 -- source_design_commit: cd7ebfd5135275536c2d54ca1ecd980bb386dcfa
 -- candidate_manifest: database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.md
--- canonical_migration_hash: PENDING_CANONICAL_HASH
+-- canonical_migration_hash: sha256:c55c6d4a882691d9dc006d55915e8584a696de1c9fd9792243c0b0c50713bb28
 -- production_status: PRODUCTION_REVIEW_REQUIRED
 --
 -- migration_id: migration@20260901.001
@@ -16,7 +16,7 @@
 -- depends_on: []
 -- schema_contract_version: v4-database-schema@1.0.0
 -- authored_at: 2026-09-01T00:00:00+08:00
--- migration_hash: PENDING_CANONICAL_HASH
+-- migration_hash: sha256:c55c6d4a882691d9dc006d55915e8584a696de1c9fd9792243c0b0c50713bb28
 -- status: DRAFT
 --
 -- Candidate PostgreSQL DDL only. It has no connection directive, psql meta command,
@@ -84,9 +84,9 @@ AS $$
   SELECT value ~ '^sha256:[0-9a-f]{64}$';
 $$;
 
--- The manifest registry describes immutable migration definitions. It permits
--- PENDING_CANONICAL_HASH only while the row is DRAFT; an applied history row
--- must contain a real canonical hash.
+-- The manifest registry describes immutable migration definitions. A runtime
+-- candidate may be DRAFT with either a generated canonical hash or the legacy
+-- pending marker; an applied history row must always contain a real hash.
 CREATE TABLE governance.v4_schema_registry (
   registry_record_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   migration_id text NOT NULL,
@@ -113,7 +113,10 @@ CREATE TABLE governance.v4_schema_registry (
   CHECK (array_position(depends_on, '') IS NULL),
   CHECK (migration_id ~ '^migration@[0-9]{8}\.[0-9]{3}$'),
   CHECK (migration_version ~ '^migration@[0-9]{8}\.[0-9]{3}$'),
-  CHECK ((status IN ('DRAFT', 'SUPERSEDED') AND migration_hash = 'PENDING_CANONICAL_HASH') OR governance.is_v4_hash(migration_hash)),
+  CHECK (
+    (status IN ('DRAFT', 'SUPERSEDED') AND (migration_hash = 'PENDING_CANONICAL_HASH' OR governance.is_v4_hash(migration_hash)))
+    OR (status IN ('APPROVED_FOR_DEPLOYMENT', 'APPLIED', 'FAILED') AND governance.is_v4_hash(migration_hash))
+  ),
   CHECK (prev_migration_hash IS NULL OR governance.is_v4_hash(prev_migration_hash)),
   CHECK (chain_hash IS NULL OR governance.is_v4_hash(chain_hash)),
   CHECK (status <> 'APPLIED' OR (success AND applied_at IS NOT NULL AND applied_by IS NOT NULL)),

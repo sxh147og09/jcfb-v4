@@ -1,0 +1,3 @@
+# Optional local-only dependency for the explicit PostgreSQL runtime gate.
+# Install this file only inside the F-drive project virtual environment.
+psycopg[binary]>=3.2,<4

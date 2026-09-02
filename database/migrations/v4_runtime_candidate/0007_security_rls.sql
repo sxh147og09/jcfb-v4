@@ -6,7 +6,7 @@
 -- source_design_file: database/migrations/v4/0007_security_rls.sql
 -- source_design_commit: cd7ebfd5135275536c2d54ca1ecd980bb386dcfa
 -- candidate_manifest: database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.md
--- canonical_migration_hash: PENDING_CANONICAL_HASH
+-- canonical_migration_hash: sha256:d173aca3dfe5af43fca1a6efd01eeb6abc0dde09bae332afd5e0faa3f3b7b243
 -- production_status: PRODUCTION_REVIEW_REQUIRED
 --
 -- migration_id: migration@20260901.007
@@ -16,7 +16,7 @@
 -- depends_on: [migration@20260901.006]
 -- schema_contract_version: v4-database-schema@1.0.0
 -- authored_at: 2026-09-01T00:00:00+08:00
--- migration_hash: PENDING_CANONICAL_HASH
+-- migration_hash: sha256:d173aca3dfe5af43fca1a6efd01eeb6abc0dde09bae332afd5e0faa3f3b7b243
 -- status: DRAFT
 -- This candidate installs the disposable security, trigger, RLS, and role boundary.
 

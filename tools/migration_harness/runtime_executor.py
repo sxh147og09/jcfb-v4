@@ -1,0 +1,663 @@
+"""Fail-closed PostgreSQL runtime executor for the V4 candidate package."""
+
+from __future__ import annotations
+
+import json
+import re
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence
+
+from .catalog import collect_runtime_catalog
+from .canonical_hash import CanonicalHashError, load_candidate_manifest, verify_candidate_hashes
+from .common import sha256_json
+from .connection import ConnectionAdapter, ConnectionConfigError, ConnectionSettings, PostgresConnectionAdapter, driver_status
+from .models import ExecutionMode
+from .runtime_tests import PostgresRuntimeCaseAdapter, run_runtime_cases, validate_runtime_case_wiring
+from .target import validate_target_descriptor
+
+
+RUNTIME_EXECUTOR_CONTRACT_VERSION = "v4-runtime-executor@1.0.0"
+ALLOWED_TARGET_ENVIRONMENTS = {"DISPOSABLE_LOCAL", "STAGING"}
+PRODUCTION_ENVIRONMENT = "PRODUCTION"
+DEFAULT_ACTOR = "jcfb-v4-runtime-executor"
+DEFAULT_REPORT_RELATIVE = ".runtime/reports/prebatch04"
+_SQL_BEGIN_RE = re.compile(r"(?im)^\s*BEGIN;\s*$")
+_SQL_COMMIT_RE = re.compile(r"(?im)^\s*COMMIT;\s*$")
+
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def default_disposable_target(database_name: str = "jcfb_v4_runtime") -> Dict[str, Any]:
+    """Build a non-secret local target descriptor for the PowerShell wrapper."""
+
+    if not re.fullmatch(r"[a-zA-Z0-9_][a-zA-Z0-9_-]{0,62}", database_name):
+        raise ValueError("Database name is not a safe local target identity")
+    return {
+        "descriptor_version": "v4-migration-target-descriptor@1.0.0",
+        "target_id": "jcfb-v4-disposable-runtime",
+        "environment": "DISPOSABLE_LOCAL",
+        "provider": "LOCAL_POSTGRES",
+        "database_identity": {
+            "server_name": "local-disposable",
+            "database_name": database_name,
+            "project_or_cluster_ref": "jcfb-v4-disposable-runtime",
+        },
+        "disposable": True,
+        "contains_v333_objects": False,
+        "contains_production_data": False,
+        "credential_env_name": "JCFB_V4_RUNTIME_DB_PASSWORD",
+        "allow_network": False,
+        "connect_permission": "EXPLICITLY_GRANTED",
+        "reset_and_teardown_contract": {
+            "reset_before_run": True,
+            "destroy_after_evidence": True,
+            "operator_owned": True,
+        },
+    }
+
+
+def _safe_target(target: Optional[Mapping[str, Any]]) -> Dict[str, Any]:
+    if not isinstance(target, Mapping):
+        return {"target_id": None, "environment": None, "provider": None, "database_identity": None}
+    identity = target.get("database_identity") if isinstance(target.get("database_identity"), Mapping) else {}
+    return {
+        "target_id": target.get("target_id"),
+        "environment": target.get("environment"),
+        "provider": target.get("provider"),
+        "database_identity": {
+            "server_name": identity.get("server_name"),
+            "database_name": identity.get("database_name"),
+            "project_or_cluster_ref": identity.get("project_or_cluster_ref"),
+        },
+    }
+
+
+def _safe_error(exc: BaseException) -> Dict[str, str]:
+    return {"error_code": "DATABASE_OPERATION_FAILED", "error_type": type(exc).__name__}
+
+
+def _blocking_report(plan: Dict[str, Any], reason: str) -> Dict[str, Any]:
+    reasons = list(plan.get("blocking_reasons", []))
+    if reason not in reasons:
+        reasons.append(reason)
+    plan["blocking_reasons"] = sorted(set(reasons))
+    plan["status"] = "BLOCKED"
+    plan["execution_boundary"]["apply_reached"] = False
+    return plan
+
+
+def _candidate_steps(manifest: Mapping[str, Any], *, apply_allowed: bool) -> List[Dict[str, Any]]:
+    candidates = manifest.get("candidates") if isinstance(manifest.get("candidates"), list) else []
+    steps: List[Dict[str, Any]] = []
+    for entry in candidates:
+        if not isinstance(entry, Mapping):
+            continue
+        steps.append(
+            {
+                "sequence": entry.get("sequence"),
+                "candidate_file": entry.get("candidate_file"),
+                "migration_id": entry.get("migration_id"),
+                "depends_on": list(entry.get("depends_on", [])) if isinstance(entry.get("depends_on"), list) else [],
+                "transaction_boundary": "ONE_TRANSACTION",
+                "apply_allowed": apply_allowed,
+                "status": "PLANNED",
+            }
+        )
+    return steps
+
+
+def _static_preflight(
+    mode: ExecutionMode,
+    target: Optional[Mapping[str, Any]],
+    target_validation: Any,
+    hash_report: Mapping[str, Any],
+    blocking_reasons: Sequence[str],
+) -> Dict[str, Any]:
+    """Run checks that must pass before the connector can be invoked."""
+
+    checks = [
+        {
+            "id": "RPS-01",
+            "status": "PASS" if hash_report.get("status") == "PASS" else "BLOCKED",
+            "reason": "Candidate manifest and canonical hashes verify locally",
+        },
+        {
+            "id": "RPS-02",
+            "status": "PASS"
+            if (
+                mode in {ExecutionMode.PLAN_ONLY, ExecutionMode.DRY_RUN}
+                and target is None
+            )
+            or (target_validation is not None and target_validation.ok)
+            else "BLOCKED",
+            "reason": "Target descriptor is valid when required; no-write modes may omit it",
+        },
+        {
+            "id": "RPS-03",
+            "status": "PASS"
+            if mode != ExecutionMode.APPLY
+            or target is not None and target.get("environment") in ALLOWED_TARGET_ENVIRONMENTS
+            else "BLOCKED",
+            "reason": "Only an explicit non-production target can reach apply",
+        },
+        {
+            "id": "RPS-04",
+            "status": "PASS" if mode != ExecutionMode.PRODUCTION_APPLY else "BLOCKED",
+            "reason": "Production apply mode is unconditionally hard-blocked",
+        },
+    ]
+    return {
+        "status": "PASS" if not blocking_reasons and all(check["status"] == "PASS" for check in checks) else "BLOCKED",
+        "checks": checks,
+        "connector_invoked": False,
+        "blocking_reasons": list(sorted(set(blocking_reasons))),
+    }
+
+
+class RuntimeExecutor:
+    """Plan by default; only explicit allow-listed apply can connect/write."""
+
+    contract_version = RUNTIME_EXECUTOR_CONTRACT_VERSION
+
+    def __init__(
+        self,
+        repo_root: Path,
+        *,
+        connection_adapter: Optional[ConnectionAdapter] = None,
+        clock: Optional[Callable[[], str]] = None,
+        actor: str = DEFAULT_ACTOR,
+    ):
+        self.repo_root = repo_root.resolve()
+        self.connection_adapter = connection_adapter
+        self.clock = clock or _now_iso
+        self.actor = actor
+
+    def plan(
+        self,
+        *,
+        mode: ExecutionMode | str = ExecutionMode.PLAN_ONLY,
+        target: Optional[Mapping[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        if isinstance(mode, str):
+            mode = ExecutionMode(mode)
+        try:
+            manifest = load_candidate_manifest(self.repo_root)
+        except CanonicalHashError:
+            manifest = {"candidates": []}
+        hash_report = verify_candidate_hashes(self.repo_root, manifest if manifest.get("candidates") else None)
+        target_validation = validate_target_descriptor(dict(target)) if target is not None else None
+        blocking: List[str] = []
+        if hash_report.get("status") != "PASS":
+            blocking.append("CANONICAL_HASH_VERIFICATION_FAILED")
+        if mode == ExecutionMode.APPLY:
+            if target_validation is None:
+                blocking.append("EXPLICIT_TARGET_REQUIRED_FOR_APPLY")
+            elif not target_validation.ok:
+                blocking.extend(issue.code for issue in target_validation.issues)
+            if target is not None and target.get("environment") not in ALLOWED_TARGET_ENVIRONMENTS:
+                blocking.append("PRODUCTION_TARGET_HARD_BLOCK")
+        if mode == ExecutionMode.PRODUCTION_APPLY:
+            blocking.append("PRODUCTION_TARGET_HARD_BLOCK")
+        if target_validation is not None and not target_validation.ok and mode in {ExecutionMode.PLAN_ONLY, ExecutionMode.DRY_RUN}:
+            blocking.extend(issue.code for issue in target_validation.issues)
+
+        status = "BLOCKED" if blocking else ("PLANNED" if mode == ExecutionMode.PLAN_ONLY else "DRY_RUN_READY")
+        target_value = _safe_target(target)
+        static_preflight = _static_preflight(mode, target, target_validation, hash_report, blocking)
+        payload = {
+            "contract_version": self.contract_version,
+            "mode": mode.value,
+            "status": status,
+            "target": target_value,
+            "target_validation": target_validation.to_dict() if target_validation else None,
+            "hash_verification": hash_report,
+            "driver": driver_status(),
+            "runtime_case_wiring": validate_runtime_case_wiring(self.repo_root),
+            "static_preflight": static_preflight,
+            "steps": _candidate_steps(manifest, apply_allowed=status != "BLOCKED" and mode == ExecutionMode.APPLY),
+            "execution_boundary": {
+                "connector_invoked": False,
+                "database_connected": False,
+                "sql_executed": False,
+                "ddl_applied": False,
+                "apply_reached": False,
+                "production_db_writes_performed": "NO",
+                "supabase_writes_performed": "NO",
+                "v333_mutated": "NO",
+            },
+            "blocking_reasons": sorted(set(blocking)),
+        }
+        payload["plan_hash"] = sha256_json(
+            {
+                "contract_version": payload["contract_version"],
+                "mode": payload["mode"],
+                "status": payload["status"],
+                "target": payload["target"],
+                "steps": payload["steps"],
+                "hashes": [entry.get("computed_hash") for entry in hash_report.get("entries", [])],
+                "blocking_reasons": payload["blocking_reasons"],
+            }
+        )
+        return payload
+
+    def execute(
+        self,
+        *,
+        target: Optional[Mapping[str, Any]],
+        mode: ExecutionMode | str = ExecutionMode.PLAN_ONLY,
+        connection_settings: Optional[ConnectionSettings] = None,
+        run_validations: bool = True,
+    ) -> Dict[str, Any]:
+        if isinstance(mode, str):
+            mode = ExecutionMode(mode)
+        plan = self.plan(mode=mode, target=target)
+        if mode != ExecutionMode.APPLY or plan["blocking_reasons"]:
+            return plan
+        if target is None or target.get("environment") not in ALLOWED_TARGET_ENVIRONMENTS:
+            return _blocking_report(plan, "PRODUCTION_TARGET_HARD_BLOCK")
+
+        try:
+            settings = connection_settings or ConnectionSettings.from_environment()
+        except ConnectionConfigError as exc:
+            plan["connection"] = {"status": "BLOCKED_CONFIGURATION", "safe_settings": {}, "error_code": "RUNTIME_CONNECTION_CONFIG_INVALID"}
+            return _blocking_report(plan, "RUNTIME_CONNECTION_CONFIG_INVALID")
+
+        adapter = self.connection_adapter or PostgresConnectionAdapter()
+        adapter_status = adapter.status() if hasattr(adapter, "status") else {"status": "READY", "connection_opened": False}
+        plan["driver"] = adapter_status
+        if adapter_status.get("status") != "READY":
+            plan["connection"] = {"status": "BLOCKED_DEPENDENCY", "safe_settings": settings.safe_dict()}
+            return _blocking_report(plan, "POSTGRES_DRIVER_UNAVAILABLE")
+
+        plan["connection"] = {"status": "READY_TO_CONNECT", "safe_settings": settings.safe_dict()}
+        connection = None
+        try:
+            connection = adapter.connect(settings)
+            plan["execution_boundary"]["connector_invoked"] = True
+            plan["execution_boundary"]["database_connected"] = True
+            preflight = self._runtime_preflight(connection, target, plan["hash_verification"], settings)
+            plan["preflight"] = preflight
+            if preflight.get("status") != "PASS":
+                return _blocking_report(plan, "RUNTIME_PREFLIGHT_BLOCKED")
+            plan["execution_boundary"]["apply_reached"] = True
+            apply_report = self._apply_candidates(connection, plan["hash_verification"])
+            plan["migrations"] = apply_report
+            if apply_report.get("status") not in {"PASS", "ALREADY_APPLIED"}:
+                plan["status"] = apply_report.get("status", "FAILED")
+                return plan
+            postflight = self._runtime_postflight(connection, target)
+            plan["postflight"] = postflight
+            if postflight.get("status") != "PASS":
+                return _blocking_report(plan, "RUNTIME_POSTFLIGHT_BLOCKED")
+            if run_validations:
+                validation_adapter = PostgresRuntimeCaseAdapter(connection)
+                plan["runtime_validation"] = run_runtime_cases(self.repo_root, validation_adapter)
+            runtime_status = plan.get("runtime_validation", {}).get("status")
+            if runtime_status == "PENDING":
+                plan["status"] = "RUNTIME_VALIDATION_PENDING"
+            elif runtime_status == "FAIL":
+                plan["status"] = "RUNTIME_VALIDATION_FAILED"
+            else:
+                plan["status"] = "RUNTIME_VALIDATION_PASS" if runtime_status == "PASS" else "APPLIED"
+            plan["execution_boundary"]["sql_executed"] = apply_report.get("applied_count", 0) > 0
+            plan["execution_boundary"]["ddl_applied"] = apply_report.get("applied_count", 0) > 0
+            return plan
+        except Exception as exc:
+            plan["error"] = _safe_error(exc)
+            return _blocking_report(plan, "RUNTIME_DATABASE_OPERATION_FAILED")
+        finally:
+            if connection is not None:
+                try:
+                    adapter.close(connection)
+                except Exception:
+                    # Close failures do not expose driver text or credentials.
+                    plan.setdefault("cleanup", {})["close_status"] = "FAILED_REDACTED"
+
+    def _runtime_preflight(
+        self,
+        connection: Any,
+        target: Mapping[str, Any],
+        hash_report: Mapping[str, Any],
+        settings: ConnectionSettings,
+    ) -> Dict[str, Any]:
+        manifest = load_candidate_manifest(self.repo_root)
+        candidates = [item for item in manifest.get("candidates", []) if isinstance(item, Mapping)]
+        catalog = collect_runtime_catalog(connection, target, candidates)
+        checks: List[Dict[str, Any]] = []
+
+        def add(check_id: str, passed: bool, reason: str, **details: Any) -> None:
+            checks.append({"id": check_id, "status": "PASS" if passed else "BLOCKED", "reason": reason, "details": details})
+
+        target_identity = catalog.get("target_identity", {})
+        add("RPF-01", target_identity.get("matches_descriptor") is True, "Connected database matches the explicit target identity")
+        version = catalog.get("database_version", {})
+        add("RPF-02", version.get("compatibility_approved") is True, "PostgreSQL 16 compatibility is proven", major=version.get("major"))
+        extensions = catalog.get("extensions", [])
+        add("RPF-03", any(item.get("name") == "pgcrypto" and item.get("approved") is True for item in extensions), "pgcrypto is installed or available for the candidate bootstrap")
+        add("RPF-04", not catalog.get("v333_objects"), "No V3.3.3-like object is present in the local target")
+        history = catalog.get("migration_history", {})
+        add("RPF-05", history.get("partial_applied") is not True and history.get("matches_manifest") is True, "Migration history is empty or an exact applied prefix")
+        objects = catalog.get("objects", [])
+        has_history = bool(history.get("rows"))
+        add("RPF-06", not objects or has_history, "Target is fresh or already attributable to the candidate history")
+        add("RPF-07", hash_report.get("status") == "PASS", "All candidate canonical hashes and headers verify")
+        add("RPF-08", settings.password_env_name == target.get("credential_env_name"), "Credential is referenced by the expected environment-variable name")
+        add("RPF-09", target.get("environment") in ALLOWED_TARGET_ENVIRONMENTS, "Target environment is explicitly allow-listed")
+        return {
+            "status": "PASS" if all(check["status"] == "PASS" for check in checks) else "BLOCKED",
+            "checks": checks,
+            "catalog_summary": {
+                "database_version": catalog.get("database_version"),
+                "target_identity": catalog.get("target_identity"),
+                "namespace_count": len(catalog.get("namespaces", [])),
+                "object_count": len(catalog.get("objects", [])),
+                "v333_object_count": len(catalog.get("v333_objects", [])),
+                "history_row_count": len(catalog.get("migration_history", {}).get("rows", [])),
+            },
+            "connector_invoked": True,
+        }
+
+    def _runtime_postflight(self, connection: Any, target: Mapping[str, Any]) -> Dict[str, Any]:
+        """Prove the exact nine-row history prefix after explicit apply."""
+
+        manifest = load_candidate_manifest(self.repo_root)
+        candidates = [item for item in manifest.get("candidates", []) if isinstance(item, Mapping)]
+        catalog = collect_runtime_catalog(connection, target, candidates)
+        history = catalog.get("migration_history", {})
+        checks = [
+            {
+                "id": "RPO-01",
+                "status": "PASS" if catalog.get("target_identity", {}).get("matches_descriptor") is True else "BLOCKED",
+                "reason": "Postflight database identity matches the explicit target",
+            },
+            {
+                "id": "RPO-02",
+                "status": "PASS" if not catalog.get("v333_objects") else "BLOCKED",
+                "reason": "No V3.3.3-like object is present after apply",
+            },
+            {
+                "id": "RPO-03",
+                "status": "PASS"
+                if history.get("matches_manifest") is True
+                and history.get("partial_applied") is not True
+                and len(history.get("rows", [])) == len(candidates)
+                else "BLOCKED",
+                "reason": "All nine immutable migration history rows match the candidate manifest",
+            },
+        ]
+        return {
+            "status": "PASS" if all(check["status"] == "PASS" for check in checks) else "BLOCKED",
+            "checks": checks,
+            "history_row_count": len(history.get("rows", [])),
+            "v333_object_count": len(catalog.get("v333_objects", [])),
+        }
+
+    def _apply_candidates(self, connection: Any, hash_report: Mapping[str, Any]) -> Dict[str, Any]:
+        manifest = load_candidate_manifest(self.repo_root)
+        candidates = [item for item in manifest.get("candidates", []) if isinstance(item, Mapping)]
+        if hash_report.get("status") != "PASS" or len(candidates) != 9:
+            return {"status": "BLOCKED", "applied_count": 0, "records": [], "reason": "Canonical hash verification did not pass"}
+        history_rows = self._read_history_rows(connection)
+        prefix, history_issue = self._validated_history_prefix(history_rows, candidates)
+        if history_issue:
+            return {"status": "BLOCKED", "applied_count": 0, "records": [], "reason": history_issue}
+        if prefix == len(candidates):
+            return {"status": "ALREADY_APPLIED", "applied_count": 0, "records": [], "skipped_count": prefix}
+
+        records: List[Dict[str, Any]] = []
+        previous_hash = candidates[prefix - 1].get("canonical_migration_hash") if prefix else None
+        for entry in candidates[prefix:]:
+            started_at = self.clock()
+            record: Dict[str, Any] = {
+                "sequence": entry.get("sequence"),
+                "migration_id": entry.get("migration_id"),
+                "migration_hash": entry.get("canonical_migration_hash"),
+                "start": started_at,
+                "end": None,
+                "status": "APPLYING",
+                "error": None,
+            }
+            sql_path = self.repo_root / Path(str(entry.get("candidate_file")))
+            sql_applied = False
+            try:
+                sql_text = sql_path.read_text(encoding="utf-8")
+                if len(_SQL_BEGIN_RE.findall(sql_text)) != 1 or len(_SQL_COMMIT_RE.findall(sql_text)) != 1:
+                    raise RuntimeError("Candidate migration transaction shape is invalid")
+                self._execute_sql(connection, sql_text)
+                sql_applied = True
+                chain_hash = sha256_json({"migration_id": entry.get("migration_id"), "migration_hash": entry.get("canonical_migration_hash"), "prev_migration_hash": previous_hash})
+                self._record_history(
+                    connection,
+                    entry,
+                    applied_at=started_at,
+                    applied_by=self.actor,
+                    previous_hash=previous_hash,
+                    chain_hash=chain_hash,
+                    status="APPLIED",
+                    success=True,
+                    partial_state=False,
+                    notes="runtime candidate applied by explicit local/staging executor",
+                )
+                self._commit(connection)
+                sql_applied = True
+                record["status"] = "APPLIED"
+                record["end"] = self.clock()
+                records.append(record)
+                previous_hash = entry.get("canonical_migration_hash")
+            except Exception as exc:
+                self._rollback(connection)
+                record["status"] = "PARTIAL_FAIL" if sql_applied else "FAILED"
+                record["end"] = self.clock()
+                record["error"] = _safe_error(exc)
+                self._try_record_failure(connection, entry, previous_hash, partial_state=sql_applied)
+                records.append(record)
+                return {"status": record["status"], "applied_count": sum(item["status"] == "APPLIED" for item in records), "records": records}
+        return {"status": "PASS", "applied_count": len(records), "records": records, "skipped_count": prefix}
+
+    @staticmethod
+    def _execute_sql(connection: Any, sql_text: str) -> None:
+        lines = sql_text.replace("\r\n", "\n").replace("\r", "\n").splitlines(keepends=True)
+        begin_indices = [index for index, line in enumerate(lines) if line.strip().upper() == "BEGIN;"]
+        commit_indices = [index for index, line in enumerate(lines) if line.strip().upper() == "COMMIT;"]
+        if len(begin_indices) != 1 or len(commit_indices) != 1 or begin_indices[0] >= commit_indices[0]:
+            raise RuntimeError("Candidate migration transaction shape is invalid")
+        body = "".join(
+            line
+            for index, line in enumerate(lines)
+            if index not in {begin_indices[0], commit_indices[0]}
+        )
+        cursor = connection.cursor()
+        try:
+            # Candidate files carry explicit BEGIN/COMMIT markers as static
+            # evidence.  The executor removes only those wrapper lines so the
+            # DDL and its immutable history row commit atomically together.
+            cursor.execute(body)
+        finally:
+            close = getattr(cursor, "close", None)
+            if callable(close):
+                close()
+
+    @staticmethod
+    def _commit(connection: Any) -> None:
+        commit = getattr(connection, "commit", None)
+        if callable(commit):
+            commit()
+
+    @staticmethod
+    def _rollback(connection: Any) -> None:
+        rollback = getattr(connection, "rollback", None)
+        if callable(rollback):
+            rollback()
+
+    @staticmethod
+    def _read_rows(connection: Any, sql: str, params: Optional[Sequence[Any]] = None) -> List[Dict[str, Any]]:
+        cursor = connection.cursor()
+        try:
+            if params is None:
+                cursor.execute(sql)
+            else:
+                cursor.execute(sql, tuple(params))
+            names = [item[0] for item in (getattr(cursor, "description", None) or [])]
+            return [dict(zip(names, row)) for row in cursor.fetchall()]
+        finally:
+            close = getattr(cursor, "close", None)
+            if callable(close):
+                close()
+
+    def _read_history_rows(self, connection: Any) -> List[Dict[str, Any]]:
+        table = self._read_rows(connection, "SELECT to_regclass('governance.schema_migrations') AS object_name")
+        if not table or not table[0].get("object_name"):
+            return []
+        return self._read_rows(
+            connection,
+            "SELECT migration_id, sequence, name, migration_version, schema_contract_version, migration_hash, status, success, partial_state "
+            "FROM governance.schema_migrations ORDER BY sequence",
+        )
+
+    @staticmethod
+    def _validated_history_prefix(rows: Sequence[Mapping[str, Any]], candidates: Sequence[Mapping[str, Any]]) -> tuple[int, Optional[str]]:
+        if len(rows) > len(candidates):
+            return 0, "Migration history contains more rows than the immutable candidate manifest"
+        seen = set()
+        for index, row in enumerate(rows):
+            entry = candidates[index]
+            migration_id = row.get("migration_id")
+            if migration_id in seen or migration_id != entry.get("migration_id"):
+                return index, "Migration history identity/order does not match the candidate prefix"
+            seen.add(migration_id)
+            if row.get("migration_hash") != entry.get("canonical_migration_hash"):
+                return index, "Migration history hash differs from the immutable candidate hash"
+            if row.get("status") != "APPLIED" or row.get("success") is not True or row.get("partial_state") is True:
+                return index, "Migration history contains a failed, blocked, or partial state"
+        return len(rows), None
+
+    def _record_history(
+        self,
+        connection: Any,
+        entry: Mapping[str, Any],
+        *,
+        applied_at: str,
+        applied_by: str,
+        previous_hash: Optional[str],
+        chain_hash: str,
+        status: str,
+        success: bool,
+        partial_state: bool,
+        notes: str,
+    ) -> None:
+        sql = (
+            "INSERT INTO governance.schema_migrations "
+            "(migration_id, sequence, name, migration_version, schema_contract_version, migration_hash, "
+            "applied_at, applied_by, app_version, success, status, partial_state, notes, prev_migration_hash, chain_hash, metadata) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        )
+        values = (
+            entry.get("migration_id"),
+            entry.get("sequence"),
+            entry.get("name"),
+            entry.get("migration_version"),
+            entry.get("schema_contract_version"),
+            entry.get("canonical_migration_hash"),
+            applied_at,
+            applied_by,
+            "jcfb-v4-runtime-executor@1.0.0",
+            success,
+            status,
+            partial_state,
+            notes,
+            previous_hash,
+            chain_hash,
+            json.dumps({"executor_contract": RUNTIME_EXECUTOR_CONTRACT_VERSION}, separators=(",", ":")),
+        )
+        cursor = connection.cursor()
+        try:
+            cursor.execute(sql, values)
+        finally:
+            close = getattr(cursor, "close", None)
+            if callable(close):
+                close()
+        # The caller commits DDL and its immutable history row together.  A
+        # commit here would make the migration only partially atomic.
+
+    def _try_record_failure(self, connection: Any, entry: Mapping[str, Any], previous_hash: Optional[str], *, partial_state: bool) -> None:
+        try:
+            table = self._read_rows(connection, "SELECT to_regclass('governance.schema_migrations') AS object_name")
+            if not table or not table[0].get("object_name"):
+                return
+            chain_hash = sha256_json({"migration_id": entry.get("migration_id"), "migration_hash": entry.get("canonical_migration_hash"), "prev_migration_hash": previous_hash, "status": "BLOCKED"})
+            self._record_history(
+                connection,
+                entry,
+                applied_at=self.clock(),
+                applied_by=self.actor,
+                previous_hash=previous_hash,
+                chain_hash=chain_hash,
+                status="BLOCKED",
+                success=False,
+                partial_state=partial_state,
+                notes="runtime candidate execution failed; remediation requires a new forward migration",
+            )
+            self._commit(connection)
+        except Exception:
+            # Failure evidence remains in the local JSON report.  Never expose
+            # a secondary driver error or attempt an UPDATE/DELETE repair.
+            return
+
+
+def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
+    """Render a compact report without credentials, URLs, or SQL text."""
+
+    boundary = report.get("execution_boundary", {})
+    hashes = report.get("hash_verification", {})
+    runtime = report.get("runtime_validation", {})
+    wiring = report.get("runtime_case_wiring", {})
+    lines = [
+        "# JCFB V4 PRE-BATCH-04 Runtime Validation Report",
+        "",
+        f"- Status: `{report.get('status')}`",
+        f"- Contract: `{report.get('contract_version')}`",
+        f"- Mode: `{report.get('mode')}`",
+        f"- Target identity: `{(report.get('target') or {}).get('target_id')}`",
+        f"- Target environment: `{(report.get('target') or {}).get('environment')}`",
+        f"- Canonical hashes: `{hashes.get('matched_count', 0)}/{hashes.get('candidate_count', 0)}`",
+        f"- Hash verifier: `{hashes.get('status')}`",
+        f"- Connector invoked: `{boundary.get('connector_invoked')}`",
+        f"- Database connected: `{boundary.get('database_connected')}`",
+        f"- SQL executed: `{boundary.get('sql_executed')}`",
+        f"- Production DB writes: `{boundary.get('production_db_writes_performed', 'NO')}`",
+        f"- Supabase writes: `{boundary.get('supabase_writes_performed', 'NO')}`",
+        f"- V3.3.3 mutated: `{boundary.get('v333_mutated', 'NO')}`",
+        "- Database runtime tests executed in Codex: `NO`",
+        "- BATCH-04/V4-018/V4-019 changed: `NO`",
+        "",
+        "## Runtime case wiring",
+        "",
+        f"- Smoke bindings: `{wiring.get('smoke_count', 0)}/20`",
+        f"- Enforcement bindings: `{wiring.get('enforcement_count', 0)}/15`",
+        f"- Runtime case result: `{runtime.get('status', 'NOT_RUN')}`",
+        f"- Cases executed: `{runtime.get('actually_executed', 0)}/35`",
+        "",
+        "## Blocking reasons",
+        "",
+    ]
+    reasons = report.get("blocking_reasons") or []
+    lines.extend([f"- `{reason}`" for reason in reasons] or ["- None"])
+    return "\n".join(lines) + "\n"
+
+
+def write_runtime_report(report: Mapping[str, Any], repo_root: Path, report_dir: Optional[Path] = None) -> Dict[str, str]:
+    directory = (report_dir or (repo_root / DEFAULT_REPORT_RELATIVE)).resolve()
+    root = repo_root.resolve()
+    if root not in directory.parents and directory != root:
+        raise ValueError("Runtime report directory must remain inside the repository")
+    directory.mkdir(parents=True, exist_ok=True)
+    json_path = directory / "prebatch04_runtime_validation.json"
+    markdown_path = directory / "prebatch04_runtime_validation.md"
+    with json_path.open("w", encoding="utf-8", newline="\n") as handle:
+        json.dump(dict(report), handle, ensure_ascii=False, indent=2)
+        handle.write("\n")
+    markdown_path.write_text(render_runtime_report_markdown(report), encoding="utf-8", newline="\n")
+    return {"json": json_path.as_posix(), "markdown": markdown_path.as_posix()}

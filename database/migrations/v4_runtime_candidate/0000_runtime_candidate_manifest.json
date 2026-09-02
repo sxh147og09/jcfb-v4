@@ -12,7 +12,34 @@
     "STAGING"
   ],
   "production_apply": "HARD_BLOCK",
-  "canonical_hash_status": "PENDING_CANONICAL_HASH",
+  "canonical_hash_status": "GENERATED_CANONICAL_HASHES",
+  "canonicalization": {
+    "version": "v4-canonical-migration@1.0.0",
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "sql_encoding": "UTF-8",
+    "line_endings": "LF",
+    "trailing_whitespace": "STRIP_HORIZONTAL_WHITESPACE_PER_LINE",
+    "final_newline": "EXACTLY_ONE_LF",
+    "self_hash_fields": "NORMALIZE_TO_SELF_HASH_PLACEHOLDER_DURING_HASH_ONLY",
+    "metadata_fields": [
+      "migration_id",
+      "sequence",
+      "name",
+      "migration_version",
+      "depends_on",
+      "schema_contract_version",
+      "authored_at",
+      "file"
+    ],
+    "volatile_fields_excluded": [
+      "applied_at",
+      "applied_by",
+      "execution_duration",
+      "deployment_host",
+      "status"
+    ]
+  },
   "candidates": [
     {
       "sequence": 1,
@@ -22,9 +49,12 @@
       "candidate_file": "database/migrations/v4_runtime_candidate/0001_prerequisites.sql",
       "candidate_identity": "v4-runtime-candidate@20260901.001",
       "migration_id": "migration@20260901.001",
+      "migration_version": "migration@20260901.001",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
       "depends_on": [],
-      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
-      "content_sha256_noncanonical": "08e71b93c214e2172b9cb56611fb684bec33987bc768bd2bfc30aab317ded4b2",
+      "canonical_migration_hash": "sha256:c55c6d4a882691d9dc006d55915e8584a696de1c9fd9792243c0b0c50713bb28",
+      "content_sha256_noncanonical": "afd470be41ae5b8115259587ee779732879acb71a34dbf70bf62628a69cf0d1c",
       "status": "RUNTIME_VALIDATION_CANDIDATE",
       "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
     },
@@ -36,11 +66,14 @@
       "candidate_file": "database/migrations/v4_runtime_candidate/0002_registries_core.sql",
       "candidate_identity": "v4-runtime-candidate@20260901.002",
       "migration_id": "migration@20260901.002",
+      "migration_version": "migration@20260901.002",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
       "depends_on": [
         "migration@20260901.001"
       ],
-      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
-      "content_sha256_noncanonical": "05d8d491dddb11a87a7b3647ee5959453b9d7b368a90921fcd2c31d4611f7f55",
+      "canonical_migration_hash": "sha256:7edfc9c4c2c0085f63d0e0860f0d2f74f6a1e85d9b1ac4e602571347e5dd332a",
+      "content_sha256_noncanonical": "c85cfae6c1fe7aba3e1bf05be794ec43d5adb47d055dd7db89c0e1f816257504",
       "status": "RUNTIME_VALIDATION_CANDIDATE",
       "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
     },
@@ -52,11 +85,14 @@
       "candidate_file": "database/migrations/v4_runtime_candidate/0003_market_context.sql",
       "candidate_identity": "v4-runtime-candidate@20260901.003",
       "migration_id": "migration@20260901.003",
+      "migration_version": "migration@20260901.003",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
       "depends_on": [
         "migration@20260901.002"
       ],
-      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
-      "content_sha256_noncanonical": "fcc97c21136f01427f8421aed262394d583bfa3deaa062b639c18640e90cc4bd",
+      "canonical_migration_hash": "sha256:dc493407c012e1296b884ab64eaa251ee6b32fff6c0a9d5cacfe4860098db808",
+      "content_sha256_noncanonical": "9b621fd38c6030f9b73e45a944a787bd214e1585e231ce7cbe3e1a79b7642881",
       "status": "RUNTIME_VALIDATION_CANDIDATE",
       "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
     },
@@ -68,11 +104,14 @@
       "candidate_file": "database/migrations/v4_runtime_candidate/0004_frozen_runtime.sql",
       "candidate_identity": "v4-runtime-candidate@20260901.004",
       "migration_id": "migration@20260901.004",
+      "migration_version": "migration@20260901.004",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
       "depends_on": [
         "migration@20260901.003"
       ],
-      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
-      "content_sha256_noncanonical": "eed5c84d6b315756389eb265e1d1af94ec3f4defc286a728ec6edff1cbf177f3",
+      "canonical_migration_hash": "sha256:660e64c210a370ac2e9d2ab13f7ac08b784caa0821df1ad0c4c81db7457ff7bb",
+      "content_sha256_noncanonical": "3339d35a37d92eca4ca76bf0a42ae02deac5fcf8ed8a190a0a5830bf48140751",
       "status": "RUNTIME_VALIDATION_CANDIDATE",
       "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
     },
@@ -84,11 +123,14 @@
       "candidate_file": "database/migrations/v4_runtime_candidate/0005_evaluation.sql",
       "candidate_identity": "v4-runtime-candidate@20260901.005",
       "migration_id": "migration@20260901.005",
+      "migration_version": "migration@20260901.005",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
       "depends_on": [
         "migration@20260901.004"
       ],
-      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
-      "content_sha256_noncanonical": "7e6b11c886bf69df3448d866001cc012856023d5756e0d38d3b818f5539e976e",
+      "canonical_migration_hash": "sha256:b4c5b6a276b42117a0dd830c56c8a8856f273c13016bf200838ba690b5e80394",
+      "content_sha256_noncanonical": "da6658b3e665f085c3968c3010ccfa0e17211824fdd28523faaa49aa750b4e81",
       "status": "RUNTIME_VALIDATION_CANDIDATE",
       "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
     },
@@ -100,11 +142,14 @@
       "candidate_file": "database/migrations/v4_runtime_candidate/0006_governance_audit.sql",
       "candidate_identity": "v4-runtime-candidate@20260901.006",
       "migration_id": "migration@20260901.006",
+      "migration_version": "migration@20260901.006",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
       "depends_on": [
         "migration@20260901.005"
       ],
-      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
-      "content_sha256_noncanonical": "ea6561889e6eb405ce281f0bcac98e4cf1c05c910216ae9cca5a9bf014f286b6",
+      "canonical_migration_hash": "sha256:85386b242f6f1ef8fabd1aa09b07f1b4c3082b589b0c6c320bb9705883a5a52d",
+      "content_sha256_noncanonical": "1ba475b2585f3f25d4984f82e2c7e8a94c815f47ff91a2d4728707adc9ee71b8",
       "status": "RUNTIME_VALIDATION_CANDIDATE",
       "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
     },
@@ -116,11 +161,14 @@
       "candidate_file": "database/migrations/v4_runtime_candidate/0007_security_rls.sql",
       "candidate_identity": "v4-runtime-candidate@20260901.007",
       "migration_id": "migration@20260901.007",
+      "migration_version": "migration@20260901.007",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
       "depends_on": [
         "migration@20260901.006"
       ],
-      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
-      "content_sha256_noncanonical": "f75b579fbc402de74e33f8fd1d5a3a6e670784ba8731a5854bd49d039d1274d8",
+      "canonical_migration_hash": "sha256:d173aca3dfe5af43fca1a6efd01eeb6abc0dde09bae332afd5e0faa3f3b7b243",
+      "content_sha256_noncanonical": "b459315aef75aeccf31b9e087e9d4aa9e4b7d72b520b8c3c81633ccca9057254",
       "status": "RUNTIME_VALIDATION_CANDIDATE",
       "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
     },
@@ -132,11 +180,14 @@
       "candidate_file": "database/migrations/v4_runtime_candidate/0008_views_projections.sql",
       "candidate_identity": "v4-runtime-candidate@20260901.008",
       "migration_id": "migration@20260901.008",
+      "migration_version": "migration@20260901.008",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
       "depends_on": [
         "migration@20260901.007"
       ],
-      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
-      "content_sha256_noncanonical": "1264ab43d7f32e3f387aede6e537dbf3934c2dee6efbf9b7b8418d97bcbcece9",
+      "canonical_migration_hash": "sha256:066964964caf34d44c80012120b79f1c09a9e246fe1125d1a7dbb2a88f2a3ce2",
+      "content_sha256_noncanonical": "7cfc47800fb4ac0154468c49eb3e88290dfe80cd529c2048fc1e18e4fcc4046e",
       "status": "RUNTIME_VALIDATION_CANDIDATE",
       "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
     },
@@ -148,11 +199,14 @@
       "candidate_file": "database/migrations/v4_runtime_candidate/0009_seed_and_smoke.sql",
       "candidate_identity": "v4-runtime-candidate@20260901.009",
       "migration_id": "migration@20260901.009",
+      "migration_version": "migration@20260901.009",
+      "schema_contract_version": "v4-database-schema@1.0.0",
+      "authored_at": "2026-09-01T00:00:00+08:00",
       "depends_on": [
         "migration@20260901.008"
       ],
-      "canonical_migration_hash": "PENDING_CANONICAL_HASH",
-      "content_sha256_noncanonical": "3ee7af8c3b4357c87fcada758cfaefb283b319f328548103170090bd688fbdec",
+      "canonical_migration_hash": "sha256:d452f9442583ee69120e4f70206d7ad007defd35ebc7784a86340e4a6b3ccf63",
+      "content_sha256_noncanonical": "0c6052c9ab63ad392775bc8e4302ad10c42e2365b4e20f1a28e2708c9d846eab",
       "status": "RUNTIME_VALIDATION_CANDIDATE",
       "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
     }

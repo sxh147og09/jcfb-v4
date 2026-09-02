@@ -1,8 +1,8 @@
-"""Fail-closed, no-write migration harness for JCFB V4 BATCH-02/BATCH-03.
+"""Fail-closed migration harness and explicit non-production runtime executor.
 
-The package intentionally contains no database driver and no connector.  It
-parses migration metadata, validates supplied evidence, and emits plans or
-explicitly pending runtime results.
+The original BATCH-02/BATCH-03 interfaces remain no-write.  The separate
+runtime executor is opt-in, reads credentials only from process environment,
+and hard-blocks Production before driver construction or connection.
 """
 
 from .models import (
@@ -10,5 +10,6 @@ from .models import (
     ExecutionMode,
     RunnerStatus,
 )
+from .runtime_executor import RuntimeExecutor
 
-__all__ = ["CheckStatus", "ExecutionMode", "RunnerStatus"]
+__all__ = ["CheckStatus", "ExecutionMode", "RunnerStatus", "RuntimeExecutor"]
