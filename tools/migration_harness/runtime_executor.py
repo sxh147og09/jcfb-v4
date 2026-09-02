@@ -25,6 +25,14 @@ DEFAULT_REPORT_RELATIVE = ".runtime/reports/prebatch04"
 _SQL_BEGIN_RE = re.compile(r"(?im)^\s*BEGIN;\s*$")
 _SQL_COMMIT_RE = re.compile(r"(?im)^\s*COMMIT;\s*$")
 
+CONNECTOR_NOT_INVOKED = "CONNECTOR_NOT_INVOKED"
+CONNECTOR_INVOKED = "CONNECTOR_INVOKED"
+CONNECTION_REFUSED = "CONNECTION_REFUSED"
+AUTH_FAILED = "AUTH_FAILED"
+DRIVER_MISSING = "DRIVER_MISSING"
+TARGET_IDENTITY_MISMATCH = "TARGET_IDENTITY_MISMATCH"
+SQL_APPLY_FAILED = "SQL_APPLY_FAILED"
+
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -75,8 +83,103 @@ def _safe_target(target: Optional[Mapping[str, Any]]) -> Dict[str, Any]:
     }
 
 
-def _safe_error(exc: BaseException) -> Dict[str, str]:
-    return {"error_code": "DATABASE_OPERATION_FAILED", "error_type": type(exc).__name__}
+def _safe_error(
+    exc: BaseException,
+    *,
+    error_code: str,
+    phase: str,
+    connector_status: str,
+) -> Dict[str, str]:
+    """Return error metadata without serialising driver text or credentials."""
+
+    return {
+        "error_code": error_code,
+        "error_type": type(exc).__name__,
+        "phase": phase,
+        "connector_status": connector_status,
+    }
+
+
+def _set_failure_taxonomy(plan: Dict[str, Any], error_code: str, phase: str) -> None:
+    invoked = bool(plan.get("execution_boundary", {}).get("connector_invoked"))
+    plan["failure_taxonomy"] = {
+        "error_code": error_code,
+        "phase": phase,
+        "connector_status": CONNECTOR_INVOKED if invoked else CONNECTOR_NOT_INVOKED,
+    }
+
+
+def _exception_text(exc: BaseException) -> str:
+    """Build private classification text; it is never written to a report."""
+
+    parts: List[str] = []
+    current: Optional[BaseException] = exc
+    seen: set[int] = set()
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        parts.append(type(current).__name__.lower())
+        try:
+            parts.append(str(current).lower())
+        except Exception:
+            pass
+        current = current.__cause__ or current.__context__
+    return " ".join(parts)
+
+
+def _classify_connection_error(exc: BaseException) -> str:
+    """Classify a failed connector call without exposing its message."""
+
+    text = _exception_text(exc)
+    auth_markers = (
+        "authentication failed",
+        "password authentication failed",
+        "invalid password",
+        "pg_hba.conf",
+        "not authorized",
+        "role .* does not exist",
+    )
+    if any(re.search(marker, text) for marker in auth_markers):
+        return AUTH_FAILED
+    # A timeout means the local published port is absent/unreachable just as a
+    # refusal does for this disposable connector contract.
+    network_markers = (
+        "connection refused",
+        "connection timed out",
+        "timeout",
+        "could not connect",
+        "no route to host",
+        "server closed the connection",
+        "operationalerror",
+        "interfaceerror",
+    )
+    if isinstance(exc, (ConnectionRefusedError, TimeoutError, OSError)) or any(
+        marker in text for marker in network_markers
+    ):
+        return CONNECTION_REFUSED
+    # The connector was invoked, so an unknown driver-side connect exception is
+    # still more actionable as a connection failure than as a generic database
+    # operation failure.
+    return CONNECTION_REFUSED
+
+
+def _preflight_failure_code(preflight: Mapping[str, Any]) -> str:
+    if any(
+        check.get("id") == "RPF-01" and check.get("status") != "PASS"
+        for check in preflight.get("checks", [])
+        if isinstance(check, Mapping)
+    ):
+        return TARGET_IDENTITY_MISMATCH
+    return "RUNTIME_PREFLIGHT_BLOCKED"
+
+
+def _postflight_failure_code(postflight: Mapping[str, Any]) -> str:
+    if any(
+        check.get("id") == "RPO-01" and check.get("status") != "PASS"
+        for check in postflight.get("checks", [])
+        if isinstance(check, Mapping)
+    ):
+        return TARGET_IDENTITY_MISMATCH
+    return "RUNTIME_POSTFLIGHT_BLOCKED"
 
 
 def _blocking_report(plan: Dict[str, Any], reason: str) -> Dict[str, Any]:
@@ -86,6 +189,8 @@ def _blocking_report(plan: Dict[str, Any], reason: str) -> Dict[str, Any]:
     plan["blocking_reasons"] = sorted(set(reasons))
     plan["status"] = "BLOCKED"
     plan["execution_boundary"]["apply_reached"] = False
+    if "failure_taxonomy" not in plan:
+        _set_failure_taxonomy(plan, reason, "STATIC_PREFLIGHT")
     return plan
 
 
@@ -262,37 +367,102 @@ class RuntimeExecutor:
         try:
             settings = connection_settings or ConnectionSettings.from_environment()
         except ConnectionConfigError as exc:
-            plan["connection"] = {"status": "BLOCKED_CONFIGURATION", "safe_settings": {}, "error_code": "RUNTIME_CONNECTION_CONFIG_INVALID"}
-            return _blocking_report(plan, "RUNTIME_CONNECTION_CONFIG_INVALID")
+            error_code = "RUNTIME_CONNECTION_CONFIG_INVALID"
+            plan["connection"] = {
+                "status": "BLOCKED_CONFIGURATION",
+                "safe_settings": {},
+                "error_code": error_code,
+                "missing_environment_variables": list(exc.missing),
+            }
+            plan["error"] = {
+                "error_code": error_code,
+                "error_type": type(exc).__name__,
+                "phase": "CONFIGURATION",
+                "connector_status": CONNECTOR_NOT_INVOKED,
+                "missing_environment_variables": list(exc.missing),
+            }
+            _set_failure_taxonomy(plan, error_code, "CONFIGURATION")
+            return _blocking_report(plan, error_code)
 
         adapter = self.connection_adapter or PostgresConnectionAdapter()
         adapter_status = adapter.status() if hasattr(adapter, "status") else {"status": "READY", "connection_opened": False}
         plan["driver"] = adapter_status
         if adapter_status.get("status") != "READY":
+            error_code = DRIVER_MISSING
             plan["connection"] = {"status": "BLOCKED_DEPENDENCY", "safe_settings": settings.safe_dict()}
-            return _blocking_report(plan, "POSTGRES_DRIVER_UNAVAILABLE")
+            plan["error"] = {
+                "error_code": error_code,
+                "error_type": "DriverUnavailable",
+                "phase": "DRIVER_CHECK",
+                "connector_status": CONNECTOR_NOT_INVOKED,
+            }
+            _set_failure_taxonomy(plan, error_code, "DRIVER_CHECK")
+            return _blocking_report(plan, error_code)
 
         plan["connection"] = {"status": "READY_TO_CONNECT", "safe_settings": settings.safe_dict()}
         connection = None
+        phase = "CONNECT"
+        # Mark invocation before entering the adapter.  A refused or timed-out
+        # socket raises before connect() returns, but the call was still made.
+        plan["execution_boundary"]["connector_invoked"] = True
         try:
             connection = adapter.connect(settings)
-            plan["execution_boundary"]["connector_invoked"] = True
             plan["execution_boundary"]["database_connected"] = True
+            plan["connection"]["status"] = "CONNECTED"
+            phase = "RUNTIME_PREFLIGHT"
             preflight = self._runtime_preflight(connection, target, plan["hash_verification"], settings)
             plan["preflight"] = preflight
             if preflight.get("status") != "PASS":
-                return _blocking_report(plan, "RUNTIME_PREFLIGHT_BLOCKED")
+                error_code = _preflight_failure_code(preflight)
+                plan["error"] = {
+                    "error_code": error_code,
+                    "error_type": "RuntimePreflightBlocked",
+                    "phase": phase,
+                    "connector_status": CONNECTOR_INVOKED,
+                }
+                _set_failure_taxonomy(plan, error_code, phase)
+                return _blocking_report(plan, error_code)
             plan["execution_boundary"]["apply_reached"] = True
+            phase = "SQL_APPLY"
             apply_report = self._apply_candidates(connection, plan["hash_verification"])
             plan["migrations"] = apply_report
             if apply_report.get("status") not in {"PASS", "ALREADY_APPLIED"}:
-                plan["status"] = apply_report.get("status", "FAILED")
-                return plan
+                error_code = str(apply_report.get("error_code") or SQL_APPLY_FAILED)
+                failed_record = next(
+                    (
+                        record
+                        for record in apply_report.get("records", [])
+                        if isinstance(record, Mapping) and record.get("status") not in {"APPLIED"}
+                    ),
+                    None,
+                )
+                plan["error"] = (
+                    dict(failed_record["error"])
+                    if isinstance(failed_record, Mapping) and isinstance(failed_record.get("error"), Mapping)
+                    else {
+                        "error_code": error_code,
+                        "error_type": "MigrationApplyBlocked",
+                        "phase": phase,
+                        "connector_status": CONNECTOR_INVOKED,
+                    }
+                )
+                _set_failure_taxonomy(plan, error_code, phase)
+                return _blocking_report(plan, error_code)
+            phase = "RUNTIME_POSTFLIGHT"
             postflight = self._runtime_postflight(connection, target)
             plan["postflight"] = postflight
             if postflight.get("status") != "PASS":
-                return _blocking_report(plan, "RUNTIME_POSTFLIGHT_BLOCKED")
+                error_code = _postflight_failure_code(postflight)
+                plan["error"] = {
+                    "error_code": error_code,
+                    "error_type": "RuntimePostflightBlocked",
+                    "phase": phase,
+                    "connector_status": CONNECTOR_INVOKED,
+                }
+                _set_failure_taxonomy(plan, error_code, phase)
+                return _blocking_report(plan, error_code)
             if run_validations:
+                phase = "RUNTIME_VALIDATION"
                 validation_adapter = PostgresRuntimeCaseAdapter(connection)
                 plan["runtime_validation"] = run_runtime_cases(self.repo_root, validation_adapter)
             runtime_status = plan.get("runtime_validation", {}).get("status")
@@ -306,8 +476,28 @@ class RuntimeExecutor:
             plan["execution_boundary"]["ddl_applied"] = apply_report.get("applied_count", 0) > 0
             return plan
         except Exception as exc:
-            plan["error"] = _safe_error(exc)
-            return _blocking_report(plan, "RUNTIME_DATABASE_OPERATION_FAILED")
+            if phase == "CONNECT":
+                error_code = _classify_connection_error(exc)
+            elif phase == "SQL_APPLY":
+                error_code = SQL_APPLY_FAILED
+            elif phase == "RUNTIME_PREFLIGHT":
+                error_code = "RUNTIME_PREFLIGHT_FAILED"
+            elif phase == "RUNTIME_POSTFLIGHT":
+                error_code = "RUNTIME_POSTFLIGHT_FAILED"
+            elif phase == "RUNTIME_VALIDATION":
+                error_code = "RUNTIME_VALIDATION_FAILED"
+            else:
+                error_code = "RUNTIME_EXECUTION_FAILED"
+            plan["error"] = _safe_error(
+                exc,
+                error_code=error_code,
+                phase=phase,
+                connector_status=CONNECTOR_INVOKED,
+            )
+            if phase == "CONNECT":
+                plan["connection"]["status"] = "CONNECT_FAILED"
+            _set_failure_taxonomy(plan, error_code, phase)
+            return _blocking_report(plan, error_code)
         finally:
             if connection is not None:
                 try:
@@ -403,7 +593,13 @@ class RuntimeExecutor:
         history_rows = self._read_history_rows(connection)
         prefix, history_issue = self._validated_history_prefix(history_rows, candidates)
         if history_issue:
-            return {"status": "BLOCKED", "applied_count": 0, "records": [], "reason": history_issue}
+            return {
+                "status": "BLOCKED",
+                "applied_count": 0,
+                "records": [],
+                "reason": history_issue,
+                "error_code": "MIGRATION_HISTORY_INVALID",
+            }
         if prefix == len(candidates):
             return {"status": "ALREADY_APPLIED", "applied_count": 0, "records": [], "skipped_count": prefix}
 
@@ -451,10 +647,20 @@ class RuntimeExecutor:
                 self._rollback(connection)
                 record["status"] = "PARTIAL_FAIL" if sql_applied else "FAILED"
                 record["end"] = self.clock()
-                record["error"] = _safe_error(exc)
+                record["error"] = _safe_error(
+                    exc,
+                    error_code=SQL_APPLY_FAILED,
+                    phase="SQL_APPLY",
+                    connector_status=CONNECTOR_INVOKED,
+                )
                 self._try_record_failure(connection, entry, previous_hash, partial_state=sql_applied)
                 records.append(record)
-                return {"status": record["status"], "applied_count": sum(item["status"] == "APPLIED" for item in records), "records": records}
+                return {
+                    "status": record["status"],
+                    "applied_count": sum(item["status"] == "APPLIED" for item in records),
+                    "records": records,
+                    "error_code": SQL_APPLY_FAILED,
+                }
         return {"status": "PASS", "applied_count": len(records), "records": records, "skipped_count": prefix}
 
     @staticmethod
@@ -614,6 +820,8 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
     hashes = report.get("hash_verification", {})
     runtime = report.get("runtime_validation", {})
     wiring = report.get("runtime_case_wiring", {})
+    taxonomy = report.get("failure_taxonomy", {})
+    error = report.get("error", {})
     lines = [
         "# JCFB V4 PRE-BATCH-04 Runtime Validation Report",
         "",
@@ -645,6 +853,28 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
     ]
     reasons = report.get("blocking_reasons") or []
     lines.extend([f"- `{reason}`" for reason in reasons] or ["- None"])
+    if taxonomy:
+        lines.extend(
+            [
+                "",
+                "## Failure taxonomy",
+                "",
+                f"- Error code: `{taxonomy.get('error_code')}`",
+                f"- Phase: `{taxonomy.get('phase')}`",
+                f"- Connector status: `{taxonomy.get('connector_status')}`",
+            ]
+        )
+    if error:
+        lines.extend(
+            [
+                "",
+                "## Redacted error",
+                "",
+                f"- Error code: `{error.get('error_code')}`",
+                f"- Error type: `{error.get('error_type')}`",
+                f"- Phase: `{error.get('phase')}`",
+            ]
+        )
     return "\n".join(lines) + "\n"
 
 

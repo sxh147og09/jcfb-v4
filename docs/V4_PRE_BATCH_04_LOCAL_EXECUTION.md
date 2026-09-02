@@ -37,6 +37,19 @@ Copy `.env.runtime-validation.example` to
 local file is ignored by Git. Do not paste the password into a command line,
 report, screenshot, or chat message.
 
+The disposable connection contract must contain these non-secret endpoint
+settings as well as the database, owner, and password values:
+
+```text
+JCFB_V4_RUNTIME_DB_HOST=127.0.0.1
+JCFB_V4_RUNTIME_DB_PORT=5433
+JCFB_V4_RUNTIME_DB_SSLMODE=disable
+```
+
+The compose file publishes only `127.0.0.1:5433` to container port `5432`.
+Readiness now checks the actual container mapping, so an older container that
+shows healthy but has no host port is blocked before the Python connector.
+
 Start and check the local container explicitly:
 
 ```powershell
@@ -73,10 +86,16 @@ optional `psycopg` dependency, the only disposable apply command is:
 The wrapper imports only the expected local environment values, rechecks
 Docker readiness, verifies hashes, validates the target, applies candidates
 0001 through 0009, records history, and invokes the wired runtime-case
-adapter. A missing driver, wrong target identity, hash mismatch, partial
-history, or failed preflight stops the run. The report remains pending until
-all 20 smoke and 15 enforcement cases have a concrete PostgreSQL hook and
-pass.
+adapter. A missing environment value, driver, wrong target identity, hash
+mismatch, partial history, or failed preflight stops the run with a specific
+redacted reason. The report distinguishes a connector that was not invoked
+from a refused connection, authentication failure, target identity mismatch,
+driver absence, and SQL apply failure. It remains pending until all 20 smoke
+and 15 enforcement cases have a concrete PostgreSQL hook and pass.
+
+The wrapper always calls
+`F:\Projects\jcfb-v4\.runtime\python-venv\Scripts\python.exe`; it does not
+fall back to a global Python interpreter.
 
 The wrapper never accepts a Production target. A staging run needs a separately
 reviewed non-secret target descriptor and must be invoked through the Python

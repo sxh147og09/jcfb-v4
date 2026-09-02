@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from tools.migration_harness.canonical_hash import (
     CanonicalHashError,
@@ -33,6 +35,32 @@ class _FailingAdapter:
 
     def close(self, connection):
         return None
+
+
+class _ConnectFailureAdapter:
+    def __init__(self, error):
+        self.error = error
+        self.connect_calls = 0
+
+    def status(self):
+        return {"status": "READY", "driver": "mock-psycopg", "connection_opened": False}
+
+    def connect(self, settings):
+        self.connect_calls += 1
+        raise self.error
+
+    def close(self, connection):
+        return None
+
+
+class _MockPsycopg:
+    def __init__(self):
+        self.kwargs = None
+        self.connection = _Connection()
+
+    def connect(self, **kwargs):
+        self.kwargs = kwargs
+        return self.connection
 
 
 class _Cursor:
@@ -179,6 +207,90 @@ class RemediationRuntimeTests(unittest.TestCase):
         self.assertIn("PRODUCTION_TARGET_HARD_BLOCK", report["blocking_reasons"])
         self.assertEqual("BLOCKED", report["static_preflight"]["status"])
         self.assertEqual(0, adapter.connect_calls)
+
+    def test_missing_host_port_fails_closed_with_specific_reason(self):
+        adapter = _FailingAdapter()
+        incomplete_env = {
+            "JCFB_V4_RUNTIME_DB_NAME": "jcfb_v4_runtime",
+            "JCFB_V4_RUNTIME_DB_USER": "local_owner",
+            "JCFB_V4_RUNTIME_DB_PASSWORD": "test-secret",
+            "JCFB_V4_RUNTIME_DB_SSLMODE": "disable",
+        }
+        with patch.dict(os.environ, incomplete_env, clear=True):
+            report = RuntimeExecutor(self.repo_root, connection_adapter=adapter).execute(
+                target=default_disposable_target(),
+                mode=ExecutionMode.APPLY,
+            )
+        self.assertEqual("BLOCKED", report["status"])
+        self.assertIn("RUNTIME_CONNECTION_CONFIG_INVALID", report["blocking_reasons"])
+        self.assertEqual(0, adapter.connect_calls)
+        self.assertFalse(report["execution_boundary"]["connector_invoked"])
+        self.assertEqual(
+            ["JCFB_V4_RUNTIME_DB_HOST", "JCFB_V4_RUNTIME_DB_PORT"],
+            report["connection"]["missing_environment_variables"],
+        )
+        self.assertEqual("CONNECTOR_NOT_INVOKED", report["failure_taxonomy"]["connector_status"])
+        self.assertNotIn("test-secret", json.dumps(report))
+
+    def test_connector_connection_failure_is_invoked_and_classified(self):
+        adapter = _ConnectFailureAdapter(TimeoutError("local socket timed out"))
+        settings = ConnectionSettings("127.0.0.1", 5433, "db", "user", "test-secret", "disable")
+        report = RuntimeExecutor(self.repo_root, connection_adapter=adapter).execute(
+            target=default_disposable_target(),
+            mode=ExecutionMode.APPLY,
+            connection_settings=settings,
+        )
+        self.assertEqual("BLOCKED", report["status"])
+        self.assertIn("CONNECTION_REFUSED", report["blocking_reasons"])
+        self.assertEqual(1, adapter.connect_calls)
+        self.assertTrue(report["execution_boundary"]["connector_invoked"])
+        self.assertFalse(report["execution_boundary"]["database_connected"])
+        self.assertEqual("CONNECTION_REFUSED", report["error"]["error_code"])
+        self.assertEqual("CONNECTOR_INVOKED", report["failure_taxonomy"]["connector_status"])
+        self.assertNotIn("local socket timed out", json.dumps(report))
+
+    def test_mocked_psycopg_connector_path_reaches_runtime_pass(self):
+        driver = _MockPsycopg()
+        adapter = PostgresConnectionAdapter(driver=driver, driver_name="psycopg")
+        settings = ConnectionSettings("127.0.0.1", 5433, "db", "user", "test-secret", "disable")
+        with patch.object(
+            RuntimeExecutor,
+            "_runtime_preflight",
+            return_value={"status": "PASS", "checks": []},
+        ), patch.object(
+            RuntimeExecutor,
+            "_apply_candidates",
+            return_value={"status": "PASS", "applied_count": 0, "records": []},
+        ), patch.object(
+            RuntimeExecutor,
+            "_runtime_postflight",
+            return_value={"status": "PASS", "checks": []},
+        ), patch(
+            "tools.migration_harness.runtime_executor.run_runtime_cases",
+            return_value={"status": "PASS", "actually_executed": 35},
+        ):
+            report = RuntimeExecutor(self.repo_root, connection_adapter=adapter).execute(
+                target=default_disposable_target(),
+                mode=ExecutionMode.APPLY,
+                connection_settings=settings,
+            )
+        self.assertEqual("RUNTIME_VALIDATION_PASS", report["status"])
+        self.assertTrue(report["execution_boundary"]["connector_invoked"])
+        self.assertTrue(report["execution_boundary"]["database_connected"])
+        self.assertEqual("CONNECTED", report["connection"]["status"])
+        self.assertEqual("127.0.0.1", driver.kwargs["host"])
+        self.assertEqual(5433, driver.kwargs["port"])
+        self.assertNotIn("url", driver.kwargs)
+        self.assertNotIn("test-secret", json.dumps(report))
+
+    def test_disposable_host_port_guard_is_localhost_only_and_fail_closed(self):
+        compose = (self.repo_root / "docker-compose.runtime-validation.yml").read_text(encoding="utf-8")
+        helper = (self.repo_root / "scripts/v4_disposable_runtime.ps1").read_text(encoding="utf-8")
+        self.assertIn('"127.0.0.1:5433:5432"', compose)
+        self.assertIn("Test-DisposableHostPort", helper)
+        self.assertIn("BLOCKED_DISPOSABLE_POSTGRES_HOST_PORT_MISSING", helper)
+        self.assertIn("BLOCKED_DISPOSABLE_POSTGRES_HOST_PORT_NOT_LOCALHOST", helper)
+        self.assertIn("127.0.0.1", helper)
 
     def test_connection_settings_redact_password(self):
         settings = ConnectionSettings(

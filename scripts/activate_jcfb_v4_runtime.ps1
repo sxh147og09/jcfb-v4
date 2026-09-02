@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$RepoRoot,
-    [switch]$PrintOnly
+    [switch]$PrintOnly,
+    [switch]$LoadRuntimeEnvironment
 )
 
 $ErrorActionPreference = 'Stop'
@@ -10,6 +11,7 @@ if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
 }
 $RepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 $runtimeRoot = Join-Path $RepoRoot '.runtime'
+$runtimeEnvFile = Join-Path $RepoRoot '.env.runtime-validation.local'
 
 $paths = [ordered]@{
     JCFB_V4_REPO_ROOT            = $RepoRoot
@@ -65,9 +67,89 @@ $runtimeDirectories = @(
     $paths['NPM_CONFIG_CACHE']
 ) | Select-Object -Unique
 
+$runtimeEnvironmentNames = @(
+    'JCFB_V4_RUNTIME_DB_HOST',
+    'JCFB_V4_RUNTIME_DB_PORT',
+    'JCFB_V4_RUNTIME_DB_SSLMODE',
+    'JCFB_V4_RUNTIME_DB_NAME',
+    'JCFB_V4_RUNTIME_DB_USER',
+    'JCFB_V4_RUNTIME_DB_PASSWORD',
+    'JCFB_V4_RUNTIME_DB',
+    'JCFB_V4_RUNTIME_OWNER',
+    'JCFB_V4_RUNTIME_PASSWORD'
+)
+
+function Import-JcfbV4RuntimeEnvironment {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        throw 'The local disposable runtime environment file is missing.'
+    }
+
+    $values = @{}
+    foreach ($line in Get-Content -LiteralPath $Path -Encoding UTF8) {
+        if ($line -match '^\s*(?:export\s+)?([A-Z][A-Z0-9_]*)\s*=\s*(.*?)\s*$') {
+            $name = $Matches[1]
+            if ($runtimeEnvironmentNames -notcontains $name) {
+                continue
+            }
+            $value = $Matches[2].Trim()
+            if (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+                $value = $value.Substring(1, $value.Length - 2)
+            }
+            $values[$name] = $value
+        }
+    }
+
+    if ([string]::IsNullOrWhiteSpace([string]$values['JCFB_V4_RUNTIME_DB_NAME']) -and $values.ContainsKey('JCFB_V4_RUNTIME_DB')) {
+        $values['JCFB_V4_RUNTIME_DB_NAME'] = $values['JCFB_V4_RUNTIME_DB']
+    }
+    if ([string]::IsNullOrWhiteSpace([string]$values['JCFB_V4_RUNTIME_DB_USER']) -and $values.ContainsKey('JCFB_V4_RUNTIME_OWNER')) {
+        $values['JCFB_V4_RUNTIME_DB_USER'] = $values['JCFB_V4_RUNTIME_OWNER']
+    }
+    if ([string]::IsNullOrWhiteSpace([string]$values['JCFB_V4_RUNTIME_DB_PASSWORD']) -and $values.ContainsKey('JCFB_V4_RUNTIME_PASSWORD')) {
+        $values['JCFB_V4_RUNTIME_DB_PASSWORD'] = $values['JCFB_V4_RUNTIME_PASSWORD']
+    }
+
+    $required = @(
+        'JCFB_V4_RUNTIME_DB_HOST',
+        'JCFB_V4_RUNTIME_DB_PORT',
+        'JCFB_V4_RUNTIME_DB_SSLMODE',
+        'JCFB_V4_RUNTIME_DB_NAME',
+        'JCFB_V4_RUNTIME_DB_USER',
+        'JCFB_V4_RUNTIME_DB_PASSWORD'
+    )
+    $missing = @($required | Where-Object { [string]::IsNullOrWhiteSpace([string]$values[$_]) })
+    if ($missing.Count -gt 0) {
+        throw ('Required disposable runtime environment variables are missing: {0}' -f ($missing -join ', '))
+    }
+    if ([string]$values['JCFB_V4_RUNTIME_DB_HOST'] -ne '127.0.0.1') {
+        throw 'Disposable runtime database host must be 127.0.0.1.'
+    }
+    if ([string]$values['JCFB_V4_RUNTIME_DB_PORT'] -ne '5433') {
+        throw 'Disposable runtime database host port must be 5433.'
+    }
+    if ([string]$values['JCFB_V4_RUNTIME_DB_SSLMODE'] -notin @('disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full')) {
+        throw 'Disposable runtime database sslmode is not supported.'
+    }
+
+    foreach ($name in $values.Keys) {
+        Set-Item -Path ("Env:{0}" -f $name) -Value ([string]$values[$name])
+    }
+    Write-Output 'JCFB_V4_RUNTIME_ENV_LOADING=PASS'
+    Write-Output 'JCFB_V4_RUNTIME_ENV_SCOPE=Current PowerShell process and child processes only'
+}
+
 if (-not $PrintOnly) {
     foreach ($directory in $runtimeDirectories) {
         $null = New-Item -ItemType Directory -Force -Path $directory
+    }
+
+    if ($LoadRuntimeEnvironment) {
+        Import-JcfbV4RuntimeEnvironment -Path $runtimeEnvFile
     }
 
     foreach ($name in $paths.Keys) {
@@ -83,4 +165,7 @@ if ($PrintOnly) {
 } else {
     Write-Output 'JCFB_V4_RUNTIME_ACTIVATION=PASS'
     Write-Output 'JCFB_V4_SCOPE=Current PowerShell process and child processes only'
+    if (-not $LoadRuntimeEnvironment) {
+        Write-Output 'JCFB_V4_RUNTIME_ENV_LOADING=NOT_REQUESTED'
+    }
 }

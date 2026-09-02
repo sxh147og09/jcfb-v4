@@ -91,6 +91,27 @@ and must pass before any candidate DDL is sent.
 The executor never starts Docker, never discovers a Docker socket, and never
 contacts Supabase from the Codex implementation environment.
 
+## Failure taxonomy
+
+Runtime reports retain only redacted error metadata. The connector invocation
+boundary is recorded before `connect()` is called, so a refused or timed-out
+socket is reported as an invoked connector failure rather than as
+`CONNECTOR_NOT_INVOKED`. The supported apply failure codes are:
+
+| Code | Meaning |
+|---|---|
+| `CONNECTOR_NOT_INVOKED` | A pre-connector gate stopped the run. |
+| `RUNTIME_CONNECTION_CONFIG_INVALID` | A required host, port, database, user, password, or TLS setting is missing or invalid. |
+| `CONNECTION_REFUSED` | The connector was called but the local endpoint was refused or unreachable, including a timeout. |
+| `AUTH_FAILED` | The connector was called and PostgreSQL rejected authentication. |
+| `DRIVER_MISSING` | No supported PostgreSQL driver is available in the project environment. |
+| `TARGET_IDENTITY_MISMATCH` | Connected database identity differs from the explicit target descriptor. |
+| `SQL_APPLY_FAILED` | Candidate SQL or its immutable history write failed. |
+
+Passwords, URLs, and driver exception text are never serialized. The
+disposable PowerShell readiness helper separately blocks a healthy container
+when `127.0.0.1:5433 -> 5432` is absent or bound to any non-loopback address.
+
 ## Runtime case adapter
 
 `tools/migration_harness/runtime_tests.py` discovers exactly 20 smoke bindings

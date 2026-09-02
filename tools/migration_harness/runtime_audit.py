@@ -38,8 +38,10 @@ REQUIRED_FILES = (
 ACTIVE_STORAGE_FILES = (
     ".gitignore",
     "docker-compose.runtime-validation.yml",
+    ".env.runtime-validation.example",
     "scripts/v4_disposable_runtime.ps1",
     "scripts/activate_jcfb_v4_runtime.ps1",
+    "scripts/v4_run_prebatch04_runtime_validation.ps1",
     "docs/JCFB_V4_LOCAL_STORAGE.md",
 )
 
@@ -99,10 +101,28 @@ def _storage_policy(repo_root: Path) -> Dict[str, Any]:
             issues.append(f"ABSOLUTE_MACHINE_PATH:{relative}")
     compose = (repo_root / "docker-compose.runtime-validation.yml").read_text(encoding="utf-8") if (repo_root / "docker-compose.runtime-validation.yml").is_file() else ""
     activate = (repo_root / "scripts/activate_jcfb_v4_runtime.ps1").read_text(encoding="utf-8") if (repo_root / "scripts/activate_jcfb_v4_runtime.ps1").is_file() else ""
+    wrapper = (repo_root / "scripts/v4_run_prebatch04_runtime_validation.ps1").read_text(encoding="utf-8") if (repo_root / "scripts/v4_run_prebatch04_runtime_validation.ps1").is_file() else ""
+    example = (repo_root / ".env.runtime-validation.example").read_text(encoding="utf-8") if (repo_root / ".env.runtime-validation.example").is_file() else ""
     if "./.runtime/postgres" not in compose:
         issues.append("POSTGRES_PATH_NOT_REPO_RELATIVE")
+    if '"127.0.0.1:5433:5432"' not in compose:
+        issues.append("POSTGRES_HOST_PORT_NOT_LOCALHOST")
     if ".runtime" not in activate:
         issues.append("RUNTIME_ENV_NOT_PROJECT_SCOPED")
+    if "Import-JcfbV4RuntimeEnvironment" not in activate or "LoadRuntimeEnvironment" not in activate:
+        issues.append("RUNTIME_ENV_FILE_NOT_LOADED_BY_ACTIVATION")
+    for required_name in (
+        "JCFB_V4_RUNTIME_DB_HOST",
+        "JCFB_V4_RUNTIME_DB_PORT",
+        "JCFB_V4_RUNTIME_DB_SSLMODE",
+        "JCFB_V4_RUNTIME_DB",
+        "JCFB_V4_RUNTIME_OWNER",
+        "JCFB_V4_RUNTIME_PASSWORD",
+    ):
+        if required_name not in example:
+            issues.append(f"RUNTIME_ENV_EXAMPLE_MISSING:{required_name}")
+    if "JCFB_V4_PYTHON_VENV" not in wrapper or "Get-Command python" in wrapper:
+        issues.append("RUNTIME_PYTHON_FALLBACK_OR_PATH_MISSING")
     return {"status": "PASS" if not issues else "FAIL", "files": inspected, "issues": issues}
 
 

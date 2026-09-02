@@ -15,6 +15,9 @@ $localEnvFile = Join-Path $RepoRoot '.env.runtime-validation.local'
 $containerName = 'jcfb-v4-disposable-pg'
 $projectRuntimeRoot = Join-Path $RepoRoot '.runtime'
 $postgresDataDir = Join-Path $projectRuntimeRoot 'postgres'
+$expectedHostAddress = '127.0.0.1'
+$expectedHostPort = '5433'
+$expectedContainerPort = '5432'
 
 # The compose file uses a repository-relative bind mount. Create the host
 # directory explicitly so the runtime cannot fall back to a Docker named
@@ -33,6 +36,55 @@ function Stop-WithStatus {
         Write-Output 'TARGET_IDENTITY=DISPOSABLE_LOCAL'
     }
     exit 2
+}
+
+function Test-DisposableHostPort {
+    $portJson = @(& docker inspect --format '{{json .NetworkSettings.Ports}}' $containerName 2>$null)
+    $inspectExitCode = $LASTEXITCODE
+    if ($inspectExitCode -ne 0 -or $portJson.Count -eq 0) {
+        return [pscustomobject]@{
+            Passed = $false
+            Status = 'BLOCKED_DISPOSABLE_POSTGRES_HOST_PORT_MISSING'
+            Message = 'The disposable PostgreSQL container has no inspectable host port mapping.'
+        }
+    }
+
+    try {
+        $ports = (($portJson -join [Environment]::NewLine) | ConvertFrom-Json)
+    }
+    catch {
+        return [pscustomobject]@{
+            Passed = $false
+            Status = 'BLOCKED_DISPOSABLE_POSTGRES_HOST_PORT_INVALID'
+            Message = 'The disposable PostgreSQL host port mapping could not be parsed.'
+        }
+    }
+
+    $containerKey = '{0}/tcp' -f $expectedContainerPort
+    $bindings = @($ports.$containerKey)
+    if ($null -eq $ports -or $bindings.Count -eq 0 -or $null -eq $bindings[0]) {
+        return [pscustomobject]@{
+            Passed = $false
+            Status = 'BLOCKED_DISPOSABLE_POSTGRES_HOST_PORT_MISSING'
+            Message = 'The disposable PostgreSQL container does not publish its port to the host.'
+        }
+    }
+
+    foreach ($binding in $bindings) {
+        if ([string]$binding.HostIp -ne $expectedHostAddress -or [string]$binding.HostPort -ne $expectedHostPort) {
+            return [pscustomobject]@{
+                Passed = $false
+                Status = 'BLOCKED_DISPOSABLE_POSTGRES_HOST_PORT_NOT_LOCALHOST'
+                Message = 'The disposable PostgreSQL port must be bound only to 127.0.0.1:5433.'
+            }
+        }
+    }
+
+    return [pscustomobject]@{
+        Passed = $true
+        Status = 'PASS'
+        Message = 'The disposable PostgreSQL host port is bound to 127.0.0.1:5433.'
+    }
 }
 
 if (-not (Test-Path -LiteralPath $composeFile -PathType Leaf)) {
@@ -80,7 +132,7 @@ switch ($Action) {
         Write-Output 'DISPOSABLE_RUNTIME_START=PASS'
         Write-Output 'TARGET_IDENTITY=DISPOSABLE_LOCAL'
         Write-Output 'CONTAINER=jcfb-v4-disposable-pg'
-        Write-Output 'BOUND_ADDRESS=127.0.0.1:5433'
+        Write-Output 'BOUND_ADDRESS=127.0.0.1:5433->5432'
         Write-Output 'MIGRATIONS_APPLIED=NO'
     }
     'readiness' {
@@ -88,6 +140,10 @@ switch ($Action) {
         $composePsExitCode = $LASTEXITCODE
         if ($composePsExitCode -ne 0) {
             Stop-WithStatus 'BLOCKED_DISPOSABLE_RUNTIME_STATUS' 'Docker Compose could not read the disposable runtime status.'
+        }
+        $hostPortCheck = Test-DisposableHostPort
+        if (-not $hostPortCheck.Passed) {
+            Stop-WithStatus $hostPortCheck.Status $hostPortCheck.Message
         }
         $healthLines = @(& docker inspect --format '{{.State.Health.Status}}' $containerName 2>$null)
         $healthExitCode = $LASTEXITCODE
@@ -97,6 +153,7 @@ switch ($Action) {
         }
         Write-Output 'DISPOSABLE_RUNTIME_READINESS=PASS'
         Write-Output 'TARGET_IDENTITY=DISPOSABLE_LOCAL'
+        Write-Output 'DISPOSABLE_RUNTIME_HOST_PORT=127.0.0.1:5433->5432'
         Write-Output 'MIGRATIONS_APPLIED=NO'
         exit 0
     }

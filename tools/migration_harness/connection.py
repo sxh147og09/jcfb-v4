@@ -12,6 +12,10 @@ from typing import Any, Dict, Mapping, Optional, Protocol, Tuple
 class ConnectionConfigError(ValueError):
     """Raised when the process environment cannot form a safe DB config."""
 
+    def __init__(self, message: str, *, missing: Tuple[str, ...] = ()):
+        super().__init__(message)
+        self.missing = tuple(missing)
+
 
 class DriverUnavailable(RuntimeError):
     """Raised when no supported PostgreSQL driver is installed."""
@@ -31,7 +35,7 @@ class ConnectionSettings:
 
     @classmethod
     def from_environment(cls, env: Optional[Mapping[str, str]] = None) -> "ConnectionSettings":
-        values = dict(env or os.environ)
+        values = dict(os.environ if env is None else env)
         aliases = {
             "host": ("JCFB_V4_RUNTIME_DB_HOST",),
             "port": ("JCFB_V4_RUNTIME_DB_PORT",),
@@ -49,12 +53,15 @@ class ConnectionSettings:
             else:
                 resolved[field] = str(value).strip()
         if missing:
-            raise ConnectionConfigError("Required runtime connection environment variables are missing: " + ", ".join(missing))
+            raise ConnectionConfigError(
+                "Required runtime connection environment variables are missing: " + ", ".join(missing),
+                missing=tuple(missing),
+            )
         if "://" in resolved["host"] or "/" in resolved["host"]:
             raise ConnectionConfigError("Runtime database host must be a host name or IP, not a URL")
         try:
             port = int(resolved["port"])
-        except ValueError as exc:
+        except (TypeError, ValueError) as exc:
             raise ConnectionConfigError("Runtime database port must be an integer") from exc
         if not 1 <= port <= 65535:
             raise ConnectionConfigError("Runtime database port is outside the valid range")

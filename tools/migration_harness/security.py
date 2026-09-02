@@ -47,7 +47,10 @@ SECRET_PATTERNS = (
     re.compile(r"(?i)\bAIza[0-9A-Za-z_-]{20,}\b"),
     re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
     re.compile(r"(?i)\bBearer\s+[A-Za-z0-9._-]{20,}\b"),
-    re.compile(r"(?i)(?:api[_-]?key|secret|token|password|service[_-]?role[_-]?key)\s*[:=]\s*[\"']?[A-Za-z0-9./+=_-]{20,}"),
+    # Keep assignment matching on one physical line.  ``\s`` also consumes
+    # newlines, which would make an empty PASSWORD= placeholder appear to
+    # capture the next environment variable's value.
+    re.compile(r"(?i)(?:api[_-]?key|secret|token|password|service[_-]?role[_-]?key)[ \t]*[:=][ \t]*[\"']?[A-Za-z0-9./+=_-]{20,}"),
     re.compile(r"(?i)postgres(?:ql)?://[^\s\"']+"),
 )
 

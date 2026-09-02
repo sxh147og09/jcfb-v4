@@ -23,7 +23,6 @@ if ($selectedModes.Count -eq 0) {
 $activateScript = Join-Path $RepoRoot 'scripts\activate_jcfb_v4_runtime.ps1'
 $disposableScript = Join-Path $RepoRoot 'scripts\v4_disposable_runtime.ps1'
 $readinessGateModule = Join-Path $RepoRoot 'scripts\v4_prebatch04_readiness_gate.psm1'
-$localEnvFile = Join-Path $RepoRoot '.env.runtime-validation.local'
 if (-not (Test-Path -LiteralPath $activateScript -PathType Leaf)) {
     throw 'The project runtime activation script is missing.'
 }
@@ -34,17 +33,20 @@ if (-not (Test-Path -LiteralPath $readinessGateModule -PathType Leaf)) {
 Import-Module -Name $readinessGateModule -Force
 
 # Dot-source the activation script so every directory used by this wrapper and
-# its child Python process remains under the project .runtime directory.
-. $activateScript -RepoRoot $RepoRoot
+# its child Python process remains under the project .runtime directory. Apply
+# additionally imports and validates the ignored disposable env file without
+# echoing any of its values.
+if ($ApplyDisposable) {
+    . $activateScript -RepoRoot $RepoRoot -LoadRuntimeEnvironment
+} else {
+    . $activateScript -RepoRoot $RepoRoot
+}
 
 $python = Join-Path $env:JCFB_V4_PYTHON_VENV 'Scripts\python.exe'
 if (-not (Test-Path -LiteralPath $python -PathType Leaf)) {
-    $pythonCommand = Get-Command python -ErrorAction SilentlyContinue
-    if ($null -eq $pythonCommand) {
-        throw 'Python is unavailable. Install Python or create the project-scoped F-drive virtual environment.'
-    }
-    $python = $pythonCommand.Source
+    throw 'The project-scoped F-drive Python virtual environment is missing; create .runtime\python-venv before running this wrapper.'
 }
+$python = (Resolve-Path -LiteralPath $python).Path
 
 function Invoke-HarnessJson {
     param([string[]]$Arguments)
@@ -58,52 +60,6 @@ function Invoke-HarnessJson {
     }
     catch {
         throw 'The migration harness returned an unreadable JSON report.'
-    }
-}
-
-function Import-DisposableEnvironment {
-    param([string]$Path)
-    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
-        throw 'Copy .env.runtime-validation.example to .env.runtime-validation.local and set a fresh disposable password.'
-    }
-    $allowed = @(
-        'JCFB_V4_RUNTIME_DB',
-        'JCFB_V4_RUNTIME_OWNER',
-        'JCFB_V4_RUNTIME_PASSWORD',
-        'JCFB_V4_RUNTIME_DB_NAME',
-        'JCFB_V4_RUNTIME_DB_USER',
-        'JCFB_V4_RUNTIME_DB_PASSWORD',
-        'JCFB_V4_RUNTIME_DB_SSLMODE'
-    )
-    foreach ($line in Get-Content -LiteralPath $Path -Encoding UTF8) {
-        if ($line -match '^\s*([A-Z][A-Z0-9_]*)\s*=\s*(.*?)\s*$') {
-            $name = $Matches[1]
-            if ($allowed -notcontains $name) {
-                continue
-            }
-            $value = $Matches[2].Trim()
-            if (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'"))) {
-                $value = $value.Substring(1, $value.Length - 2)
-            }
-            Set-Item -Path ("Env:{0}" -f $name) -Value $value
-        }
-    }
-    if ([string]::IsNullOrWhiteSpace($env:JCFB_V4_RUNTIME_DB_NAME)) {
-        $env:JCFB_V4_RUNTIME_DB_NAME = $env:JCFB_V4_RUNTIME_DB
-    }
-    if ([string]::IsNullOrWhiteSpace($env:JCFB_V4_RUNTIME_DB_USER)) {
-        $env:JCFB_V4_RUNTIME_DB_USER = $env:JCFB_V4_RUNTIME_OWNER
-    }
-    if ([string]::IsNullOrWhiteSpace($env:JCFB_V4_RUNTIME_DB_PASSWORD)) {
-        $env:JCFB_V4_RUNTIME_DB_PASSWORD = $env:JCFB_V4_RUNTIME_PASSWORD
-    }
-    $env:JCFB_V4_RUNTIME_DB_HOST = '127.0.0.1'
-    $env:JCFB_V4_RUNTIME_DB_PORT = '5433'
-    $env:JCFB_V4_RUNTIME_DB_SSLMODE = if ($env:JCFB_V4_RUNTIME_DB_SSLMODE) { $env:JCFB_V4_RUNTIME_DB_SSLMODE } else { 'disable' }
-    if ([string]::IsNullOrWhiteSpace($env:JCFB_V4_RUNTIME_DB_NAME) -or
-        [string]::IsNullOrWhiteSpace($env:JCFB_V4_RUNTIME_DB_USER) -or
-        [string]::IsNullOrWhiteSpace($env:JCFB_V4_RUNTIME_DB_PASSWORD)) {
-        throw 'The disposable database name, owner, and password must be non-empty; the password value is never printed.'
     }
 }
 
@@ -142,7 +98,6 @@ try {
         if (-not $readinessGate.Passed) {
             throw ("The disposable PostgreSQL readiness gate did not pass: {0}" -f $readinessGate.Reason)
         }
-        Import-DisposableEnvironment -Path $localEnvFile
     }
 
     $databaseName = if ($ApplyDisposable) { $env:JCFB_V4_RUNTIME_DB_NAME } else { 'jcfb_v4_runtime' }
