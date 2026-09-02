@@ -93,13 +93,23 @@ optional `psycopg` dependency, the only disposable apply command is:
 
 The wrapper imports only the expected local environment values, rechecks
 Docker readiness, verifies hashes, validates the target, applies candidates
-0001 through 0009, records history, and invokes the wired runtime-case
-adapter. A missing environment value, driver, wrong target identity, hash
-mismatch, partial history, or failed preflight stops the run with a specific
-redacted reason. The report distinguishes a connector that was not invoked
-from a refused connection, authentication failure, target identity mismatch,
-driver absence, and SQL apply failure. It remains pending until all 20 smoke
-and 15 enforcement cases have a concrete PostgreSQL hook and pass.
+0001 through 0009, records history, prepares the disposable role simulation,
+and executes all 20 smoke plus 15 enforcement handlers in isolated
+transactions. A missing environment value, driver, wrong target identity,
+hash mismatch, partial history, failed preflight, failed schema check, or
+unexpected case outcome stops the run with a specific redacted reason. The
+report distinguishes a connector that was not invoked from a refused
+connection, authentication failure, target identity mismatch, driver absence,
+SQL apply failure, and runtime validation failure. Each expected rejection
+must match its declared SQLSTATE and stable database mechanism; a generic SQL
+error does not pass.
+
+The report also records `DISPOSABLE_ROLE_SIMULATION` when local-only
+`backend`, `executor`, or `auditor` fixtures are created. This does not emulate
+Supabase Auth, and the Advisor-specific check remains
+`NOT_RUN_IN_DISPOSABLE`. Staging readiness is emitted as
+`READY_FOR_PRODUCTION_REVIEW` only when migrations 9/9, smoke 20/20,
+enforcement 15/15, schema/security checks, and all hard gates pass.
 
 The wrapper always calls
 `F:\Projects\jcfb-v4\.runtime\python-venv\Scripts\python.exe`; it does not
@@ -107,7 +117,9 @@ fall back to a global Python interpreter.
 
 The wrapper never accepts a Production target. A staging run needs a separately
 reviewed non-secret target descriptor and must be invoked through the Python
-executor rather than by changing the disposable wrapper's target.
+executor rather than by changing the disposable wrapper's target. Even a
+successful disposable run never executes BATCH-04 and never changes
+V4-018/V4-019.
 
 ## Capture and teardown
 

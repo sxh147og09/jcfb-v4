@@ -111,10 +111,13 @@ try {
     Write-Output ("PRE_BATCH_04_RUNTIME_MODE={0}" -f $mode)
     Write-Output ("PRE_BATCH_04_RUNTIME_STATUS={0}" -f $report.status)
     Write-Output ("PRE_BATCH_04_HASHES={0}/{1}" -f $report.hash_verification.matched_count, $report.hash_verification.candidate_count)
-    Write-Output ("PRE_BATCH_04_SMOKE_BINDINGS={0}/20" -f $report.runtime_case_wiring.smoke_count)
-    Write-Output ("PRE_BATCH_04_ENFORCEMENT_BINDINGS={0}/15" -f $report.runtime_case_wiring.enforcement_count)
+    Write-Output ("PRE_BATCH_04_SMOKE_EXECUTABLE_HANDLERS={0}/20" -f $report.runtime_case_wiring.smoke_executable_handler_count)
+    Write-Output ("PRE_BATCH_04_ENFORCEMENT_EXECUTABLE_HANDLERS={0}/15" -f $report.runtime_case_wiring.enforcement_executable_handler_count)
+    Write-Output ("PRE_BATCH_04_SMOKE_PASSED={0}/20" -f $report.runtime_validation.passed_smoke)
+    Write-Output ("PRE_BATCH_04_ENFORCEMENT_PASSED={0}/15" -f $report.runtime_validation.passed_enforcement)
+    Write-Output ("PRE_BATCH_04_STAGING_READINESS={0}" -f $report.staging_readiness.status)
     Write-Output 'PRE_BATCH_04_REPORT_SCOPE=.runtime/reports/prebatch04'
-    if ($mode -eq 'APPLY' -and $report.status -notin @('APPLIED', 'RUNTIME_VALIDATION_PENDING', 'RUNTIME_VALIDATION_PASS')) {
+    if ($mode -eq 'APPLY' -and ($report.status -ne 'RUNTIME_VALIDATION_PASS' -or $report.staging_readiness.status -ne 'READY_FOR_PRODUCTION_REVIEW')) {
         exit 1
     }
 }

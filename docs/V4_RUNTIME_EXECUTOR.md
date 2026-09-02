@@ -17,7 +17,9 @@ candidate manifest
   -> environment-only connection settings
   -> read-only PostgreSQL catalog preflight (before DDL)
   -> one transaction per candidate plus immutable history row
-  -> runtime-case adapter
+  -> disposable role simulation
+  -> one rollback-isolated transaction per executable runtime case
+  -> catalog/schema and runtime gate checks
   -> redacted local report
 ```
 
@@ -118,16 +120,41 @@ binding is blocked.
 
 `tools/migration_harness/runtime_tests.py` discovers exactly 20 smoke bindings
 from `v4_smoke_test_catalog.json` and exactly 15 database-enforcement bindings
-(`NEG-08` through `NEG-22`) from `v4_negative_case_registry.json`. Each binding
-preserves its source reference, expected result, caller-role contract, and a
-stable hook name. The PostgreSQL adapter accepts a connection-level
-`run_v4_runtime_case(binding)` hook; an absent hook is reported as pending,
-never as a pass. This keeps case wiring auditable without claiming that a
-database test ran in Codex.
+(`NEG-08` through `NEG-22`) from `v4_negative_case_registry.json`. The
+machine-readable execution contract in
+`config/migration_harness/v4_runtime_case_execution.json` is joined to those
+registries by case ID. Every binding therefore has a concrete handler, setup,
+action, expected outcome, governed mechanism, and cleanup strategy.
+
+`tools/migration_harness/runtime_case_handlers.py` executes the handlers through
+ordinary PostgreSQL statements. The runner starts a transaction for each case,
+uses savepoints around rejected actions, records only SQLSTATE/constraint
+metadata, and rolls back the complete fixture transaction before the next case.
+The result vocabulary is deliberately closed:
+`PASS_EXPECTED_ACCEPT`, `PASS_EXPECTED_REJECT`, `FAIL_UNEXPECTED_ACCEPT`,
+`FAIL_UNEXPECTED_REJECT`, and `BLOCKED_ENVIRONMENT`. A negative case can pass
+only when SQLSTATE and the contract's stable constraint/error marker match;
+an arbitrary SQL error is never accepted as evidence.
+
+The disposable target may create the minimal local-only `backend`, `executor`,
+and `auditor` no-login roles and grant them membership in `service_role` when
+the candidate schema has no equivalent role. Existing `anon` and
+`authenticated` roles are used as public read/write-boundary fixtures. This is
+reported as `DISPOSABLE_ROLE_SIMULATION`; it is not a Supabase auth runtime.
+Supabase Advisor remains `NOT_RUN_IN_DISPOSABLE`.
+
+The runtime schema audit is read-only after migration apply. It checks the
+candidate tables, functions, fixed `search_path` for security-definer
+functions, security-invoker views, RLS, critical triggers, constraints,
+production uniqueness indexes, no-future-leakage triggers, and the canonical
+latest-business-timestamp view.
 
 ## Reports and gate
 
 Explicit local execution may write only redacted reports below
-`.runtime/reports/prebatch04/`. A pending or failed runtime case blocks the
-acceptance report. This executor does not change V4 task checkboxes, does not
-approve BATCH-04, and does not perform Production or Supabase writes.
+`.runtime/reports/prebatch04/`. A blocked or failed runtime case blocks staging
+readiness. The PowerShell wrapper now accepts `-ApplyDisposable` only when all
+35 executable cases pass, the schema/security gates pass, and the report says
+`READY_FOR_PRODUCTION_REVIEW`. This executor does not change V4 task
+checkboxes, does not approve BATCH-04, and does not perform Production or
+Supabase writes.

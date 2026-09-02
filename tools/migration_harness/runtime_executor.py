@@ -14,6 +14,7 @@ from .common import sha256_json
 from .connection import ConnectionAdapter, ConnectionConfigError, ConnectionSettings, PostgresConnectionAdapter, driver_status
 from .models import ExecutionMode
 from .runtime_tests import PostgresRuntimeCaseAdapter, run_runtime_cases, validate_runtime_case_wiring
+from .runtime_schema import collect_runtime_schema_checks
 from .target import validate_target_descriptor
 
 
@@ -426,6 +427,14 @@ class RuntimeExecutor:
             phase = "SQL_APPLY"
             apply_report = self._apply_candidates(connection, plan["hash_verification"])
             plan["migrations"] = apply_report
+            plan["migration_apply_path"] = {
+                "status": "PASS" if apply_report.get("status") in {"PASS", "ALREADY_APPLIED"} else "FAIL",
+                "candidate_count": 9,
+                "applied_count": apply_report.get("applied_count", 0),
+                "validated_history_count": apply_report.get("applied_count", 0) + apply_report.get("skipped_count", 0),
+                "history_recording": "PASS" if apply_report.get("status") in {"PASS", "ALREADY_APPLIED"} else "FAIL",
+                "transactional_ddl_and_history": True,
+            }
             if apply_report.get("status") not in {"PASS", "ALREADY_APPLIED"}:
                 error_code = str(apply_report.get("error_code") or SQL_APPLY_FAILED)
                 failed_record = next(
@@ -463,17 +472,67 @@ class RuntimeExecutor:
                 return _blocking_report(plan, error_code)
             if run_validations:
                 phase = "RUNTIME_VALIDATION"
-                validation_adapter = PostgresRuntimeCaseAdapter(connection)
+                plan["schema_checks"] = collect_runtime_schema_checks(connection)
+                validation_adapter = PostgresRuntimeCaseAdapter(connection, repo_root=self.repo_root, actor=self.actor)
                 plan["runtime_validation"] = run_runtime_cases(self.repo_root, validation_adapter)
-            runtime_status = plan.get("runtime_validation", {}).get("status")
-            if runtime_status == "PENDING":
-                plan["status"] = "RUNTIME_VALIDATION_PENDING"
-            elif runtime_status == "FAIL":
-                plan["status"] = "RUNTIME_VALIDATION_FAILED"
             else:
-                plan["status"] = "RUNTIME_VALIDATION_PASS" if runtime_status == "PASS" else "APPLIED"
-            plan["execution_boundary"]["sql_executed"] = apply_report.get("applied_count", 0) > 0
+                plan["schema_checks"] = {
+                    "status": "BLOCKED_ENVIRONMENT",
+                    "reason": "Runtime validations were explicitly disabled",
+                    "advisor_status": "NOT_RUN_IN_DISPOSABLE",
+                }
+                plan["runtime_validation"] = {
+                    "status": "BLOCKED",
+                    "defined_count": 35,
+                    "actually_executed": 0,
+                    "blocked_environment": 35,
+                    "reason": "Runtime validations were explicitly disabled",
+                    "results": [],
+                }
+            runtime_status = plan.get("runtime_validation", {}).get("status")
+            if runtime_status == "FAIL":
+                plan["status"] = "RUNTIME_VALIDATION_FAILED"
+            elif runtime_status == "PASS":
+                plan["status"] = "RUNTIME_VALIDATION_PASS"
+            else:
+                plan["status"] = "RUNTIME_VALIDATION_BLOCKED"
+            plan["execution_boundary"]["sql_executed"] = bool(
+                apply_report.get("applied_count", 0) > 0
+                or plan.get("runtime_validation", {}).get("actually_executed", 0) > 0
+            )
             plan["execution_boundary"]["ddl_applied"] = apply_report.get("applied_count", 0) > 0
+            plan["database_runtime_executed_in_codex"] = "NO"
+            plan["database_runtime_executed_on_target"] = "YES"
+            plan["production_db_writes_performed"] = "NO"
+            plan["supabase_writes_performed"] = "NO"
+            plan["v4_018_v4_019_changed"] = "NO"
+            runtime = plan.get("runtime_validation", {})
+            schema = plan.get("schema_checks", {})
+            gates = runtime.get("runtime_gates", {}) if isinstance(runtime, Mapping) else {}
+            history_ok = (
+                apply_report.get("status") in {"PASS", "ALREADY_APPLIED"}
+                and int(plan.get("postflight", {}).get("history_row_count", 0)) == 9
+            )
+            readiness_checks = {
+                "migrations_9_of_9": history_ok,
+                "smoke_20_of_20": runtime.get("passed_smoke", 0) == 20 and runtime.get("smoke_count") == 20,
+                "enforcement_15_of_15": runtime.get("passed_enforcement", 0) == 15 and runtime.get("enforcement_count") == 15,
+                "schema_constraints": schema.get("constraints", {}).get("status") == "PASS",
+                "rls": schema.get("rls", {}).get("status") == "PASS",
+                "triggers": schema.get("triggers", {}).get("status") == "PASS",
+                "views": schema.get("views", {}).get("status") == "PASS",
+                "no_future_leakage": gates.get("no_future_leakage") == "PASS" and schema.get("no_future_leakage", {}).get("status") == "PASS",
+                "production_uniqueness": gates.get("production_uniqueness") == "PASS" and schema.get("production_uniqueness", {}).get("status") == "PASS",
+                "tier_a_same_frozen_input": gates.get("tier_a_same_frozen_input") == "PASS",
+                "canonical_latest_update": gates.get("canonical_latest_update") == "PASS" and schema.get("canonical_latest_update", {}).get("status") == "PASS",
+            }
+            readiness_ready = all(readiness_checks.values()) and runtime.get("status") == "PASS" and schema.get("status") == "PASS"
+            plan["staging_readiness"] = {
+                "status": "READY_FOR_PRODUCTION_REVIEW" if readiness_ready else "BLOCKED_RUNTIME_VALIDATION",
+                "checks": readiness_checks,
+                "advisor_status": "NOT_RUN_IN_DISPOSABLE",
+                "production_apply_allowed": False,
+            }
             return plan
         except Exception as exc:
             if phase == "CONNECT":
@@ -529,7 +588,10 @@ class RuntimeExecutor:
         add("RPF-03", any(item.get("name") == "pgcrypto" and item.get("approved") is True for item in extensions), "pgcrypto is installed or available for the candidate bootstrap")
         add("RPF-04", not catalog.get("v333_objects"), "No V3.3.3-like object is present in the local target")
         history = catalog.get("migration_history", {})
-        add("RPF-05", history.get("partial_applied") is not True and history.get("matches_manifest") is True, "Migration history is empty or an exact applied prefix")
+        history_rows = self._read_history_rows(connection)
+        history_prefix, history_issue = self._validated_history_prefix(history_rows, candidates)
+        history_prefix_ok = history_issue is None and history_prefix == len(history_rows)
+        add("RPF-05", history.get("partial_applied") is not True and history.get("matches_manifest") is True and history_prefix_ok, "Migration history is empty or an exact applied prefix", history_issue=history_issue)
         objects = catalog.get("objects", [])
         has_history = bool(history.get("rows"))
         add("RPF-06", not objects or has_history, "Target is fresh or already attributable to the candidate history")
@@ -557,6 +619,8 @@ class RuntimeExecutor:
         candidates = [item for item in manifest.get("candidates", []) if isinstance(item, Mapping)]
         catalog = collect_runtime_catalog(connection, target, candidates)
         history = catalog.get("migration_history", {})
+        history_rows = self._read_history_rows(connection)
+        history_prefix, history_issue = self._validated_history_prefix(history_rows, candidates)
         checks = [
             {
                 "id": "RPO-01",
@@ -574,8 +638,11 @@ class RuntimeExecutor:
                 if history.get("matches_manifest") is True
                 and history.get("partial_applied") is not True
                 and len(history.get("rows", [])) == len(candidates)
+                and history_issue is None
+                and history_prefix == len(candidates)
                 else "BLOCKED",
                 "reason": "All nine immutable migration history rows match the candidate manifest",
+                "details": {"history_issue": history_issue},
             },
         ]
         return {
@@ -719,7 +786,7 @@ class RuntimeExecutor:
             return []
         return self._read_rows(
             connection,
-            "SELECT migration_id, sequence, name, migration_version, schema_contract_version, migration_hash, status, success, partial_state "
+            "SELECT migration_id, sequence, name, migration_version, schema_contract_version, migration_hash, applied_at, applied_by, app_version, status, success, partial_state, notes, prev_migration_hash, chain_hash, recorded_at "
             "FROM governance.schema_migrations ORDER BY sequence",
         )
 
@@ -734,10 +801,30 @@ class RuntimeExecutor:
             if migration_id in seen or migration_id != entry.get("migration_id"):
                 return index, "Migration history identity/order does not match the candidate prefix"
             seen.add(migration_id)
+            if row.get("sequence") != entry.get("sequence"):
+                return index, "Migration history sequence differs from the immutable candidate prefix"
+            if row.get("name") != entry.get("name"):
+                return index, "Migration history name differs from the immutable candidate prefix"
+            if row.get("migration_version") != entry.get("migration_version"):
+                return index, "Migration history migration_version differs from the immutable candidate prefix"
+            if row.get("schema_contract_version") != entry.get("schema_contract_version"):
+                return index, "Migration history schema contract differs from the immutable candidate prefix"
             if row.get("migration_hash") != entry.get("canonical_migration_hash"):
                 return index, "Migration history hash differs from the immutable candidate hash"
             if row.get("status") != "APPLIED" or row.get("success") is not True or row.get("partial_state") is True:
                 return index, "Migration history contains a failed, blocked, or partial state"
+            expected_previous_hash = candidates[index - 1].get("canonical_migration_hash") if index else None
+            if row.get("prev_migration_hash") != expected_previous_hash:
+                return index, "Migration history previous-hash chain differs from the immutable candidate prefix"
+            expected_chain_hash = sha256_json(
+                {
+                    "migration_id": entry.get("migration_id"),
+                    "migration_hash": entry.get("canonical_migration_hash"),
+                    "prev_migration_hash": expected_previous_hash,
+                }
+            )
+            if row.get("chain_hash") != expected_chain_hash:
+                return index, "Migration history chain_hash differs from the immutable candidate prefix"
         return len(rows), None
 
     def _record_history(
@@ -820,6 +907,9 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
     hashes = report.get("hash_verification", {})
     runtime = report.get("runtime_validation", {})
     wiring = report.get("runtime_case_wiring", {})
+    migrations = report.get("migrations", {})
+    schema = report.get("schema_checks", {})
+    readiness = report.get("staging_readiness", {})
     taxonomy = report.get("failure_taxonomy", {})
     error = report.get("error", {})
     lines = [
@@ -838,21 +928,63 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
         f"- Production DB writes: `{boundary.get('production_db_writes_performed', 'NO')}`",
         f"- Supabase writes: `{boundary.get('supabase_writes_performed', 'NO')}`",
         f"- V3.3.3 mutated: `{boundary.get('v333_mutated', 'NO')}`",
-        "- Database runtime tests executed in Codex: `NO`",
+        f"- Database runtime tests executed in Codex: `{report.get('database_runtime_executed_in_codex', 'NO')}`",
+        f"- Database runtime tests executed on target: `{report.get('database_runtime_executed_on_target', 'NO')}`",
+        f"- Migration apply path: `{report.get('migration_apply_path', {}).get('status', 'NOT_RUN')}`",
+        f"- Migration history recording: `{report.get('migration_apply_path', {}).get('history_recording', 'NOT_RUN')}`",
+        f"- Production/Supabase writes performed: `{report.get('production_db_writes_performed', boundary.get('production_db_writes_performed', 'NO'))}/{report.get('supabase_writes_performed', boundary.get('supabase_writes_performed', 'NO'))}`",
         "- BATCH-04/V4-018/V4-019 changed: `NO`",
         "",
         "## Runtime case wiring",
         "",
         f"- Smoke bindings: `{wiring.get('smoke_count', 0)}/20`",
+        f"- Smoke executable handlers: `{wiring.get('smoke_executable_handler_count', 0)}/20`",
         f"- Enforcement bindings: `{wiring.get('enforcement_count', 0)}/15`",
+        f"- Enforcement executable handlers: `{wiring.get('enforcement_executable_handler_count', 0)}/15`",
         f"- Runtime case result: `{runtime.get('status', 'NOT_RUN')}`",
         f"- Cases executed: `{runtime.get('actually_executed', 0)}/35`",
+        f"- Expected-reject matching: `{runtime.get('expected_reject_matching', 'NOT_RUN')}`",
+        f"- Role simulation: `{(runtime.get('role_simulation') or {}).get('status', 'NOT_RUN')}`",
         "",
-        "## Blocking reasons",
+        "## Migration history",
+        "",
+        f"- Apply status: `{migrations.get('status', 'NOT_RUN')}`",
+        f"- Applied this invocation: `{migrations.get('applied_count', 0)}/9`",
+        f"- Validated migration history rows: `{migrations.get('validated_history_count', migrations.get('applied_count', 0))}/9`",
+        f"- Transactional DDL + history row: `{report.get('migration_apply_path', {}).get('transactional_ddl_and_history', False)}`",
+        "",
+        "## Schema and security checks",
+        "",
+        f"- Schema audit: `{schema.get('status', 'NOT_RUN')}`",
+        f"- Tables/constraints: `{schema.get('tables', {}).get('status', 'NOT_RUN')}/{schema.get('constraints', {}).get('status', 'NOT_RUN')}`",
+        f"- RLS/triggers/views: `{schema.get('rls', {}).get('status', 'NOT_RUN')}/{schema.get('triggers', {}).get('status', 'NOT_RUN')}/{schema.get('views', {}).get('status', 'NOT_RUN')}`",
+        f"- No future leakage: `{schema.get('no_future_leakage', {}).get('status', 'NOT_RUN')}`",
+        f"- Production uniqueness: `{schema.get('production_uniqueness', {}).get('status', 'NOT_RUN')}`",
+        f"- Canonical latest update: `{schema.get('canonical_latest_update', {}).get('status', 'NOT_RUN')}`",
+        f"- Supabase Advisor: `{schema.get('advisor_status', 'NOT_RUN_IN_DISPOSABLE')}`",
+        "",
+        "## Runtime gates",
         "",
     ]
-    reasons = report.get("blocking_reasons") or []
-    lines.extend([f"- `{reason}`" for reason in reasons] or ["- None"])
+    gates = runtime.get("runtime_gates", {}) if isinstance(runtime, Mapping) else {}
+    lines.extend([f"- {name}: `{value}`" for name, value in gates.items()] or ["- None"])
+    lines.extend(["", "## Staging readiness", "", f"- Status: `{readiness.get('status', 'NOT_RUN')}`"])
+    readiness_checks = readiness.get("checks", {}) if isinstance(readiness, Mapping) else {}
+    lines.extend([f"- {name}: `{'PASS' if value else 'FAIL'}`" for name, value in readiness_checks.items()] or ["- No readiness checks were run"])
+    lines.extend(["", "## Blocking reasons", ""])
+    lines.extend([f"- `{reason}`" for reason in (report.get("blocking_reasons") or [])] or ["- None"])
+    lines.extend(["", "## Runtime cases", "", "| Case | Kind | Status | Expected | Actual | Handler | Mechanism | Reason |", "|---|---|---|---|---|---|---|---|"])
+    case_results = runtime.get("results", []) if isinstance(runtime, Mapping) else []
+    if case_results:
+        for result in case_results:
+            mechanism = result.get("observed_mechanism") or result.get("expected_mechanism") or {}
+            mechanism_text = str(mechanism.get("trigger") or mechanism.get("constraint") or mechanism.get("role_gate") or mechanism.get("view") or mechanism.get("type") or "-").replace("|", "/")
+            reason_text = str(result.get("reason") or result.get("blocked_reason") or "-").replace("|", "/").replace("\r", " ").replace("\n", " ")
+            lines.append(
+                f"| {result.get('case_id')} | {result.get('kind')} | {result.get('status')} | {result.get('expected_outcome', '-')} | {result.get('actual_outcome', '-')} | {result.get('hook_name')} | {mechanism_text} | {reason_text} |"
+            )
+    else:
+        lines.append("| - | - | NOT_RUN | - | - | - | - | - |")
     if taxonomy:
         lines.extend(
             [
