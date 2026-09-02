@@ -27,6 +27,8 @@ REQUIRED_FILES = (
     "tools/migration_harness/runtime_tests.py",
     "tools/migration_harness/runtime_audit.py",
     "scripts/v4_run_prebatch04_runtime_validation.ps1",
+    "scripts/v4_prebatch04_readiness_gate.psm1",
+    "tests/migration_harness/test_prebatch04_readiness_gate.ps1",
     "docs/V4_CANONICAL_MIGRATION_HASH.md",
     "docs/V4_RUNTIME_EXECUTOR.md",
     "docs/V4_PRE_BATCH_04_LOCAL_EXECUTION.md",

@@ -25,6 +25,20 @@ TEXT_SUFFIXES = {
     ".env",
     ".example",
 }
+EXCLUDED_DIRECTORIES = {
+    ".git",
+    ".runtime",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "node_modules",
+    ".next",
+    ".turbo",
+    ".vite",
+    ".cache",
+    "playwright-report",
+    "test-results",
+}
 SECRET_PATTERNS = (
     re.compile(r"(?i)\bsk-[A-Za-z0-9]{20,}\b"),
     re.compile(r"(?i)\bgh[pousr]_[A-Za-z0-9]{20,}\b"),
@@ -40,7 +54,10 @@ SECRET_PATTERNS = (
 
 def _candidate_files(repo_root: Path) -> Iterable[Path]:
     for path in repo_root.rglob("*"):
-        if not path.is_file() or ".git" in path.parts:
+        if not path.is_file():
+            continue
+        relative_parts = path.relative_to(repo_root).parts
+        if any(part in EXCLUDED_DIRECTORIES for part in relative_parts[:-1]):
             continue
         if path.name == ".env.example" or path.suffix.lower() in TEXT_SUFFIXES:
             yield path

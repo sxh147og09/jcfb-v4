@@ -1,12 +1,15 @@
 [CmdletBinding()]
 param(
-    [string]$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path,
+    [string]$RepoRoot,
     [switch]$PlanOnly,
     [switch]$DryRun,
     [switch]$ApplyDisposable
 )
 
 $ErrorActionPreference = 'Stop'
+if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
+    $RepoRoot = Join-Path $PSScriptRoot '..'
+}
 $RepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 
 $selectedModes = @($PlanOnly.IsPresent, $DryRun.IsPresent, $ApplyDisposable.IsPresent) | Where-Object { $_ }
@@ -19,10 +22,16 @@ if ($selectedModes.Count -eq 0) {
 
 $activateScript = Join-Path $RepoRoot 'scripts\activate_jcfb_v4_runtime.ps1'
 $disposableScript = Join-Path $RepoRoot 'scripts\v4_disposable_runtime.ps1'
+$readinessGateModule = Join-Path $RepoRoot 'scripts\v4_prebatch04_readiness_gate.psm1'
 $localEnvFile = Join-Path $RepoRoot '.env.runtime-validation.local'
 if (-not (Test-Path -LiteralPath $activateScript -PathType Leaf)) {
     throw 'The project runtime activation script is missing.'
 }
+if (-not (Test-Path -LiteralPath $readinessGateModule -PathType Leaf)) {
+    throw 'The disposable runtime readiness gate module is missing.'
+}
+
+Import-Module -Name $readinessGateModule -Force
 
 # Dot-source the activation script so every directory used by this wrapper and
 # its child Python process remains under the project .runtime directory.
@@ -110,9 +119,28 @@ try {
         if (-not (Test-Path -LiteralPath $disposableScript -PathType Leaf)) {
             throw 'The disposable runtime readiness script is missing.'
         }
-        & $disposableScript -Action readiness -RepoRoot $RepoRoot
-        if ($LASTEXITCODE -ne 0) {
-            throw 'The disposable PostgreSQL readiness gate did not pass.'
+
+        $powerShellCommand = Get-Command powershell.exe -ErrorAction SilentlyContinue
+        if ($null -eq $powerShellCommand) {
+            $powerShellCommand = Get-Command pwsh.exe -ErrorAction SilentlyContinue
+        }
+        if ($null -eq $powerShellCommand) {
+            throw 'A PowerShell executable is unavailable for the disposable readiness helper.'
+        }
+
+        # Run the helper out of process so its explicit exit status cannot be
+        # confused with a previous native command in this wrapper scope.
+        $readinessOutput = @(
+            & $powerShellCommand.Source -NoProfile -NonInteractive -ExecutionPolicy Bypass -File $disposableScript -Action readiness -RepoRoot $RepoRoot 2>&1
+        )
+        $readinessExitCode = $LASTEXITCODE
+        foreach ($readinessLine in $readinessOutput) {
+            Write-Output ([string]$readinessLine)
+        }
+
+        $readinessGate = Test-DisposableReadinessOutput -OutputLines $readinessOutput -ExitCode $readinessExitCode
+        if (-not $readinessGate.Passed) {
+            throw ("The disposable PostgreSQL readiness gate did not pass: {0}" -f $readinessGate.Reason)
         }
         Import-DisposableEnvironment -Path $localEnvFile
     }

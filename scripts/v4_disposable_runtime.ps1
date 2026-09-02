@@ -1,12 +1,15 @@
 param(
     [ValidateSet('start', 'readiness', 'stop', 'destroy')]
     [string]$Action = 'readiness',
-    [string]$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path,
+    [string]$RepoRoot,
     [switch]$ConfirmDestroy
 )
 
 $ErrorActionPreference = 'Stop'
-$RepoRoot = (Resolve-Path $RepoRoot).Path
+if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
+    $RepoRoot = Join-Path $PSScriptRoot '..'
+}
+$RepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 $composeFile = Join-Path $RepoRoot 'docker-compose.runtime-validation.yml'
 $localEnvFile = Join-Path $RepoRoot '.env.runtime-validation.local'
 $containerName = 'jcfb-v4-disposable-pg'
@@ -25,6 +28,10 @@ function Stop-WithStatus {
     )
     Write-Output $Status
     Write-Output $Message
+    if ($Action -eq 'readiness') {
+        Write-Output 'DISPOSABLE_RUNTIME_READINESS=BLOCKED'
+        Write-Output 'TARGET_IDENTITY=DISPOSABLE_LOCAL'
+    }
     exit 2
 }
 
@@ -78,14 +85,20 @@ switch ($Action) {
     }
     'readiness' {
         & docker @composeArgs ps
-        $health = (& docker inspect --format '{{.State.Health.Status}}' $containerName 2>$null | Select-Object -First 1)
-        $health = if ($null -eq $health) { '' } else { $health.ToString().Trim() }
-        if ($health -ne 'healthy') {
+        $composePsExitCode = $LASTEXITCODE
+        if ($composePsExitCode -ne 0) {
+            Stop-WithStatus 'BLOCKED_DISPOSABLE_RUNTIME_STATUS' 'Docker Compose could not read the disposable runtime status.'
+        }
+        $healthLines = @(& docker inspect --format '{{.State.Health.Status}}' $containerName 2>$null)
+        $healthExitCode = $LASTEXITCODE
+        $health = if ($healthLines.Count -eq 0) { '' } else { ([string]$healthLines[0]).Trim() }
+        if ($healthExitCode -ne 0 -or $health -ne 'healthy') {
             Stop-WithStatus 'BLOCKED_DISPOSABLE_POSTGRES_NOT_READY' ("Container health is '{0}'. Run the start action and retry." -f $health)
         }
         Write-Output 'DISPOSABLE_RUNTIME_READINESS=PASS'
         Write-Output 'TARGET_IDENTITY=DISPOSABLE_LOCAL'
         Write-Output 'MIGRATIONS_APPLIED=NO'
+        exit 0
     }
     'stop' {
         & docker @composeArgs stop
