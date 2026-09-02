@@ -9,7 +9,11 @@ services:
     ports:
       - "127.0.0.1:5433:5432"
     volumes:
-      - jcfb-v4-disposable-pg-data:/var/lib/postgresql/data
+      # Relative bind mounts resolve from this repository, so disposable
+      # PostgreSQL data is kept under F:\Projects\jcfb-v4\.runtime\postgres.
+      - type: bind
+        source: ./.runtime/postgres
+        target: /var/lib/postgresql/data
     healthcheck:
       test:
         - CMD-SHELL
@@ -25,7 +29,3 @@ services:
 networks:
   jcfb-v4-local-only:
     internal: true
-
-volumes:
-  jcfb-v4-disposable-pg-data:
-    name: jcfb-v4-disposable-pg-data

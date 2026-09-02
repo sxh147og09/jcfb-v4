@@ -10,6 +10,13 @@ $RepoRoot = (Resolve-Path $RepoRoot).Path
 $composeFile = Join-Path $RepoRoot 'docker-compose.runtime-validation.yml'
 $localEnvFile = Join-Path $RepoRoot '.env.runtime-validation.local'
 $containerName = 'jcfb-v4-disposable-pg'
+$projectRuntimeRoot = Join-Path $RepoRoot '.runtime'
+$postgresDataDir = Join-Path $projectRuntimeRoot 'postgres'
+
+# The compose file uses a repository-relative bind mount. Create the host
+# directory explicitly so the runtime cannot fall back to a Docker named
+# volume whose storage location is controlled by Docker Desktop.
+$null = New-Item -ItemType Directory -Force -Path $postgresDataDir
 
 function Stop-WithStatus {
     param(
@@ -30,8 +37,12 @@ if ($null -eq $docker) {
     Stop-WithStatus 'BLOCKED_DOCKER_NOT_INSTALLED' 'Install Docker Desktop manually, start it, then rerun this wrapper.'
 }
 
+$previousErrorActionPreference = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
 $null = & docker info 2>$null
-if ($LASTEXITCODE -ne 0) {
+$dockerInfoExitCode = $LASTEXITCODE
+$ErrorActionPreference = $previousErrorActionPreference
+if ($dockerInfoExitCode -ne 0) {
     Stop-WithStatus 'BLOCKED_DOCKER_DAEMON_UNAVAILABLE' 'Docker is installed but its local daemon is not available. Start Docker Desktop and retry.'
 }
 
@@ -86,13 +97,19 @@ switch ($Action) {
     }
     'destroy' {
         if (-not $ConfirmDestroy) {
-            Stop-WithStatus 'DESTROY_CONFIRMATION_REQUIRED' 'Repeat with -ConfirmDestroy to remove only the named disposable container and volume.'
+            Stop-WithStatus 'DESTROY_CONFIRMATION_REQUIRED' 'Repeat with -ConfirmDestroy to remove only the disposable container and F-drive runtime data directory.'
         }
-        & docker @composeArgs down --volumes --remove-orphans
+        & docker @composeArgs down --remove-orphans
         if ($LASTEXITCODE -ne 0) {
             Stop-WithStatus 'BLOCKED_DISPOSABLE_RUNTIME_DESTROY' 'Docker Compose could not remove the local disposable runtime.'
         }
+        $resolvedPostgresDataDir = (Resolve-Path -LiteralPath $postgresDataDir).Path
+        $resolvedRuntimeRoot = (Resolve-Path -LiteralPath $projectRuntimeRoot).Path
+        if ($resolvedPostgresDataDir -eq $resolvedRuntimeRoot -or -not $resolvedPostgresDataDir.StartsWith($resolvedRuntimeRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+            Stop-WithStatus 'BLOCKED_RUNTIME_DATA_SCOPE' 'The resolved disposable data path is outside the project runtime directory.'
+        }
+        Remove-Item -LiteralPath $resolvedPostgresDataDir -Recurse -Force
         Write-Output 'DISPOSABLE_RUNTIME_DESTROY=PASS'
-        Write-Output 'REMOVED_SCOPE=jcfb-v4-disposable-runtime and its named disposable volume'
+        Write-Output 'REMOVED_SCOPE=jcfb-v4-disposable-runtime and F-drive .runtime/postgres data'
     }
 }

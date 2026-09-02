@@ -53,6 +53,8 @@ V4-011 migration architecture is documented in [`docs/V4_DATABASE_MIGRATION_DESI
 
 V4-012 is complete as a design-only artifact in [`docs/V4_MIGRATION_DRY_RUN_HARNESS.md`](docs/V4_MIGRATION_DRY_RUN_HARNESS.md) with machine-readable target, manifest, smoke, schema-diff, policy, and acceptance-report contracts under [`config/migration_harness/`](config/migration_harness/). BATCH-03 adds [`docs/V4_STAGING_READINESS.md`](docs/V4_STAGING_READINESS.md), [`docs/V4_MIGRATION_ACCEPTANCE_PACKAGE.md`](docs/V4_MIGRATION_ACCEPTANCE_PACKAGE.md), and the no-write acceptance harness. No database or Supabase was contacted.
 
+Pre-BATCH-04 Remediation 2 is a separate remediation package, not a new V4 task ID. It adds the canonical hash verifier and generated hashes for the nine runtime candidates, an optional environment-only PostgreSQL executor, and the local PowerShell validation entry point. Read [`docs/V4_CANONICAL_MIGRATION_HASH.md`](docs/V4_CANONICAL_MIGRATION_HASH.md), [`docs/V4_RUNTIME_EXECUTOR.md`](docs/V4_RUNTIME_EXECUTOR.md), and [`docs/V4_PRE_BATCH_04_LOCAL_EXECUTION.md`](docs/V4_PRE_BATCH_04_LOCAL_EXECUTION.md) before using it. The default remains `PLAN_ONLY`; explicit local apply is limited to `DISPOSABLE_LOCAL` or separately approved `STAGING`. Codex/static validation does not count as the 35 database runtime tests, and BATCH-04/V4-018/V4-019 remain locked.
+
 ## First-version architecture target
 
 Canonical Data
@@ -91,3 +93,14 @@ The architecture target is a design direction only at this bootstrap stage. Prod
 ## Current scope
 
 V4-001 through V4-017 are complete as governance, design, no-write harness, readiness, and acceptance-package artifacts. V4-011 defines the ordered PostgreSQL/Supabase migration architecture; BATCH-02 implements plan/preflight/schema-diff/smoke/negative contracts; BATCH-03 packages isolated target readiness and later acceptance evidence. No database migration, Supabase write, model execution, or V3.3.3 change was performed. V4-018 through V4-100 remain future work.
+
+## Local storage on the project drive
+
+Project-scoped local runtime paths are documented in [`docs/JCFB_V4_LOCAL_STORAGE.md`](docs/JCFB_V4_LOCAL_STORAGE.md). Before running project tooling from PowerShell, activate them with:
+
+```powershell
+Set-Location F:\Projects\jcfb-v4
+. .\scripts\activate_jcfb_v4_runtime.ps1
+```
+
+This keeps JCFB V4 temporary files and tool caches under `.runtime\` on F:, without changing global Windows temporary paths. The disposable PostgreSQL compose runtime also uses the repository-relative `.runtime\postgres` bind directory.

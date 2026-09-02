@@ -11,6 +11,17 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 
+# Project-local runtime, dependency, and tool caches. These stay on the
+# project drive and must never be committed.
+.runtime/
+node_modules/
+.next/
+.turbo/
+.vite/
+.cache/
+playwright-report/
+test-results/
+
 .idea/
 .vscode/
 
