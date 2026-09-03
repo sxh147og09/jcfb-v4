@@ -1,5 +1,11 @@
 # Changelog
 
+## JCFB V4 Supabase Preflight Plan Completion 1.0
+
+- Recorded the supplied read-only Production baseline for Supabase project ref `icndieflfvydixtehgzu`, PostgreSQL 17.6, nine existing V3.3.3-era migration rows, public schema counts, named identity samples, and stable Security/Performance advisor fingerprints.
+- Added the apply-before checklist, object-identity schema diff and V3.3.3 isolation contract, advisor before/after policy, partial-apply detector, forward-fix/recovery contract, fourteen post-apply verifications, and explicit human-approval separation.
+- Added repository-only validation for the completed preflight plan and canonical-hash 9/9 verification. Production hard block remains closed; no Supabase/Production write, BATCH-04 execution, V4-018/V4-019 change, or V3.3.3 mutation occurred.
+
 ## JCFB V4 Production Target Binding 1.0
 
 - Bound the sole non-secret Production target identity to Supabase project ref `icndieflfvydixtehgzu`, region `us-west-2`, and PostgreSQL major `17` after explicit human confirmation.

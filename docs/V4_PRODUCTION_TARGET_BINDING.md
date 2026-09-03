@@ -51,7 +51,16 @@ The runtime executor continues to reject `PRODUCTION_APPLY`. V4-018 and V4-019 r
 
 The contract contains no database URL, password, token, API key, service-role key, cookie, or connection secret. Credentials, when a future approved runtime path needs them, remain process-environment-only and are not copied into this contract or its evidence.
 
-Production Target Identity is now `KNOWN` from the binding contract. The Supabase Preflight Plan is not automatically `PASS`: security/advisor evidence, schema baseline/diff, extension and role review, migration-history state, and the remaining target checks must be completed separately in the next stage, `SUPABASE_PREFLIGHT_PLAN_COMPLETION`.
+Production Target Identity is now `KNOWN` from the binding contract. The
+repository Supabase Preflight Plan is now `PASS` from the supplied read-only
+baseline and is recorded in
+[`docs/V4_MIGRATION_PREFLIGHT.md`](V4_MIGRATION_PREFLIGHT.md) and
+[`config/migration_harness/v4_supabase_preflight_plan.json`](../config/migration_harness/v4_supabase_preflight_plan.json).
+This PASS is a readiness-plan result only: live apply-before recapture,
+independent Final Review, and explicit Production Apply Approval are still
+required.
+
+Next stage: `BATCH_04_PRODUCTION_READINESS_FINAL_REVIEW_3`.
 
 ## 6. Read-only verification
 

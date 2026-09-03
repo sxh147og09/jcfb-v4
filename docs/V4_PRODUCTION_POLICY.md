@@ -14,6 +14,13 @@ The named Production target is recorded in [`config/migration_harness/v4_product
 
 Target binding does not equal Production apply approval. A `BOUND_APPROVED` target identity only removes target ambiguity; it does not authorize a schema apply, a Production database write, BATCH-04, V4-018, or V4-019. The hard block and explicit Production Apply Approval gate remain in force.
 
+The Supabase Production baseline and read-only Preflight Plan are recorded in
+[`docs/V4_MIGRATION_PREFLIGHT.md`](V4_MIGRATION_PREFLIGHT.md) and
+[`config/migration_harness/v4_supabase_preflight_plan.json`](../config/migration_harness/v4_supabase_preflight_plan.json).
+`Supabase Preflight Plan: PASS` means the evidence contract and verification
+plan are complete; it does not equal Production apply approval. The next
+stage is `BATCH_04_PRODUCTION_READINESS_FINAL_REVIEW_3`.
+
 ## 2. Production is the sole canonical source
 
 PRODUCTION is the only formal prediction source and the only role that may:

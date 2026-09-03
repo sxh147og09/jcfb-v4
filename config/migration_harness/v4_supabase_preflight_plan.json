@@ -1,0 +1,223 @@
+{
+  "$schema": "./v4_supabase_preflight_plan.schema.json",
+  "$id": "v4-supabase-preflight-plan@1.0.0",
+  "contract_version": "v4-supabase-preflight-plan@1.0.0",
+  "contract_state": "ACTIVE",
+  "scope": "JCFB_V4_SUPABASE_PREFLIGHT_PLAN_COMPLETION",
+  "plan_status": "PASS",
+  "target_binding_source": "config/migration_harness/v4_production_target_identity.json",
+  "production_baseline": {
+    "target": {
+      "provider": "Supabase",
+      "project_ref": "icndieflfvydixtehgzu",
+      "region": "us-west-2",
+      "environment": "PRODUCTION"
+    },
+    "capture": {
+      "captured_at": "UNKNOWN_SUPPLIED_BASELINE_TIME",
+      "capture_time_status": "NOT_SUPPLIED_IN_REFERENCE",
+      "capture_source": "connected Supabase read-only inspection",
+      "read_only": true,
+      "production_writes_performed": "NO"
+    },
+    "database_identity": {
+      "database_name": "postgres",
+      "server_version": "17.6",
+      "postgres_major": 17
+    },
+    "migration_history": {
+      "count": 9,
+      "exact_baseline_required": true,
+      "identity_fields": ["version", "name"],
+      "drift_action": "BLOCK_UNLESS_EXPLICITLY_REVIEWED",
+      "entries": [
+        {"ordinal": 1, "version": "20260831064909", "name": "jcfb_v3_3_3_central_data_schema_1_0"},
+        {"ordinal": 2, "version": "20260831064938", "name": "jcfb_v3_3_3_schema_1_0_security_hardening"},
+        {"ordinal": 3, "version": "20260831064955", "name": "jcfb_v3_3_3_schema_1_0_fk_indexes"},
+        {"ordinal": 4, "version": "20260831065135", "name": "jcfb_v3_3_3_central_data_schema_1_1"},
+        {"ordinal": 5, "version": "20260831065552", "name": "jcfb_v3_3_3_official_odds_ingestion_gate_1_0"},
+        {"ordinal": 6, "version": "20260831070156", "name": "jcfb_v3_3_3_official_screenshot_intake_1_0"},
+        {"ordinal": 7, "version": "20260831073246", "name": "jcfb_v3_3_3_shadow_execution_provenance_guard_1_0"},
+        {"ordinal": 8, "version": "20260831074714", "name": "historical_tier_a_recovery_quarantine_1_0"},
+        {"ordinal": 9, "version": "20260831080846", "name": "jcfb_v3_3_3_forward_tier_a_collection_1_0"}
+      ]
+    },
+    "schema_counts": {
+      "public_tables": 20,
+      "public_views": 11,
+      "public_functions": 18,
+      "public_rls_tables": 20,
+      "public_non_internal_triggers": 38
+    },
+    "schema_object_identities": {
+      "comparison_by": "OBJECT_IDENTITY",
+      "identity_fields": ["object_kind", "schema", "name"],
+      "counts_are_not_identity_evidence": true,
+      "completeness": "PARTIAL_NAMED_IDENTITIES_FROM_SUPPLIED_BASELINE",
+      "full_identity_recapture_required_before_apply": true,
+      "known_identity_samples": [
+        {"object_kind": "table", "schema": "public", "name": "model_versions", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "table", "schema": "public", "name": "matches", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "table", "schema": "public", "name": "odds_snapshots", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "table", "schema": "public", "name": "predictions", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "table", "schema": "public", "name": "frozen_predictions", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "table", "schema": "public", "name": "tier_a_samples", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "view", "schema": "public", "name": "v_canonical_latest_update", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "view", "schema": "public", "name": "v_current_frozen_predictions", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "view", "schema": "public", "name": "v_forward_tier_a_progress", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "view", "schema": "public", "name": "v_historical_tier_a_recovery_status", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "view", "schema": "public", "name": "v_latest_odds_snapshots", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "view", "schema": "public", "name": "v_odds_ingestion_gate_status", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "view", "schema": "public", "name": "v_public_latest_odds", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "view", "schema": "public", "name": "v_public_predictions", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "view", "schema": "public", "name": "v_screenshot_intake_status", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "view", "schema": "public", "name": "v_shadow_run_latest", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "view", "schema": "public", "name": "v_tier_a_progress", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"},
+        {"object_kind": "function", "schema": "public", "name": "rls_auto_enable()", "attribution": "PRE_EXISTING_V3_3_3_BASELINE"}
+      ],
+      "identity_sample_count": 18,
+      "unresolved_identity_completeness": "FULL_CATALOG_REQUIRED_BEFORE_APPLY"
+    },
+    "v333_isolation": {
+      "classification": "PRE_EXISTING_V3_3_3_BASELINE",
+      "known_object_examples": ["public.model_versions", "public.matches", "public.odds_snapshots", "public.predictions", "public.frozen_predictions", "public.tier_a_samples", "public.v_shadow_run_latest", "public.rls_auto_enable()"],
+      "compatibility_change_manifest": [],
+      "v4_must_not_modify": true,
+      "drift_action": "BLOCK_UNLESS_MIGRATION_MANIFEST_EXPLICITLY_DECLARES_COMPATIBILITY_CHANGE"
+    },
+    "security_advisor": {
+      "captured": true,
+      "baseline_attribution": "PRE_EXISTING_V3_3_3_DEBT",
+      "summary": {"error_count": 1, "warn_count": 2, "info_scope": "ALL_OR_MOST_INTERNAL_TABLES"},
+      "findings": [
+        {"advisor": "supabase_security", "code": "rls_enabled_no_policy", "severity": "INFO", "scope": "INTERNAL_TABLES_ALL_OR_MOST", "attribution": "PRE_EXISTING_V3_3_3_DEBT", "fingerprint": "sha256:7ac107c3b1bf7a646f5ebdca7f6876218767a137da17730881f507c87e13ae8e", "disposition": "BASELINE_TRACKED_NOT_AUTO_FIXED"},
+        {"advisor": "supabase_security", "code": "security_definer_view", "severity": "ERROR", "object_identity": "public.v_shadow_run_latest", "attribution": "PRE_EXISTING_V3_3_3_DEBT", "fingerprint": "sha256:20a0dd551c4e2321b3813e89c8c584a9aac4cf6fcdd805c359a721bcf83b934d", "disposition": "BASELINE_TRACKED_NOT_AUTO_FIXED"},
+        {"advisor": "supabase_security", "code": "anon_security_definer_function_executable", "severity": "WARN", "object_identity": "public.rls_auto_enable()", "role": "anon", "attribution": "PRE_EXISTING_V3_3_3_DEBT", "fingerprint": "sha256:97c3c8179a6ba0e676163603530185ac771119fded0a4f2ab62f5acbe9200503", "disposition": "BASELINE_TRACKED_NOT_AUTO_FIXED"},
+        {"advisor": "supabase_security", "code": "authenticated_security_definer_function_executable", "severity": "WARN", "object_identity": "public.rls_auto_enable()", "role": "authenticated", "attribution": "PRE_EXISTING_V3_3_3_DEBT", "fingerprint": "sha256:f403438ffd7f8c6e30ef87fc4ad0dad6cda2d3706370b4e137cefed945c3d082", "disposition": "BASELINE_TRACKED_NOT_AUTO_FIXED"}
+      ],
+      "v4_policy": {"new_error_warn_attributable_to_v4": "ZERO", "baseline_count_must_not_worsen": true}
+    },
+    "performance_advisor": {
+      "captured": true,
+      "baseline_attribution": "PRE_EXISTING_V3_3_3_DEBT",
+      "summary": {"unindexed_foreign_key_count": 3, "unused_index_info_scope": "MULTIPLE_EXISTING_V3_3_3_TABLES"},
+      "findings": [
+        {"advisor": "supabase_performance", "code": "unindexed_foreign_key", "severity": "ADVISORY", "object_identity": "forward_shadow_outputs.frozen_prediction_id", "attribution": "PRE_EXISTING_V3_3_3_DEBT", "fingerprint": "sha256:9a717251f50bd36ce2e3eea9e3723f7f800c6bb07d43b1f95fb72c4eac52a8a7", "disposition": "BASELINE_TRACKED_NOT_AUTO_FIXED"},
+        {"advisor": "supabase_performance", "code": "unindexed_foreign_key", "severity": "ADVISORY", "object_identity": "forward_tier_a_epochs.production_model_version_id", "attribution": "PRE_EXISTING_V3_3_3_DEBT", "fingerprint": "sha256:2550d2efe381085270b9f9553d238cd2f511f6c9ef020c85265a3361123cf08f", "disposition": "BASELINE_TRACKED_NOT_AUTO_FIXED"},
+        {"advisor": "supabase_performance", "code": "unindexed_foreign_key", "severity": "ADVISORY", "object_identity": "forward_tier_a_epochs.shadow_model_version_id", "attribution": "PRE_EXISTING_V3_3_3_DEBT", "fingerprint": "sha256:77cc8142820865d8519e74ce68a839e28d2ed9c99ece93a5bf5b3b0e549354f0", "disposition": "BASELINE_TRACKED_NOT_AUTO_FIXED"},
+        {"advisor": "supabase_performance", "code": "unused_index", "severity": "INFO", "scope": "MULTIPLE_EXISTING_V3_3_3_TABLES", "attribution": "PRE_EXISTING_V3_3_3_DEBT", "fingerprint": "sha256:2a6556b193ebe799c2294d0fe501ec4ba0943ee7303043fbd6960bae7264d2de", "disposition": "BASELINE_TRACKED_NOT_AUTO_FIXED"}
+      ],
+      "v4_policy": {"new_high_impact_regressions": "BLOCK", "new_info_findings": "REVIEW_REQUIRED_NO_SILENT_REGRESSION"}
+    }
+  },
+  "apply_before_checklist": [
+    {"id": "APPLY-01", "required": true, "gate": "MANDATORY_BEFORE_PRODUCTION_APPLY", "evidence_ref": "production-baseline/target/project_ref", "failure_action": "BLOCK", "assertion": "project_ref must equal icndieflfvydixtehgzu"},
+    {"id": "APPLY-02", "required": true, "gate": "MANDATORY_BEFORE_PRODUCTION_APPLY", "evidence_ref": "production-baseline/database_identity", "failure_action": "BLOCK", "assertion": "database postgres and server version 17.6 / major 17 must match"},
+    {"id": "APPLY-03", "required": true, "gate": "MANDATORY_BEFORE_PRODUCTION_APPLY", "evidence_ref": "production-baseline/migration_history", "failure_action": "BLOCK", "assertion": "recapture all nine baseline rows and require exact version/name match unless drift is explicitly reviewed"},
+    {"id": "APPLY-04", "required": true, "gate": "MANDATORY_BEFORE_PRODUCTION_APPLY", "evidence_ref": "production-baseline/schema_object_identities", "failure_action": "BLOCK", "assertion": "recapture complete object identities and compare definitions/properties, not only counts"},
+    {"id": "APPLY-05", "required": true, "gate": "MANDATORY_BEFORE_PRODUCTION_APPLY", "evidence_ref": "production-baseline/security_advisor+performance_advisor", "failure_action": "BLOCK", "assertion": "recapture both advisors and compare stable baseline fingerprints"},
+    {"id": "APPLY-06", "required": true, "gate": "MANDATORY_BEFORE_PRODUCTION_APPLY", "evidence_ref": "runtime-evidence/git_head", "failure_action": "BLOCK", "current_head_must_equal_approved_runtime_evidence_head": true},
+    {"id": "APPLY-07", "required": true, "gate": "MANDATORY_BEFORE_PRODUCTION_APPLY", "evidence_ref": "database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.json", "failure_action": "BLOCK", "expected_count": 9, "assertion": "canonical hashes must verify 9/9 without write"},
+    {"id": "APPLY-08", "required": true, "gate": "MANDATORY_BEFORE_PRODUCTION_APPLY", "evidence_ref": "config/migration_harness/v4_production_target_identity.json#production_apply_gate", "failure_action": "BLOCK", "assertion": "Production hard block remains closed until explicit apply approval"},
+    {"id": "APPLY-09", "required": true, "gate": "MANDATORY_BEFORE_PRODUCTION_APPLY", "evidence_ref": "production-readiness/final-review", "failure_action": "BLOCK", "assertion": "preflight PASS is not apply approval"}
+  ],
+  "schema_baseline_diff_contract": {
+    "compare_by_object_identity": true,
+    "identity_fields": ["object_kind", "schema", "name"],
+    "counts_are_not_identity_evidence": true,
+    "pre_apply_rule": "Compare the complete recaptured catalog against the supplied baseline identity set; unexpected pre-existing drift is BLOCKED_UNLESS_EXPLICITLY_REVIEWED.",
+    "post_apply_rule": "Classify preserved V3.3.3 identities, V4 additions/changes, missing pre-existing identities, changed pre-existing definitions, and unexpected additions separately.",
+    "v4_expected_catalog_source": "config/migration_harness/v4_schema_snapshot_contract.json",
+    "v3_compatibility_change_manifest": [],
+    "v3_compatibility_rule": "V3.3.3 tables/views/functions/triggers remain unchanged; no compatibility change is currently declared.",
+    "classification_labels": ["PRESERVED_V3_3_3", "V4_ADDED", "V4_CHANGED", "MISSING_PRE_EXISTING", "CHANGED_PRE_EXISTING", "UNEXPECTED_ADDED", "UNEXPECTED_PRE_EXISTING_DRIFT"],
+    "unknown_identity_action": "BLOCK",
+    "never_auto_repair": true
+  },
+  "advisor_before_after_contract": {
+    "fingerprint_algorithm": "sha256_json of advisor/code/severity/scope/object_identity/role/attribution",
+    "baseline_attribution": "PRE_EXISTING_V3_3_3_DEBT",
+    "new_security_error_warn_action": "BLOCK",
+    "baseline_fingerprint_missing_action": "BLOCK_UNLESS_EXPLICITLY_REVIEWED",
+    "performance_info_action": "REVIEW_REQUIRED_NO_SILENT_REGRESSION",
+    "v333_debt_change_action": "BLOCK_UNLESS_EXPLICITLY_REVIEWED",
+    "comparison_requires_before_and_after": true,
+    "security_error_warn_policy": "Zero new V4-attributable ERROR/WARN findings; v_shadow_run_latest and rls_auto_enable findings remain isolated V3.3.3 debt and are not modified.",
+    "performance_policy": "Do not remove unused indexes or add unrelated indexes in preflight; any new high-impact regression blocks and new INFO requires review."
+  },
+  "partial_apply_contract": {
+    "expected_v4_sequence": ["0001", "0002", "0003", "0004", "0005", "0006", "0007", "0008", "0009"],
+    "history_registry": "governance.schema_migrations",
+    "atomic_step_recording": true,
+    "transaction_boundary": "ONE_TRANSACTION_PER_SAFE_MIGRATION_WHERE_SUPPORTED",
+    "applied_step_recording": "Each committed step and its canonical identity is recorded atomically in migration history/governance registry.",
+    "partial_states": ["APPLYING", "FAILED", "PARTIAL", "BLOCKED"],
+    "on_partial": {"stop_further_execution": true, "state": "FORWARD_FIX_REQUIRED", "do_not_continue": true, "do_not_fake_or_repair_history_manually": true},
+    "history_mutation_policy": {"update_applied_rows": false, "delete_applied_rows": false, "rewrite_history": false, "repair_action": "NEW_FORWARD_MIGRATION_ID_ONLY"}
+  },
+  "forward_fix_recovery_contract": {
+    "historical_rollback_rewrite": false,
+    "recovery_path": "FORWARD_FIX_REQUIRED",
+    "transaction_per_safe_migration": true,
+    "irreversible_ddl_review_required": true,
+    "no_history_repair_by_hand": true,
+    "recovery_steps": ["stop_and_preserve_state", "read_only_reconcile_catalog_and_history", "record_incident_or_partial_state", "design_new_forward_identity", "obtain_independent_review", "rerun_post_apply_verification"],
+    "rollback_exception": "Only a separately approved, proven transactionally reversible empty-target operation may be rolled back; it never rewrites history."
+  },
+  "post_apply_verification_plan": [
+    {"id": "POST-01", "required": true, "evidence_ref": "post-apply/schema-diff", "failure_action": "BLOCK_ACCEPTANCE"},
+    {"id": "POST-02", "required": true, "evidence_ref": "post-apply/migration-history", "failure_action": "BLOCK_ACCEPTANCE"},
+    {"id": "POST-03", "required": true, "evidence_ref": "post-apply/rls-grants", "failure_action": "BLOCK_ACCEPTANCE"},
+    {"id": "POST-04", "required": true, "evidence_ref": "post-apply/security-invoker-views", "failure_action": "BLOCK_ACCEPTANCE"},
+    {"id": "POST-05", "required": true, "evidence_ref": "post-apply/functions-security-definer", "failure_action": "BLOCK_ACCEPTANCE"},
+    {"id": "POST-06", "required": true, "evidence_ref": "post-apply/triggers-append-only-frozen", "failure_action": "BLOCK_ACCEPTANCE"},
+    {"id": "POST-07", "required": true, "evidence_ref": "post-apply/production-uniqueness", "failure_action": "BLOCK_ACCEPTANCE"},
+    {"id": "POST-08", "required": true, "evidence_ref": "post-apply/no-future-leakage", "failure_action": "BLOCK_ACCEPTANCE"},
+    {"id": "POST-09", "required": true, "evidence_ref": "post-apply/tier-a-pair-integrity", "failure_action": "BLOCK_ACCEPTANCE"},
+    {"id": "POST-10", "required": true, "evidence_ref": "post-apply/canonical-latest-update", "failure_action": "BLOCK_ACCEPTANCE"},
+    {"id": "POST-11", "required": true, "evidence_ref": "post-apply/public-projection-isolation", "failure_action": "BLOCK_ACCEPTANCE"},
+    {"id": "POST-12", "required": true, "evidence_ref": "post-apply/v333-isolation", "failure_action": "BLOCK_ACCEPTANCE"},
+    {"id": "POST-13", "required": true, "evidence_ref": "post-apply/security-advisor-comparison", "failure_action": "BLOCK_ACCEPTANCE"},
+    {"id": "POST-14", "required": true, "evidence_ref": "post-apply/performance-advisor-comparison", "failure_action": "BLOCK_ACCEPTANCE"}
+  ],
+  "approval_separation": {
+    "target_binding_approval": {"state": "BOUND_APPROVED", "authorizes_apply": false},
+    "preflight_plan": {"state": "PASS", "authorizes_apply": false},
+    "final_review": {"required": true, "decision": "READY_FOR_PRODUCTION_APPLY_APPROVAL", "approval_state": "PENDING_PRODUCTION_APPLY_APPROVAL"},
+    "explicit_apply_approval_required": true,
+    "production_apply_allowed": false,
+    "same_agent_may_not_approve_and_execute": true
+  },
+  "canonical_hash_contract": {
+    "source_manifest": "database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.json",
+    "expected_count": 9,
+    "verification_mode": "VERIFY_ONLY_NO_WRITE",
+    "expected_status": "PASS",
+    "pending_count": 0
+  },
+  "secret_policy": {
+    "secret_fields_present": false,
+    "raw_secret_values_present": false,
+    "credential_source": "PROCESS_ENVIRONMENT_ONLY",
+    "persist_values": false,
+    "log_values": false,
+    "report_values": false
+  },
+  "execution_boundary": {
+    "production_apply_invoked": false,
+    "production_db_writes_performed": "NO",
+    "supabase_writes_performed": "NO",
+    "ddl_executed": false,
+    "dml_executed": false,
+    "batch_04_executed": "NO",
+    "v4_018_v4_019_changed": "NO",
+    "v333_mutated": "NO",
+    "automatic_apply": false
+  },
+  "final_readiness_projection": {
+    "production_target_identity": "KNOWN",
+    "supabase_preflight_plan": "PASS",
+    "decision": "READY_FOR_PRODUCTION_APPLY_APPROVAL",
+    "apply_gate": "CLOSED_PENDING_EXPLICIT_APPROVAL"
+  }
+}

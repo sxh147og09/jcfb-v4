@@ -14,6 +14,13 @@ from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 
 from .common import TARGET_ID_RE, read_json
 from .models import CheckStatus, Issue
+from .supabase_preflight import (
+    PREFLIGHT_PLAN_PATH,
+    PREFLIGHT_PLAN_SCHEMA_PATH,
+    build_supabase_preflight_report,
+    load_supabase_preflight_plan,
+    validate_supabase_preflight_plan_document,
+)
 
 
 PRODUCTION_TARGET_IDENTITY_PATH = "config/migration_harness/v4_production_target_identity.json"
@@ -384,6 +391,20 @@ def production_target_binding_report(repo_root: Path) -> Dict[str, Any]:
         and production_target.get("approved_by") == PRODUCTION_APPROVED_BY
         and production_target.get("approval_basis") == PRODUCTION_APPROVAL_BASIS
     )
+    preflight_report = build_supabase_preflight_report(root, contract_value)
+    preflight_status = preflight_report.get("supabase_preflight_plan", "FAIL")
+    preflight_summary = {
+        "status": preflight_status,
+        "automatic_pass": False,
+        "reason": (
+            "Static Supabase Production baseline and preflight plan are complete; live apply-before recapture and explicit approval remain required"
+            if preflight_status == "PASS"
+            else "Supabase Production preflight plan contract is invalid or canonical hash verification failed"
+        ),
+        "next_stage": "BATCH_04_PRODUCTION_READINESS_FINAL_REVIEW_3",
+        "source": PREFLIGHT_PLAN_PATH,
+        "production_apply_authorized": False,
+    }
     return {
         "status": "PASS" if validation.ok else "FAIL",
         "contract_version": contract_value.get("contract_version"),
@@ -399,12 +420,8 @@ def production_target_binding_report(repo_root: Path) -> Dict[str, Any]:
         "production_hard_block_preserved": "PASS" if gate["hard_block_preserved"] else "FAIL",
         "explicit_apply_approval_required": "PASS" if gate["explicit_approval_required"] else "FAIL",
         "production_apply_gate": gate,
-        "supabase_preflight_plan": {
-            "status": "INCOMPLETE",
-            "automatic_pass": False,
-            "reason": "Target binding records identity only; Supabase security/advisor and schema baseline evidence remain separate",
-            "next_stage": "SUPABASE_PREFLIGHT_PLAN_COMPLETION",
-        },
+        "supabase_preflight_plan": preflight_summary,
+        "supabase_preflight_checks": preflight_report.get("checks", {}),
         "issues": [issue.to_dict() for issue in validation.issues],
         "database_connected": False,
         "production_db_writes_performed": "NO",
@@ -413,14 +430,28 @@ def production_target_binding_report(repo_root: Path) -> Dict[str, Any]:
 
 
 def build_production_readiness_review(repo_root: Path) -> Dict[str, Any]:
-    """Build the identity-only Production Readiness review input."""
+    """Build the read-only Production Readiness review input.
+
+    A PASS here means the named target and the checked-in preflight plan are
+    ready for an independent apply-approval review.  It never means that
+    Production apply is allowed.
+    """
 
     binding = production_target_binding_report(repo_root)
+    plan_pass = binding.get("supabase_preflight_plan", {}).get("status") == "PASS"
+    identity_known = binding.get("production_target_identity") == "KNOWN"
+    review_ready = identity_known and plan_pass
     return {
-        "status": "IDENTITY_KNOWN_PREFLIGHT_INCOMPLETE" if binding["production_target_identity"] == "KNOWN" else "BLOCKED_PRODUCTION_TARGET_BINDING",
+        "status": "READY_FOR_PRODUCTION_APPLY_APPROVAL" if review_ready else ("IDENTITY_KNOWN_PREFLIGHT_INCOMPLETE" if identity_known else "BLOCKED_PRODUCTION_TARGET_BINDING"),
         "production_target_identity": binding["production_target_identity"],
         "production_target_binding": binding,
         "supabase_preflight_plan": binding["supabase_preflight_plan"],
+        "supabase_preflight_checks": binding.get("supabase_preflight_checks", {}),
+        "final_readiness_review": {
+            "status": "PASS" if review_ready else "BLOCKED",
+            "decision": "READY_FOR_PRODUCTION_APPLY_APPROVAL" if review_ready else "BLOCKED",
+            "explicit_apply_approval_required": True,
+        },
         "production_apply_gate": binding["production_apply_gate"],
         "production_apply_approval_required": True,
         "production_apply_allowed": False,
@@ -442,15 +473,21 @@ def run_production_target_cross_doc_consistency(repo_root: Path) -> Dict[str, An
         "docs/V4_PRODUCTION_TARGET_BINDING.md": (
             PRODUCTION_TARGET_IDENTITY_PATH,
             "target binding does not authorize Production apply",
-            "SUPABASE_PREFLIGHT_PLAN_COMPLETION",
+            "BATCH_04_PRODUCTION_READINESS_FINAL_REVIEW_3",
+            PREFLIGHT_PLAN_PATH,
+            "Supabase Preflight Plan is now `PASS`",
+            "explicit Production Apply Approval",
         ),
         "docs/V4_PRODUCTION_POLICY.md": (
             "docs/V4_PRODUCTION_TARGET_BINDING.md",
             "Target binding does not equal Production apply approval",
+            PREFLIGHT_PLAN_PATH,
+            "Supabase Preflight Plan: PASS",
+            "BATCH_04_PRODUCTION_READINESS_FINAL_REVIEW_3",
         ),
         "docs/V4_RUNTIME_ROLE_BOUNDARY.md": ("project_ref", "BOUND_APPROVED", "PRODUCTION"),
-        "docs/V4_MIGRATION_PREFLIGHT.md": (PRODUCTION_TARGET_IDENTITY_PATH, "target identity is known", "preflight"),
-        "README.md": ("docs/V4_PRODUCTION_TARGET_BINDING.md", "V4-018 NEXT", "Production apply approval"),
+        "docs/V4_MIGRATION_PREFLIGHT.md": (PRODUCTION_TARGET_IDENTITY_PATH, "target identity is known", "Supabase Preflight Plan: PASS", "BATCH_04_PRODUCTION_READINESS_FINAL_REVIEW_3"),
+        "README.md": ("docs/V4_PRODUCTION_TARGET_BINDING.md", "V4-018 NEXT", "Production apply approval", PREFLIGHT_PLAN_PATH),
     }
     for relative, needles in requirements.items():
         path = root / relative
@@ -470,6 +507,21 @@ def run_production_target_cross_doc_consistency(repo_root: Path) -> Dict[str, An
         checks.append("binding-contract-and-schema:present")
     else:
         failures.append("binding-contract-and-schema:missing")
+    preflight_plan_path = root / PREFLIGHT_PLAN_PATH
+    preflight_schema_path = root / PREFLIGHT_PLAN_SCHEMA_PATH
+    if not preflight_plan_path.is_file() or not preflight_schema_path.is_file():
+        failures.append("preflight-plan-and-schema:missing")
+    else:
+        try:
+            binding_contract = load_production_target_binding(root)
+            plan = load_supabase_preflight_plan(root)
+            plan_issues = validate_supabase_preflight_plan_document(plan, binding_contract if isinstance(binding_contract, Mapping) else None)
+        except (OSError, ValueError, TypeError) as exc:
+            plan_issues = [_issue("PREFLIGHT_PLAN_LOAD_FAILED", "Supabase preflight plan could not be loaded")]
+        if plan_issues:
+            failures.extend(f"preflight-contract:{issue.code}" for issue in plan_issues)
+        else:
+            checks.append("preflight-plan-and-schema:valid")
     return {
         "status": "PASS" if not failures else "FAIL",
         "checks": checks,

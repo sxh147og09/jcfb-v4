@@ -1,76 +1,318 @@
-# JCFB V4 Migration Preflight 1.0
+# JCFB V4 Supabase Preflight Plan Completion 1.0
 
-Status: V4-011 COMPLETE (DESIGN-ONLY; PREFLIGHT NOT RUN)
+Status: `SUPABASE PREFLIGHT PLAN PASS` / `NO PRODUCTION WRITE`
 
-## 1. Purpose
+Scope: `JCFB_V4_SUPABASE_PREFLIGHT_PLAN_COMPLETION`
 
-Preflight is a deployment gate, not a best-effort checklist. It runs against the explicitly named target and produces an attributed result for every critical item. Any critical failure is `BLOCKED`; the executor must not continue to the next migration.
+V4-011 vocabulary compatibility: legacy critical IDs `PF-01` through
+`PF-18` remain reserved for the original deployment-preflight surface. In
+this completion plan, `PF-01` (target project identity) and `PF-18`
+(production release state) are represented by the target binding,
+apply-before checklist, and final-review separation below. The legacy
+`target_project_identity` output name remains an identity-evidence label;
+`NOT_RUN` is not a pass, and any live check that has not been recaptured is
+still an apply blocker.
 
-This repository run did not contact a database. The separate Production
-target binding contract can make the target identity known, but it does not
-complete any target-dependent preflight item. Every live Supabase check below
-remains `NOT_RUN` until its read-only evidence is supplied.
+Machine-readable contract: [`config/migration_harness/v4_supabase_preflight_plan.json`](../config/migration_harness/v4_supabase_preflight_plan.json)
 
-## 2. Required preflight checks
+Machine validator: [`scripts/validate_v4_supabase_preflight.ps1`](../scripts/validate_v4_supabase_preflight.ps1)
 
-| ID | Check | Required evidence | Failure outcome |
-|---|---|---|---|
-| PF-01 | Target project identity | Human-confirmed Supabase project/environment/ref; no secret value; binding contract identity must match | `BLOCKED` if absent, ambiguous, or wrong environment |
-| PF-02 | Database version | `server_version_num`, major version, provider/runtime | `BLOCKED` if outside approved compatibility range |
-| PF-03 | Required extensions | Availability/owner/version for `pgcrypto` or approved UUIDv7 provider; no silent assumption | `BLOCKED` if unavailable or unapproved |
-| PF-04 | Security-invoker support | Target version proves `security_invoker=true`, or approved old-version fallback | `BLOCKED` if neither path is proven |
-| PF-05 | Existing conflicting schemas/tables | Catalog report for `core`, `market`, `context`, `model`, `evaluation`, `governance`, `public`, and migration tables | `BLOCKED` on unapproved collision |
-| PF-06 | V3.3.3 isolation | Read-only catalog/path review proving no V4 rename/drop/alter/FK/import path to V3.3.3 | `BLOCKED` on any overlap |
-| PF-07 | V4 namespace state | Empty/new V4 namespace, or explicit coexistence approval with object-by-object diff | `BLOCKED` when state is unknown |
-| PF-08 | Role and permission availability | `service_role`/approved backend writer, executor, auditor, schema owners, and function privileges | `BLOCKED` if actor boundary is not attributable |
-| PF-09 | Migration history state | `schema_migrations`/equivalent is absent or matches the manifest exactly; no partial row | `BLOCKED` on drift or partial state |
-| PF-10 | Backup/snapshot decision | Backup ID/time or written decision that no backup is required for an empty disposable target | `BLOCKED` if risk decision is missing |
-| PF-11 | Maintenance window | Approved window, lock budget, timeout/rollback owner | `BLOCKED` if live target has no window |
-| PF-12 | Current migrations clean | No failed/partial migration, dirty local state, or unrecorded manual DDL | `BLOCKED` until reconciled by approved forward fix |
-| PF-13 | Manifest and hash readiness | Exact files, dependencies, canonical hashes, and status match the approved manifest | `BLOCKED` while any hash is pending or drifted |
-| PF-14 | Runtime secrets | Required credentials exist only in runtime secret storage; repository scan is clean | `BLOCKED` if a secret is in files, logs, or command arguments |
-| PF-15 | Data API exposure | Explicit schema/table/view exposure configuration; internal tables not accidentally exposed | `BLOCKED` if public exposure is unreviewed |
-| PF-16 | Default privileges | `PUBLIC`, `anon`, and ordinary `authenticated` grants reviewed before RLS/policy work | `BLOCKED` if default access cannot be closed |
-| PF-17 | Search path and function security | Function owner, fixed search path, execute grants, and no arbitrary SQL/table parameters | `BLOCKED` for unsafe or unreviewed function security |
-| PF-18 | Production release state | No active V4 Production pointer is unintentionally replaced; first deployment has no auto-promotion | `BLOCKED` on ambiguity |
-
-## 3. Preflight output contract
-
-The executor records:
+The Production target identity is known from the separately approved binding
+[`config/migration_harness/v4_production_target_identity.json`](../config/migration_harness/v4_production_target_identity.json):
 
 ```text
-target_project_identity
-target_environment
-database_version
-extension_report
-namespace_report
-v333_isolation_report
-migration_history_report
-backup_decision
-maintenance_window
-manifest_hash_report
-secret_scan_report
-actor_identity
-started_at
-completed_at
-overall_status = PRECHECK_PASS | BLOCKED
+provider: Supabase
+project_ref: icndieflfvydixtehgzu
+region: us-west-2
+postgres major: 17
+binding_state: BOUND_APPROVED
 ```
 
-The report contains references and hashes, not tokens, passwords, service keys, database URLs, or cookies. `NOT_RUN` is not a pass. An unresolved check remains `BLOCKED`.
+This document completes the repository preflight plan from the previously
+supplied connected Supabase read-only baseline. It does not connect to
+Supabase, execute SQL, apply a migration, modify a V3.3.3 object, execute
+BATCH-04, or grant Production apply permission. `PASS` means that the plan,
+baseline contract, comparison rules, recovery rules, and verification plan
+are complete and can feed the independent Final Readiness Review. It does not
+mean that Production apply is allowed.
 
-The binding artifact at
-`config/migration_harness/v4_production_target_identity.json` is identity
-evidence only; target identity is known from the contract, not from a live
-database check. It does not turn the Supabase Preflight Plan into `PASS` and
-does not replace the security/advisor snapshot, schema baseline/diff, history,
-RLS, grant, or partial-apply checks.
+## 1. Production baseline snapshot
 
-## 4. First-deployment stop conditions
+The baseline is recorded without credentials or connection material.
 
-Do not apply 0001 if the target project is not explicitly identified, if `pgcrypto`/UUID provider approval is unknown, if a V3.3.3 object could be affected, if a namespace conflict is not approved, if migration history is dirty, if a backup/maintenance decision is missing, if a required server actor is unavailable, or if any candidate hash is still `PENDING_CANONICAL_HASH`.
+| Field | Captured value |
+|---|---|
+| Provider | `Supabase` |
+| Project ref | `icndieflfvydixtehgzu` |
+| Region | `us-west-2` |
+| Database identity | `postgres` |
+| PostgreSQL server version | `17.6` |
+| PostgreSQL major | `17` |
+| Captured at | `UNKNOWN_SUPPLIED_BASELINE_TIME` (the reference did not include a timestamp) |
+| Capture source | `connected Supabase read-only inspection` |
+| Production/Supabase writes in this task | `NO` |
 
-## 5. V4-011 evidence
+The unknown timestamp is explicit rather than invented. `APPLY-02` through
+`APPLY-05` require a fresh, attributable recapture immediately before any
+future apply decision.
 
-Preflight execution: **NOT RUN by design**.
+### 1.1 Existing migration history
 
-No database connection, catalog query, SQL execution, or Supabase write occurred in this task.
+The current Production history is a nine-row V3.3.3-era baseline. It is not
+the V4 `0001 -> 0009` sequence. Before apply, the exact version/name sequence
+must be recaptured; any drift is `BLOCK_UNLESS_EXPLICITLY_REVIEWED`.
+
+| Ordinal | Version | Name |
+|---:|---|---|
+| 1 | `20260831064909` | `jcfb_v3_3_3_central_data_schema_1_0` |
+| 2 | `20260831064938` | `jcfb_v3_3_3_schema_1_0_security_hardening` |
+| 3 | `20260831064955` | `jcfb_v3_3_3_schema_1_0_fk_indexes` |
+| 4 | `20260831065135` | `jcfb_v3_3_3_central_data_schema_1_1` |
+| 5 | `20260831065552` | `jcfb_v3_3_3_official_odds_ingestion_gate_1_0` |
+| 6 | `20260831070156` | `jcfb_v3_3_3_official_screenshot_intake_1_0` |
+| 7 | `20260831073246` | `jcfb_v3_3_3_shadow_execution_provenance_guard_1_0` |
+| 8 | `20260831074714` | `historical_tier_a_recovery_quarantine_1_0` |
+| 9 | `20260831080846` | `jcfb_v3_3_3_forward_tier_a_collection_1_0` |
+
+### 1.2 Existing public schema counts
+
+| Object group | Baseline count |
+|---|---:|
+| Public tables | 20 |
+| Public views/materialized views | 11 |
+| Public functions | 18 |
+| Public RLS-enabled tables | 20 |
+| Public non-internal triggers | 38 |
+
+The supplied baseline identifies the current objects as V3.3.3-era objects,
+including model versions, matches, odds snapshots, predictions, frozen
+predictions, Tier A samples, screenshot intake, shadow/forward Tier A objects,
+and audit logs. The contract retains named identity samples rather than
+inventing names for objects that were not present in the supplied evidence.
+The named view identities are:
+
+```text
+public.v_canonical_latest_update
+public.v_current_frozen_predictions
+public.v_forward_tier_a_progress
+public.v_historical_tier_a_recovery_status
+public.v_latest_odds_snapshots
+public.v_odds_ingestion_gate_status
+public.v_public_latest_odds
+public.v_public_predictions
+public.v_screenshot_intake_status
+public.v_shadow_run_latest
+public.v_tier_a_progress
+```
+
+The baseline identity sample is intentionally marked
+`PARTIAL_NAMED_IDENTITIES_FROM_SUPPLIED_BASELINE`. Counts are not treated as
+identity evidence. A complete `pg_catalog`/`information_schema` identity
+recapture is mandatory before apply.
+
+## 2. Apply-before mandatory checklist
+
+Every item below is a blocking gate. The checked-in plan records the required
+assertion and evidence reference; it does not fabricate a future recapture.
+
+| ID | Mandatory assertion | Evidence | Failure action |
+|---|---|---|---|
+| APPLY-01 | Verify `project_ref` is exactly `icndieflfvydixtehgzu`. | baseline target identity | `BLOCK` |
+| APPLY-02 | Verify database identity is `postgres`, server version is `17.6`, and major is `17`. | read-only database identity/version | `BLOCK` |
+| APPLY-03 | Recapture all nine existing history rows and require exact version/name equality unless drift is explicitly reviewed. | migration history | `BLOCK` |
+| APPLY-04 | Recapture complete schema object identities and compare names, types, definitions, constraints, RLS, grants, policies, view security, functions, and triggers. | schema identity catalog | `BLOCK` |
+| APPLY-05 | Recapture Supabase Security and Performance advisors and compare stable baseline fingerprints. | advisor before/after evidence | `BLOCK` |
+| APPLY-06 | Verify current Git HEAD equals the approved runtime-evidence HEAD. | runtime evidence Git identity | `BLOCK` |
+| APPLY-07 | Verify the nine runtime-candidate canonical hashes are `9/9 PASS`; do not rewrite hashes. | runtime-candidate manifest | `BLOCK` |
+| APPLY-08 | Verify the Production hard block remains closed and no apply approval has been inferred from binding or preflight. | Production apply gate | `BLOCK` |
+| APPLY-09 | Verify the independent Final Review is complete before any explicit apply approval is considered. | Final Review record | `BLOCK` |
+
+`APPLY-06` is a live identity check, not a value that can be copied from an
+older report. The latest local runtime evidence must be recaptured after the
+approved source commit is fixed; an old evidence HEAD is not silently accepted.
+
+## 3. Schema baseline and diff contract
+
+The machine contract uses the identity tuple:
+
+```text
+(object_kind, schema, name)
+```
+
+Where the catalog supplies them, definition/property signatures are compared
+after the identity match. The following rules apply:
+
+1. Compare object identities and properties, not only aggregate counts.
+2. Detect missing, extra, changed, malformed, and unexpected pre-existing
+   objects before apply. Unknown or incomplete identity evidence blocks apply.
+3. After apply, classify `PRESERVED_V3_3_3`, `V4_ADDED`, `V4_CHANGED`,
+   `MISSING_PRE_EXISTING`, `CHANGED_PRE_EXISTING`, and `UNEXPECTED_ADDED`
+   separately.
+4. The V4 expected catalog is sourced from
+   `config/migration_harness/v4_schema_snapshot_contract.json`; it is not
+   compared directly against the V3.3.3 baseline as if the baseline were
+   empty.
+5. V3.3.3 tables, views, functions, and triggers remain unchanged. The current
+   compatibility-change manifest is empty. Any compatibility change requires
+   an explicit migration-manifest declaration and independent review.
+6. No object is auto-dropped, rewritten, renamed, disabled, or repaired by
+   this preflight validator.
+
+The comparison helpers are in
+`tools/migration_harness/supabase_preflight.py`:
+`compare_schema_object_identities` detects pre-existing drift and
+`classify_post_apply_schema` separates V3.3.3 preservation from V4 additions.
+
+## 4. Advisor before/after contract
+
+Every baseline finding has a stable fingerprint derived from the canonical
+JSON of `advisor`, `code`, `severity`, `scope`, `object_identity`, `role`, and
+`attribution`. The baseline attribution is
+`PRE_EXISTING_V3_3_3_DEBT`.
+
+### Security advisor baseline
+
+| Finding | Severity | Identity/scope | Policy |
+|---|---|---|---|
+| `rls_enabled_no_policy` | INFO | all/most internal tables | Track as baseline; do not auto-fix |
+| `security_definer_view` | ERROR | `public.v_shadow_run_latest` | Track as V3.3.3 debt; do not modify |
+| `anon_security_definer_function_executable` | WARN | `public.rls_auto_enable()` / `anon` | Track as V3.3.3 debt; do not modify |
+| `authenticated_security_definer_function_executable` | WARN | `public.rls_auto_enable()` / `authenticated` | Track as V3.3.3 debt; do not modify |
+
+The V4 rule is zero new V4-attributable Security `ERROR`/`WARN` findings and
+no worsening or unreviewed change to the pre-existing baseline. The
+`v_shadow_run_latest` and `rls_auto_enable()` findings remain V3.3.3 debt and
+are not fixed by this task.
+
+### Performance advisor baseline
+
+| Finding | Identity |
+|---|---|
+| Unindexed foreign key | `forward_shadow_outputs.frozen_prediction_id` |
+| Unindexed foreign key | `forward_tier_a_epochs.production_model_version_id` |
+| Unindexed foreign key | `forward_tier_a_epochs.shadow_model_version_id` |
+| Unused-index INFO findings | multiple existing V3.3.3 tables |
+
+The preflight does not remove unused indexes or add unrelated indexes. New
+high-impact performance regressions block. New INFO findings are
+`REVIEW_REQUIRED_NO_SILENT_REGRESSION`; they are never silently discarded.
+
+The before/after helper returns `PASS`, `REVIEW_REQUIRED`, or `BLOCKED` and
+retains preserved, new, and missing-baseline finding sets.
+
+## 5. Partial apply detection
+
+The expected V4 sequence is strictly serial:
+
+```text
+0001 -> 0002 -> 0003 -> 0004 -> 0005 -> 0006 -> 0007 -> 0008 -> 0009
+```
+
+Each committed step must be recorded atomically with its canonical migration
+identity in `governance.schema_migrations` (or the governed migration-history
+registry for the target adapter). A row with `APPLYING`, `FAILED`, `PARTIAL`,
+`BLOCKED`, or `partial_state=true`, a duplicate step, a gap, or an out-of-order
+step enters `FORWARD_FIX_REQUIRED` and stops further execution.
+
+The validator never fabricates a missing history row and never repairs an
+applied history row manually. A clean prefix that is not yet complete is also
+`PARTIAL_APPLY_STOP_REQUIRED`; the next migration is not run automatically.
+
+## 6. Forward-fix and recovery contract
+
+- Applied migration files and history rows are immutable.
+- There is no historical rollback rewriting.
+- Use one transaction per safe migration where the target supports it.
+- Irreversible DDL must be identified and reviewed before approval.
+- On uncertainty, stop, preserve the observed state, reconcile by read-only
+  inspection, record the incident/partial state, and design a new forward
+  migration identity.
+- A rollback is allowed only for a separately approved, proven,
+  transactionally reversible empty-target operation; it never rewrites history
+  and never affects V3.3.3.
+
+## 7. Post-apply mandatory verification plan
+
+The following fourteen checks are required after any future approved apply;
+each failure blocks acceptance:
+
+| ID | Verification |
+|---|---|
+| POST-01 | Schema diff and object identity classification |
+| POST-02 | Migration history and atomic step records |
+| POST-03 | RLS and grants for all exposed/internal surfaces |
+| POST-04 | `security_invoker` view behavior |
+| POST-05 | Function owner, `SECURITY DEFINER`, fixed `search_path`, and execute exposure |
+| POST-06 | Triggers, append-only rules, and Frozen Input/Prediction immutability |
+| POST-07 | Production uniqueness and one active canonical revision |
+| POST-08 | No-future-leakage and cutoff/kickoff boundaries |
+| POST-09 | Tier A pair integrity and same-frozen-input rule |
+| POST-10 | Canonical latest update uses business timestamps, not page build time |
+| POST-11 | Public projection isolation and role boundary |
+| POST-12 | V3.3.3 isolation and unchanged legacy identities |
+| POST-13 | Supabase Security advisor before/after comparison |
+| POST-14 | Supabase Performance advisor before/after comparison |
+
+## 8. Human approval separation
+
+The gates are intentionally separate:
+
+```text
+Target Binding Approval (BOUND_APPROVED)
+        != Production Apply Approval
+
+Supabase Preflight Plan (PASS)
+        != Production Apply Approval
+
+Final Review decision (READY_FOR_PRODUCTION_APPLY_APPROVAL)
+        -> explicit human apply approval still pending
+```
+
+Only an explicit Human Approver decision after the Final Review may open the
+Production apply gate. The checked-in state remains:
+
+```text
+hard_block_preserved = true
+explicit_approval_required = true
+target_binding_authorizes_apply = false
+approval_state = PENDING_PRODUCTION_APPLY_APPROVAL
+production_apply_allowed = false
+```
+
+## 9. Validation boundary and commands
+
+The following validations are repository-only/read-only:
+
+```powershell
+Set-Location F:\Projects\jcfb-v4
+python -m tools.migration_harness --repo-root . supabase-preflight
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\validate_v4_supabase_preflight.ps1 -RepoRoot F:\Projects\jcfb-v4
+python -m tools.migration_harness --repo-root . production-readiness
+```
+
+The canonical hash command is verification-only in this task:
+
+```powershell
+python -m tools.migration_harness --repo-root . canonical-hash
+```
+
+No `--write` hash maintenance operation is part of this completion. The
+Production target binding validator remains required and must continue to
+pass.
+
+## 10. Completion disposition
+
+```text
+Production Target Identity: KNOWN
+Supabase Preflight Plan: PASS
+Final Readiness Decision: READY_FOR_PRODUCTION_APPLY_APPROVAL
+Production Apply: CLOSED_PENDING_EXPLICIT_APPROVAL
+Production/Supabase Writes Performed: NO
+BATCH-04 Executed: NO
+V4-018/V4-019 Changed: NO
+V3.3.3 Modified: NO
+Next Stage: BATCH_04_PRODUCTION_READINESS_FINAL_REVIEW_3
+```
+
+The next stage is a separate Final Review. This document never advances the
+repository into Production Apply.

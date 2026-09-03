@@ -17,6 +17,7 @@ from .runtime_tests import validate_runtime_case_wiring
 from .security import secret_scan
 from .models import ExecutionMode
 from .production_target import production_target_binding_report, run_production_target_cross_doc_consistency
+from .supabase_preflight import build_supabase_preflight_report
 
 
 REQUIRED_FILES = (
@@ -42,6 +43,12 @@ REQUIRED_FILES = (
     "docs/V4_PRODUCTION_TARGET_BINDING.md",
     "scripts/validate_v4_production_target_binding.ps1",
     "tests/migration_harness/test_production_target_binding.py",
+    "config/migration_harness/v4_supabase_preflight_plan.json",
+    "config/migration_harness/v4_supabase_preflight_plan.schema.json",
+    "tools/migration_harness/supabase_preflight.py",
+    "scripts/validate_v4_supabase_preflight.ps1",
+    "tests/migration_harness/test_supabase_preflight.py",
+    "docs/V4_MIGRATION_PREFLIGHT.md",
     "requirements-v4-runtime.txt",
 )
 
@@ -170,6 +177,7 @@ def run_remediation_self_audit(repo_root: Path) -> Dict[str, Any]:
     design = _design_files_untouched(root)
     binding = production_target_binding_report(root)
     cross_doc = run_production_target_cross_doc_consistency(root)
+    preflight = build_supabase_preflight_report(root, binding.get("production_target"))
     checks = {
         "required_files": _required_files(root),
         "canonical_hashes": {
@@ -202,6 +210,7 @@ def run_remediation_self_audit(repo_root: Path) -> Dict[str, Any]:
         "design_migrations_untouched": design,
         "production_target_binding": binding,
         "production_target_cross_doc_consistency": cross_doc,
+        "supabase_preflight_plan": preflight,
         "secret_scan": secrets,
         "git": git,
     }
@@ -215,6 +224,7 @@ def run_remediation_self_audit(repo_root: Path) -> Dict[str, Any]:
         checks["design_migrations_untouched"]["status"] == "PASS",
         checks["production_target_binding"].get("status") == "PASS",
         checks["production_target_cross_doc_consistency"].get("status") == "PASS",
+        checks["supabase_preflight_plan"].get("status") == "PASS",
         secrets.get("status") == "PASS",
     )
     return {

@@ -114,19 +114,20 @@ class ProductionTargetBindingTests(unittest.TestCase):
         self.assertIn("PRODUCTION_TARGET_HARD_BLOCK", blocked["blocking_reasons"])
         self.assertFalse(blocked["execution_boundary"]["connector_invoked"])
 
-    def test_production_readiness_knows_identity_without_passing_supabase_preflight(self):
+    def test_production_readiness_passes_static_preflight_without_authorizing_apply(self):
         review = build_production_readiness_review(self.repo_root)
         self.assertEqual("KNOWN", review["production_target_identity"])
-        self.assertEqual("IDENTITY_KNOWN_PREFLIGHT_INCOMPLETE", review["status"])
-        self.assertEqual("INCOMPLETE", review["supabase_preflight_plan"]["status"])
+        self.assertEqual("READY_FOR_PRODUCTION_APPLY_APPROVAL", review["status"])
+        self.assertEqual("PASS", review["supabase_preflight_plan"]["status"])
         self.assertFalse(review["supabase_preflight_plan"]["automatic_pass"])
         self.assertFalse(review["production_apply_allowed"])
         self.assertEqual("NO", review["supabase_writes_performed"])
 
-    def test_runtime_evidence_review_exposes_known_identity_without_auto_passing_preflight(self):
+    def test_runtime_evidence_review_exposes_known_identity_without_authorizing_apply(self):
         review = review_runtime_evidence(self.repo_root, report_dir=self.repo_root / ".runtime" / "missing-production-review-fixture")
         self.assertEqual("KNOWN", review["production_target_identity"])
-        self.assertEqual("INCOMPLETE", review["supabase_preflight_plan"]["status"])
+        self.assertEqual("PASS", review["supabase_preflight_plan"]["status"])
+        self.assertFalse(review["supabase_preflight_plan"]["automatic_pass"])
         self.assertFalse(review["production_apply_allowed"])
         self.assertEqual("PASS", review["checks"]["production_target_identity"]["status"])
 

@@ -26,6 +26,7 @@ from .runtime_audit import run_remediation_self_audit
 from .production_target import build_production_readiness_review, production_target_binding_report
 from .schema_diff import compare_schema_snapshot, load_expected_snapshot
 from .smoke import load_smoke_catalog, runtime_pending_smoke_report
+from .supabase_preflight import build_supabase_preflight_report
 
 
 def _load_target(path: Optional[str]) -> Optional[Dict[str, Any]]:
@@ -70,6 +71,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("runtime-review", help="verify latest runtime evidence against the current Git HEAD")
     sub.add_parser("remediation-audit", help="run the static PRE-BATCH-04 remediation self-audit without a connector")
     sub.add_parser("production-binding", help="validate the checked-in non-secret Production target binding")
+    sub.add_parser("supabase-preflight", help="validate the checked-in read-only Supabase Production preflight plan")
     sub.add_parser("production-readiness", help="emit the identity-only Production Readiness review input")
     return parser
 
@@ -144,6 +146,8 @@ def main(argv=None) -> int:
         value = run_remediation_self_audit(repo_root)
     elif args.command == "production-binding":
         value = production_target_binding_report(repo_root)
+    elif args.command == "supabase-preflight":
+        value = build_supabase_preflight_report(repo_root)
     elif args.command == "production-readiness":
         value = build_production_readiness_review(repo_root)
     else:

@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v4-supabase-preflight-plan@1.0.0",
+  "title": "JCFB V4 Supabase production preflight plan contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "$id",
+    "contract_version",
+    "contract_state",
+    "scope",
+    "plan_status",
+    "target_binding_source",
+    "production_baseline",
+    "apply_before_checklist",
+    "schema_baseline_diff_contract",
+    "advisor_before_after_contract",
+    "partial_apply_contract",
+    "forward_fix_recovery_contract",
+    "post_apply_verification_plan",
+    "approval_separation",
+    "canonical_hash_contract",
+    "secret_policy",
+    "execution_boundary",
+    "final_readiness_projection"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "$id": {"const": "v4-supabase-preflight-plan@1.0.0"},
+    "contract_version": {"const": "v4-supabase-preflight-plan@1.0.0"},
+    "contract_state": {"const": "ACTIVE"},
+    "scope": {"const": "JCFB_V4_SUPABASE_PREFLIGHT_PLAN_COMPLETION"},
+    "plan_status": {"const": "PASS"},
+    "target_binding_source": {"const": "config/migration_harness/v4_production_target_identity.json"},
+    "production_baseline": {"$ref": "#/$defs/production_baseline"},
+    "apply_before_checklist": {
+      "type": "array",
+      "minItems": 8,
+      "items": {"$ref": "#/$defs/checklist_item"}
+    },
+    "schema_baseline_diff_contract": {"$ref": "#/$defs/schema_contract"},
+    "advisor_before_after_contract": {"$ref": "#/$defs/advisor_contract"},
+    "partial_apply_contract": {"$ref": "#/$defs/partial_contract"},
+    "forward_fix_recovery_contract": {"$ref": "#/$defs/forward_fix_contract"},
+    "post_apply_verification_plan": {
+      "type": "array",
+      "minItems": 10,
+      "items": {"$ref": "#/$defs/verification_item"}
+    },
+    "approval_separation": {"$ref": "#/$defs/approval_contract"},
+    "canonical_hash_contract": {"$ref": "#/$defs/hash_contract"},
+    "secret_policy": {"$ref": "#/$defs/secret_policy"},
+    "execution_boundary": {"$ref": "#/$defs/execution_boundary"},
+    "final_readiness_projection": {"$ref": "#/$defs/readiness_projection"}
+  },
+  "$defs": {
+    "production_baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target", "capture", "database_identity", "migration_history", "schema_counts", "schema_object_identities", "v333_isolation", "security_advisor", "performance_advisor"],
+      "properties": {
+        "target": {"type": "object"},
+        "capture": {"type": "object"},
+        "database_identity": {"type": "object"},
+        "migration_history": {"type": "object"},
+        "schema_counts": {"type": "object"},
+        "schema_object_identities": {"type": "object"},
+        "v333_isolation": {"type": "object"},
+        "security_advisor": {"type": "object"},
+        "performance_advisor": {"type": "object"}
+      }
+    },
+    "checklist_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "required", "gate", "evidence_ref", "failure_action"],
+      "properties": {
+        "id": {"type": "string"},
+        "required": {"const": true},
+        "gate": {"const": "MANDATORY_BEFORE_PRODUCTION_APPLY"},
+        "evidence_ref": {"type": "string", "minLength": 1},
+        "failure_action": {"const": "BLOCK"},
+        "current_head_must_equal_approved_runtime_evidence_head": {"type": "boolean"},
+        "expected_count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "schema_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compare_by_object_identity", "identity_fields", "counts_are_not_identity_evidence", "v4_expected_catalog_source", "v3_compatibility_change_manifest", "unknown_identity_action", "never_auto_repair"],
+      "properties": {
+        "compare_by_object_identity": {"const": true},
+        "identity_fields": {"type": "array", "minItems": 3},
+        "counts_are_not_identity_evidence": {"const": true},
+        "v4_expected_catalog_source": {"type": "string"},
+        "v3_compatibility_change_manifest": {"type": "array"},
+        "unknown_identity_action": {"const": "BLOCK"},
+        "never_auto_repair": {"const": true}
+      }
+    },
+    "advisor_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fingerprint_algorithm", "baseline_attribution", "new_security_error_warn_action", "baseline_fingerprint_missing_action", "performance_info_action", "v333_debt_change_action", "comparison_requires_before_and_after"],
+      "properties": {
+        "fingerprint_algorithm": {"type": "string"},
+        "baseline_attribution": {"const": "PRE_EXISTING_V3_3_3_DEBT"},
+        "new_security_error_warn_action": {"const": "BLOCK"},
+        "baseline_fingerprint_missing_action": {"const": "BLOCK_UNLESS_EXPLICITLY_REVIEWED"},
+        "performance_info_action": {"const": "REVIEW_REQUIRED_NO_SILENT_REGRESSION"},
+        "v333_debt_change_action": {"const": "BLOCK_UNLESS_EXPLICITLY_REVIEWED"},
+        "comparison_requires_before_and_after": {"const": true}
+      }
+    },
+    "partial_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected_v4_sequence", "history_registry", "atomic_step_recording", "partial_states", "on_partial", "history_mutation_policy"],
+      "properties": {
+        "expected_v4_sequence": {"type": "array", "minItems": 9, "maxItems": 9},
+        "history_registry": {"const": "governance.schema_migrations"},
+        "atomic_step_recording": {"const": true},
+        "partial_states": {"type": "array", "minItems": 1},
+        "on_partial": {"type": "object"},
+        "history_mutation_policy": {"type": "object"}
+      }
+    },
+    "forward_fix_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["historical_rollback_rewrite", "recovery_path", "transaction_per_safe_migration", "irreversible_ddl_review_required", "no_history_repair_by_hand"],
+      "properties": {
+        "historical_rollback_rewrite": {"const": false},
+        "recovery_path": {"const": "FORWARD_FIX_REQUIRED"},
+        "transaction_per_safe_migration": {"const": true},
+        "irreversible_ddl_review_required": {"const": true},
+        "no_history_repair_by_hand": {"const": true}
+      }
+    },
+    "verification_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "required", "evidence_ref", "failure_action"],
+      "properties": {
+        "id": {"type": "string"},
+        "required": {"const": true},
+        "evidence_ref": {"type": "string", "minLength": 1},
+        "failure_action": {"const": "BLOCK_ACCEPTANCE"}
+      }
+    },
+    "approval_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_binding_approval", "preflight_plan", "final_review", "explicit_apply_approval_required", "production_apply_allowed", "same_agent_may_not_approve_and_execute"],
+      "properties": {
+        "target_binding_approval": {"type": "object"},
+        "preflight_plan": {"type": "object"},
+        "final_review": {"type": "object"},
+        "explicit_apply_approval_required": {"const": true},
+        "production_apply_allowed": {"const": false},
+        "same_agent_may_not_approve_and_execute": {"const": true}
+      }
+    },
+    "hash_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_manifest", "expected_count", "verification_mode", "expected_status", "pending_count"],
+      "properties": {
+        "source_manifest": {"type": "string"},
+        "expected_count": {"const": 9},
+        "verification_mode": {"const": "VERIFY_ONLY_NO_WRITE"},
+        "expected_status": {"const": "PASS"},
+        "pending_count": {"const": 0}
+      }
+    },
+    "secret_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["secret_fields_present", "raw_secret_values_present", "credential_source", "persist_values", "log_values", "report_values"],
+      "properties": {
+        "secret_fields_present": {"const": false},
+        "raw_secret_values_present": {"const": false},
+        "credential_source": {"const": "PROCESS_ENVIRONMENT_ONLY"},
+        "persist_values": {"const": false},
+        "log_values": {"const": false},
+        "report_values": {"const": false}
+      }
+    },
+    "execution_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["production_apply_invoked", "production_db_writes_performed", "supabase_writes_performed", "ddl_executed", "dml_executed", "batch_04_executed", "v4_018_v4_019_changed", "v333_mutated", "automatic_apply"],
+      "properties": {
+        "production_apply_invoked": {"const": false},
+        "production_db_writes_performed": {"const": "NO"},
+        "supabase_writes_performed": {"const": "NO"},
+        "ddl_executed": {"const": false},
+        "dml_executed": {"const": false},
+        "batch_04_executed": {"const": "NO"},
+        "v4_018_v4_019_changed": {"const": "NO"},
+        "v333_mutated": {"const": "NO"},
+        "automatic_apply": {"const": false}
+      }
+    },
+    "readiness_projection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["production_target_identity", "supabase_preflight_plan", "decision", "apply_gate"],
+      "properties": {
+        "production_target_identity": {"const": "KNOWN"},
+        "supabase_preflight_plan": {"const": "PASS"},
+        "decision": {"const": "READY_FOR_PRODUCTION_APPLY_APPROVAL"},
+        "apply_gate": {"const": "CLOSED_PENDING_EXPLICIT_APPROVAL"}
+      }
+    }
+  }
+}
