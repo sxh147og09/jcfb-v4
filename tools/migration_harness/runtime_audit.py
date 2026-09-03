@@ -7,13 +7,12 @@ SQL.  A local operator can run it before the explicit PowerShell apply gate.
 
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 from typing import Any, Dict, List
 
 from .canonical_hash import verify_candidate_hashes
 from .connection import driver_status
-from .runtime_executor import RuntimeExecutor, default_disposable_target
+from .runtime_executor import RuntimeEvidenceError, RuntimeExecutor, default_disposable_target, run_resolved_git_command
 from .runtime_tests import validate_runtime_case_wiring
 from .security import secret_scan
 from .models import ExecutionMode
@@ -53,15 +52,9 @@ ACTIVE_STORAGE_FILES = (
 
 def _git_status(repo_root: Path) -> Dict[str, Any]:
     try:
-        result = subprocess.run(
-            ["git", "-C", str(repo_root), "status", "--porcelain", "--untracked-files=all"],
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-        )
-    except OSError:
-        return {"status": "BLOCKED_GIT", "changed_files": [], "reason": "Git executable is unavailable"}
+        result = run_resolved_git_command(repo_root, "status", "--porcelain", "--untracked-files=all")
+    except RuntimeEvidenceError as exc:
+        return {"status": "BLOCKED_GIT", "changed_files": [], "reason": exc.code}
     if result.returncode != 0:
         return {"status": "BLOCKED_GIT", "changed_files": [], "reason": "Repository Git metadata is unavailable"}
     changed = [line[3:].strip() for line in result.stdout.splitlines() if len(line) >= 3]
@@ -70,22 +63,10 @@ def _git_status(repo_root: Path) -> Dict[str, Any]:
 
 def _design_files_untouched(repo_root: Path) -> Dict[str, Any]:
     try:
-        unstaged = subprocess.run(
-            ["git", "-C", str(repo_root), "diff", "--name-only", "--", "database/migrations/v4"],
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-        )
-        staged = subprocess.run(
-            ["git", "-C", str(repo_root), "diff", "--cached", "--name-only", "--", "database/migrations/v4"],
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-        )
-    except OSError:
-        return {"status": "BLOCKED_GIT", "changed_files": []}
+        unstaged = run_resolved_git_command(repo_root, "diff", "--name-only", "--", "database/migrations/v4")
+        staged = run_resolved_git_command(repo_root, "diff", "--cached", "--name-only", "--", "database/migrations/v4")
+    except RuntimeEvidenceError as exc:
+        return {"status": "BLOCKED_GIT", "changed_files": [], "reason": exc.code}
     if unstaged.returncode != 0 or staged.returncode != 0:
         return {"status": "BLOCKED_GIT", "changed_files": []}
     changed = [*unstaged.stdout.splitlines(), *staged.stdout.splitlines()]
@@ -144,6 +125,12 @@ def _storage_policy(repo_root: Path) -> Dict[str, Any]:
         issues.append("RUNTIME_ENV_EXAMPLE_PORT_NOT_55432")
     if "JCFB_V4_PYTHON_VENV" not in wrapper or "Get-Command python" in wrapper:
         issues.append("RUNTIME_PYTHON_FALLBACK_OR_PATH_MISSING")
+    if "Get-Command git" not in activate or "JCFB_V4_GIT_EXE" not in activate:
+        issues.append("GIT_ACTIVATION_RESOLUTION_MISSING")
+    if "JCFB_V4_GIT_RESOLUTION=BLOCKED" not in activate:
+        issues.append("GIT_ACTIVATION_FAIL_CLOSED_MISSING")
+    if "Env:JCFB_V4_GIT_EXE" not in activate or "Current PowerShell process and child processes only" not in activate:
+        issues.append("GIT_ACTIVATION_PROCESS_SCOPE_MISSING")
     return {"status": "PASS" if not issues else "FAIL", "files": inspected, "issues": issues}
 
 

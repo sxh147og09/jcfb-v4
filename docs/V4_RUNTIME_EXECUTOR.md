@@ -164,11 +164,16 @@ readiness. The PowerShell wrapper now accepts `-ApplyDisposable` only when all
 35 executable cases pass, the schema/security gates pass, and the report says
 `READY_FOR_PRODUCTION_REVIEW`. Each write gets a unique `run_id` and is stored
 under `.runtime/reports/prebatch04/runs/<run_id>/`; `latest.json` is an atomic
-pointer to the newest run. At runtime start, Git is resolved from the process
-PATH and the executor captures `git_head`, `git_branch`,
+pointer to the newest run. At runtime start, Git resolution uses the following
+portable priority: the process-only `JCFB_V4_GIT_EXE` override, `shutil.which`,
+and common Windows Git installation locations. The PowerShell activation script
+also discovers a current-user Codex bundled Git helper when available and sets
+that override only for the current PowerShell process and its children. The
+executor captures `git_head`, `git_branch`,
 `working_tree_clean`, `repo_root`, `run_id`, and timestamps. A missing or
-invalid Git HEAD blocks evidence persistence; it is never serialized as a
-valid `null` identity. The JSON and Markdown files persist the same identity,
+invalid Git executable raises `GIT_EXECUTABLE_NOT_FOUND` with source categories
+only. A missing or invalid Git HEAD blocks evidence persistence; it is never
+serialized as a valid `null` identity. The JSON and Markdown files persist the same identity,
 `smoke_passed`, `enforcement_passed`, and the exact PowerShell summary lines.
 The pointer includes `report_json`, `report_markdown`, `runtime_status`, and
 the same Git identity (with `json`/`markdown` aliases retained for local

@@ -29,6 +29,12 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 
 All project cache, temporary, virtual-environment, report, and disposable
 PostgreSQL data paths should now be under `F:\Projects\jcfb-v4\.runtime\`.
+Activation prints `JCFB_V4_GIT_RESOLUTION=PASS` plus a redacted source label
+when Git is available. It checks an explicit `JCFB_V4_GIT_EXE` override, the
+PowerShell Git command, common Windows install locations, and a current-user
+Codex runtime helper; any resolved path is kept in the current process only.
+If all sources fail it prints `JCFB_V4_GIT_RESOLUTION=BLOCKED`, and runtime
+evidence remains fail-closed with `GIT_EXECUTABLE_NOT_FOUND`.
 
 ## Configure the disposable database
 

@@ -42,6 +42,7 @@ DRIVER_MISSING = "DRIVER_MISSING"
 TARGET_IDENTITY_MISMATCH = "TARGET_IDENTITY_MISMATCH"
 SQL_APPLY_FAILED = "SQL_APPLY_FAILED"
 _GIT_HEAD_RE = re.compile(r"[0-9a-fA-F]{40,64}\Z")
+GIT_EXECUTABLE_ENV = "JCFB_V4_GIT_EXE"
 
 
 class RuntimeEvidenceError(RuntimeError):
@@ -75,21 +76,102 @@ def _compact_report_time(value: str) -> str:
     return parsed.strftime("%Y%m%dT%H%M%SZ")
 
 
-def _resolve_git_executable() -> str:
-    """Resolve Git from the current process PATH on every runtime start."""
-
-    executable = shutil.which("git") or shutil.which("git.exe")
-    if not executable:
-        raise RuntimeEvidenceError(
-            "GIT_EXECUTABLE_UNAVAILABLE",
-            "The Git executable could not be resolved from PATH.",
-        )
-    return executable
+def _clean_git_candidate(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    candidate = str(value).strip()
+    if len(candidate) >= 2 and candidate[0] == candidate[-1] and candidate[0] in {"'", '"'}:
+        candidate = candidate[1:-1].strip()
+    return candidate or None
 
 
-def _run_git_command(repo_root: Path, executable: str, *arguments: str) -> str:
+def _existing_git_file(value: Any) -> Optional[str]:
+    candidate = _clean_git_candidate(value)
+    if candidate is None:
+        return None
     try:
-        completed = subprocess.run(
+        path = Path(candidate).expanduser()
+        if not path.is_file():
+            return None
+        return str(path.resolve())
+    except (OSError, TypeError, ValueError):
+        return None
+
+
+def _windows_common_git_candidates(environ: Optional[Mapping[str, str]] = None) -> Sequence[Path]:
+    """Return portable Windows Git install locations without user-specific paths."""
+
+    if os.name != "nt":
+        return ()
+    environment = environ if environ is not None else os.environ
+    candidates: List[Path] = []
+    seen: set[str] = set()
+
+    def add(root: Optional[str], relative: str) -> None:
+        if not root:
+            return
+        try:
+            path = Path(root) / relative
+            key = os.path.normcase(str(path))
+        except (TypeError, ValueError):
+            return
+        if key not in seen:
+            seen.add(key)
+            candidates.append(path)
+
+    for variable in ("ProgramFiles", "ProgramW6432", "ProgramFiles(x86)"):
+        root = environment.get(variable)
+        add(root, "Git/cmd/git.exe")
+        add(root, "Git/bin/git.exe")
+
+    local_app_data = environment.get("LocalAppData")
+    add(local_app_data, "Programs/Git/cmd/git.exe")
+    add(local_app_data, "Programs/Git/bin/git.exe")
+    return tuple(candidates)
+
+
+def _resolve_git_executable() -> str:
+    """Resolve Git without depending on a machine-specific bundled-runtime path.
+
+    The returned value is always the executable path used by the metadata
+    subprocesses.  Resolution failures intentionally expose only source
+    categories, never the candidate paths that were inspected.
+    """
+
+    attempted_sources = [
+        f"{GIT_EXECUTABLE_ENV} environment override",
+        "PATH via shutil.which",
+    ]
+
+    explicit = _existing_git_file(os.environ.get(GIT_EXECUTABLE_ENV))
+    if explicit:
+        return explicit
+
+    for command_name in ("git", "git.exe"):
+        try:
+            from_path = shutil.which(command_name)
+        except OSError:
+            from_path = None
+        resolved = _existing_git_file(from_path)
+        if resolved:
+            return resolved
+
+    attempted_sources.append("Windows common Git installation paths")
+    for candidate in _windows_common_git_candidates():
+        resolved = _existing_git_file(candidate)
+        if resolved:
+            return resolved
+
+    raise RuntimeEvidenceError(
+        "GIT_EXECUTABLE_NOT_FOUND",
+        "GIT_EXECUTABLE_NOT_FOUND: no usable Git executable was found. "
+        f"Attempted sources: {', '.join(attempted_sources)}.",
+    )
+
+
+def _run_git_process(repo_root: Path, executable: str, *arguments: str) -> subprocess.CompletedProcess:
+    try:
+        return subprocess.run(
             [executable, "-C", str(repo_root), *arguments],
             capture_output=True,
             text=True,
@@ -100,14 +182,25 @@ def _run_git_command(repo_root: Path, executable: str, *arguments: str) -> str:
         )
     except FileNotFoundError as exc:
         raise RuntimeEvidenceError(
-            "GIT_EXECUTABLE_UNAVAILABLE",
-            "The resolved Git executable could not be started.",
+            "GIT_EXECUTABLE_NOT_FOUND",
+            "GIT_EXECUTABLE_NOT_FOUND: the resolved Git executable could not be started.",
         ) from exc
     except (OSError, subprocess.SubprocessError) as exc:
         raise RuntimeEvidenceError(
             "GIT_COMMAND_FAILED",
             "A Git metadata command could not be completed.",
         ) from exc
+
+
+def run_resolved_git_command(repo_root: Path, *arguments: str) -> subprocess.CompletedProcess:
+    """Run a read-only Git command through the shared executable resolver."""
+
+    root = Path(repo_root).resolve()
+    return _run_git_process(root, _resolve_git_executable(), *arguments)
+
+
+def _run_git_command(repo_root: Path, executable: str, *arguments: str) -> str:
+    completed = _run_git_process(repo_root, executable, *arguments)
     if completed.returncode != 0:
         raise RuntimeEvidenceError(
             "GIT_COMMAND_FAILED",

@@ -720,7 +720,7 @@ class RuntimeCaseExecutionTests(unittest.TestCase):
             with patch("tools.migration_harness.runtime_executor.shutil.which", return_value=None):
                 with self.assertRaises(RuntimeEvidenceError) as context:
                     write_runtime_report(report, self.repo_root, report_dir=report_dir)
-            self.assertEqual("GIT_EXECUTABLE_UNAVAILABLE", context.exception.code)
+            self.assertEqual("GIT_EXECUTABLE_NOT_FOUND", context.exception.code)
             self.assertFalse(report_dir.exists())
 
     def test_report_json_markdown_and_latest_persist_one_git_head(self):

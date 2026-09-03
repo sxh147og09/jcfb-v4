@@ -37,6 +37,7 @@ from .readiness import (
 from .schema_diff import compare_schema_snapshot, load_expected_snapshot, validate_expected_snapshot_shape
 from .security import secret_scan
 from .smoke import load_smoke_catalog, runtime_pending_smoke_report, validate_smoke_catalog
+from .runtime_executor import RuntimeEvidenceError, run_resolved_git_command
 
 
 ACCEPTANCE_PACKAGE_SCHEMA_PATH = "config/migration_harness/v4_batch_03_acceptance_package.schema.json"
@@ -49,14 +50,10 @@ NEXT_BATCH = "BATCH-04 — Formal Schema Apply & Production DB Write HARD_GATE (
 
 
 def _git(repo_root: Path, *args: str) -> str:
-    result = subprocess.run(
-        ["git", "-C", str(repo_root), *args],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
-    )
+    try:
+        result = run_resolved_git_command(repo_root, *args)
+    except RuntimeEvidenceError:
+        return ""
     return result.stdout.strip() if result.returncode == 0 else ""
 
 

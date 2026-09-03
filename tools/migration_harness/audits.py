@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import re
-import subprocess
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
 from .models import CheckStatus, Issue
+from .runtime_executor import RuntimeEvidenceError, run_resolved_git_command
 
 
 def _result(status: str, evidence_ref: str, reason: str, **extra: Any) -> Dict[str, Any]:
@@ -83,14 +83,15 @@ def run_cross_doc_consistency(repo_root: Path) -> Dict[str, Any]:
 
 
 def run_git_diff_check(repo_root: Path) -> Dict[str, Any]:
-    result = subprocess.run(
-        ["git", "-C", str(repo_root), "diff", "--check"],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
-    )
+    try:
+        result = run_resolved_git_command(repo_root, "diff", "--check")
+    except RuntimeEvidenceError as exc:
+        return _result(
+            CheckStatus.FAIL.value,
+            "evidence/git-diff-check.txt",
+            "Git executable could not be resolved for git diff --check",
+            output=exc.code,
+        )
     return _result(
         CheckStatus.PASS.value if result.returncode == 0 else CheckStatus.FAIL.value,
         "evidence/git-diff-check.txt",
@@ -100,14 +101,17 @@ def run_git_diff_check(repo_root: Path) -> Dict[str, Any]:
 
 
 def run_v333_path_audit(repo_root: Path) -> Dict[str, Any]:
-    result = subprocess.run(
-        ["git", "-C", str(repo_root), "diff", "--name-only"],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
-    )
+    try:
+        result = run_resolved_git_command(repo_root, "diff", "--name-only")
+    except RuntimeEvidenceError as exc:
+        return _result(
+            CheckStatus.FAIL.value,
+            "evidence/v333-isolation-audit.json",
+            "Git executable could not be resolved for the V3.3.3 isolation audit",
+            changed_paths=[],
+            collisions=[],
+            error_code=exc.code,
+        )
     changed = [line.strip() for line in result.stdout.splitlines() if line.strip()]
     collisions = [path for path in changed if re.search(r"(^|/)(?:V333|v333|V3\.3\.3)(?:/|$)", path)]
     return _result(
