@@ -89,11 +89,11 @@ canonical verifier and a fresh disposable execution of 0001-0009.
 | Smoke | `20/20 PASS` |
 | Enforcement | `15/15 PASS` |
 | Runtime status | `RUNTIME_VALIDATION_PASS` |
-| Fresh run ID | `prebatch04-20260903T102114Z-0a4016dbf7ff4e0e8a6061a3b6f5942d` |
+| Fresh run ID | `prebatch04-20260903T102619Z-12189f611f044934b3c0a9b1fa4688e4` |
 | Runtime target | `DISPOSABLE_LOCAL` |
 | Runtime write boundary | `production_db_writes_performed=NO; supabase_writes_performed=NO` |
-| Git commit | `PENDING_FINAL_COMMIT` |
-| Working tree | `PENDING_FINAL_COMMIT` |
+| Git commit used for fresh runtime evidence | `114b0c11c2395783fbcdd03bb693a47b936df730` |
+| Working tree at fresh runtime evidence | `CLEAN` |
 
 ## Resume instructions
 
