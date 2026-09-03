@@ -973,18 +973,27 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
     lines.extend([f"- {name}: `{'PASS' if value else 'FAIL'}`" for name, value in readiness_checks.items()] or ["- No readiness checks were run"])
     lines.extend(["", "## Blocking reasons", ""])
     lines.extend([f"- `{reason}`" for reason in (report.get("blocking_reasons") or [])] or ["- None"])
-    lines.extend(["", "## Runtime cases", "", "| Case | Kind | Status | Expected | Actual | Handler | Mechanism | Reason |", "|---|---|---|---|---|---|---|---|"])
+    lines.extend(["", "## Runtime cases", "", "| Case | Kind | Status | Expected | Actual | Error class | SQLSTATE | DB object/constraint/trigger/policy | Handler | Reason |", "|---|---|---|---|---|---|---|---|---|---|"])
     case_results = runtime.get("results", []) if isinstance(runtime, Mapping) else []
     if case_results:
         for result in case_results:
             mechanism = result.get("observed_mechanism") or result.get("expected_mechanism") or {}
-            mechanism_text = str(mechanism.get("trigger") or mechanism.get("constraint") or mechanism.get("role_gate") or mechanism.get("view") or mechanism.get("type") or "-").replace("|", "/")
-            reason_text = str(result.get("reason") or result.get("blocked_reason") or "-").replace("|", "/").replace("\r", " ").replace("\n", " ")
+            mechanism_parts = []
+            for key in ("object", "constraint", "trigger", "policy", "role_gate", "view", "catalog", "postcondition"):
+                value = mechanism.get(key) if isinstance(mechanism, Mapping) else None
+                if value:
+                    mechanism_parts.append(f"{key}={value}")
+            error_constraint = result.get("error_constraint")
+            if error_constraint and not any("constraint=" in item for item in mechanism_parts):
+                mechanism_parts.append(f"db_constraint={error_constraint}")
+            mechanism_text = ", ".join(mechanism_parts) or (str(mechanism.get("type") if isinstance(mechanism, Mapping) else "-") or "-")
+            mechanism_text = mechanism_text.replace("|", "/")
+            reason_text = str(result.get("reason") or result.get("blocked_reason") or result.get("expected_rejection_match_reason") or "-").replace("|", "/").replace("\r", " ").replace("\n", " ")
             lines.append(
-                f"| {result.get('case_id')} | {result.get('kind')} | {result.get('status')} | {result.get('expected_outcome', '-')} | {result.get('actual_outcome', '-')} | {result.get('hook_name')} | {mechanism_text} | {reason_text} |"
+                f"| {result.get('case_id')} | {result.get('kind')} | {result.get('status')} | {result.get('expected_outcome', '-')} | {result.get('actual_outcome', '-')} | {result.get('error_class') or '-'} | {result.get('error_sqlstate') or '-'} | {mechanism_text} | {result.get('hook_name')} | {reason_text} |"
             )
     else:
-        lines.append("| - | - | NOT_RUN | - | - | - | - | - |")
+        lines.append("| - | - | NOT_RUN | - | - | - | - | - | - | - |")
     if taxonomy:
         lines.extend(
             [

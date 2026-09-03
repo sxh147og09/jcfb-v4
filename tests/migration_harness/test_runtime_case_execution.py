@@ -11,6 +11,8 @@ from tools.migration_harness.runtime_case_handlers import (
     CaseContext,
     LATEST_BUSINESS_TIMESTAMP,
     RuntimeCaseHandlerRunner,
+    _hash,
+    _id,
     match_expected_rejection,
 )
 from tools.migration_harness.runtime_executor import RuntimeExecutor, render_runtime_report_markdown
@@ -23,16 +25,17 @@ from tools.migration_harness.runtime_tests import (
 
 
 class _Diag:
-    def __init__(self, sqlstate: str, constraint_name: str | None = None):
+    def __init__(self, sqlstate: str, constraint_name: str | None = None, message_primary: str | None = None):
         self.sqlstate = sqlstate
         self.constraint_name = constraint_name
+        self.message_primary = message_primary
 
 
 class _DbError(Exception):
-    def __init__(self, message: str, sqlstate: str, constraint_name: str | None = None):
+    def __init__(self, message: str, sqlstate: str, constraint_name: str | None = None, message_primary: str | None = None):
         super().__init__(message)
         self.sqlstate = sqlstate
-        self.diag = _Diag(sqlstate, constraint_name)
+        self.diag = _Diag(sqlstate, constraint_name, message_primary)
 
 
 class _Cursor:
@@ -44,6 +47,8 @@ class _Cursor:
     def execute(self, sql, params=None):
         values = None if params is None else tuple(params)
         self.connection.executed.append((sql, values))
+        if self.connection.fail_sql and self.connection.fail_sql in sql:
+            raise _DbError("", "23514", message_primary="fixture failure")
         self.description = []
         self._rows = []
         if "FROM pg_catalog.pg_roles" in sql:
@@ -77,6 +82,7 @@ class _Connection:
         self.executed = []
         self.commit_count = 0
         self.rollback_count = 0
+        self.fail_sql = None
 
     def cursor(self):
         return _Cursor(self)
@@ -103,6 +109,43 @@ class _HandlerProbeContext:
         placeholders = len(re.findall(r"(?<!%)%(?!%)s", sql))
         if placeholders != len(values):
             raise AssertionError(f"{placeholders} placeholders != {len(values)} params")
+        insert_match = re.search(
+            r"\bINSERT\s+INTO\s+[A-Za-z_][\w.]*\s*\((?P<columns>[^()]*)\)\s+VALUES\s*\((?P<values>.*)\)\s*$",
+            sql,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        if insert_match:
+            def split_items(segment):
+                items = []
+                start = 0
+                depth = 0
+                quote = None
+                index = 0
+                while index < len(segment):
+                    char = segment[index]
+                    if quote:
+                        if char == quote and index + 1 < len(segment) and segment[index + 1] == quote:
+                            index += 2
+                            continue
+                        if char == quote:
+                            quote = None
+                    elif char in {"'", '"'}:
+                        quote = char
+                    elif char == "(":
+                        depth += 1
+                    elif char == ")":
+                        depth -= 1
+                    elif char == "," and depth == 0:
+                        items.append(segment[start:index].strip())
+                        start = index + 1
+                    index += 1
+                items.append(segment[start:].strip())
+                return items
+
+            columns = split_items(insert_match.group("columns"))
+            values_sql = split_items(insert_match.group("values"))
+            if len(columns) != len(values_sql):
+                raise AssertionError(f"{len(columns)} INSERT columns != {len(values_sql)} VALUES expressions")
         self.executed.append((sql, values))
 
     def attempt(self, sql, params=None, *, role, flush=True):
@@ -114,6 +157,22 @@ class _HandlerProbeContext:
 
     def one(self, sql, params=None):
         self.execute(sql, params)
+        if "snapshot_row" in sql:
+            return {"snapshot_row": True, "unavailable_without_payload": True}
+        if "before_state" in sql:
+            return {
+                "actor": "fixture-actor",
+                "actor_role": "auditor",
+                "action": "INSERT",
+                "entity_type": "core.matches",
+                "entity_id": "fixture-entity",
+                "before_state": {},
+                "after_state": {"fixture": True},
+                "happened_at": "2026-01-01T09:00:00+00:00",
+                "entry_hash": "sha256:" + "a" * 64,
+            }
+        if "entity_type = 'evaluation.official_results'" in sql:
+            return {"count": 2}
         if "gate_reason" in sql:
             return {"gate_reason": None, "immutable": True, "status": "FROZEN"}
         if "canonical_latest_update_at" in sql:
@@ -127,7 +186,7 @@ class _HandlerProbeContext:
         if "result_revision" in sql:
             return [
                 {"result_revision": 1, "supersedes_result_id": None},
-                {"result_revision": 2, "supersedes_result_id": "fixture"},
+                {"result_revision": 2, "supersedes_result_id": _id(self.case_id, "result:first")},
             ]
         return []
 
@@ -201,6 +260,32 @@ class RuntimeCaseExecutionTests(unittest.TestCase):
             )
         )
 
+    def test_expected_rejection_reads_psycopg_diagnostic_message_fields(self):
+        expected = {
+            "type": "trigger",
+            "sqlstates": ["23514"],
+            "message_tokens": ["OFFICIAL_RQSPF_HANDICAP_REQUIRED"],
+        }
+        error = _DbError("", "23514", message_primary="OFFICIAL_RQSPF_HANDICAP_REQUIRED")
+        self.assertTrue(match_expected_rejection(error, expected))
+
+    def test_unique_constraint_rejection_is_classified_from_driver_diagnostics(self):
+        binding = next(item for item in load_runtime_case_bindings(self.repo_root)["smoke"] if item.case_id == "SMOKE-02")
+        runner = object.__new__(RuntimeCaseHandlerRunner)
+        result = runner._evaluate(
+            binding,
+            {
+                "actual_outcome": "REJECT",
+                "error": _DbError("", "23505", "matches_data_date_official_match_no_key"),
+                "verification": {"original_only": True},
+            },
+            "REJECT",
+        )
+        self.assertEqual("PASS_EXPECTED_REJECT", result["status"])
+        self.assertTrue(result["expected_rejection_match"])
+        self.assertEqual("MATCH", result["expected_rejection_match_reason"])
+        self.assertEqual("unique_violation", result["error_class"])
+
     def test_legacy_generic_reject_is_blocked_and_matched_reject_is_explicit_pass(self):
         binding = next(item for item in load_runtime_case_bindings(self.repo_root)["enforcement"] if item.case_id == "NEG-08")
         generic = _normalize_adapter_result(
@@ -248,6 +333,46 @@ class RuntimeCaseExecutionTests(unittest.TestCase):
         self.assertTrue(any(statement.startswith("RELEASE SAVEPOINT") for statement in sql))
         self.assertGreaterEqual(connection.rollback_count, 2)
         self.assertEqual(0, connection.commit_count)
+
+    def test_case_context_restores_failed_savepoint_for_next_action(self):
+        connection = _Connection()
+        context = CaseContext(connection, "SMOKE-TEST", "unit-test-actor")
+        context.begin()
+        connection.fail_sql = "SELECT fixture_failure"
+        failed = context.attempt("SELECT fixture_failure", role="executor")
+        connection.fail_sql = None
+        recovered = context.attempt("SELECT 1", role="executor")
+        context.close()
+        self.assertFalse(failed.accepted)
+        self.assertEqual("23514", failed.error.sqlstate)
+        self.assertTrue(recovered.accepted)
+        sql = [item[0] for item in connection.executed]
+        self.assertTrue(any(statement.startswith("ROLLBACK TO SAVEPOINT") for statement in sql))
+        self.assertGreaterEqual(connection.rollback_count, 2)
+
+    def test_accept_postconditions_handle_native_driver_values(self):
+        context = _HandlerProbeContext()
+        runner = object.__new__(RuntimeCaseHandlerRunner)
+        for case_id, hook_name in (
+            ("SMOKE-03", "smoke_03_official_market_unavailable"),
+            ("SMOKE-09", "smoke_09_official_result_correction"),
+            ("SMOKE-19", "smoke_19_lifecycle_audit_coverage"),
+        ):
+            with self.subTest(case_id=case_id):
+                context.case_id = case_id
+                result = getattr(runner, hook_name)(context)
+                self.assertTrue(all(result["verification"].values()))
+
+    def test_tier_a_mismatch_fixture_reaches_pair_action_after_valid_lineage_setup(self):
+        context = _HandlerProbeContext()
+        context.case_id = "SMOKE-11"
+        runner = object.__new__(RuntimeCaseHandlerRunner)
+        result = runner.smoke_11_tier_a_pair_different_frozen_input_hashes(context)
+        executed_parameters = [value for _, params in context.executed for value in (params or ())]
+        self.assertTrue(any("evaluation.tier_a_samples" in sql for sql, _ in context.executed))
+        self.assertIn(_hash("SMOKE-11:declared-different-frozen-input"), executed_parameters)
+        self.assertNotIn(_id("SMOKE-11", "prediction:shadow-mismatch"), executed_parameters)
+        self.assertEqual("REJECT", result["actual_outcome"])
 
     def test_disposable_role_simulation_is_explicit_and_no_supabase_auth_is_faked(self):
         connection = _Connection()

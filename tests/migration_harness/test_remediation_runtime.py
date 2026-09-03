@@ -17,6 +17,7 @@ from tools.migration_harness.canonical_hash import (
     verify_candidate_hashes,
     write_candidate_hashes,
 )
+from tools.migration_harness.common import sha256_json
 from tools.migration_harness.connection import ConnectionSettings, PostgresConnectionAdapter
 from tools.migration_harness.models import ExecutionMode
 from tools.migration_harness.runtime_executor import RuntimeExecutor, default_disposable_target
@@ -103,6 +104,41 @@ class RemediationRuntimeTests(unittest.TestCase):
         self.assertEqual(0, first["pending_count"])
         self.assertEqual("PASS", first["dependency_status"])
         self.assertEqual(second, third)
+
+    def test_complete_candidate_history_prefix_validates_all_nine_rows(self):
+        manifest = json.loads(
+            (self.repo_root / "database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        candidates = manifest["candidates"]
+        rows = []
+        for index, entry in enumerate(candidates):
+            previous_hash = candidates[index - 1]["canonical_migration_hash"] if index else None
+            rows.append(
+                {
+                    "migration_id": entry["migration_id"],
+                    "sequence": entry["sequence"],
+                    "name": entry["name"],
+                    "migration_version": entry["migration_version"],
+                    "schema_contract_version": entry["schema_contract_version"],
+                    "migration_hash": entry["canonical_migration_hash"],
+                    "status": "APPLIED",
+                    "success": True,
+                    "partial_state": False,
+                    "prev_migration_hash": previous_hash,
+                    "chain_hash": sha256_json(
+                        {
+                            "migration_id": entry["migration_id"],
+                            "migration_hash": entry["canonical_migration_hash"],
+                            "prev_migration_hash": previous_hash,
+                        }
+                    ),
+                }
+            )
+        prefix, issue = RuntimeExecutor._validated_history_prefix(rows, candidates)
+        self.assertEqual(9, prefix)
+        self.assertIsNone(issue)
 
     def test_tampered_candidate_is_detected_without_changing_repository(self):
         with tempfile.TemporaryDirectory() as directory:

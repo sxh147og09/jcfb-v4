@@ -51,6 +51,27 @@ HASH_ALGORITHM = "SHA-256"
 MARKETS = ("spf", "rqspf", "total_goals", "exact_score", "half_full")
 ROLE_NAMES = {"anon", "authenticated", "service_role", "backend", "executor", "auditor"}
 
+POSTGRES_ERROR_CLASSES = {
+    "23503": "foreign_key_violation",
+    "23505": "unique_violation",
+    "23514": "check_violation",
+    "42501": "insufficient_privilege",
+    "42601": "syntax_error",
+    "55000": "object_not_in_prerequisite_state",
+}
+
+_DIAGNOSTIC_TEXT_FIELDS = (
+    "message_primary",
+    "message_detail",
+    "message_hint",
+    "schema_name",
+    "table_name",
+    "column_name",
+    "constraint_name",
+    "datatype_name",
+    "source_function",
+)
+
 
 class RuntimeCaseBlocked(RuntimeError):
     """Raised when the target cannot execute a governed case."""
@@ -94,16 +115,25 @@ def _sqlstate(exc: BaseException) -> str:
     for name in ("sqlstate", "pgcode"):
         value = getattr(exc, name, None)
         if value:
-            return str(value)
+            return str(value).strip().upper()
     diag = getattr(exc, "diag", None)
     value = getattr(diag, "sqlstate", None) if diag is not None else None
-    return str(value or "")
+    return str(value or "").strip().upper()
 
 
 def _constraint_name(exc: BaseException) -> str:
     diag = getattr(exc, "diag", None)
     value = getattr(diag, "constraint_name", None) if diag is not None else None
-    return str(value or "")
+    return str(value or "").strip()
+
+
+def _error_class(exc: Optional[BaseException]) -> Optional[str]:
+    if exc is None:
+        return None
+    sqlstate = _sqlstate(exc)
+    if not sqlstate:
+        return None
+    return POSTGRES_ERROR_CLASSES.get(sqlstate, f"sqlstate_{sqlstate.lower()}")
 
 
 def _private_error_text(exc: Optional[BaseException]) -> str:
@@ -119,11 +149,20 @@ def _private_error_text(exc: Optional[BaseException]) -> str:
             parts.append(str(current).lower())
         except Exception:
             pass
+        diag = getattr(current, "diag", None)
+        if diag is not None:
+            for field in _DIAGNOSTIC_TEXT_FIELDS:
+                try:
+                    value = getattr(diag, field, None)
+                except Exception:
+                    value = None
+                if value:
+                    parts.append(str(value).lower())
         current = current.__cause__ or current.__context__
     return " ".join(parts)
 
 
-def match_expected_rejection(exc: Optional[BaseException], expected: Mapping[str, Any]) -> bool:
+def _expected_rejection_match_reason(exc: Optional[BaseException], expected: Mapping[str, Any]) -> str:
     """Match a rejection against the governed SQL mechanism.
 
     SQLSTATE is mandatory.  If the contract names constraints, trigger names,
@@ -133,14 +172,18 @@ def match_expected_rejection(exc: Optional[BaseException], expected: Mapping[str
     stable error constants.
     """
 
-    if exc is None or not isinstance(expected, Mapping):
-        return False
-    sqlstates = {str(item) for item in expected.get("sqlstates", []) if item}
+    if exc is None:
+        return "DATABASE_ERROR_MISSING"
+    if not isinstance(expected, Mapping):
+        return "EXPECTED_MECHANISM_INVALID"
+    sqlstates = {str(item).strip().upper() for item in expected.get("sqlstates", []) if item}
     # A governed rejection must always identify a PostgreSQL SQLSTATE.  A
     # message-only or exception-class-only match would turn an unrelated
     # database error into a false PASS.
-    if not sqlstates or _sqlstate(exc) not in sqlstates:
-        return False
+    if not sqlstates:
+        return "SQLSTATE_RULE_MISSING"
+    if _sqlstate(exc) not in sqlstates:
+        return "SQLSTATE_MISMATCH"
     constraint = _constraint_name(exc).lower()
     text = _private_error_text(exc)
     constraints = [str(item).lower() for item in expected.get("constraints", []) if item]
@@ -148,19 +191,25 @@ def match_expected_rejection(exc: Optional[BaseException], expected: Mapping[str
     tokens = [str(item).lower() for item in expected.get("message_tokens", []) if item]
     trigger_names = [str(item).lower() for item in expected.get("trigger_names", []) if item]
     if constraints and not any(item == constraint for item in constraints):
-        return False
+        return "CONSTRAINT_MISMATCH"
     if prefixes and not any(constraint.startswith(item) for item in prefixes):
-        return False
+        return "CONSTRAINT_PREFIX_MISMATCH"
     # Trigger names are normally present in audit metadata rather than in the
     # PostgreSQL error itself.  The stable trigger error constants are the
     # enforceable runtime marker; accept the trigger family when a message
     # token proves the same branch.  A contract with trigger names but no
     # message token remains valid for an explicit constraint match only.
     if tokens and not any(item in text for item in tokens):
-        return False
+        return "MESSAGE_TOKEN_MISMATCH"
     if trigger_names and not (tokens or constraints or prefixes):
-        return False
-    return True
+        return "TRIGGER_MARKER_MISSING"
+    return "MATCH"
+
+
+def match_expected_rejection(exc: Optional[BaseException], expected: Mapping[str, Any]) -> bool:
+    """Return whether a rejection matches its SQLSTATE and stable mechanism marker."""
+
+    return _expected_rejection_match_reason(exc, expected) == "MATCH"
 
 
 class CaseContext:
@@ -1156,6 +1205,7 @@ class RuntimeCaseHandlerRunner:
         verification_pass = verification is True or (isinstance(verification, Mapping) and all(value is True for value in verification.values()))
         error = raw.get("error") if isinstance(raw.get("error"), BaseException) else None
         expected_mechanism = dict(binding.execution).get("expected_mechanism", {})
+        rejection_match_reason = _expected_rejection_match_reason(error, expected_mechanism) if expected == "REJECT" else None
         if expected == "ACCEPT":
             if actual != "ACCEPT":
                 status = "FAIL_UNEXPECTED_REJECT"
@@ -1166,7 +1216,7 @@ class RuntimeCaseHandlerRunner:
         else:
             if actual == "ACCEPT":
                 status = "FAIL_UNEXPECTED_ACCEPT"
-            elif not match_expected_rejection(error, expected_mechanism):
+            elif rejection_match_reason != "MATCH":
                 status = "FAIL_UNEXPECTED_REJECT"
             elif not verification_pass:
                 status = "FAIL_UNEXPECTED_REJECT"
@@ -1185,8 +1235,11 @@ class RuntimeCaseHandlerRunner:
             "observed_mechanism": raw.get("observed_mechanism", {}),
             "expected_mechanism": expected_mechanism,
             "verification": dict(verification) if isinstance(verification, Mapping) else verification,
+            "expected_rejection_match": rejection_match_reason == "MATCH" if expected == "REJECT" else None,
+            "expected_rejection_match_reason": rejection_match_reason,
             "error_sqlstate": _sqlstate(error) if error is not None else None,
             "error_constraint": _constraint_name(error) if error is not None else None,
+            "error_class": _error_class(error),
             "reason": raw.get("reason"),
             "hard_gate": bool(dict(binding.execution).get("hard_gate", False)),
             "advisor_status": dict(binding.execution).get("advisor_status"),
@@ -1242,8 +1295,8 @@ class RuntimeCaseHandlerRunner:
         case_id = ctx.case_id
         fixture = _core_fixture(ctx, case_id)
         attempt, snapshot_id = _official_snapshot(ctx, case_id, fixture["match_id"], unavailable="rqspf")
-        row = ctx.one("SELECT status, rqspf, market_availability->'rqspf'->>'available' AS available FROM market.official_odds_snapshots WHERE snapshot_id = %s", (snapshot_id,))
-        return self._accept("executor", {"snapshot_row": attempt.accepted and row.get("status") == "AVAILABLE", "unavailable_without_payload": row.get("rqspf") is None and str(row.get("available")).lower() == "false"}, observed={"postcondition": "explicit_unavailable_market"})
+        row = ctx.one("SELECT status = 'AVAILABLE' AS snapshot_row, (rqspf IS NULL AND (market_availability->'rqspf'->>'available')::boolean IS FALSE) AS unavailable_without_payload FROM market.official_odds_snapshots WHERE snapshot_id = %s", (snapshot_id,))
+        return self._accept("executor", {"snapshot_row": attempt.accepted and row.get("snapshot_row") is True, "unavailable_without_payload": row.get("unavailable_without_payload") is True}, observed={"postcondition": "explicit_unavailable_market"})
 
     def smoke_04_available_market_without_payload(self, ctx: CaseContext) -> Dict[str, Any]:
         case_id = ctx.case_id
@@ -1254,7 +1307,7 @@ class RuntimeCaseHandlerRunner:
         availability, reasons, payloads = _official_market_states()
         payloads["spf"] = None
         malformed = ctx.attempt(
-            "INSERT INTO market.official_odds_snapshots (snapshot_id, match_id, snapshot_kind, captured_at, source_timestamp, observed_at, ingested_at, availability_at, availability_time_state, availability_time_basis, source_is_official, source, source_type, source_reference, market_availability, market_unavailable_reason, spf, rqspf, total_goals, exact_score, half_full, snapshot_hash, payload_hash, provenance_hash, hash_algorithm, hash_profile, contract_version, schema_version, status, metadata) VALUES (%s, %s, 'CURRENT', %s, %s, %s, %s, %s, 'KNOWN', 'SOURCE_TIMESTAMP', true, 'runtime-official', 'OFFICIAL_FEED', %s, %s::jsonb, %s::jsonb, NULL, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s, %s, %s, 'SHA-256', %s, %s, %s, %s::jsonb)",
+            "INSERT INTO market.official_odds_snapshots (snapshot_id, match_id, snapshot_kind, captured_at, source_timestamp, observed_at, ingested_at, availability_at, availability_time_state, availability_time_basis, source_is_official, source, source_type, source_reference, market_availability, market_unavailable_reason, spf, rqspf, total_goals, exact_score, half_full, snapshot_hash, payload_hash, provenance_hash, hash_algorithm, hash_profile, contract_version, schema_version, status, metadata) VALUES (%s, %s, 'CURRENT', %s, %s, %s, %s, %s, 'KNOWN', 'SOURCE_TIMESTAMP', true, 'runtime-official', 'OFFICIAL_FEED', %s, %s::jsonb, %s::jsonb, NULL, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s, %s, %s, 'SHA-256', %s, %s, %s, 'AVAILABLE', %s::jsonb)",
             (_id(case_id, "malformed"), fixture["match_id"], CUTOFF, PRE_RUN, PRE_RUN, PRE_RUN, CUTOFF, f"runtime://{case_id}/malformed", availability, reasons, _json(payloads["rqspf"]), _json(payloads["total_goals"]), _json(payloads["exact_score"]), _json(payloads["half_full"]), _hash(f"{case_id}:malformed"), _hash(f"{case_id}:malformed"), _hash(f"{case_id}:malformed:prov"), HASH_PROFILE, CONTRACT_VERSION, SCHEMA_VERSION, _json({"fixture": True, "case_id": case_id})),
             role="executor",
         )
@@ -1266,7 +1319,7 @@ class RuntimeCaseHandlerRunner:
         fixture = _core_fixture(ctx, case_id)
         availability, reasons, payloads = _official_market_states(rqspf_handicap=False)
         attempt = ctx.attempt(
-            "INSERT INTO market.official_odds_snapshots (snapshot_id, match_id, snapshot_kind, captured_at, source_timestamp, observed_at, ingested_at, availability_at, availability_time_state, availability_time_basis, source_is_official, source, source_type, source_reference, market_availability, market_unavailable_reason, spf, rqspf, total_goals, exact_score, half_full, snapshot_hash, payload_hash, provenance_hash, hash_algorithm, hash_profile, contract_version, schema_version, status, metadata) VALUES (%s, %s, 'CURRENT', %s, %s, %s, %s, %s, 'KNOWN', 'SOURCE_TIMESTAMP', true, 'runtime-official', 'OFFICIAL_FEED', %s, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s, %s, %s, 'SHA-256', %s, %s, %s, %s::jsonb)",
+            "INSERT INTO market.official_odds_snapshots (snapshot_id, match_id, snapshot_kind, captured_at, source_timestamp, observed_at, ingested_at, availability_at, availability_time_state, availability_time_basis, source_is_official, source, source_type, source_reference, market_availability, market_unavailable_reason, spf, rqspf, total_goals, exact_score, half_full, snapshot_hash, payload_hash, provenance_hash, hash_algorithm, hash_profile, contract_version, schema_version, status, metadata) VALUES (%s, %s, 'CURRENT', %s, %s, %s, %s, %s, 'KNOWN', 'SOURCE_TIMESTAMP', true, 'runtime-official', 'OFFICIAL_FEED', %s, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s, %s, %s, 'SHA-256', %s, %s, %s, 'AVAILABLE', %s::jsonb)",
             (_id(case_id, "malformed"), fixture["match_id"], CUTOFF, PRE_RUN, PRE_RUN, PRE_RUN, CUTOFF, f"runtime://{case_id}/malformed", availability, reasons, _json(payloads["spf"]), _json(payloads["rqspf"]), _json(payloads["total_goals"]), _json(payloads["exact_score"]), _json(payloads["half_full"]), _hash(f"{case_id}:malformed"), _hash(f"{case_id}:malformed"), _hash(f"{case_id}:malformed:prov"), HASH_PROFILE, CONTRACT_VERSION, SCHEMA_VERSION, _json({"fixture": True, "case_id": case_id})),
             role="executor",
         )
@@ -1304,7 +1357,7 @@ class RuntimeCaseHandlerRunner:
         ctx.set_role("auditor")
         rows = ctx.rows("SELECT result_revision, supersedes_result_id, metadata FROM evaluation.official_results WHERE result_lineage_id = %s ORDER BY result_revision", (lineage,))
         audit = ctx.one("SELECT count(*) AS count FROM governance.audit_logs WHERE entity_type = 'evaluation.official_results'", ())
-        return self._accept("executor", {"revision_chain": len(rows) == 2 and rows[1].get("supersedes_result_id") == first, "predecessor_unchanged": rows[0].get("result_revision") == 1, "audit_row": int(audit.get("count", 0)) >= 2}, observed={"postcondition": "append_only_result_correction"})
+        return self._accept("executor", {"revision_chain": len(rows) == 2 and rows[1].get("supersedes_result_id") is not None and str(rows[1].get("supersedes_result_id")) == str(first), "predecessor_unchanged": rows[0].get("result_revision") == 1, "audit_row": int(audit.get("count", 0)) >= 2}, observed={"postcondition": "append_only_result_correction"})
 
     def smoke_10_review_with_mismatched_match_identity(self, ctx: CaseContext) -> Dict[str, Any]:
         case_id = ctx.case_id
@@ -1318,8 +1371,9 @@ class RuntimeCaseHandlerRunner:
         case_id = ctx.case_id
         fixture = _runtime_fixture(ctx, case_id, include_pair=True)
         mismatched = _hash(f"{case_id}:declared-different-frozen-input")
-        bad_prediction = _prediction(ctx, case_id, "shadow-mismatch", fixture, role="SHADOW", model_id=fixture["shadow_model_id"], frozen_input_hash=mismatched)
-        attempt = _tier_sample(ctx, case_id, fixture, shadow_prediction_id=bad_prediction["prediction_id"], frozen_input_hash=mismatched)
+        # Keep both predictions valid so the Tier A pair trigger, rather than
+        # the earlier prediction-lineage trigger, owns this negative case.
+        attempt = _tier_sample(ctx, case_id, fixture, frozen_input_hash=mismatched)
         return self._reject(attempt, {"pair_rejected": not attempt.accepted}, observed={"trigger": "v4_tier_a_pair_gate"})
 
     def smoke_12_experiment_forward_tier_a_member(self, ctx: CaseContext) -> Dict[str, Any]:
@@ -1344,7 +1398,7 @@ class RuntimeCaseHandlerRunner:
         first_model = _model(ctx, case_id, "active-a", role="PRODUCTION", status="PRODUCTION", active=True, family="jcfb-unique", channel="main")
         first = _engine(ctx, case_id, "active-a", first_model, role="PRODUCTION", status="PRODUCTION", active=True, family="jcfb-unique", channel="main")
         second = ctx.attempt(
-            "INSERT INTO governance.model_versions (model_version_id, model_family, model_name, model_version, major, minor, patch, revision, jcfb_version, role, canonical_output_channel, implementation_hash, config_version, config_hash, schema_version, dataset_version, migration_version, hash_algorithm, hash_profile, compatibility_level, status, is_canonical_active, effective_at, approval_reference, approved_at, contract_version, metadata) VALUES (%s, 'jcfb-unique', 'runtime-active-b', 'runtime-active-b@1.0.0', 1, 0, 0, 'r1', 'v4-runtime', 'PRODUCTION', 'main', %s, 'config@1.0.0', %s, %s, 'dataset@runtime', %s, 'SHA-256', %s, 'PATCH_COMPATIBLE', true, %s, 'runtime-approval:SMOKE-14-b', %s, %s, %s::jsonb)",
+            "INSERT INTO governance.model_versions (model_version_id, model_family, model_name, model_version, major, minor, patch, revision, jcfb_version, role, canonical_output_channel, implementation_hash, config_version, config_hash, schema_version, dataset_version, migration_version, hash_algorithm, hash_profile, compatibility_level, status, is_canonical_active, effective_at, approval_reference, approved_at, contract_version, metadata) VALUES (%s, 'jcfb-unique', 'runtime-active-b', 'runtime-active-b@1.0.0', 1, 0, 0, 'r1', 'v4-runtime', 'PRODUCTION', 'main', %s, 'config@1.0.0', %s, %s, 'dataset@runtime', %s, 'SHA-256', %s, 'PATCH_COMPATIBLE', 'PRODUCTION', true, %s, 'runtime-approval:SMOKE-14-b', %s, %s, %s::jsonb)",
             (_id(case_id, "active-b"), _hash(f"{case_id}:model-b"), _hash(f"{case_id}:config-b"), SCHEMA_VERSION, MIGRATION_VERSION, HASH_PROFILE, PRE_FROZEN, PRE_FROZEN, CONTRACT_VERSION, _json({"fixture": True, "case_id": case_id})),
             role="backend",
         )
@@ -1394,8 +1448,8 @@ class RuntimeCaseHandlerRunner:
         fixture = _core_fixture(ctx, ctx.case_id)
         ctx.set_role("auditor")
         row = ctx.one("SELECT actor, actor_role, action, entity_type, entity_id, before_state, after_state, happened_at, entry_hash FROM governance.audit_logs WHERE entity_type = 'core.matches' AND entity_id = %s ORDER BY audit_log_id DESC LIMIT 1", (fixture["match_id"],))
-        fields = ("actor", "actor_role", "action", "entity_type", "entity_id", "before_state", "after_state", "happened_at", "entry_hash")
-        return self._accept("auditor", {field: row.get(field) not in (None, "", {}) for field in fields}, observed={"audit_stream": "core.matches"})
+        scalar_fields = ("actor", "actor_role", "action", "entity_type", "entity_id", "happened_at", "entry_hash")
+        return self._accept("auditor", {field: row.get(field) not in (None, "") for field in scalar_fields} | {"before_state": isinstance(row.get("before_state"), Mapping), "after_state": isinstance(row.get("after_state"), Mapping) and bool(row.get("after_state"))}, observed={"audit_stream": "core.matches"})
 
     def smoke_20_v333_boundary_comparison(self, ctx: CaseContext) -> Dict[str, Any]:
         ctx.set_role("auditor")
@@ -1416,7 +1470,7 @@ class RuntimeCaseHandlerRunner:
         reasons_obj = json.loads(reasons)
         reasons_obj["spf"] = ""
         attempt = ctx.attempt(
-            "INSERT INTO market.official_odds_snapshots (snapshot_id, match_id, snapshot_kind, captured_at, source_timestamp, observed_at, ingested_at, availability_at, availability_time_state, availability_time_basis, source_is_official, source, source_type, source_reference, market_availability, market_unavailable_reason, spf, rqspf, total_goals, exact_score, half_full, snapshot_hash, payload_hash, provenance_hash, hash_algorithm, hash_profile, contract_version, schema_version, status, metadata) VALUES (%s, %s, 'CURRENT', %s, %s, %s, %s, %s, 'KNOWN', 'SOURCE_TIMESTAMP', true, 'runtime-official', 'OFFICIAL_FEED', %s, %s::jsonb, %s::jsonb, NULL, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s, %s, %s, 'SHA-256', %s, %s, %s, %s::jsonb)",
+            "INSERT INTO market.official_odds_snapshots (snapshot_id, match_id, snapshot_kind, captured_at, source_timestamp, observed_at, ingested_at, availability_at, availability_time_state, availability_time_basis, source_is_official, source, source_type, source_reference, market_availability, market_unavailable_reason, spf, rqspf, total_goals, exact_score, half_full, snapshot_hash, payload_hash, provenance_hash, hash_algorithm, hash_profile, contract_version, schema_version, status, metadata) VALUES (%s, %s, 'CURRENT', %s, %s, %s, %s, %s, 'KNOWN', 'SOURCE_TIMESTAMP', true, 'runtime-official', 'OFFICIAL_FEED', %s, %s::jsonb, %s::jsonb, NULL, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s, %s, %s, 'SHA-256', %s, %s, %s, 'AVAILABLE', %s::jsonb)",
             (_id("NEG-09", "malformed"), fixture["match_id"], CUTOFF, PRE_RUN, PRE_RUN, PRE_RUN, CUTOFF, "runtime://NEG-09/malformed", _json(availability_obj), _json(reasons_obj), _json(payloads["rqspf"]), _json(payloads["total_goals"]), _json(payloads["exact_score"]), _json(payloads["half_full"]), _hash("NEG-09:malformed"), _hash("NEG-09:malformed"), _hash("NEG-09:malformed:prov"), HASH_PROFILE, CONTRACT_VERSION, SCHEMA_VERSION, _json({"fixture": True})),
             role="executor",
         )
@@ -1468,7 +1522,7 @@ class RuntimeCaseHandlerRunner:
         fixture = _core_fixture(ctx, "NEG-22")
         availability, reasons, payloads = _official_market_states(missing_state_field="spf")
         attempt = ctx.attempt(
-            "INSERT INTO market.official_odds_snapshots (snapshot_id, match_id, snapshot_kind, captured_at, source_timestamp, observed_at, ingested_at, availability_at, availability_time_state, availability_time_basis, source_is_official, source, source_type, source_reference, market_availability, market_unavailable_reason, spf, rqspf, total_goals, exact_score, half_full, snapshot_hash, payload_hash, provenance_hash, hash_algorithm, hash_profile, contract_version, schema_version, status, metadata) VALUES (%s, %s, 'CURRENT', %s, %s, %s, %s, %s, 'KNOWN', 'SOURCE_TIMESTAMP', true, 'runtime-official', 'OFFICIAL_FEED', %s, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s, %s, %s, 'SHA-256', %s, %s, %s, %s::jsonb)",
+            "INSERT INTO market.official_odds_snapshots (snapshot_id, match_id, snapshot_kind, captured_at, source_timestamp, observed_at, ingested_at, availability_at, availability_time_state, availability_time_basis, source_is_official, source, source_type, source_reference, market_availability, market_unavailable_reason, spf, rqspf, total_goals, exact_score, half_full, snapshot_hash, payload_hash, provenance_hash, hash_algorithm, hash_profile, contract_version, schema_version, status, metadata) VALUES (%s, %s, 'CURRENT', %s, %s, %s, %s, %s, 'KNOWN', 'SOURCE_TIMESTAMP', true, 'runtime-official', 'OFFICIAL_FEED', %s, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s::jsonb, %s, %s, %s, 'SHA-256', %s, %s, %s, 'AVAILABLE', %s::jsonb)",
             (_id("NEG-22", "unknown"), fixture["match_id"], CUTOFF, PRE_RUN, PRE_RUN, PRE_RUN, CUTOFF, "runtime://NEG-22/unknown", availability, reasons, _json(payloads["spf"]), _json(payloads["rqspf"]), _json(payloads["total_goals"]), _json(payloads["exact_score"]), _json(payloads["half_full"]), _hash("NEG-22:unknown"), _hash("NEG-22:unknown"), _hash("NEG-22:unknown:prov"), HASH_PROFILE, CONTRACT_VERSION, SCHEMA_VERSION, _json({"fixture": True})),
             role="executor",
         )
