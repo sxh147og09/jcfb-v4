@@ -253,7 +253,13 @@ for ($i = 0; $i -lt $migrationFiles.Count; $i++) {
     }
 }
 
-foreach ($sqlFile in @(Get-ChildItem -LiteralPath (Repo-Path 'database') -Recurse -File -Filter '*.sql')) {
+# This validator owns the design artifacts only. Runtime candidates have a different contract and are validated by validate_v4_runtime_candidates.ps1;
+# do not make their executable SQL satisfy the design-only marker check.
+$designSqlFiles = @(
+    Get-ChildItem -LiteralPath (Repo-Path 'database/schema') -Recurse -File -Filter '*.sql'
+    Get-ChildItem -LiteralPath (Repo-Path 'database/migrations/v4') -Recurse -File -Filter '*.sql'
+)
+foreach ($sqlFile in $designSqlFiles) {
     $sqlText = Get-Content -LiteralPath $sqlFile.FullName -Raw -Encoding utf8
     if (-not $sqlText.StartsWith('-- DESIGN ONLY - DO NOT APPLY')) { Add-Failure "SQL without design-only marker: $($sqlFile.FullName)" }
 }

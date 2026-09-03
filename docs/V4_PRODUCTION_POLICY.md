@@ -8,6 +8,12 @@ This policy defines the only formal Production path for JCFB V4. It implements t
 
 This policy describes governance and evidence requirements. It does not publish a model, select parameters, run a prediction, or implement a database.
 
+## 1A. Production target identity is a separate gate
+
+The named Production target is recorded in [`config/migration_harness/v4_production_target_identity.json`](../config/migration_harness/v4_production_target_identity.json). The contract uses the Supabase `project_ref` as the unique identity key and records the approved region, PostgreSQL major version, role, and binding basis without storing credentials.
+
+Target binding does not equal Production apply approval. A `BOUND_APPROVED` target identity only removes target ambiguity; it does not authorize a schema apply, a Production database write, BATCH-04, V4-018, or V4-019. The hard block and explicit Production Apply Approval gate remain in force.
+
 ## 2. Production is the sole canonical source
 
 PRODUCTION is the only formal prediction source and the only role that may:
@@ -142,3 +148,4 @@ Operationally, the active serving pointer may be cut back to the previous approv
 - docs/V4_VERSIONING_STANDARD.md
 - docs/V4_INCIDENT_POLICY.md
 - docs/V4_ARCHITECTURE_BLUEPRINT.md
+- docs/V4_PRODUCTION_TARGET_BINDING.md

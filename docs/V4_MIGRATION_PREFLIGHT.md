@@ -6,13 +6,16 @@ Status: V4-011 COMPLETE (DESIGN-ONLY; PREFLIGHT NOT RUN)
 
 Preflight is a deployment gate, not a best-effort checklist. It runs against the explicitly named target and produces an attributed result for every critical item. Any critical failure is `BLOCKED`; the executor must not continue to the next migration.
 
-This repository run did not contact a database. Every target-dependent item below is `NOT_RUN` for V4-011.
+This repository run did not contact a database. The separate Production
+target binding contract can make the target identity known, but it does not
+complete any target-dependent preflight item. Every live Supabase check below
+remains `NOT_RUN` until its read-only evidence is supplied.
 
 ## 2. Required preflight checks
 
 | ID | Check | Required evidence | Failure outcome |
 |---|---|---|---|
-| PF-01 | Target project identity | Human-confirmed Supabase project/environment/ref; no secret value | `BLOCKED` if absent, ambiguous, or wrong environment |
+| PF-01 | Target project identity | Human-confirmed Supabase project/environment/ref; no secret value; binding contract identity must match | `BLOCKED` if absent, ambiguous, or wrong environment |
 | PF-02 | Database version | `server_version_num`, major version, provider/runtime | `BLOCKED` if outside approved compatibility range |
 | PF-03 | Required extensions | Availability/owner/version for `pgcrypto` or approved UUIDv7 provider; no silent assumption | `BLOCKED` if unavailable or unapproved |
 | PF-04 | Security-invoker support | Target version proves `security_invoker=true`, or approved old-version fallback | `BLOCKED` if neither path is proven |
@@ -54,6 +57,13 @@ overall_status = PRECHECK_PASS | BLOCKED
 ```
 
 The report contains references and hashes, not tokens, passwords, service keys, database URLs, or cookies. `NOT_RUN` is not a pass. An unresolved check remains `BLOCKED`.
+
+The binding artifact at
+`config/migration_harness/v4_production_target_identity.json` is identity
+evidence only; target identity is known from the contract, not from a live
+database check. It does not turn the Supabase Preflight Plan into `PASS` and
+does not replace the security/advisor snapshot, schema baseline/diff, history,
+RLS, grant, or partial-apply checks.
 
 ## 4. First-deployment stop conditions
 

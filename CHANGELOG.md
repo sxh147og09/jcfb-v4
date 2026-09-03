@@ -1,5 +1,12 @@
 # Changelog
 
+## JCFB V4 Production Target Binding 1.0
+
+- Bound the sole non-secret Production target identity to Supabase project ref `icndieflfvydixtehgzu`, region `us-west-2`, and PostgreSQL major `17` after explicit human confirmation.
+- Added exactly-one-Production, project-ref format, disposable/staging isolation, no-secret, and explicit-apply-approval validators plus an identity-only Production Readiness input.
+- Preserved the Production hard block; no Production/Supabase write, BATCH-04 execution, V4-018/V4-019 completion, or V3.3.3 change occurred.
+- Scoped the legacy design validator to `database/schema` and `database/migrations/v4`; runtime candidates remain under their separate candidate validator.
+
 ## V4-016 / V4-017 — BATCH-03 Staging Readiness & Migration Acceptance Package
 
 - Added the three-environment staging/disposable target readiness contract with fail-closed states, explicit identity/isolation/reset/teardown/retention rules, environment-only secret references, and a Production hard block.

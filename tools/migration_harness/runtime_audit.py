@@ -16,6 +16,7 @@ from .runtime_executor import RuntimeEvidenceError, RuntimeExecutor, default_dis
 from .runtime_tests import validate_runtime_case_wiring
 from .security import secret_scan
 from .models import ExecutionMode
+from .production_target import production_target_binding_report, run_production_target_cross_doc_consistency
 
 
 REQUIRED_FILES = (
@@ -35,6 +36,12 @@ REQUIRED_FILES = (
     "docs/V4_CANONICAL_MIGRATION_HASH.md",
     "docs/V4_RUNTIME_EXECUTOR.md",
     "docs/V4_PRE_BATCH_04_LOCAL_EXECUTION.md",
+    "config/migration_harness/v4_production_target_identity.json",
+    "config/migration_harness/v4_production_target_identity.schema.json",
+    "tools/migration_harness/production_target.py",
+    "docs/V4_PRODUCTION_TARGET_BINDING.md",
+    "scripts/validate_v4_production_target_binding.ps1",
+    "tests/migration_harness/test_production_target_binding.py",
     "requirements-v4-runtime.txt",
 )
 
@@ -161,6 +168,8 @@ def run_remediation_self_audit(repo_root: Path) -> Dict[str, Any]:
     secrets = secret_scan(root)
     git = _git_status(root)
     design = _design_files_untouched(root)
+    binding = production_target_binding_report(root)
+    cross_doc = run_production_target_cross_doc_consistency(root)
     checks = {
         "required_files": _required_files(root),
         "canonical_hashes": {
@@ -191,6 +200,8 @@ def run_remediation_self_audit(repo_root: Path) -> Dict[str, Any]:
         "driver_strategy": driver_status(),
         "storage_policy": _storage_policy(root),
         "design_migrations_untouched": design,
+        "production_target_binding": binding,
+        "production_target_cross_doc_consistency": cross_doc,
         "secret_scan": secrets,
         "git": git,
     }
@@ -202,6 +213,8 @@ def run_remediation_self_audit(repo_root: Path) -> Dict[str, Any]:
         checks["production_hard_block"]["status"] == "PASS",
         checks["storage_policy"]["status"] == "PASS",
         checks["design_migrations_untouched"]["status"] == "PASS",
+        checks["production_target_binding"].get("status") == "PASS",
+        checks["production_target_cross_doc_consistency"].get("status") == "PASS",
         secrets.get("status") == "PASS",
     )
     return {

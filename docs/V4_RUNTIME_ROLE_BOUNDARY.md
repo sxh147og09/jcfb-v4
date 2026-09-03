@@ -37,6 +37,14 @@ EXPERIMENT cannot enter a formal public projection, cannot count as a Forward Ti
 
 The role field is mandatory for every formal run. No role may be inferred from a directory, branch, process name, or output filename.
 
+The deployment target identity is a separate environment contract. For the
+bound Production target, `project_ref` is the unique identity key and
+`role=PRODUCTION` must agree with the named environment. `BOUND_APPROVED`
+means that the target identity was explicitly approved; it does not grant
+Production schema-apply or database-write permission. The three-environment
+binding and its fail-closed apply gate are recorded in
+docs/V4_PRODUCTION_TARGET_BINDING.md.
+
 ## 3. Runtime identity envelope
 
 Every formal run preserves, at minimum:
@@ -151,3 +159,4 @@ This boundary applies only to JCFB V4. It does not authorize any change to JCFB 
 - docs/V4_VERSIONING_STANDARD.md
 - docs/V4_VERSION_IDENTITY_CONTRACT.md
 - docs/V4_ARCHITECTURE_BLUEPRINT.md
+- docs/V4_PRODUCTION_TARGET_BINDING.md

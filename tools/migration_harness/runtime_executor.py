@@ -20,6 +20,7 @@ from .models import ExecutionMode
 from .runtime_tests import PostgresRuntimeCaseAdapter, run_runtime_cases, validate_runtime_case_wiring
 from .runtime_schema import collect_runtime_schema_checks
 from .target import validate_target_descriptor
+from .production_target import production_target_binding_report
 
 
 RUNTIME_EXECUTOR_CONTRACT_VERSION = "v4-runtime-executor@1.0.0"
@@ -1531,6 +1532,16 @@ def review_runtime_evidence(repo_root: Path, report_dir: Optional[Path] = None) 
         if code not in blocking_reasons:
             blocking_reasons.append(code)
 
+    production_binding = production_target_binding_report(root)
+    binding_known = production_binding.get("production_target_identity") == "KNOWN"
+    checks["production_target_identity"] = {
+        "status": "PASS" if binding_known else "BLOCKED",
+        "identity": production_binding.get("production_target"),
+        "source": production_binding.get("source"),
+    }
+    if not binding_known:
+        block("BLOCKED_PRODUCTION_TARGET_BINDING")
+
     pointer_path = directory / RUNTIME_REPORT_POINTER_FILENAME
     pointer: Optional[Dict[str, Any]] = None
     try:
@@ -1627,6 +1638,12 @@ def review_runtime_evidence(repo_root: Path, report_dir: Optional[Path] = None) 
         "status": "PASS" if not blocking_reasons else "BLOCKED",
         "blocking_reasons": sorted(blocking_reasons),
         "checks": checks,
+        "production_target_identity": production_binding.get("production_target_identity", "FAIL"),
+        "production_target_binding": production_binding,
+        "supabase_preflight_plan": production_binding.get("supabase_preflight_plan"),
+        "production_apply_gate": production_binding.get("production_apply_gate"),
+        "production_apply_approval_required": True,
+        "production_apply_allowed": False,
         "latest": {
             "path": pointer_path.as_posix(),
             "run_id": pointer.get("run_id") if pointer else None,

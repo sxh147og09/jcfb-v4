@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "v4-production-target-identity@1.0.0",
+  "title": "JCFB V4 production target identity binding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "$id",
+    "contract_version",
+    "contract_state",
+    "scope",
+    "identity_primary_key",
+    "targets",
+    "production_apply_gate",
+    "secret_policy"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "$id": {
+      "const": "v4-production-target-identity@1.0.0"
+    },
+    "contract_version": {
+      "const": "v4-production-target-identity@1.0.0"
+    },
+    "contract_state": {
+      "const": "ACTIVE"
+    },
+    "scope": {
+      "const": "JCFB_V4_PRODUCTION_TARGET_BINDING"
+    },
+    "identity_primary_key": {
+      "const": "project_ref"
+    },
+    "targets": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/target"
+      }
+    },
+    "production_apply_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hard_block_preserved",
+        "explicit_approval_required",
+        "target_binding_authorizes_apply",
+        "approval_state",
+        "approval_scope"
+      ],
+      "properties": {
+        "hard_block_preserved": {
+          "const": true
+        },
+        "explicit_approval_required": {
+          "const": true
+        },
+        "target_binding_authorizes_apply": {
+          "const": false
+        },
+        "approval_state": {
+          "const": "PENDING_PRODUCTION_APPLY_APPROVAL"
+        },
+        "approval_scope": {
+          "const": "EXPLICIT_PRODUCTION_APPLY_APPROVAL"
+        }
+      }
+    },
+    "secret_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "secrets_stored",
+        "raw_values_allowed",
+        "credential_source"
+      ],
+      "properties": {
+        "secrets_stored": {
+          "const": false
+        },
+        "raw_values_allowed": {
+          "const": false
+        },
+        "credential_source": {
+          "const": "PROCESS_ENVIRONMENT_ONLY"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "environment",
+        "target_id",
+        "provider",
+        "project_ref",
+        "region",
+        "postgres_major",
+        "role",
+        "binding_state"
+      ],
+      "properties": {
+        "environment": {
+          "enum": ["DISPOSABLE_LOCAL", "STAGING", "PRODUCTION"]
+        },
+        "target_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"
+        },
+        "provider": {
+          "type": "string",
+          "enum": [
+            "LOCAL_POSTGRES",
+            "DOCKER_POSTGRES",
+            "STAGING_POSTGRES",
+            "STAGING_SUPABASE",
+            "Supabase"
+          ]
+        },
+        "project_ref": {
+          "type": ["string", "null"]
+        },
+        "region": {
+          "type": ["string", "null"]
+        },
+        "postgres_major": {
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "role": {
+          "enum": ["DISPOSABLE_LOCAL", "STAGING", "PRODUCTION"]
+        },
+        "binding_state": {
+          "enum": ["NOT_BOUND", "BOUND_APPROVED"]
+        },
+        "approved_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval_basis": {
+          "type": "string",
+          "minLength": 1
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "environment": {
+                "const": "PRODUCTION"
+              }
+            }
+          },
+          "then": {
+            "required": ["approved_by", "approval_basis"],
+            "properties": {
+              "provider": {
+                "const": "Supabase"
+              },
+              "role": {
+                "const": "PRODUCTION"
+              },
+              "binding_state": {
+                "const": "BOUND_APPROVED"
+              },
+              "project_ref": {
+                "type": "string",
+                "pattern": "^[a-z0-9]{20}$"
+              },
+              "region": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)+$"
+              },
+              "postgres_major": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "environment": {
+                "const": "STAGING"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "role": {
+                "const": "STAGING"
+              },
+              "binding_state": {
+                "const": "NOT_BOUND"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "environment": {
+                "const": "DISPOSABLE_LOCAL"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "role": {
+                "const": "DISPOSABLE_LOCAL"
+              },
+              "binding_state": {
+                "const": "NOT_BOUND"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

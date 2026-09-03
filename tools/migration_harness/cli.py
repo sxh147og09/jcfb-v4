@@ -23,6 +23,7 @@ from .runtime_executor import (
     write_runtime_report,
 )
 from .runtime_audit import run_remediation_self_audit
+from .production_target import build_production_readiness_review, production_target_binding_report
 from .schema_diff import compare_schema_snapshot, load_expected_snapshot
 from .smoke import load_smoke_catalog, runtime_pending_smoke_report
 
@@ -68,6 +69,8 @@ def build_parser() -> argparse.ArgumentParser:
     runtime.add_argument("--write-report", action="store_true", help="write the redacted JSON and Markdown report under .runtime/reports")
     sub.add_parser("runtime-review", help="verify latest runtime evidence against the current Git HEAD")
     sub.add_parser("remediation-audit", help="run the static PRE-BATCH-04 remediation self-audit without a connector")
+    sub.add_parser("production-binding", help="validate the checked-in non-secret Production target binding")
+    sub.add_parser("production-readiness", help="emit the identity-only Production Readiness review input")
     return parser
 
 
@@ -139,6 +142,10 @@ def main(argv=None) -> int:
         value = review_runtime_evidence(repo_root)
     elif args.command == "remediation-audit":
         value = run_remediation_self_audit(repo_root)
+    elif args.command == "production-binding":
+        value = production_target_binding_report(repo_root)
+    elif args.command == "production-readiness":
+        value = build_production_readiness_review(repo_root)
     else:
         report_path = Path(args.report_json)
         value = render_batch_03_markdown(json.loads(report_path.read_text(encoding="utf-8")))

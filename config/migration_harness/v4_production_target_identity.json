@@ -1,0 +1,55 @@
+{
+  "$schema": "./v4_production_target_identity.schema.json",
+  "$id": "v4-production-target-identity@1.0.0",
+  "contract_version": "v4-production-target-identity@1.0.0",
+  "contract_state": "ACTIVE",
+  "scope": "JCFB_V4_PRODUCTION_TARGET_BINDING",
+  "identity_primary_key": "project_ref",
+  "targets": [
+    {
+      "environment": "DISPOSABLE_LOCAL",
+      "target_id": "jcfb-v4-disposable-runtime",
+      "provider": "LOCAL_POSTGRES",
+      "project_ref": "jcfb-v4-disposable-runtime",
+      "region": null,
+      "postgres_major": 16,
+      "role": "DISPOSABLE_LOCAL",
+      "binding_state": "NOT_BOUND"
+    },
+    {
+      "environment": "STAGING",
+      "target_id": "pending-staging-target",
+      "provider": "STAGING_SUPABASE",
+      "project_ref": null,
+      "region": null,
+      "postgres_major": null,
+      "role": "STAGING",
+      "binding_state": "NOT_BOUND"
+    },
+    {
+      "environment": "PRODUCTION",
+      "target_id": "jcfb-v4-production-supabase",
+      "provider": "Supabase",
+      "project_ref": "icndieflfvydixtehgzu",
+      "region": "us-west-2",
+      "postgres_major": 17,
+      "role": "PRODUCTION",
+      "binding_state": "BOUND_APPROVED",
+      "approved_by": "human_approver",
+      "approval_basis": "explicit user confirmation in ChatGPT",
+      "display_name": "1347427215@qq.com's Project"
+    }
+  ],
+  "production_apply_gate": {
+    "hard_block_preserved": true,
+    "explicit_approval_required": true,
+    "target_binding_authorizes_apply": false,
+    "approval_state": "PENDING_PRODUCTION_APPLY_APPROVAL",
+    "approval_scope": "EXPLICIT_PRODUCTION_APPLY_APPROVAL"
+  },
+  "secret_policy": {
+    "secrets_stored": false,
+    "raw_values_allowed": false,
+    "credential_source": "PROCESS_ENVIRONMENT_ONLY"
+  }
+}
