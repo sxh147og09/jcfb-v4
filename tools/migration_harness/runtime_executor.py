@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import shutil
 import subprocess
 import uuid
 from datetime import datetime, timezone
@@ -39,6 +41,15 @@ AUTH_FAILED = "AUTH_FAILED"
 DRIVER_MISSING = "DRIVER_MISSING"
 TARGET_IDENTITY_MISMATCH = "TARGET_IDENTITY_MISMATCH"
 SQL_APPLY_FAILED = "SQL_APPLY_FAILED"
+_GIT_HEAD_RE = re.compile(r"[0-9a-fA-F]{40,64}\Z")
+
+
+class RuntimeEvidenceError(RuntimeError):
+    """A runtime evidence identity could not be captured safely."""
+
+    def __init__(self, code: str, message: str):
+        self.code = code
+        super().__init__(message)
 
 
 def _now_iso() -> str:
@@ -64,20 +75,107 @@ def _compact_report_time(value: str) -> str:
     return parsed.strftime("%Y%m%dT%H%M%SZ")
 
 
-def _git_head(repo_root: Path) -> Optional[str]:
+def _resolve_git_executable() -> str:
+    """Resolve Git from the current process PATH on every runtime start."""
+
+    executable = shutil.which("git") or shutil.which("git.exe")
+    if not executable:
+        raise RuntimeEvidenceError(
+            "GIT_EXECUTABLE_UNAVAILABLE",
+            "The Git executable could not be resolved from PATH.",
+        )
+    return executable
+
+
+def _run_git_command(repo_root: Path, executable: str, *arguments: str) -> str:
     try:
         completed = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=str(repo_root),
+            [executable, "-C", str(repo_root), *arguments],
             capture_output=True,
             text=True,
-            check=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
             timeout=5,
         )
-    except (OSError, subprocess.SubprocessError):
-        return None
-    value = completed.stdout.strip()
-    return value if re.fullmatch(r"[0-9a-fA-F]{7,64}", value) else None
+    except FileNotFoundError as exc:
+        raise RuntimeEvidenceError(
+            "GIT_EXECUTABLE_UNAVAILABLE",
+            "The resolved Git executable could not be started.",
+        ) from exc
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise RuntimeEvidenceError(
+            "GIT_COMMAND_FAILED",
+            "A Git metadata command could not be completed.",
+        ) from exc
+    if completed.returncode != 0:
+        raise RuntimeEvidenceError(
+            "GIT_COMMAND_FAILED",
+            "A Git metadata command returned a nonzero status.",
+        )
+    return completed.stdout.strip()
+
+
+def capture_git_metadata(repo_root: Path) -> Dict[str, Any]:
+    """Capture immutable repository identity before any runtime connector call.
+
+    Every command is fail-closed.  In particular, a missing or malformed HEAD
+    is never converted to ``None`` and allowed to reach a valid report.
+    """
+
+    try:
+        root = Path(repo_root).resolve()
+    except OSError as exc:
+        raise RuntimeEvidenceError(
+            "GIT_REPO_ROOT_UNAVAILABLE",
+            "The runtime repository root could not be resolved.",
+        ) from exc
+
+    executable = _resolve_git_executable()
+    reported_root = _run_git_command(root, executable, "rev-parse", "--show-toplevel")
+    if not reported_root:
+        raise RuntimeEvidenceError(
+            "GIT_REPO_ROOT_UNAVAILABLE",
+            "Git did not report a repository root.",
+        )
+    try:
+        actual_root = Path(reported_root).resolve()
+    except OSError as exc:
+        raise RuntimeEvidenceError(
+            "GIT_REPO_ROOT_UNAVAILABLE",
+            "The Git-reported repository root could not be resolved.",
+        ) from exc
+    if os.path.normcase(str(actual_root)) != os.path.normcase(str(root)):
+        raise RuntimeEvidenceError(
+            "GIT_REPO_ROOT_MISMATCH",
+            "The supplied runtime root is not the Git repository root.",
+        )
+
+    head = _run_git_command(root, executable, "rev-parse", "HEAD")
+    if not _GIT_HEAD_RE.fullmatch(head):
+        raise RuntimeEvidenceError(
+            "GIT_HEAD_INVALID",
+            "Git returned no valid commit identity for HEAD.",
+        )
+
+    branch = _run_git_command(root, executable, "branch", "--show-current") or "DETACHED_HEAD"
+    status = _run_git_command(root, executable, "status", "--porcelain", "--untracked-files=all")
+    return {
+        "git_head": head.lower(),
+        "git_branch": branch,
+        "working_tree_clean": status == "",
+        "repo_root": actual_root.as_posix(),
+    }
+
+
+def _git_head(repo_root: Path) -> str:
+    """Backward-compatible single-field accessor with fail-closed behavior."""
+
+    return str(capture_git_metadata(repo_root)["git_head"])
+
+
+def _new_runtime_run_id(started_at: str) -> str:
+    return f"prebatch04-{_compact_report_time(started_at)}-{uuid.uuid4().hex}"
 
 
 def _safe_report_count(value: Any, default: int = 0) -> int:
@@ -120,6 +218,9 @@ def _materialize_runtime_report(
     started_at: Optional[str] = None,
     finished_at: Optional[str] = None,
     git_head: Optional[str] = None,
+    git_branch: Optional[str] = None,
+    working_tree_clean: Optional[bool] = None,
+    recorded_repo_root: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Attach immutable identity to one report write.
 
@@ -131,18 +232,42 @@ def _materialize_runtime_report(
 
     started = started_at or _now_iso()
     finished = finished_at or _now_iso()
-    actual_run_id = run_id or f"prebatch04-{_compact_report_time(started)}-{uuid.uuid4().hex}"
+    actual_run_id = run_id or _new_runtime_run_id(started)
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{7,127}", actual_run_id):
         raise ValueError("Runtime report run_id is not a safe path component")
+    if not isinstance(git_head, str) or not _GIT_HEAD_RE.fullmatch(git_head):
+        raise RuntimeEvidenceError(
+            "GIT_HEAD_MISSING",
+            "Runtime evidence cannot be written without a valid Git HEAD.",
+        )
+    if not isinstance(git_branch, str) or not git_branch.strip():
+        raise RuntimeEvidenceError(
+            "GIT_BRANCH_MISSING",
+            "Runtime evidence cannot be written without a Git branch identity.",
+        )
+    if not isinstance(working_tree_clean, bool):
+        raise RuntimeEvidenceError(
+            "GIT_WORKING_TREE_STATUS_MISSING",
+            "Runtime evidence cannot be written without a working-tree status.",
+        )
+    if not isinstance(recorded_repo_root, str) or not recorded_repo_root.strip():
+        raise RuntimeEvidenceError(
+            "GIT_REPO_ROOT_MISSING",
+            "Runtime evidence cannot be written without a repository root.",
+        )
     value = dict(report)
     value.update(
         {
             "run_id": actual_run_id,
             "started_at": started,
             "finished_at": finished,
-            "git_head": git_head if git_head is not None else _git_head(repo_root),
+            "git_head": git_head.lower(),
+            "git_branch": git_branch,
+            "working_tree_clean": working_tree_clean,
+            "repo_root": recorded_repo_root,
         }
     )
+    value["runtime_status"] = value.get("status")
     runtime = value.get("runtime_validation") if isinstance(value.get("runtime_validation"), Mapping) else {}
     value["smoke_passed"] = _safe_report_count(runtime.get("passed_smoke"), 0)
     value["enforcement_passed"] = _safe_report_count(runtime.get("passed_enforcement"), 0)
@@ -484,11 +609,61 @@ class RuntimeExecutor:
     ) -> Dict[str, Any]:
         if isinstance(mode, str):
             mode = ExecutionMode(mode)
+        started_at = self.clock()
+        run_id = _new_runtime_run_id(started_at)
+        try:
+            git_metadata = capture_git_metadata(self.repo_root)
+        except RuntimeEvidenceError as exc:
+            plan = self.plan(mode=mode, target=target)
+            plan = _blocking_report(plan, exc.code)
+            plan["error"] = {
+                "error_code": exc.code,
+                "error_type": type(exc).__name__,
+                "phase": "RUNTIME_EVIDENCE",
+                "connector_status": CONNECTOR_NOT_INVOKED,
+            }
+            plan["runtime_evidence"] = {
+                "status": "BLOCKED",
+                "error_code": exc.code,
+            }
+            plan.update(
+                {
+                    "run_id": run_id,
+                    "started_at": started_at,
+                    "finished_at": self.clock(),
+                    "git_head": None,
+                    "git_branch": None,
+                    "working_tree_clean": None,
+                    "repo_root": self.repo_root.as_posix(),
+                    "runtime_status": "BLOCKED",
+                }
+            )
+            _set_failure_taxonomy(plan, exc.code, "RUNTIME_EVIDENCE")
+            return plan
+
+        identity = {
+            "run_id": run_id,
+            "started_at": started_at,
+            **git_metadata,
+        }
+
+        def finalize(value: Dict[str, Any]) -> Dict[str, Any]:
+            value.update(identity)
+            value["finished_at"] = self.clock()
+            value["runtime_status"] = value.get("status")
+            value["runtime_evidence"] = {
+                "status": "PASS",
+                "git_head_source": "git rev-parse HEAD",
+                "git_branch_source": "git branch --show-current",
+                "working_tree_source": "git status --porcelain --untracked-files=all",
+            }
+            return value
+
         plan = self.plan(mode=mode, target=target)
         if mode != ExecutionMode.APPLY or plan["blocking_reasons"]:
-            return plan
+            return finalize(plan)
         if target is None or target.get("environment") not in ALLOWED_TARGET_ENVIRONMENTS:
-            return _blocking_report(plan, "PRODUCTION_TARGET_HARD_BLOCK")
+            return finalize(_blocking_report(plan, "PRODUCTION_TARGET_HARD_BLOCK"))
 
         try:
             settings = connection_settings or ConnectionSettings.from_environment()
@@ -508,7 +683,7 @@ class RuntimeExecutor:
                 "missing_environment_variables": list(exc.missing),
             }
             _set_failure_taxonomy(plan, error_code, "CONFIGURATION")
-            return _blocking_report(plan, error_code)
+            return finalize(_blocking_report(plan, error_code))
 
         adapter = self.connection_adapter or PostgresConnectionAdapter()
         adapter_status = adapter.status() if hasattr(adapter, "status") else {"status": "READY", "connection_opened": False}
@@ -523,7 +698,7 @@ class RuntimeExecutor:
                 "connector_status": CONNECTOR_NOT_INVOKED,
             }
             _set_failure_taxonomy(plan, error_code, "DRIVER_CHECK")
-            return _blocking_report(plan, error_code)
+            return finalize(_blocking_report(plan, error_code))
 
         plan["connection"] = {"status": "READY_TO_CONNECT", "safe_settings": settings.safe_dict()}
         connection = None
@@ -547,7 +722,7 @@ class RuntimeExecutor:
                     "connector_status": CONNECTOR_INVOKED,
                 }
                 _set_failure_taxonomy(plan, error_code, phase)
-                return _blocking_report(plan, error_code)
+                return finalize(_blocking_report(plan, error_code))
             plan["execution_boundary"]["apply_reached"] = True
             phase = "SQL_APPLY"
             apply_report = self._apply_candidates(connection, plan["hash_verification"])
@@ -581,7 +756,7 @@ class RuntimeExecutor:
                     }
                 )
                 _set_failure_taxonomy(plan, error_code, phase)
-                return _blocking_report(plan, error_code)
+                return finalize(_blocking_report(plan, error_code))
             phase = "RUNTIME_POSTFLIGHT"
             postflight = self._runtime_postflight(connection, target)
             plan["postflight"] = postflight
@@ -594,7 +769,7 @@ class RuntimeExecutor:
                     "connector_status": CONNECTOR_INVOKED,
                 }
                 _set_failure_taxonomy(plan, error_code, phase)
-                return _blocking_report(plan, error_code)
+                return finalize(_blocking_report(plan, error_code))
             if run_validations:
                 phase = "RUNTIME_VALIDATION"
                 plan["schema_checks"] = collect_runtime_schema_checks(connection)
@@ -658,7 +833,7 @@ class RuntimeExecutor:
                 "advisor_status": "NOT_RUN_IN_DISPOSABLE",
                 "production_apply_allowed": False,
             }
-            return plan
+            return finalize(plan)
         except Exception as exc:
             if phase == "CONNECT":
                 error_code = _classify_connection_error(exc)
@@ -681,7 +856,7 @@ class RuntimeExecutor:
             if phase == "CONNECT":
                 plan["connection"]["status"] = "CONNECT_FAILED"
             _set_failure_taxonomy(plan, error_code, phase)
-            return _blocking_report(plan, error_code)
+            return finalize(_blocking_report(plan, error_code))
         finally:
             if connection is not None:
                 try:
@@ -1025,6 +1200,12 @@ class RuntimeExecutor:
             return
 
 
+def _markdown_scalar(value: Any, default: str = "NOT_PERSISTED") -> str:
+    if value is None:
+        return default
+    return str(value).replace("`", "'").replace("\r", " ").replace("\n", " ")
+
+
 def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
     """Render a compact report without credentials, URLs, or SQL text."""
 
@@ -1048,11 +1229,15 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
         f"- run_id: `{report.get('run_id', 'NOT_PERSISTED')}`",
         f"- started_at: `{report.get('started_at', 'NOT_PERSISTED')}`",
         f"- finished_at: `{report.get('finished_at', 'NOT_PERSISTED')}`",
-        f"- git_head: `{report.get('git_head', 'NOT_PERSISTED')}`",
+        f"- git_head: `{_markdown_scalar(report.get('git_head'))}`",
+        f"- git_branch: `{_markdown_scalar(report.get('git_branch'))}`",
+        f"- working_tree_clean: `{_markdown_scalar(report.get('working_tree_clean'))}`",
+        f"- repo_root: `{_markdown_scalar(report.get('repo_root'))}`",
         f"- smoke_passed: `{report.get('smoke_passed', runtime.get('passed_smoke', 0))}/{runtime.get('smoke_count', 20)}`",
         f"- enforcement_passed: `{report.get('enforcement_passed', runtime.get('passed_enforcement', 0))}/{runtime.get('enforcement_count', 15)}`",
         "",
         f"- Status: `{report.get('status')}`",
+        f"- runtime_status: `{report.get('runtime_status', report.get('status'))}`",
         f"- Contract: `{report.get('contract_version')}`",
         f"- Mode: `{report.get('mode')}`",
         f"- Target identity: `{(report.get('target') or {}).get('target_id')}`",
@@ -1219,6 +1404,146 @@ def load_latest_runtime_report(report_dir: Path) -> Dict[str, Any]:
     return value
 
 
+def _extract_markdown_field(markdown: str, field: str) -> Optional[str]:
+    pattern = rf"(?m)^-\s+{re.escape(field)}:\s+`([^`\r\n]*)`\s*$"
+    matches = re.findall(pattern, markdown)
+    return matches[0] if len(matches) == 1 else None
+
+
+def _resolve_report_pointer_path(report_dir: Path, value: Any) -> Optional[Path]:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    relative = Path(value)
+    if relative.is_absolute():
+        return None
+    resolved = (report_dir / relative).resolve()
+    if not _report_path_is_inside(report_dir, resolved) or not resolved.is_file():
+        return None
+    return resolved
+
+
+def review_runtime_evidence(repo_root: Path, report_dir: Optional[Path] = None) -> Dict[str, Any]:
+    """Validate the latest runtime evidence against the current Git HEAD.
+
+    This is a read-only Production Readiness input check.  It never connects
+    to PostgreSQL and never changes the report files it inspects.
+    """
+
+    root = Path(repo_root).resolve()
+    directory = (report_dir or (root / DEFAULT_REPORT_RELATIVE)).resolve()
+    checks: Dict[str, Dict[str, Any]] = {}
+    blocking_reasons: List[str] = []
+
+    def block(code: str) -> None:
+        if code not in blocking_reasons:
+            blocking_reasons.append(code)
+
+    pointer_path = directory / RUNTIME_REPORT_POINTER_FILENAME
+    pointer: Optional[Dict[str, Any]] = None
+    try:
+        loaded_pointer = json.loads(pointer_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
+        loaded_pointer = None
+    if isinstance(loaded_pointer, dict):
+        pointer = loaded_pointer
+        checks["latest_json"] = {"status": "PASS"}
+    else:
+        checks["latest_json"] = {"status": "BLOCKED"}
+        block("BLOCKED_RUNTIME_EVIDENCE_LATEST_MISSING")
+
+    try:
+        current_git = capture_git_metadata(root)
+        checks["current_git_head"] = {"status": "PASS"}
+    except RuntimeEvidenceError as exc:
+        current_git = None
+        checks["current_git_head"] = {"status": "BLOCKED", "error_code": exc.code}
+        block("BLOCKED_RUNTIME_EVIDENCE_GIT_HEAD_MISMATCH")
+
+    run_json: Optional[Dict[str, Any]] = None
+    markdown = ""
+    json_path: Optional[Path] = None
+    markdown_path: Optional[Path] = None
+    if pointer is not None:
+        required_pointer_fields = (
+            "run_id",
+            "report_json",
+            "report_markdown",
+            "git_head",
+            "runtime_status",
+            "smoke_passed",
+            "enforcement_passed",
+            "finished_at",
+        )
+        missing_fields = [field for field in required_pointer_fields if field not in pointer]
+        checks["latest_schema"] = {
+            "status": "PASS" if not missing_fields else "BLOCKED",
+            "missing_fields": missing_fields,
+        }
+        if missing_fields:
+            block("BLOCKED_RUNTIME_EVIDENCE_LATEST_SCHEMA")
+
+        json_path = _resolve_report_pointer_path(directory, pointer.get("report_json"))
+        markdown_path = _resolve_report_pointer_path(directory, pointer.get("report_markdown"))
+        if json_path is None:
+            block("BLOCKED_RUNTIME_EVIDENCE_REPORT_JSON_PATH")
+        if markdown_path is None:
+            block("BLOCKED_RUNTIME_EVIDENCE_REPORT_MARKDOWN_PATH")
+        if json_path is not None:
+            run_json = _read_runtime_report(json_path)
+        if markdown_path is not None:
+            try:
+                markdown = markdown_path.read_text(encoding="utf-8")
+            except OSError:
+                markdown = ""
+        if run_json is None:
+            block("BLOCKED_RUNTIME_EVIDENCE_REPORT_JSON_INVALID")
+        if not markdown:
+            block("BLOCKED_RUNTIME_EVIDENCE_REPORT_MARKDOWN_INVALID")
+
+    pointer_head = pointer.get("git_head") if pointer is not None else None
+    run_head = run_json.get("git_head") if run_json is not None else None
+    markdown_head = _extract_markdown_field(markdown, "git_head") if markdown else None
+    heads = {
+        "latest_json_git_head": pointer_head,
+        "run_json_git_head": run_head,
+        "run_markdown_git_head": markdown_head,
+        "current_git_head": current_git.get("git_head") if current_git else None,
+    }
+    head_status = "PASS" if all(
+        isinstance(value, str) and _GIT_HEAD_RE.fullmatch(value) for value in heads.values()
+    ) and len(set(heads.values())) == 1 else "BLOCKED"
+    checks["git_head_consistency"] = {"status": head_status, "heads": heads}
+    if head_status != "PASS":
+        block("BLOCKED_RUNTIME_EVIDENCE_GIT_HEAD_MISMATCH")
+
+    if pointer is not None and run_json is not None:
+        identity_pairs = (
+            ("run_id", pointer.get("run_id"), run_json.get("run_id")),
+            ("finished_at", pointer.get("finished_at"), run_json.get("finished_at")),
+            ("runtime_status", pointer.get("runtime_status"), run_json.get("status")),
+            ("smoke_passed", pointer.get("smoke_passed"), run_json.get("smoke_passed")),
+            ("enforcement_passed", pointer.get("enforcement_passed"), run_json.get("enforcement_passed")),
+        )
+        for field, pointer_value, run_value in identity_pairs:
+            passed = pointer_value is not None and pointer_value == run_value
+            checks[f"latest_{field}"] = {"status": "PASS" if passed else "BLOCKED"}
+            if not passed:
+                block("BLOCKED_RUNTIME_EVIDENCE_LATEST_MISMATCH")
+
+    result: Dict[str, Any] = {
+        "status": "PASS" if not blocking_reasons else "BLOCKED",
+        "blocking_reasons": sorted(blocking_reasons),
+        "checks": checks,
+        "latest": {
+            "path": pointer_path.as_posix(),
+            "run_id": pointer.get("run_id") if pointer else None,
+            "report_json": json_path.as_posix() if json_path else None,
+            "report_markdown": markdown_path.as_posix() if markdown_path else None,
+        },
+    }
+    return result
+
+
 def write_runtime_report(
     report: Mapping[str, Any],
     repo_root: Path,
@@ -1228,11 +1553,45 @@ def write_runtime_report(
     started_at: Optional[str] = None,
     finished_at: Optional[str] = None,
     git_head: Optional[str] = None,
+    git_branch: Optional[str] = None,
+    working_tree_clean: Optional[bool] = None,
+    recorded_repo_root: Optional[str] = None,
 ) -> Dict[str, str]:
     directory = (report_dir or (repo_root / DEFAULT_REPORT_RELATIVE)).resolve()
     root = repo_root.resolve()
     if root not in directory.parents and directory != root:
         raise ValueError("Runtime report directory must remain inside the repository")
+
+    captured_git = capture_git_metadata(root)
+    if git_head is not None and str(git_head).lower() != captured_git["git_head"]:
+        raise RuntimeEvidenceError(
+            "GIT_HEAD_ARGUMENT_MISMATCH",
+            "The supplied runtime Git HEAD does not match the current repository HEAD.",
+        )
+    if git_branch is not None and git_branch != captured_git["git_branch"]:
+        raise RuntimeEvidenceError(
+            "GIT_BRANCH_ARGUMENT_MISMATCH",
+            "The supplied runtime Git branch does not match the current repository branch.",
+        )
+    if working_tree_clean is not None and working_tree_clean != captured_git["working_tree_clean"]:
+        raise RuntimeEvidenceError(
+            "GIT_WORKING_TREE_ARGUMENT_MISMATCH",
+            "The supplied runtime working-tree state does not match the current repository.",
+        )
+    if recorded_repo_root is not None:
+        try:
+            recorded_root = Path(recorded_repo_root).resolve()
+        except OSError as exc:
+            raise RuntimeEvidenceError(
+                "GIT_REPO_ROOT_ARGUMENT_INVALID",
+                "The supplied runtime repository root could not be resolved.",
+            ) from exc
+        if os.path.normcase(str(recorded_root)) != os.path.normcase(str(root)):
+            raise RuntimeEvidenceError(
+                "GIT_REPO_ROOT_ARGUMENT_MISMATCH",
+                "The supplied runtime repository root does not match the current repository.",
+            )
+
     directory.mkdir(parents=True, exist_ok=True)
     runs_directory = directory / "runs"
     runs_directory.mkdir(parents=True, exist_ok=True)
@@ -1242,7 +1601,10 @@ def write_runtime_report(
         run_id=run_id,
         started_at=started_at,
         finished_at=finished_at,
-        git_head=git_head,
+        git_head=captured_git["git_head"],
+        git_branch=captured_git["git_branch"],
+        working_tree_clean=captured_git["working_tree_clean"],
+        recorded_repo_root=captured_git["repo_root"],
     )
     run_directory = (runs_directory / materialized["run_id"]).resolve()
     if not _report_path_is_inside(directory, run_directory):
@@ -1263,8 +1625,14 @@ def write_runtime_report(
         "started_at": materialized["started_at"],
         "finished_at": materialized["finished_at"],
         "git_head": materialized["git_head"],
+        "git_branch": materialized["git_branch"],
+        "working_tree_clean": materialized["working_tree_clean"],
+        "repo_root": materialized["repo_root"],
+        "runtime_status": materialized["status"],
         "smoke_passed": materialized["smoke_passed"],
         "enforcement_passed": materialized["enforcement_passed"],
+        "report_json": json_path.relative_to(directory).as_posix(),
+        "report_markdown": markdown_path.relative_to(directory).as_posix(),
         "json": json_path.relative_to(directory).as_posix(),
         "markdown": markdown_path.relative_to(directory).as_posix(),
     }
@@ -1277,4 +1645,6 @@ def write_runtime_report(
         "markdown": markdown_path.as_posix(),
         "latest": pointer_path.as_posix(),
         "run_id": str(materialized["run_id"]),
+        "report_json": json_path.as_posix(),
+        "report_markdown": markdown_path.as_posix(),
     }

@@ -133,9 +133,19 @@ execution:
 ```
 
 The report writer never overwrites an earlier run. Use the persisted `run_id`,
-timestamps, `git_head`, and `runtime_summary_lines` to match the terminal
-summary to one exact invocation; the selector also scans all run directories
-when recovering the newest valid report.
+timestamps, `git_head`, `git_branch`, `working_tree_clean`, and
+`runtime_summary_lines` to match the terminal summary to one exact invocation;
+the selector also scans all run directories when recovering the newest valid
+report. The read-only Git identity review is:
+
+```powershell
+& .\.runtime\python-venv\Scripts\python.exe -m tools.migration_harness --repo-root F:\Projects\jcfb-v4 runtime-review
+```
+
+It must pass only when `latest.json.git_head`, the selected run JSON and
+Markdown, and the current repository HEAD are identical. The previous
+successful run with a missing Git HEAD is not repairable evidence and must be
+replaced by a fresh disposable run after the implementation commit.
 
 Stop the container when finished:
 

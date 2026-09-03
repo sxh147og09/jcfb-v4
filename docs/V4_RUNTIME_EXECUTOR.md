@@ -164,9 +164,17 @@ readiness. The PowerShell wrapper now accepts `-ApplyDisposable` only when all
 35 executable cases pass, the schema/security gates pass, and the report says
 `READY_FOR_PRODUCTION_REVIEW`. Each write gets a unique `run_id` and is stored
 under `.runtime/reports/prebatch04/runs/<run_id>/`; `latest.json` is an atomic
-pointer to the newest run. The JSON and Markdown files persist `started_at`,
-`finished_at`, `git_head`, `smoke_passed`, `enforcement_passed`, and the exact
-PowerShell summary lines. Report selection compares all valid run files so a
-stale pointer or legacy fixed-name report cannot hide a newer run. This
-executor does not change V4 task checkboxes, does not approve BATCH-04, and
-does not perform Production or Supabase writes.
+pointer to the newest run. At runtime start, Git is resolved from the process
+PATH and the executor captures `git_head`, `git_branch`,
+`working_tree_clean`, `repo_root`, `run_id`, and timestamps. A missing or
+invalid Git HEAD blocks evidence persistence; it is never serialized as a
+valid `null` identity. The JSON and Markdown files persist the same identity,
+`smoke_passed`, `enforcement_passed`, and the exact PowerShell summary lines.
+The pointer includes `report_json`, `report_markdown`, `runtime_status`, and
+the same Git identity (with `json`/`markdown` aliases retained for local
+compatibility). The read-only `runtime-review` command verifies that the
+pointer, per-run JSON, per-run Markdown, and current repository all carry the
+same Git HEAD; any missing or conflicting value is blocked. Report selection
+compares all valid run files so a stale pointer or legacy fixed-name report
+cannot hide a newer run. This executor does not change V4 task checkboxes, does
+not approve BATCH-04, and does not perform Production or Supabase writes.

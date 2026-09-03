@@ -65,7 +65,7 @@ function Invoke-HarnessJson {
 
 Push-Location -LiteralPath $RepoRoot
 try {
-    $hashReport = Invoke-HarnessJson @('--repo-root', '.', 'canonical-hash')
+    $hashReport = Invoke-HarnessJson @('--repo-root', $RepoRoot, 'canonical-hash')
     if ($hashReport.status -ne 'PASS' -or $hashReport.matched_count -ne 9 -or $hashReport.pending_count -ne 0) {
         throw 'Canonical candidate hash verification did not pass; apply is blocked.'
     }
@@ -102,12 +102,20 @@ try {
 
     $databaseName = if ($ApplyDisposable) { $env:JCFB_V4_RUNTIME_DB_NAME } else { 'jcfb_v4_runtime' }
     $report = Invoke-HarnessJson @(
-        '--repo-root', '.',
+        '--repo-root', $RepoRoot,
         'runtime-validate',
         '--mode', $mode,
         '--database-name', $databaseName,
         '--write-report'
     )
+    foreach ($identityField in @('git_head', 'git_branch', 'repo_root')) {
+        if ([string]::IsNullOrWhiteSpace([string]$report.$identityField)) {
+            throw ("Runtime evidence is missing required Git identity field: {0}." -f $identityField)
+        }
+    }
+    if ($null -eq $report.working_tree_clean) {
+        throw 'Runtime evidence is missing required working-tree state.'
+    }
     Write-Output ("PRE_BATCH_04_RUNTIME_MODE={0}" -f $mode)
     Write-Output ("PRE_BATCH_04_RUNTIME_STATUS={0}" -f $report.status)
     Write-Output ("PRE_BATCH_04_HASHES={0}/{1}" -f $report.hash_verification.matched_count, $report.hash_verification.candidate_count)
@@ -120,6 +128,9 @@ try {
     Write-Output ("PRE_BATCH_04_STARTED_AT={0}" -f $report.started_at)
     Write-Output ("PRE_BATCH_04_FINISHED_AT={0}" -f $report.finished_at)
     Write-Output ("PRE_BATCH_04_GIT_HEAD={0}" -f $report.git_head)
+    Write-Output ("PRE_BATCH_04_GIT_BRANCH={0}" -f $report.git_branch)
+    Write-Output ("PRE_BATCH_04_WORKING_TREE_CLEAN={0}" -f $report.working_tree_clean)
+    Write-Output ("PRE_BATCH_04_REPO_ROOT={0}" -f $report.repo_root)
     Write-Output ("PRE_BATCH_04_REPORT_JSON={0}" -f $report.report_paths.json)
     Write-Output ("PRE_BATCH_04_REPORT_MARKDOWN={0}" -f $report.report_paths.markdown)
     Write-Output ("PRE_BATCH_04_REPORT_LATEST={0}" -f $report.report_paths.latest)

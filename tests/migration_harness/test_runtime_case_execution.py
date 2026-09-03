@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from tools.migration_harness.common import sha256_json
 from tools.migration_harness.runtime_case_handlers import (
@@ -19,8 +21,11 @@ from tools.migration_harness.runtime_case_handlers import (
 )
 from tools.migration_harness.runtime_executor import (
     RuntimeExecutor,
+    RuntimeEvidenceError,
+    capture_git_metadata,
     load_latest_runtime_report,
     render_runtime_report_markdown,
+    review_runtime_evidence,
     select_latest_runtime_report,
     write_runtime_report,
 )
@@ -645,22 +650,32 @@ class RuntimeCaseExecutionTests(unittest.TestCase):
         }
         with tempfile.TemporaryDirectory(dir=str(self.repo_root)) as directory:
             report_dir = Path(directory) / "prebatch04"
-            first = write_runtime_report(
-                report,
-                self.repo_root,
-                report_dir=report_dir,
-                started_at="2026-09-03T10:00:00+00:00",
-                finished_at="2026-09-03T10:00:01+00:00",
-                git_head="a" * 40,
-            )
-            second = write_runtime_report(
-                report,
-                self.repo_root,
-                report_dir=report_dir,
-                started_at="2026-09-03T10:01:00+00:00",
-                finished_at="2026-09-03T10:01:01+00:00",
-                git_head="b" * 40,
-            )
+            git_metadata = lambda head: {
+                "git_head": head,
+                "git_branch": "main",
+                "working_tree_clean": True,
+                "repo_root": self.repo_root.resolve().as_posix(),
+            }
+            with patch(
+                "tools.migration_harness.runtime_executor.capture_git_metadata",
+                side_effect=[git_metadata("a" * 40), git_metadata("b" * 40)],
+            ):
+                first = write_runtime_report(
+                    report,
+                    self.repo_root,
+                    report_dir=report_dir,
+                    started_at="2026-09-03T10:00:00+00:00",
+                    finished_at="2026-09-03T10:00:01+00:00",
+                    git_head="a" * 40,
+                )
+                second = write_runtime_report(
+                    report,
+                    self.repo_root,
+                    report_dir=report_dir,
+                    started_at="2026-09-03T10:01:00+00:00",
+                    finished_at="2026-09-03T10:01:01+00:00",
+                    git_head="b" * 40,
+                )
             self.assertNotEqual(first["json"], second["json"])
             self.assertNotEqual(first["run_id"], second["run_id"])
             selected = select_latest_runtime_report(report_dir)
@@ -675,11 +690,134 @@ class RuntimeCaseExecutionTests(unittest.TestCase):
             pointer = json.loads(Path(second["latest"]).read_text(encoding="utf-8"))
             self.assertEqual(second["run_id"], pointer["run_id"])
             self.assertEqual(second["json"], str(report_dir / pointer["json"]).replace("\\", "/"))
+            self.assertEqual(pointer["json"], pointer["report_json"])
+            self.assertEqual(pointer["markdown"], pointer["report_markdown"])
+            self.assertEqual("RUNTIME_VALIDATION_FAILED", pointer["runtime_status"])
             markdown = Path(second["markdown"]).read_text(encoding="utf-8")
             for field in ("run_id", "started_at", "finished_at", "git_head", "smoke_passed", "enforcement_passed"):
                 self.assertIn(f"- {field}: ", markdown)
             self.assertIn("PRE_BATCH_04_SMOKE_PASSED=7/20", markdown)
             self.assertIn("PRE_BATCH_04_ENFORCEMENT_PASSED=0/15", markdown)
+
+    def test_valid_git_metadata_is_populated_from_the_actual_repository(self):
+        metadata = capture_git_metadata(self.repo_root)
+        completed = subprocess.run(
+            ["git", "-C", str(self.repo_root), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertEqual(completed.stdout.strip().lower(), metadata["git_head"])
+        self.assertTrue(re.fullmatch(r"[0-9a-f]{40,64}", metadata["git_head"]))
+        self.assertTrue(metadata["git_branch"])
+        self.assertEqual(self.repo_root.resolve().as_posix(), metadata["repo_root"])
+        self.assertIsInstance(metadata["working_tree_clean"], bool)
+
+    def test_git_unavailable_fails_closed_before_report_creation(self):
+        report = {"status": "RUNTIME_VALIDATION_PASS", "runtime_validation": {"passed_smoke": 20, "passed_enforcement": 15}}
+        with tempfile.TemporaryDirectory(dir=str(self.repo_root)) as directory:
+            report_dir = Path(directory) / "prebatch04"
+            with patch("tools.migration_harness.runtime_executor.shutil.which", return_value=None):
+                with self.assertRaises(RuntimeEvidenceError) as context:
+                    write_runtime_report(report, self.repo_root, report_dir=report_dir)
+            self.assertEqual("GIT_EXECUTABLE_UNAVAILABLE", context.exception.code)
+            self.assertFalse(report_dir.exists())
+
+    def test_report_json_markdown_and_latest_persist_one_git_head(self):
+        report = {
+            "status": "RUNTIME_VALIDATION_PASS",
+            "runtime_validation": {
+                "status": "PASS",
+                "passed_smoke": 20,
+                "passed_enforcement": 15,
+                "smoke_count": 20,
+                "enforcement_count": 15,
+            },
+            "staging_readiness": {"status": "READY_FOR_PRODUCTION_REVIEW"},
+        }
+        with tempfile.TemporaryDirectory(dir=str(self.repo_root)) as directory:
+            root = Path(directory)
+            report_dir = root / "prebatch04"
+            first = write_runtime_report(report, self.repo_root, report_dir=report_dir)
+            run_json = json.loads(Path(first["json"]).read_text(encoding="utf-8"))
+            pointer = json.loads(Path(first["latest"]).read_text(encoding="utf-8"))
+            markdown = Path(first["markdown"]).read_text(encoding="utf-8")
+            self.assertEqual(run_json["git_head"], pointer["git_head"])
+            self.assertIn(f"- git_head: `{run_json['git_head']}`", markdown)
+            self.assertEqual("RUNTIME_VALIDATION_PASS", pointer["runtime_status"])
+            self.assertEqual(run_json["status"], pointer["runtime_status"])
+            self.assertEqual(first["json"], str(report_dir / pointer["report_json"]).replace("\\", "/"))
+            self.assertEqual(first["markdown"], str(report_dir / pointer["report_markdown"]).replace("\\", "/"))
+            self.assertEqual("PASS", review_runtime_evidence(self.repo_root, report_dir=report_dir)["status"])
+
+    def test_dirty_working_tree_is_captured_accurately(self):
+        clean = capture_git_metadata(self.repo_root)
+        self.assertIsInstance(clean["working_tree_clean"], bool)
+        with tempfile.TemporaryDirectory(dir=str(self.repo_root)) as directory:
+            root = Path(directory)
+            source = root / "tracked.txt"
+            source.write_text("initial\n", encoding="utf-8")
+            subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.name", "JCFB Test"], check=True)
+            subprocess.run(["git", "-C", str(root), "config", "user.email", "jcfb-test@example.invalid"], check=True)
+            subprocess.run(["git", "-C", str(root), "add", "tracked.txt"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "--quiet", "-m", "fixture"], check=True)
+            self.assertTrue(capture_git_metadata(root)["working_tree_clean"])
+            (root / "untracked.txt").write_text("dirty\n", encoding="utf-8")
+            self.assertFalse(capture_git_metadata(root)["working_tree_clean"])
+
+    def test_two_successive_runs_keep_their_own_run_id_and_git_head(self):
+        report = {
+            "status": "RUNTIME_VALIDATION_PASS",
+            "runtime_validation": {"status": "PASS", "passed_smoke": 20, "passed_enforcement": 15},
+            "staging_readiness": {"status": "READY_FOR_PRODUCTION_REVIEW"},
+        }
+        with tempfile.TemporaryDirectory(dir=str(self.repo_root)) as directory:
+            root = Path(directory)
+            tracked = root / "tracked.txt"
+            tracked.write_text("one\n", encoding="utf-8")
+            subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+            for key, value in (("user.name", "JCFB Test"), ("user.email", "jcfb-test@example.invalid")):
+                subprocess.run(["git", "-C", str(root), "config", key, value], check=True)
+            subprocess.run(["git", "-C", str(root), "add", "tracked.txt"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "--quiet", "-m", "one"], check=True)
+            report_dir = root / "prebatch04"
+            first = write_runtime_report(report, root, report_dir=report_dir)
+            first_json = json.loads(Path(first["json"]).read_text(encoding="utf-8"))
+            tracked.write_text("two\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "tracked.txt"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "--quiet", "-m", "two"], check=True)
+            second = write_runtime_report(report, root, report_dir=report_dir)
+            second_json = json.loads(Path(second["json"]).read_text(encoding="utf-8"))
+            self.assertNotEqual(first_json["run_id"], second_json["run_id"])
+            self.assertNotEqual(first_json["git_head"], second_json["git_head"])
+            self.assertEqual(second_json["git_head"], json.loads(Path(second["latest"]).read_text(encoding="utf-8"))["git_head"])
+
+    def test_runtime_review_blocks_inconsistent_markdown_git_head(self):
+        report = {
+            "status": "RUNTIME_VALIDATION_PASS",
+            "runtime_validation": {"status": "PASS", "passed_smoke": 20, "passed_enforcement": 15},
+            "staging_readiness": {"status": "READY_FOR_PRODUCTION_REVIEW"},
+        }
+        with tempfile.TemporaryDirectory(dir=str(self.repo_root)) as directory:
+            root = Path(directory)
+            source = root / "tracked.txt"
+            source.write_text("fixture\n", encoding="utf-8")
+            subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+            for key, value in (("user.name", "JCFB Test"), ("user.email", "jcfb-test@example.invalid")):
+                subprocess.run(["git", "-C", str(root), "config", key, value], check=True)
+            subprocess.run(["git", "-C", str(root), "add", "tracked.txt"], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "--quiet", "-m", "fixture"], check=True)
+            report_dir = root / "prebatch04"
+            result = write_runtime_report(report, root, report_dir=report_dir)
+            markdown_path = Path(result["markdown"])
+            markdown_path.write_text(
+                markdown_path.read_text(encoding="utf-8").replace(report["git_head"], "0" * 40),
+                encoding="utf-8",
+            )
+            review = review_runtime_evidence(root, report_dir=report_dir)
+            self.assertEqual("BLOCKED", review["status"])
+            self.assertIn("BLOCKED_RUNTIME_EVIDENCE_GIT_HEAD_MISMATCH", review["blocking_reasons"])
 
 
 if __name__ == "__main__":

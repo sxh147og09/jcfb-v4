@@ -16,7 +16,12 @@ from .report import build_batch_02_report
 from .acceptance import build_batch_03_report, render_batch_03_markdown, validate_batch_03_static
 from .readiness import assess_readiness, load_readiness_contract, load_staging_target_template, readiness_contract_summary, validate_target_manifest
 from .runner import DryRunRunner
-from .runtime_executor import RuntimeExecutor, default_disposable_target, write_runtime_report
+from .runtime_executor import (
+    RuntimeExecutor,
+    default_disposable_target,
+    review_runtime_evidence,
+    write_runtime_report,
+)
 from .runtime_audit import run_remediation_self_audit
 from .schema_diff import compare_schema_snapshot, load_expected_snapshot
 from .smoke import load_smoke_catalog, runtime_pending_smoke_report
@@ -61,6 +66,7 @@ def build_parser() -> argparse.ArgumentParser:
     runtime.add_argument("--target-json", help="explicit non-secret target descriptor")
     runtime.add_argument("--database-name", default="jcfb_v4_runtime", help="non-secret local database identity used for the default disposable target")
     runtime.add_argument("--write-report", action="store_true", help="write the redacted JSON and Markdown report under .runtime/reports")
+    sub.add_parser("runtime-review", help="verify latest runtime evidence against the current Git HEAD")
     sub.add_parser("remediation-audit", help="run the static PRE-BATCH-04 remediation self-audit without a connector")
     return parser
 
@@ -118,7 +124,19 @@ def main(argv=None) -> int:
         target = _load_target(args.target_json) if args.target_json else default_disposable_target(args.database_name)
         value = RuntimeExecutor(repo_root).execute(target=target, mode=ExecutionMode(runtime_mode))
         if args.write_report:
-            value["report_paths"] = write_runtime_report(value, repo_root)
+            value["report_paths"] = write_runtime_report(
+                value,
+                repo_root,
+                run_id=value.get("run_id"),
+                started_at=value.get("started_at"),
+                finished_at=value.get("finished_at"),
+                git_head=value.get("git_head"),
+                git_branch=value.get("git_branch"),
+                working_tree_clean=value.get("working_tree_clean"),
+                recorded_repo_root=value.get("repo_root"),
+            )
+    elif args.command == "runtime-review":
+        value = review_runtime_evidence(repo_root)
     elif args.command == "remediation-audit":
         value = run_remediation_self_audit(repo_root)
     else:
@@ -127,6 +145,8 @@ def main(argv=None) -> int:
         print(value, end="")
         return 0
     print(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True))
+    if args.command == "runtime-review":
+        return 0 if value.get("status") == "PASS" else 1
     return 0
 
 

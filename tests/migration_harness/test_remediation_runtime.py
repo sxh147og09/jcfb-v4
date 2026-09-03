@@ -20,7 +20,7 @@ from tools.migration_harness.canonical_hash import (
 from tools.migration_harness.common import sha256_json
 from tools.migration_harness.connection import ConnectionSettings, PostgresConnectionAdapter
 from tools.migration_harness.models import ExecutionMode
-from tools.migration_harness.runtime_executor import RuntimeExecutor, default_disposable_target
+from tools.migration_harness.runtime_executor import RuntimeExecutor, capture_git_metadata, default_disposable_target
 from tools.migration_harness.runtime_tests import validate_runtime_case_wiring
 
 
@@ -224,6 +224,22 @@ class RemediationRuntimeTests(unittest.TestCase):
         self.assertEqual(20, report["runtime_case_wiring"]["smoke_count"])
         self.assertEqual(15, report["runtime_case_wiring"]["enforcement_count"])
 
+    def test_runtime_start_records_git_identity_before_execution(self):
+        adapter = _FailingAdapter()
+        report = RuntimeExecutor(self.repo_root, connection_adapter=adapter).execute(
+            target=default_disposable_target(),
+            mode=ExecutionMode.PLAN_ONLY,
+        )
+        self.assertRegex(report["git_head"], r"^[0-9a-f]{40,64}$")
+        self.assertTrue(report["git_branch"])
+        self.assertIsInstance(report["working_tree_clean"], bool)
+        self.assertEqual(self.repo_root.resolve().as_posix(), report["repo_root"])
+        self.assertTrue(report["run_id"])
+        self.assertTrue(report["started_at"])
+        self.assertTrue(report["finished_at"])
+        self.assertEqual("PASS", report["runtime_evidence"]["status"])
+        self.assertEqual(capture_git_metadata(self.repo_root)["git_head"], report["git_head"])
+
     def test_production_apply_is_hard_blocked_before_adapter(self):
         adapter = _FailingAdapter()
         target = default_disposable_target()
@@ -248,6 +264,7 @@ class RemediationRuntimeTests(unittest.TestCase):
     def test_missing_host_port_fails_closed_with_specific_reason(self):
         adapter = _FailingAdapter()
         incomplete_env = {
+            "PATH": os.environ.get("PATH", ""),
             "JCFB_V4_RUNTIME_DB_NAME": "jcfb_v4_runtime",
             "JCFB_V4_RUNTIME_DB_USER": "local_owner",
             "JCFB_V4_RUNTIME_DB_PASSWORD": "test-secret",
