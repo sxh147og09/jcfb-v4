@@ -6,7 +6,7 @@
 -- source_design_file: database/migrations/v4/0001_prerequisites.sql
 -- source_design_commit: cd7ebfd5135275536c2d54ca1ecd980bb386dcfa
 -- candidate_manifest: database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.md
--- canonical_migration_hash: sha256:c55c6d4a882691d9dc006d55915e8584a696de1c9fd9792243c0b0c50713bb28
+-- canonical_migration_hash: sha256:1b959f089bc3f46e272ee7edc19b6a9665c78b4067cdad470a3ebc98a513f2bb
 -- production_status: PRODUCTION_REVIEW_REQUIRED
 --
 -- migration_id: migration@20260901.001
@@ -16,7 +16,7 @@
 -- depends_on: []
 -- schema_contract_version: v4-database-schema@1.0.0
 -- authored_at: 2026-09-01T00:00:00+08:00
--- migration_hash: sha256:c55c6d4a882691d9dc006d55915e8584a696de1c9fd9792243c0b0c50713bb28
+-- migration_hash: sha256:1b959f089bc3f46e272ee7edc19b6a9665c78b4067cdad470a3ebc98a513f2bb
 -- status: DRAFT
 --
 -- Candidate PostgreSQL DDL only. It has no connection directive, psql meta command,
@@ -31,10 +31,31 @@ SET LOCAL TIME ZONE 'UTC';
 -- installed in public. Production extension availability/version remains PRODUCTION_REVIEW_REQUIRED.
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 
--- Disposable-only role bootstrap. These roles have no login and no password.
--- Production role mapping, ownership, and BYPASSRLS policy remain
--- PRODUCTION_REVIEW_REQUIRED. A fresh local target may use service_role as the
--- server-side test principal so the RLS deny-by-default boundary is testable.
+-- Provider-owned service_role prerequisite. The migration never creates,
+-- alters, or changes membership of this reserved role. A target is valid only
+-- when service_role already exists with the platform-provided BYPASSRLS capability.
+DO $$
+DECLARE
+  service_role_bypass_rls boolean;
+BEGIN
+  SELECT rolbypassrls
+    INTO service_role_bypass_rls
+    FROM pg_catalog.pg_roles
+   WHERE rolname = 'service_role';
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'V4_PREREQUISITE_SERVICE_ROLE_MISSING: service_role must already exist with BYPASSRLS=true'
+      USING ERRCODE = '55000';
+  END IF;
+  IF service_role_bypass_rls IS NOT TRUE THEN
+    RAISE EXCEPTION 'V4_PREREQUISITE_SERVICE_ROLE_BYPASSRLS_REQUIRED: service_role must have BYPASSRLS=true'
+      USING ERRCODE = '55000';
+  END IF;
+END;
+$$;
+
+-- Disposable-only bootstrap for public and V4-local roles. The reserved
+-- service_role is intentionally absent from this list.
 DO $$
 DECLARE
   role_name text;
@@ -42,7 +63,6 @@ BEGIN
   FOREACH role_name IN ARRAY ARRAY[
     'anon',
     'authenticated',
-    'service_role',
     'v4_fact_intake',
     'v4_production_runtime',
     'v4_shadow_runtime',
@@ -58,7 +78,15 @@ BEGIN
       );
     END IF;
   END LOOP;
-  EXECUTE 'ALTER ROLE service_role BYPASSRLS';
+  IF EXISTS (
+    SELECT 1
+      FROM pg_catalog.pg_roles
+     WHERE rolname IN ('anon', 'authenticated')
+       AND rolbypassrls IS TRUE
+  ) THEN
+    RAISE EXCEPTION 'V4_PREREQUISITE_PUBLIC_ROLE_BYPASSRLS_FORBIDDEN: anon/authenticated must have BYPASSRLS=false'
+      USING ERRCODE = '55000';
+  END IF;
 END;
 $$;
 

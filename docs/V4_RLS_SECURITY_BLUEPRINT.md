@@ -40,6 +40,13 @@ These are logical identities; creation and membership grants require a future ap
 
 The backend role is a service boundary, not a general-purpose unrestricted client. Where `service_role` is unavoidable, the caller is server-side, the function validates actor/role/action, and the operation emits a complete audit event.
 
+The runtime candidate treats `service_role` as provider-owned: candidate 0001
+checks `pg_catalog.pg_roles.rolbypassrls` and fails closed when the role is
+missing or false. It never creates or alters that reserved role. The disposable
+container may provision a local compatibility role before candidate execution;
+that local bootstrap is not a Production or Supabase migration path. `anon` and
+`authenticated` must retain `rolbypassrls = false`.
+
 ## 3. Grant and revoke blueprint
 
 The real migration must review the actual Supabase default privileges. Candidate order:

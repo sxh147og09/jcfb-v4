@@ -115,6 +115,25 @@ foreach ($pattern in $forbiddenCandidatePatterns) {
     Assert-Check (-not ($allCandidateText -match $pattern)) ("Candidate SQL contains forbidden runtime marker or connection path: {0}" -f $pattern)
 }
 
+Assert-Check (-not ($allCandidateText -match '(?i)\b(?:ALTER|CREATE|SET)\s+ROLE\s+service_role\b')) 'Candidate SQL must not mutate the Supabase-reserved service_role'
+$prerequisitePath = Join-Path $candidateDir '0001_prerequisites.sql'
+if (Test-Path -LiteralPath $prerequisitePath -PathType Leaf) {
+    $prerequisiteText = Read-Utf8 $prerequisitePath
+    foreach ($requiredServiceRoleCheck in @(
+        'pg_catalog\.pg_roles',
+        'rolname\s*=\s*''service_role''',
+        'rolbypassrls',
+        'IF\s+NOT\s+FOUND',
+        'V4_PREREQUISITE_SERVICE_ROLE_MISSING',
+        'V4_PREREQUISITE_SERVICE_ROLE_BYPASSRLS_REQUIRED',
+        'V4_PREREQUISITE_PUBLIC_ROLE_BYPASSRLS_FORBIDDEN',
+        'anon',
+        'authenticated'
+    )) {
+        Assert-Check ($prerequisiteText -match ('(?is)' + $requiredServiceRoleCheck)) ("0001 is missing service_role prerequisite check: {0}" -f $requiredServiceRoleCheck)
+    }
+}
+
 Assert-Check ($allCandidateText -match '(?im)CREATE\s+EXTENSION\s+IF\s+NOT\s+EXISTS\s+pgcrypto') 'Candidate prerequisites do not install pgcrypto'
 Assert-Check ($allCandidateText -match '(?im)SET\s+LOCAL\s+TIME\s+ZONE\s+''UTC''') 'Candidate SQL does not pin runtime timezone to UTC'
 Assert-Check ($allCandidateText -match '(?im)CREATE\s+SCHEMA') 'Candidate SQL does not create V4 schemas'

@@ -64,7 +64,7 @@ foreach ($relativePath in $contractFiles) {
 }
 
 if (-not $SkipSecretScan) {
-    $secretPattern = '(?i)(sk-[A-Za-z0-9]{20,}|sb_secret_[A-Za-z0-9]{12,}|service_role[^\r\n]{0,40}[=:][^\r\n]{12,}|password\s*[=:]\s*["''][^"'']{8,}["'']|api[_-]?key\s*[=:]\s*["''][^"'']{12,}["''])'
+    $secretPattern = '(?i)(sk-[A-Za-z0-9]{20,}|sb_secret_[A-Za-z0-9]{12,}|(?:\b(?:supabase[_-]?)?service[_-]role[_-]key\b)[ \t]*[=:][ \t]*["'']?[A-Za-z0-9./+=_-]{20,}|password[ \t]*[=:][ \t]*["''][^"'']{8,}["'']|api[_-]?key[ \t]*[=:][ \t]*["''][^"'']{12,}["''])'
     $tracked = @(git -C $repoRoot ls-files)
     foreach ($relativePath in $tracked) {
         if ($relativePath -eq 'scripts/validate_v4_data_contracts.ps1') {

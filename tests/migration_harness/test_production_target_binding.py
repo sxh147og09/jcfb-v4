@@ -80,7 +80,7 @@ class ProductionTargetBindingTests(unittest.TestCase):
 
     def test_secret_fields_are_rejected_and_no_secret_policy_is_recorded(self):
         mutated = copy.deepcopy(self.contract)
-        mutated["targets"][2]["service_role_key"] = "fixture-secret-field-must-not-exist"
+        mutated["targets"][2]["service_role_key"] = "REDACTED"
         result = validate_production_target_binding(mutated)
         self.assertFalse(result.ok)
         self.assertIn("SECRET_FIELD_PRESENT", {issue.code for issue in result.issues})

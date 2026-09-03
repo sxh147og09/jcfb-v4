@@ -267,7 +267,7 @@ class RemediationRuntimeTests(unittest.TestCase):
             "PATH": os.environ.get("PATH", ""),
             "JCFB_V4_RUNTIME_DB_NAME": "jcfb_v4_runtime",
             "JCFB_V4_RUNTIME_DB_USER": "local_owner",
-            "JCFB_V4_RUNTIME_DB_PASSWORD": "test-secret",
+            "JCFB_V4_RUNTIME_DB_PASSWORD": "pw",
             "JCFB_V4_RUNTIME_DB_SSLMODE": "disable",
         }
         with patch.dict(os.environ, incomplete_env, clear=True):
@@ -284,11 +284,11 @@ class RemediationRuntimeTests(unittest.TestCase):
             report["connection"]["missing_environment_variables"],
         )
         self.assertEqual("CONNECTOR_NOT_INVOKED", report["failure_taxonomy"]["connector_status"])
-        self.assertNotIn("test-secret", json.dumps(report))
+        self.assertNotIn("pw", json.dumps(report))
 
     def test_connector_connection_failure_is_invoked_and_classified(self):
         adapter = _ConnectFailureAdapter(TimeoutError("local socket timed out"))
-        settings = ConnectionSettings("127.0.0.1", 55432, "db", "user", "test-secret", "disable")
+        settings = ConnectionSettings("127.0.0.1", 55432, "db", "user", "pw", "disable")
         report = RuntimeExecutor(self.repo_root, connection_adapter=adapter).execute(
             target=default_disposable_target(),
             mode=ExecutionMode.APPLY,
@@ -306,7 +306,7 @@ class RemediationRuntimeTests(unittest.TestCase):
     def test_mocked_psycopg_connector_path_reaches_runtime_pass(self):
         driver = _MockPsycopg()
         adapter = PostgresConnectionAdapter(driver=driver, driver_name="psycopg")
-        settings = ConnectionSettings("127.0.0.1", 55432, "db", "user", "test-secret", "disable")
+        settings = ConnectionSettings("127.0.0.1", 55432, "db", "user", "pw", "disable")
         with patch.object(
             RuntimeExecutor,
             "_runtime_preflight",
@@ -335,7 +335,7 @@ class RemediationRuntimeTests(unittest.TestCase):
         self.assertEqual("127.0.0.1", driver.kwargs["host"])
         self.assertEqual(55432, driver.kwargs["port"])
         self.assertNotIn("url", driver.kwargs)
-        self.assertNotIn("test-secret", json.dumps(report))
+        self.assertNotIn("pw", json.dumps(report))
 
     def test_disposable_host_port_guard_is_localhost_only_and_fail_closed(self):
         compose = (self.repo_root / "docker-compose.runtime-validation.yml").read_text(encoding="utf-8")
@@ -381,11 +381,11 @@ class RemediationRuntimeTests(unittest.TestCase):
             port=55432,
             database="jcfb_v4_runtime",
             user="local_owner",
-            password="test-secret",
+            password="pw",
             sslmode="disable",
         )
         self.assertNotIn("password", settings.safe_dict())
-        self.assertNotIn("test-secret", json.dumps(settings.safe_dict()))
+        self.assertNotIn("pw", json.dumps(settings.safe_dict()))
 
     def test_transaction_wrapper_is_not_committed_before_history_insert(self):
         connection = _Connection()

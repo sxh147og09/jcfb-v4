@@ -7,6 +7,17 @@ This profile applies only to the nine runtime candidates under
 under `database/migrations/v4/` remain design-only artifacts and are not
 rewritten or treated as deployment approval.
 
+## Reserved service_role forward-fix
+
+The `RESERVED_ROLE_MUTATION` Production attempt exposed an incompatibility in
+the unapplied runtime candidate 0001. The candidate now verifies a pre-existing
+provider-owned `service_role` with `rolbypassrls = true` and fails closed when
+that prerequisite is missing or false; it never changes the reserved role.
+After this SQL revision, the canonical verifier must regenerate candidate 0001
+and the dependent 0009 registry-seed value. Candidates 0002 through 0008 remain
+unchanged unless a verifier reports otherwise. Generated hashes remain
+disposable/staging evidence and do not grant Production approval.
+
 The machine-readable source of truth is
 `0000_runtime_candidate_manifest.json`. The Markdown manifest is the review
 surface and must agree with the JSON manifest and the SQL headers.

@@ -136,11 +136,16 @@ The result vocabulary is deliberately closed:
 only when SQLSTATE and the contract's stable constraint/error marker match;
 an arbitrary SQL error is never accepted as evidence.
 
-The disposable target may create the minimal local-only `backend`, `executor`,
-and `auditor` no-login roles and grant them membership in `service_role` when
-the candidate schema has no equivalent role. Existing `anon` and
-`authenticated` roles are used as public read/write-boundary fixtures. This is
-reported as `DISPOSABLE_ROLE_SIMULATION`; it is not a Supabase auth runtime.
+The disposable container's first-time initialization provisions only a local
+compatibility `service_role` with the platform-equivalent `BYPASSRLS`
+capability. Candidate 0001 verifies that the role already exists with
+`rolbypassrls = true` and fails closed for a missing or false capability; it
+does not create or alter the provider-owned role. It also fails closed if
+`anon` or `authenticated` has `rolbypassrls = true`. The runtime case adapter
+may then create the minimal local-only `backend`, `executor`, and `auditor`
+no-login roles and grant them membership in `service_role`. Existing `anon`
+and `authenticated` roles are used as public read/write-boundary fixtures. This
+is reported as `DISPOSABLE_ROLE_SIMULATION`; it is not a Supabase auth runtime.
 Supabase Advisor remains `NOT_RUN_IN_DISPOSABLE`.
 
 The local role simulation records which `backend`, `executor`, and `auditor`

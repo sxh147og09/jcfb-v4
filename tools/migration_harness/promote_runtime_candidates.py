@@ -6,9 +6,9 @@ database/migrations/v4; it copies the reviewed design files into a separate
 disposable-only directory, adds provenance, and replaces the fail-closed 0007
 design placeholders with reviewed runtime gates.
 
-The generated SQL remains a candidate, not a production migration. The
-canonical migration hash is intentionally left pending until the repository's
-approved canonicalizer exists.
+The generated SQL remains a candidate, not a production migration. Fresh
+promotion initially marks canonical hashes pending; the approved canonicalizer
+must be run as an explicit maintenance step before review.
 """
 
 from __future__ import annotations
@@ -41,10 +41,31 @@ MIGRATIONS = [
 
 
 RUNTIME_ROLES_SQL = """
--- Disposable-only role bootstrap. These roles have no login and no password.
--- Production role mapping, ownership, and BYPASSRLS policy remain
--- PRODUCTION_REVIEW_REQUIRED. A fresh local target may use service_role as the
--- server-side test principal so the RLS deny-by-default boundary is testable.
+-- Provider-owned service_role prerequisite. The migration never creates,
+-- alters, or changes membership of this reserved role. A target is valid only
+-- when service_role already exists with the platform-provided BYPASSRLS capability.
+DO $$
+DECLARE
+  service_role_bypass_rls boolean;
+BEGIN
+  SELECT rolbypassrls
+    INTO service_role_bypass_rls
+    FROM pg_catalog.pg_roles
+   WHERE rolname = 'service_role';
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'V4_PREREQUISITE_SERVICE_ROLE_MISSING: service_role must already exist with BYPASSRLS=true'
+      USING ERRCODE = '55000';
+  END IF;
+  IF service_role_bypass_rls IS NOT TRUE THEN
+    RAISE EXCEPTION 'V4_PREREQUISITE_SERVICE_ROLE_BYPASSRLS_REQUIRED: service_role must have BYPASSRLS=true'
+      USING ERRCODE = '55000';
+  END IF;
+END;
+$$;
+
+-- Disposable-only bootstrap for public and V4-local roles. The reserved
+-- service_role is intentionally absent from this list.
 DO $$
 DECLARE
   role_name text;
@@ -52,7 +73,6 @@ BEGIN
   FOREACH role_name IN ARRAY ARRAY[
     'anon',
     'authenticated',
-    'service_role',
     'v4_fact_intake',
     'v4_production_runtime',
     'v4_shadow_runtime',
@@ -68,7 +88,15 @@ BEGIN
       );
     END IF;
   END LOOP;
-  EXECUTE 'ALTER ROLE service_role BYPASSRLS';
+  IF EXISTS (
+    SELECT 1
+      FROM pg_catalog.pg_roles
+     WHERE rolname IN ('anon', 'authenticated')
+       AND rolbypassrls IS TRUE
+  ) THEN
+    RAISE EXCEPTION 'V4_PREREQUISITE_PUBLIC_ROLE_BYPASSRLS_FORBIDDEN: anon/authenticated must have BYPASSRLS=false'
+      USING ERRCODE = '55000';
+  END IF;
 END;
 $$;
 """.strip()
@@ -1402,14 +1430,14 @@ def main() -> int:
             "pgcrypto is installed in public; extension availability/version in production remains PRODUCTION_REVIEW_REQUIRED.",
             "V4 schemas are new local namespaces; production coexistence/ownership remains PRODUCTION_REVIEW_REQUIRED.",
             "Session timezone is explicitly UTC.",
-            "No-login local roles are created without passwords; service_role BYPASSRLS is disposable-only.",
+            "No-login local roles are created without passwords; the disposable bootstrap provisions a local service_role compatibility role, and migrations only verify its BYPASSRLS capability.",
             "security_invoker views require the disposable PostgreSQL 16 baseline; production support remains PRODUCTION_REVIEW_REQUIRED.",
             "Audit entry hashes use disposable-runtime-audit-envelope@1.0; canonical production audit profile remains PRODUCTION_REVIEW_REQUIRED.",
         ],
         "production_review_required": [
             "Canonical migration byte profile and real migration hashes.",
             "Supabase extension availability/version and schema ownership/namespace coexistence.",
-            "Production role mapping, ownership, service_role policy, and security_invoker support.",
+            "Production role mapping, ownership, service_role provider capability/policy, and security_invoker support.",
             "Production audit envelope/hash profile and controlled release executor identity.",
             "Reconciliation of the existing V4-012 schema snapshot catalog with the migration history/audit tables retained by 0001/0009.",
         ],
@@ -1431,7 +1459,7 @@ def main() -> int:
         "- Production apply: HARD BLOCK",
         f"- Source manifest: {manifest['source_manifest']} at {source_manifest_commit}",
         f"- Promotion source commit: {current_commit}",
-        "- Canonical migration hashes: PENDING_CANONICAL_HASH until the approved canonicalizer exists",
+        "- Canonical migration hashes: run the approved canonicalizer explicitly after fresh promotion; pending until then",
         "",
         "## Candidate sequence",
         "",
@@ -1451,9 +1479,10 @@ def main() -> int:
             "1. The original database/migrations/v4/0001-0009 design files remain immutable design artifacts.",
             "2. These files may be considered only by a disposable/local or explicitly approved staging runtime gate.",
             "3. No candidate file contains a production connection directive, secret, project ID, or production apply path.",
-            "4. migration_hash remains PENDING_CANONICAL_HASH; the recorded byte hash is provenance evidence, not a canonical migration identity.",
-            "5. Candidate 0007 installs real fail-closed lineage, chronology, role/source separation, review, release, public projection, audit, trigger, and RLS gates.",
-            "6. Any production extension, role, namespace, view-security, audit-hash, or executor choice remains PRODUCTION_REVIEW_REQUIRED.",
+            "4. canonical_migration_hash and migration_hash are generated SHA-256 identities; the recorded byte hash remains separate provenance evidence.",
+            "5. Candidate 0001 verifies a pre-existing service_role with rolbypassrls=true and fails closed; it never creates or alters the provider-owned role. The disposable container bootstrap is the only local compatibility-role provisioner.",
+            "6. Candidate 0007 installs real fail-closed lineage, chronology, role/source separation, review, release, public projection, audit, trigger, and RLS gates.",
+            "7. Any production extension, role, namespace, view-security, audit-hash, or executor choice remains PRODUCTION_REVIEW_REQUIRED.",
             "",
             "## Dependency graph",
             "",

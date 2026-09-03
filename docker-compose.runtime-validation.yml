@@ -15,6 +15,12 @@ services:
       - type: bind
         source: ./.runtime/postgres
         target: /var/lib/postgresql/data
+      # The local compatibility role is provisioned only by PostgreSQL's
+      # first-time disposable initialization, then verified by candidate 0001.
+      - type: bind
+        source: ./database/runtime/0000_service_role.sql
+        target: /docker-entrypoint-initdb.d/0000_service_role.sql
+        read_only: true
     healthcheck:
       test:
         - CMD-SHELL

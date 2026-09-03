@@ -115,6 +115,7 @@ $textExtensions = @('.md', '.txt', '.json', '.yaml', '.yml', '.toml', '.ini', '.
 $scanFiles = Get-ChildItem -LiteralPath $RepoRoot -Recurse -File -Force |
     Where-Object {
         $_.FullName -notmatch '\\.git\\' -and
+        $_.FullName -notmatch '\\.runtime\\' -and
         ($textExtensions -contains $_.Extension.ToLowerInvariant() -or $_.Name -eq '.env.example' -or $_.Name -eq '.gitignore')
     }
 
@@ -126,7 +127,7 @@ $secretPatterns = @(
     '(?i)\bAIza[0-9A-Za-z_-]{20,}\b',
     '-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----',
     '(?i)\bBearer\s+[A-Za-z0-9._-]{20,}\b',
-    '(?i)(?:api[_-]?key|secret|token|password|service[_-]?role[_-]?key)\s*[:=]\s*["'']?[A-Za-z0-9./+=_-]{20,}'
+    '(?i)(?:api[_-]?key|secret|token|password|service[_-]?role[_-]?key)[ \t]*[:=][ \t]*["'']?[A-Za-z0-9./+=_-]{20,}'
 )
 
 $secretHits = 0

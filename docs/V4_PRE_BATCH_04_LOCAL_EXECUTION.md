@@ -73,6 +73,11 @@ Start and check the local container explicitly:
 
 The compose file binds PostgreSQL data to the repository-relative
 `.runtime\postgres` directory. It does not use a new Docker named volume.
+On a fresh data directory, PostgreSQL also runs the read-only-mounted
+`database/runtime/0000_service_role.sql` bootstrap. That file provisions only a
+local compatibility `service_role`; candidate 0001 then verifies
+`rolbypassrls = true` and does not mutate the role. A missing or false role
+capability fails the migration closed.
 
 ## Verify, then plan
 

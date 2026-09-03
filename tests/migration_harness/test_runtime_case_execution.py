@@ -527,9 +527,22 @@ class RuntimeCaseExecutionTests(unittest.TestCase):
         self.assertEqual("PASS", preparation["status"])
         self.assertEqual("DISPOSABLE_ROLE_SIMULATION", preparation["role_simulation"]["mode"])
         self.assertFalse(preparation["role_simulation"]["supabase_auth_runtime"])
+        self.assertTrue(preparation["role_simulation"]["invariants"]["service_role_bypass_rls"])
+        self.assertTrue(preparation["role_simulation"]["invariants"]["anon_authenticated_bypass_rls_false"])
         self.assertTrue(any("CREATE ROLE" in sql for sql, _ in connection.executed))
         self.assertTrue(any("GRANT service_role" in sql for sql, _ in connection.executed))
         self.assertEqual(1, connection.commit_count)
+
+    def test_disposable_role_simulation_fails_closed_for_reserved_and_public_role_invariants(self):
+        for role, bypass in (("service_role", False), ("anon", True), ("authenticated", True)):
+            with self.subTest(role=role):
+                connection = _Connection()
+                connection.roles[role]["rolbypassrls"] = bypass
+                runner = RuntimeCaseHandlerRunner(connection, actor="unit-test-actor")
+                preparation = runner.prepare()
+                self.assertEqual("BLOCKED", preparation["status"])
+                self.assertEqual("BLOCKED", preparation["role_simulation"]["status"])
+                self.assertFalse(preparation["role_simulation"]["invariants"]["service_role_bypass_rls"] if role == "service_role" else preparation["role_simulation"]["invariants"]["anon_authenticated_bypass_rls_false"])
 
     def test_disposable_role_simulation_teardown_drops_only_runner_created_roles(self):
         connection = _Connection()

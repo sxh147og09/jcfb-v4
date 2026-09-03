@@ -26,8 +26,9 @@ dependency metadata. The JSON and Markdown manifests are:
 - database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.md
 
 The recorded content_sha256_noncanonical values are byte-level provenance
-evidence only. The canonical migration hash remains
-PENDING_CANONICAL_HASH because no approved canonicalizer was present.
+evidence only. The canonical migration hashes are generated with the approved
+`v4-canonical-migration@1.0.0` / SHA-256 profile and are still evidence, not
+Production approval.
 
 ## Runtime-safe determinations
 
@@ -36,14 +37,20 @@ PostgreSQL target executable and testable:
 
 1. The session timezone is UTC.
 2. pgcrypto is installed in the local public namespace.
-3. Fresh local no-login roles are created without passwords. The local
-   service_role may use BYPASSRLS only for testing the deny-by-default
-   boundary.
-4. The V4 namespaces are created on a fresh local target.
-5. Candidate 0007 contains fail-closed implementations for chronology,
+3. The disposable container bootstrap provisions a local compatibility
+   `service_role` without a password. Candidate 0001 verifies that the role
+   exists with `rolbypassrls = true`, verifies that `anon` and `authenticated`
+   do not bypass RLS, and fails closed without creating or altering the
+   provider-owned role. A missing or false `service_role` capability is not
+   repaired by the migration.
+4. Fresh local no-login public and V4 roles are created without passwords; the
+   runtime case adapter may create only its minimal local backend fixtures and
+   grant their disposable memberships.
+5. The V4 namespaces are created on a fresh local target.
+6. Candidate 0007 contains fail-closed implementations for chronology,
    frozen-input lineage, role/source separation, review/release scope,
    append-only mutation, public projection, audit, triggers, and RLS.
-6. Candidate 0009 contains registry/acceptance metadata only; it does not seed
+7. Candidate 0009 contains registry/acceptance metadata only; it does not seed
    business matches, odds, predictions, or results.
 
 Production extension availability, role mapping and ownership, namespace

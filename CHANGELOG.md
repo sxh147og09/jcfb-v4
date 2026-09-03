@@ -1,5 +1,13 @@
 # Changelog
 
+## JCFB V4 RESERVED SERVICE_ROLE Forward-Fix 1.0
+
+- Recorded the failed Production attempt as `RESERVED_ROLE_MUTATION`: migration 0001 rolled back, migrations 0002-0009 were not run, the official migration history remained unchanged, and no Production/Supabase committed write occurred.
+- Replaced the unapplied candidate's `ALTER ROLE service_role BYPASSRLS` mutation with a fail-closed verification that the provider-owned role exists with `rolbypassrls=true`; `anon` and `authenticated` must retain `rolbypassrls=false`.
+- Added the separate disposable-only local compatibility-role bootstrap, regression coverage, reserved-role static auditing, and the forward-fix report at `docs/V4_RESERVED_SERVICE_ROLE_FORWARD_FIX.md`.
+- Recomputed canonical hashes: 0001 changed for the prerequisite repair and 0009 changed only because its registry seed embeds the 0001 hash; 0002-0008 remain unchanged. A fresh approval chain is required before any second Production Apply.
+- No V3.3.3 object/history, V4-018/V4-019 item, or BATCH-04 status was changed.
+
 ## JCFB V4 Supabase Preflight Plan Completion 1.0
 
 - Recorded the supplied read-only Production baseline for Supabase project ref `icndieflfvydixtehgzu`, PostgreSQL 17.6, nine existing V3.3.3-era migration rows, public schema counts, named identity samples, and stable Security/Performance advisor fingerprints.

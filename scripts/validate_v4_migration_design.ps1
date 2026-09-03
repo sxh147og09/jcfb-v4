@@ -186,7 +186,10 @@ else { Add-Pass 'Migration sequences unique and ordered' }
 
 $allSql = @(
     (Get-ChildItem -LiteralPath (RepoPath 'database') -Recurse -File -Filter '*.sql' |
-        Where-Object { $_.FullName -notlike (Join-Path $migrationDir.Replace('\migrations\v4', '\migrations\v4_runtime_candidate') '*') })
+        Where-Object {
+            $_.FullName -notlike (Join-Path $migrationDir.Replace('\migrations\v4', '\migrations\v4_runtime_candidate') '*') -and
+            $_.FullName -notlike (Join-Path (RepoPath 'database/runtime') '*')
+        })
 )
 foreach ($sql in $allSql) {
     $content = Get-Content -LiteralPath $sql.FullName -Raw -Encoding utf8
@@ -195,6 +198,17 @@ foreach ($sql in $allSql) {
     }
 }
 if ($failures.Count -eq 0) { Add-Pass 'All design SQL files carry the design-only marker; runtime candidates are validated separately' }
+
+$localRoleBootstrap = RepoPath 'database/runtime/0000_service_role.sql'
+if (Test-Path -LiteralPath $localRoleBootstrap -PathType Leaf) {
+    $bootstrapText = Get-Content -LiteralPath $localRoleBootstrap -Raw -Encoding utf8
+    if ($bootstrapText.StartsWith('-- JCFB V4 DISPOSABLE LOCAL ROLE BOOTSTRAP')) {
+        Add-Pass 'Disposable local role bootstrap is explicitly separated from V4-011 design SQL'
+    }
+    else {
+        Add-Failure 'Disposable local role bootstrap is missing its explicit support-file marker'
+    }
+}
 
 $manifest = RepoPath 'database/migrations/v4/0000_manifest.md'
 if (Test-Path -LiteralPath $manifest -PathType Leaf) {

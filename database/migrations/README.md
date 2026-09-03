@@ -27,7 +27,7 @@ Each file declares `migration_id`, `sequence`, `name`, `migration_version`, `dep
 
 ## Security and rollback
 
-Internal schemas/tables are private by default. `anon` and ordinary `authenticated` have no internal write grants. Public access is restricted to reviewed safe projections/views. `service_role` is server-side only. RLS, triggers, and grants are separate controls.
+Internal schemas/tables are private by default. `anon` and ordinary `authenticated` have no internal write grants and must not have `rolbypassrls`. Public access is restricted to reviewed safe projections/views. `service_role` is a provider-owned server-side role whose `rolbypassrls = true` capability is verified, never changed, by the runtime candidate. RLS, triggers, and grants are separate controls.
 
 Before Production and with no retained data, an approved empty-target rollback may be possible in reverse dependency order. After Production acceptance, all fixes are forward migrations with new identities. Historical migration files, rows, frozen records, audit evidence, and V3.3.3 assets are not rewritten or deleted.
 

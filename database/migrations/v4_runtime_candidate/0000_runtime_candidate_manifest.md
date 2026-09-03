@@ -12,7 +12,7 @@
 
 | Sequence | Candidate | Source design | Depends on | Byte hash (non-canonical) | Canonical migration hash |
 |---:|---|---|---|---|---|
-| 0001 | database/migrations/v4_runtime_candidate/0001_prerequisites.sql | database/migrations/v4/0001_prerequisites.sql @ cd7ebfd51352 | none | afd470be41ae5b8115259587ee779732879acb71a34dbf70bf62628a69cf0d1c | sha256:c55c6d4a882691d9dc006d55915e8584a696de1c9fd9792243c0b0c50713bb28 |
+| 0001 | database/migrations/v4_runtime_candidate/0001_prerequisites.sql | database/migrations/v4/0001_prerequisites.sql @ cd7ebfd51352 | none | 6ea852a6924082767912a46b8859a7610828835273f0f6fb01fe4893f6c63511 | sha256:1b959f089bc3f46e272ee7edc19b6a9665c78b4067cdad470a3ebc98a513f2bb |
 | 0002 | database/migrations/v4_runtime_candidate/0002_registries_core.sql | database/migrations/v4/0002_registries_core.sql @ cd7ebfd51352 | migration@20260901.001 | c85cfae6c1fe7aba3e1bf05be794ec43d5adb47d055dd7db89c0e1f816257504 | sha256:7edfc9c4c2c0085f63d0e0860f0d2f74f6a1e85d9b1ac4e602571347e5dd332a |
 | 0003 | database/migrations/v4_runtime_candidate/0003_market_context.sql | database/migrations/v4/0003_market_context.sql @ cd7ebfd51352 | migration@20260901.002 | 9b621fd38c6030f9b73e45a944a787bd214e1585e231ce7cbe3e1a79b7642881 | sha256:dc493407c012e1296b884ab64eaa251ee6b32fff6c0a9d5cacfe4860098db808 |
 | 0004 | database/migrations/v4_runtime_candidate/0004_frozen_runtime.sql | database/migrations/v4/0004_frozen_runtime.sql @ cd7ebfd51352 | migration@20260901.003 | 3339d35a37d92eca4ca76bf0a42ae02deac5fcf8ed8a190a0a5830bf48140751 | sha256:660e64c210a370ac2e9d2ab13f7ac08b784caa0821df1ad0c4c81db7457ff7bb |
@@ -20,18 +20,19 @@
 | 0006 | database/migrations/v4_runtime_candidate/0006_governance_audit.sql | database/migrations/v4/0006_governance_audit.sql @ cd7ebfd51352 | migration@20260901.005 | 1ba475b2585f3f25d4984f82e2c7e8a94c815f47ff91a2d4728707adc9ee71b8 | sha256:85386b242f6f1ef8fabd1aa09b07f1b4c3082b589b0c6c320bb9705883a5a52d |
 | 0007 | database/migrations/v4_runtime_candidate/0007_security_rls.sql | database/migrations/v4/0007_security_rls.sql @ cd7ebfd51352 | migration@20260901.006 | 367c0b4d52d84e60bca6c1bee797a45f5fc7ea769cf21508efacf9cb2a6978c3 | sha256:952ae622fba16f831389b8bfd3b0bfa05b6278f721c41c768532f37d6178a4b0 |
 | 0008 | database/migrations/v4_runtime_candidate/0008_views_projections.sql | database/migrations/v4/0008_views_projections.sql @ cd7ebfd51352 | migration@20260901.007 | 7cfc47800fb4ac0154468c49eb3e88290dfe80cd529c2048fc1e18e4fcc4046e | sha256:066964964caf34d44c80012120b79f1c09a9e246fe1125d1a7dbb2a88f2a3ce2 |
-| 0009 | database/migrations/v4_runtime_candidate/0009_seed_and_smoke.sql | database/migrations/v4/0009_seed_and_smoke.sql @ cd7ebfd51352 | migration@20260901.008 | 3a5eb2807d1148602271e5a6172c940b575879f3c3800a14b07614229f687c06 | sha256:56c0ad2da49d0a169c080eca023a5a54af4c2089565c244fec5d88301bfd6448 |
+| 0009 | database/migrations/v4_runtime_candidate/0009_seed_and_smoke.sql | database/migrations/v4/0009_seed_and_smoke.sql @ cd7ebfd51352 | migration@20260901.008 | 8d4bec203e1d1b97374c974962f87ad711515a6138599b5e56e77a8dde76c091 | sha256:009467fa464f08457ade762500245918bb7ac251077c5b2ec0b539ca981aadb7 |
 
 ## Candidate execution contract
 
 1. The original database/migrations/v4/0001-0009 design files remain immutable design artifacts.
 2. These files may be considered only by a disposable/local or explicitly approved staging runtime gate.
 3. No candidate file contains a production connection directive, secret, project ID, or production apply path.
-4. `migration_hash` and `canonical_migration_hash` are generated SHA-256 identities; the recorded byte hash remains separate provenance evidence.
+4. `canonical_migration_hash` and `migration_hash` are generated SHA-256 identities; the recorded byte hash remains separate provenance evidence.
 5. Canonical SQL uses UTF-8, LF line endings, strips horizontal trailing whitespace per line, emits exactly one final LF, and preserves SQL tokens, comments, internal whitespace, statement order, and dollar-quoted bodies. The self-hash fields are normalized only during digest calculation and are still verified against the manifest.
 6. Stable metadata input is `migration_id`, `sequence`, `name`, `migration_version`, `depends_on`, `schema_contract_version`, `authored_at`, and the repository-relative candidate file path. Apply timestamps, actor, host, duration, and lifecycle status are excluded.
-7. Candidate 0007 installs real fail-closed lineage, chronology, role/source separation, review, release, public projection, audit, trigger, and RLS gates.
-8. Any production extension, role, namespace, view-security, audit-hash, or executor choice remains PRODUCTION_REVIEW_REQUIRED.
+7. Candidate 0001 verifies a pre-existing service_role with `rolbypassrls=true` and fails closed; it never creates or alters the provider-owned role. The disposable container bootstrap is the only local compatibility-role provisioner.
+8. Candidate 0007 installs real fail-closed lineage, chronology, role/source separation, review, release, public projection, audit, trigger, and RLS gates.
+9. Any production extension, role, namespace, view-security, audit-hash, or executor choice remains PRODUCTION_REVIEW_REQUIRED.
 
 ## Dependency graph
 

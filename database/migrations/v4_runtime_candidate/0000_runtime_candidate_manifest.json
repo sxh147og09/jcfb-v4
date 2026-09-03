@@ -53,8 +53,8 @@
       "schema_contract_version": "v4-database-schema@1.0.0",
       "authored_at": "2026-09-01T00:00:00+08:00",
       "depends_on": [],
-      "canonical_migration_hash": "sha256:c55c6d4a882691d9dc006d55915e8584a696de1c9fd9792243c0b0c50713bb28",
-      "content_sha256_noncanonical": "afd470be41ae5b8115259587ee779732879acb71a34dbf70bf62628a69cf0d1c",
+      "canonical_migration_hash": "sha256:1b959f089bc3f46e272ee7edc19b6a9665c78b4067cdad470a3ebc98a513f2bb",
+      "content_sha256_noncanonical": "6ea852a6924082767912a46b8859a7610828835273f0f6fb01fe4893f6c63511",
       "status": "RUNTIME_VALIDATION_CANDIDATE",
       "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
     },
@@ -205,8 +205,8 @@
       "depends_on": [
         "migration@20260901.008"
       ],
-      "canonical_migration_hash": "sha256:56c0ad2da49d0a169c080eca023a5a54af4c2089565c244fec5d88301bfd6448",
-      "content_sha256_noncanonical": "3a5eb2807d1148602271e5a6172c940b575879f3c3800a14b07614229f687c06",
+      "canonical_migration_hash": "sha256:009467fa464f08457ade762500245918bb7ac251077c5b2ec0b539ca981aadb7",
+      "content_sha256_noncanonical": "8d4bec203e1d1b97374c974962f87ad711515a6138599b5e56e77a8dde76c091",
       "status": "RUNTIME_VALIDATION_CANDIDATE",
       "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
     }
@@ -270,14 +270,14 @@
     "pgcrypto is installed in public; extension availability/version in production remains PRODUCTION_REVIEW_REQUIRED.",
     "V4 schemas are new local namespaces; production coexistence/ownership remains PRODUCTION_REVIEW_REQUIRED.",
     "Session timezone is explicitly UTC.",
-    "No-login local roles are created without passwords; service_role BYPASSRLS is disposable-only.",
+    "No-login local roles are created without passwords; the disposable bootstrap provisions a local service_role compatibility role, and migrations only verify its BYPASSRLS capability.",
     "security_invoker views require the disposable PostgreSQL 16 baseline; production support remains PRODUCTION_REVIEW_REQUIRED.",
     "Audit entry hashes use disposable-runtime-audit-envelope@1.0; canonical production audit profile remains PRODUCTION_REVIEW_REQUIRED."
   ],
   "production_review_required": [
     "Canonical migration byte profile and real migration hashes.",
     "Supabase extension availability/version and schema ownership/namespace coexistence.",
-    "Production role mapping, ownership, service_role policy, and security_invoker support.",
+    "Production role mapping, ownership, service_role provider capability/policy, and security_invoker support.",
     "Production audit envelope/hash profile and controlled release executor identity.",
     "Reconciliation of the existing V4-012 schema snapshot catalog with the migration history/audit tables retained by 0001/0009."
   ],

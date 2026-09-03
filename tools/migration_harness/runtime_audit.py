@@ -7,6 +7,7 @@ SQL.  A local operator can run it before the explicit PowerShell apply gate.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -29,6 +30,11 @@ REQUIRED_FILES = (
     "tools/migration_harness/runtime_case_handlers.py",
     "tools/migration_harness/runtime_schema.py",
     "tools/migration_harness/runtime_audit.py",
+    "tools/migration_harness/promote_runtime_candidates.py",
+    "tools/migration_harness/service_role_prerequisite.py",
+    "tests/migration_harness/test_service_role_prerequisite.py",
+    "database/runtime/0000_service_role.sql",
+    "docs/V4_RESERVED_SERVICE_ROLE_FORWARD_FIX.md",
     "config/migration_harness/v4_runtime_case_execution.json",
     "scripts/v4_run_prebatch04_runtime_validation.ps1",
     "scripts/v4_prebatch04_readiness_gate.psm1",
@@ -61,7 +67,62 @@ ACTIVE_STORAGE_FILES = (
     "scripts/activate_jcfb_v4_runtime.ps1",
     "scripts/v4_run_prebatch04_runtime_validation.ps1",
     "docs/JCFB_V4_LOCAL_STORAGE.md",
+    "database/runtime/0000_service_role.sql",
 )
+
+
+RESERVED_ROLE_MUTATION_RE = re.compile(r"(?i)\b(?:ALTER|CREATE|SET)\s+ROLE\s+service_role\b")
+
+
+def _service_role_forward_fix_audit(repo_root: Path) -> Dict[str, Any]:
+    """Audit the reserved-role boundary without opening a database connection."""
+
+    issues: List[str] = []
+    candidate_dir = repo_root / "database/migrations/v4_runtime_candidate"
+    candidate_0001 = candidate_dir / "0001_prerequisites.sql"
+    generator = repo_root / "tools/migration_harness/promote_runtime_candidates.py"
+    bootstrap = repo_root / "database/runtime/0000_service_role.sql"
+
+    if not candidate_0001.is_file():
+        issues.append("MISSING:database/migrations/v4_runtime_candidate/0001_prerequisites.sql")
+        candidate_text = ""
+    else:
+        candidate_text = candidate_0001.read_text(encoding="utf-8")
+    candidate_texts = [
+        path.read_text(encoding="utf-8")
+        for path in sorted(candidate_dir.glob("*.sql"))
+        if path.is_file()
+    ]
+    if any(RESERVED_ROLE_MUTATION_RE.search(text) for text in candidate_texts):
+        issues.append("RUNTIME_CANDIDATE_RESERVED_ROLE_MUTATION")
+    if RESERVED_ROLE_MUTATION_RE.search(generator.read_text(encoding="utf-8") if generator.is_file() else ""):
+        issues.append("CANDIDATE_GENERATOR_RESERVED_ROLE_MUTATION")
+    for marker in (
+        "SELECT rolbypassrls",
+        "FROM pg_catalog.pg_roles",
+        "IF NOT FOUND",
+        "V4_PREREQUISITE_SERVICE_ROLE_MISSING",
+        "V4_PREREQUISITE_SERVICE_ROLE_BYPASSRLS_REQUIRED",
+        "V4_PREREQUISITE_PUBLIC_ROLE_BYPASSRLS_FORBIDDEN",
+    ):
+        if marker not in candidate_text:
+            issues.append(f"0001_MISSING:{marker}")
+    if not bootstrap.is_file():
+        issues.append("MISSING:database/runtime/0000_service_role.sql")
+        bootstrap_text = ""
+    else:
+        bootstrap_text = bootstrap.read_text(encoding="utf-8")
+    if "JCFB V4 DISPOSABLE LOCAL ROLE BOOTSTRAP" not in bootstrap_text:
+        issues.append("LOCAL_BOOTSTRAP_MARKER_MISSING")
+    if not re.search(r"(?is)\bCREATE\s+ROLE\s+service_role\b.*?\bBYPASSRLS\b", bootstrap_text):
+        issues.append("LOCAL_BOOTSTRAP_SERVICE_ROLE_BYPASSRLS_MISSING")
+    return {
+        "status": "PASS" if not issues else "FAIL",
+        "issues": issues,
+        "candidate_reserved_role_mutation": any(RESERVED_ROLE_MUTATION_RE.search(text) for text in candidate_texts),
+        "generator_reserved_role_mutation": RESERVED_ROLE_MUTATION_RE.search(generator.read_text(encoding="utf-8") if generator.is_file() else "") is not None,
+        "local_bootstrap_separate": bootstrap.is_file() and "JCFB V4 DISPOSABLE LOCAL ROLE BOOTSTRAP" in bootstrap_text,
+    }
 
 
 def _git_status(repo_root: Path) -> Dict[str, Any]:
@@ -107,6 +168,8 @@ def _storage_policy(repo_root: Path) -> Dict[str, Any]:
     example = (repo_root / ".env.runtime-validation.example").read_text(encoding="utf-8") if (repo_root / ".env.runtime-validation.example").is_file() else ""
     if "./.runtime/postgres" not in compose:
         issues.append("POSTGRES_PATH_NOT_REPO_RELATIVE")
+    if "source: ./database/runtime/0000_service_role.sql" not in compose or "read_only: true" not in compose:
+        issues.append("SERVICE_ROLE_BOOTSTRAP_NOT_READ_ONLY_MOUNTED")
     if '"127.0.0.1:55432:5432"' not in compose:
         issues.append("POSTGRES_HOST_PORT_NOT_LOCALHOST")
     if "driver: bridge" not in compose:
@@ -178,6 +241,7 @@ def run_remediation_self_audit(repo_root: Path) -> Dict[str, Any]:
     binding = production_target_binding_report(root)
     cross_doc = run_production_target_cross_doc_consistency(root)
     preflight = build_supabase_preflight_report(root, binding.get("production_target"))
+    service_role = _service_role_forward_fix_audit(root)
     checks = {
         "required_files": _required_files(root),
         "canonical_hashes": {
@@ -211,6 +275,7 @@ def run_remediation_self_audit(repo_root: Path) -> Dict[str, Any]:
         "production_target_binding": binding,
         "production_target_cross_doc_consistency": cross_doc,
         "supabase_preflight_plan": preflight,
+        "service_role_forward_fix": service_role,
         "secret_scan": secrets,
         "git": git,
     }
@@ -225,6 +290,7 @@ def run_remediation_self_audit(repo_root: Path) -> Dict[str, Any]:
         checks["production_target_binding"].get("status") == "PASS",
         checks["production_target_cross_doc_consistency"].get("status") == "PASS",
         checks["supabase_preflight_plan"].get("status") == "PASS",
+        checks["service_role_forward_fix"].get("status") == "PASS",
         secrets.get("status") == "PASS",
     )
     return {

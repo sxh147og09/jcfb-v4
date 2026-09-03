@@ -1232,21 +1232,39 @@ class RuntimeCaseHandlerRunner:
                 for item in role_rows
                 if item["role"] in {"backend", "executor", "auditor"}
             )
-            ok = required.issubset(present) and memberships_ok
+            service_role_bypass_ok = any(
+                item["role"] == "service_role" and item["bypass_rls"]
+                for item in role_rows
+            )
+            public_roles_bypass_ok = all(
+                not item["bypass_rls"]
+                for item in role_rows
+                if item["role"] in {"anon", "authenticated"}
+            )
+            ok = (
+                required.issubset(present)
+                and memberships_ok
+                and service_role_bypass_ok
+                and public_roles_bypass_ok
+            )
             self.role_simulation = {
                 "status": "PASS" if ok else "BLOCKED",
                 "mode": "DISPOSABLE_ROLE_SIMULATION",
                 "roles": role_rows,
+                "invariants": {
+                    "service_role_bypass_rls": service_role_bypass_ok,
+                    "anon_authenticated_bypass_rls_false": public_roles_bypass_ok,
+                },
                 "created_roles": list(self._created_roles),
                 "granted_service_role_memberships": list(self._granted_service_role_memberships),
                 "teardown": {"status": "PENDING"},
                 "supabase_auth_runtime": False,
-                "notes": "No Supabase auth runtime is emulated; anon/authenticated are no-login read roles and backend/executor/auditor are no-login local server-side fixtures.",
+                "notes": "No Supabase auth runtime is emulated; service_role BYPASSRLS is verified as a pre-existing capability, anon/authenticated must not bypass RLS, and backend/executor/auditor are no-login local server-side fixtures.",
             }
             self.preparation = {
                 "status": "PASS" if ok else "BLOCKED",
                 "role_simulation": self.role_simulation,
-                "reason": None if ok else "Required disposable roles or service_role membership are unavailable",
+                "reason": None if ok else "Required disposable roles, service_role BYPASSRLS, service_role membership, or public-role RLS invariant is unavailable",
             }
         except BaseException:
             self.role_simulation = {
