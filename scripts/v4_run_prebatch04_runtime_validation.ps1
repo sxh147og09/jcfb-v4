@@ -116,6 +116,13 @@ try {
     Write-Output ("PRE_BATCH_04_SMOKE_PASSED={0}/20" -f $report.runtime_validation.passed_smoke)
     Write-Output ("PRE_BATCH_04_ENFORCEMENT_PASSED={0}/15" -f $report.runtime_validation.passed_enforcement)
     Write-Output ("PRE_BATCH_04_STAGING_READINESS={0}" -f $report.staging_readiness.status)
+    Write-Output ("PRE_BATCH_04_RUN_ID={0}" -f $report.run_id)
+    Write-Output ("PRE_BATCH_04_STARTED_AT={0}" -f $report.started_at)
+    Write-Output ("PRE_BATCH_04_FINISHED_AT={0}" -f $report.finished_at)
+    Write-Output ("PRE_BATCH_04_GIT_HEAD={0}" -f $report.git_head)
+    Write-Output ("PRE_BATCH_04_REPORT_JSON={0}" -f $report.report_paths.json)
+    Write-Output ("PRE_BATCH_04_REPORT_MARKDOWN={0}" -f $report.report_paths.markdown)
+    Write-Output ("PRE_BATCH_04_REPORT_LATEST={0}" -f $report.report_paths.latest)
     Write-Output 'PRE_BATCH_04_REPORT_SCOPE=.runtime/reports/prebatch04'
     if ($mode -eq 'APPLY' -and ($report.status -ne 'RUNTIME_VALIDATION_PASS' -or $report.staging_readiness.status -ne 'READY_FOR_PRODUCTION_REVIEW')) {
         exit 1

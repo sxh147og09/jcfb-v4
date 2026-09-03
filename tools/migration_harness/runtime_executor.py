@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence
@@ -23,6 +25,10 @@ ALLOWED_TARGET_ENVIRONMENTS = {"DISPOSABLE_LOCAL", "STAGING"}
 PRODUCTION_ENVIRONMENT = "PRODUCTION"
 DEFAULT_ACTOR = "jcfb-v4-runtime-executor"
 DEFAULT_REPORT_RELATIVE = ".runtime/reports/prebatch04"
+RUNTIME_REPORT_FILENAME = "prebatch04_runtime_validation.json"
+RUNTIME_REPORT_MARKDOWN_FILENAME = "prebatch04_runtime_validation.md"
+RUNTIME_REPORT_POINTER_FILENAME = "latest.json"
+RUNTIME_REPORT_POINTER_VERSION = "v4-runtime-report-latest@1.0.0"
 _SQL_BEGIN_RE = re.compile(r"(?im)^\s*BEGIN;\s*$")
 _SQL_COMMIT_RE = re.compile(r"(?im)^\s*COMMIT;\s*$")
 
@@ -37,6 +43,125 @@ SQL_APPLY_FAILED = "SQL_APPLY_FAILED"
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _parse_report_time(value: Any) -> Optional[datetime]:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def _compact_report_time(value: str) -> str:
+    parsed = _parse_report_time(value)
+    if parsed is None:
+        return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return parsed.strftime("%Y%m%dT%H%M%SZ")
+
+
+def _git_head(repo_root: Path) -> Optional[str]:
+    try:
+        completed = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=5,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    value = completed.stdout.strip()
+    return value if re.fullmatch(r"[0-9a-fA-F]{7,64}", value) else None
+
+
+def _safe_report_count(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _runtime_summary_lines(report: Mapping[str, Any]) -> List[str]:
+    runtime = report.get("runtime_validation") if isinstance(report.get("runtime_validation"), Mapping) else {}
+    wiring = report.get("runtime_case_wiring") if isinstance(report.get("runtime_case_wiring"), Mapping) else {}
+    hashes = report.get("hash_verification") if isinstance(report.get("hash_verification"), Mapping) else {}
+    readiness = report.get("staging_readiness") if isinstance(report.get("staging_readiness"), Mapping) else {}
+    smoke_count = _safe_report_count(runtime.get("smoke_count", wiring.get("smoke_count", 20)), 20)
+    enforcement_count = _safe_report_count(runtime.get("enforcement_count", wiring.get("enforcement_count", 15)), 15)
+    smoke_passed = _safe_report_count(
+        report.get("smoke_passed", runtime.get("passed_smoke", 0)), 0
+    )
+    enforcement_passed = _safe_report_count(
+        report.get("enforcement_passed", runtime.get("passed_enforcement", 0)), 0
+    )
+    return [
+        f"PRE_BATCH_04_RUNTIME_MODE={report.get('mode', 'UNKNOWN')}",
+        f"PRE_BATCH_04_RUNTIME_STATUS={report.get('status', 'UNKNOWN')}",
+        f"PRE_BATCH_04_HASHES={_safe_report_count(hashes.get('matched_count'), 0)}/{_safe_report_count(hashes.get('candidate_count'), 0)}",
+        f"PRE_BATCH_04_SMOKE_EXECUTABLE_HANDLERS={_safe_report_count(wiring.get('smoke_executable_handler_count'), 0)}/{smoke_count}",
+        f"PRE_BATCH_04_ENFORCEMENT_EXECUTABLE_HANDLERS={_safe_report_count(wiring.get('enforcement_executable_handler_count'), 0)}/{enforcement_count}",
+        f"PRE_BATCH_04_SMOKE_PASSED={smoke_passed}/{smoke_count}",
+        f"PRE_BATCH_04_ENFORCEMENT_PASSED={enforcement_passed}/{enforcement_count}",
+        f"PRE_BATCH_04_STAGING_READINESS={readiness.get('status', 'UNKNOWN')}",
+    ]
+
+
+def _materialize_runtime_report(
+    report: Mapping[str, Any],
+    repo_root: Path,
+    *,
+    run_id: Optional[str] = None,
+    started_at: Optional[str] = None,
+    finished_at: Optional[str] = None,
+    git_head: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Attach immutable identity to one report write.
+
+    The writer intentionally does not reuse identity fields already present in
+    ``report``.  Reusing a dict from a previous invocation would make a second
+    runtime run appear to be the first one, which was the failure mode this
+    persistence contract is designed to prevent.
+    """
+
+    started = started_at or _now_iso()
+    finished = finished_at or _now_iso()
+    actual_run_id = run_id or f"prebatch04-{_compact_report_time(started)}-{uuid.uuid4().hex}"
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{7,127}", actual_run_id):
+        raise ValueError("Runtime report run_id is not a safe path component")
+    value = dict(report)
+    value.update(
+        {
+            "run_id": actual_run_id,
+            "started_at": started,
+            "finished_at": finished,
+            "git_head": git_head if git_head is not None else _git_head(repo_root),
+        }
+    )
+    runtime = value.get("runtime_validation") if isinstance(value.get("runtime_validation"), Mapping) else {}
+    value["smoke_passed"] = _safe_report_count(runtime.get("passed_smoke"), 0)
+    value["enforcement_passed"] = _safe_report_count(runtime.get("passed_enforcement"), 0)
+    value["runtime_summary_lines"] = _runtime_summary_lines(value)
+    return value
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
+    try:
+        temporary.write_text(content, encoding="utf-8", newline="\n")
+        temporary.replace(path)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def _report_path_is_inside(root: Path, path: Path) -> bool:
+    return root == path or root in path.parents
 
 
 def default_disposable_target(database_name: str = "jcfb_v4_runtime") -> Dict[str, Any]:
@@ -912,8 +1037,20 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
     readiness = report.get("staging_readiness", {})
     taxonomy = report.get("failure_taxonomy", {})
     error = report.get("error", {})
+    runtime_summary_lines = report.get("runtime_summary_lines")
+    if not isinstance(runtime_summary_lines, list) or not all(
+        isinstance(item, str) for item in runtime_summary_lines
+    ):
+        runtime_summary_lines = _runtime_summary_lines(report)
     lines = [
         "# JCFB V4 PRE-BATCH-04 Runtime Validation Report",
+        "",
+        f"- run_id: `{report.get('run_id', 'NOT_PERSISTED')}`",
+        f"- started_at: `{report.get('started_at', 'NOT_PERSISTED')}`",
+        f"- finished_at: `{report.get('finished_at', 'NOT_PERSISTED')}`",
+        f"- git_head: `{report.get('git_head', 'NOT_PERSISTED')}`",
+        f"- smoke_passed: `{report.get('smoke_passed', runtime.get('passed_smoke', 0))}/{runtime.get('smoke_count', 20)}`",
+        f"- enforcement_passed: `{report.get('enforcement_passed', runtime.get('passed_enforcement', 0))}/{runtime.get('enforcement_count', 15)}`",
         "",
         f"- Status: `{report.get('status')}`",
         f"- Contract: `{report.get('contract_version')}`",
@@ -935,6 +1072,12 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
         f"- Production/Supabase writes performed: `{report.get('production_db_writes_performed', boundary.get('production_db_writes_performed', 'NO'))}/{report.get('supabase_writes_performed', boundary.get('supabase_writes_performed', 'NO'))}`",
         "- BATCH-04/V4-018/V4-019 changed: `NO`",
         "",
+        "## Persisted runtime summary",
+        "",
+        "```text",
+        *runtime_summary_lines,
+        "```",
+        "",
         "## Runtime case wiring",
         "",
         f"- Smoke bindings: `{wiring.get('smoke_count', 0)}/20`",
@@ -945,6 +1088,7 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
         f"- Cases executed: `{runtime.get('actually_executed', 0)}/35`",
         f"- Expected-reject matching: `{runtime.get('expected_reject_matching', 'NOT_RUN')}`",
         f"- Role simulation: `{(runtime.get('role_simulation') or {}).get('status', 'NOT_RUN')}`",
+        f"- Case cleanup: `{(runtime.get('cleanup') or {}).get('status', 'NOT_RUN')}`",
         "",
         "## Migration history",
         "",
@@ -973,7 +1117,7 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
     lines.extend([f"- {name}: `{'PASS' if value else 'FAIL'}`" for name, value in readiness_checks.items()] or ["- No readiness checks were run"])
     lines.extend(["", "## Blocking reasons", ""])
     lines.extend([f"- `{reason}`" for reason in (report.get("blocking_reasons") or [])] or ["- None"])
-    lines.extend(["", "## Runtime cases", "", "| Case | Kind | Status | Expected | Actual | Error class | SQLSTATE | DB object/constraint/trigger/policy | Handler | Reason |", "|---|---|---|---|---|---|---|---|---|---|"])
+    lines.extend(["", "## Runtime cases", "", "| Case | Kind | Status | Expected | Actual | Phase | Transaction state | Error class | SQLSTATE | DB object/constraint/trigger/policy | Matcher | Previous-case contamination | Handler | Reason |", "|---|---|---|---|---|---|---|---|---|---|---|---|---|---"])
     case_results = runtime.get("results", []) if isinstance(runtime, Mapping) else []
     if case_results:
         for result in case_results:
@@ -990,10 +1134,10 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
             mechanism_text = mechanism_text.replace("|", "/")
             reason_text = str(result.get("reason") or result.get("blocked_reason") or result.get("expected_rejection_match_reason") or "-").replace("|", "/").replace("\r", " ").replace("\n", " ")
             lines.append(
-                f"| {result.get('case_id')} | {result.get('kind')} | {result.get('status')} | {result.get('expected_outcome', '-')} | {result.get('actual_outcome', '-')} | {result.get('error_class') or '-'} | {result.get('error_sqlstate') or '-'} | {mechanism_text} | {result.get('hook_name')} | {reason_text} |"
+                f"| {result.get('case_id')} | {result.get('kind')} | {result.get('status')} | {result.get('expected_outcome', '-')} | {result.get('actual_outcome', '-')} | {result.get('execution_phase') or result.get('phase') or '-'} | {result.get('transaction_state') or '-'} | {result.get('error_class') or '-'} | {result.get('error_sqlstate') or '-'} | {mechanism_text} | {result.get('expected_rejection_match') if result.get('expected_rejection_match') is not None else '-'} | {result.get('contaminated_by_previous_case', '-')} | {result.get('hook_name')} | {reason_text} |"
             )
     else:
-        lines.append("| - | - | NOT_RUN | - | - | - | - | - | - | - |")
+        lines.append("| - | - | NOT_RUN | - | - | - | - | - | - | - | - | - | - | - |")
     if taxonomy:
         lines.extend(
             [
@@ -1019,16 +1163,118 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def write_runtime_report(report: Mapping[str, Any], repo_root: Path, report_dir: Optional[Path] = None) -> Dict[str, str]:
+def list_runtime_report_paths(report_dir: Path) -> List[Path]:
+    """List valid report filenames under the report root and all run folders."""
+
+    root = Path(report_dir).resolve()
+    if not root.is_dir():
+        return []
+    return sorted(
+        path
+        for path in root.rglob(RUNTIME_REPORT_FILENAME)
+        if path.is_file() and _report_path_is_inside(root, path.resolve())
+    )
+
+
+def _read_runtime_report(path: Path) -> Optional[Dict[str, Any]]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError):
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def _runtime_report_sort_key(path: Path) -> tuple[Any, ...]:
+    value = _read_runtime_report(path) or {}
+    timestamp = _parse_report_time(value.get("finished_at")) or _parse_report_time(value.get("started_at"))
+    return (
+        1 if timestamp is not None else 0,
+        timestamp or datetime.min.replace(tzinfo=timezone.utc),
+        path.stat().st_mtime_ns,
+        str(value.get("run_id") or ""),
+        path.as_posix(),
+    )
+
+
+def select_latest_runtime_report(report_dir: Path) -> Optional[Path]:
+    """Select the newest valid report, including reports in timestamped runs.
+
+    A valid latest pointer is written for operator convenience, but selection
+    still compares every valid report.  That prevents a stale pointer from
+    hiding a newer report if a run was copied or recovered manually.
+    """
+
+    candidates = [path for path in list_runtime_report_paths(report_dir) if _read_runtime_report(path) is not None]
+    return max(candidates, key=_runtime_report_sort_key) if candidates else None
+
+
+def load_latest_runtime_report(report_dir: Path) -> Dict[str, Any]:
+    path = select_latest_runtime_report(report_dir)
+    if path is None:
+        raise FileNotFoundError(f"No valid {RUNTIME_REPORT_FILENAME} found under {Path(report_dir).resolve()}")
+    value = _read_runtime_report(path)
+    if value is None:
+        raise ValueError(f"Selected runtime report is not valid JSON: {path}")
+    value["_selected_report_path"] = path.as_posix()
+    return value
+
+
+def write_runtime_report(
+    report: Mapping[str, Any],
+    repo_root: Path,
+    report_dir: Optional[Path] = None,
+    *,
+    run_id: Optional[str] = None,
+    started_at: Optional[str] = None,
+    finished_at: Optional[str] = None,
+    git_head: Optional[str] = None,
+) -> Dict[str, str]:
     directory = (report_dir or (repo_root / DEFAULT_REPORT_RELATIVE)).resolve()
     root = repo_root.resolve()
     if root not in directory.parents and directory != root:
         raise ValueError("Runtime report directory must remain inside the repository")
     directory.mkdir(parents=True, exist_ok=True)
-    json_path = directory / "prebatch04_runtime_validation.json"
-    markdown_path = directory / "prebatch04_runtime_validation.md"
-    with json_path.open("w", encoding="utf-8", newline="\n") as handle:
-        json.dump(dict(report), handle, ensure_ascii=False, indent=2)
-        handle.write("\n")
-    markdown_path.write_text(render_runtime_report_markdown(report), encoding="utf-8", newline="\n")
-    return {"json": json_path.as_posix(), "markdown": markdown_path.as_posix()}
+    runs_directory = directory / "runs"
+    runs_directory.mkdir(parents=True, exist_ok=True)
+    materialized = _materialize_runtime_report(
+        report,
+        root,
+        run_id=run_id,
+        started_at=started_at,
+        finished_at=finished_at,
+        git_head=git_head,
+    )
+    run_directory = (runs_directory / materialized["run_id"]).resolve()
+    if not _report_path_is_inside(directory, run_directory):
+        raise ValueError("Runtime report run directory must remain inside the report root")
+    run_directory.mkdir(parents=False, exist_ok=False)
+    json_path = run_directory / RUNTIME_REPORT_FILENAME
+    markdown_path = run_directory / RUNTIME_REPORT_MARKDOWN_FILENAME
+    _atomic_write_text(
+        json_path,
+        json.dumps(materialized, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+    )
+    _atomic_write_text(markdown_path, render_runtime_report_markdown(materialized))
+
+    pointer_path = directory / RUNTIME_REPORT_POINTER_FILENAME
+    pointer = {
+        "pointer_version": RUNTIME_REPORT_POINTER_VERSION,
+        "run_id": materialized["run_id"],
+        "started_at": materialized["started_at"],
+        "finished_at": materialized["finished_at"],
+        "git_head": materialized["git_head"],
+        "smoke_passed": materialized["smoke_passed"],
+        "enforcement_passed": materialized["enforcement_passed"],
+        "json": json_path.relative_to(directory).as_posix(),
+        "markdown": markdown_path.relative_to(directory).as_posix(),
+    }
+    _atomic_write_text(pointer_path, json.dumps(pointer, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
+    if isinstance(report, dict):
+        report.clear()
+        report.update(materialized)
+    return {
+        "json": json_path.as_posix(),
+        "markdown": markdown_path.as_posix(),
+        "latest": pointer_path.as_posix(),
+        "run_id": str(materialized["run_id"]),
+    }

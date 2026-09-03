@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -13,9 +14,16 @@ from tools.migration_harness.runtime_case_handlers import (
     RuntimeCaseHandlerRunner,
     _hash,
     _id,
+    _official_market_states,
     match_expected_rejection,
 )
-from tools.migration_harness.runtime_executor import RuntimeExecutor, render_runtime_report_markdown
+from tools.migration_harness.runtime_executor import (
+    RuntimeExecutor,
+    load_latest_runtime_report,
+    render_runtime_report_markdown,
+    select_latest_runtime_report,
+    write_runtime_report,
+)
 from tools.migration_harness.runtime_tests import (
     _normalize_adapter_result,
     load_runtime_case_bindings,
@@ -38,6 +46,12 @@ class _DbError(Exception):
         self.diag = _Diag(sqlstate, constraint_name, message_primary)
 
 
+class _DiagOnlyError(Exception):
+    def __init__(self, sqlstate: str, message_primary: str, constraint_name: str | None = None):
+        super().__init__("")
+        self.diag = _Diag(sqlstate, constraint_name, message_primary)
+
+
 class _Cursor:
     def __init__(self, connection: "_Connection"):
         self.connection = connection
@@ -49,6 +63,24 @@ class _Cursor:
         self.connection.executed.append((sql, values))
         if self.connection.fail_sql and self.connection.fail_sql in sql:
             raise _DbError("", "23514", message_primary="fixture failure")
+        if "DO $$ DECLARE role_name" in sql:
+            for role in ("backend", "executor", "auditor"):
+                self.connection.roles.setdefault(
+                    role,
+                    {"rolinherit": True, "rolbypassrls": True, "service_role_member": False},
+                )
+        elif "GRANT service_role TO" in sql:
+            for role in ("backend", "executor", "auditor"):
+                if role in self.connection.roles:
+                    self.connection.roles[role]["service_role_member"] = True
+        elif "REVOKE service_role FROM" in sql:
+            for role in ("backend", "executor", "auditor"):
+                if role in self.connection.roles:
+                    self.connection.roles[role]["service_role_member"] = False
+        elif "DROP ROLE IF EXISTS" in sql:
+            match = re.search(r'DROP ROLE IF EXISTS "([a-z_]+)"', sql, flags=re.IGNORECASE)
+            if match:
+                self.connection.roles.pop(match.group(1), None)
         self.description = []
         self._rows = []
         if "FROM pg_catalog.pg_roles" in sql:
@@ -59,12 +91,13 @@ class _Cursor:
                 ("service_role_member",),
             ]
             self._rows = [
-                ("anon", False, False, False),
-                ("authenticated", False, False, False),
-                ("service_role", False, True, False),
-                ("backend", True, True, True),
-                ("executor", True, True, True),
-                ("auditor", True, True, True),
+                (
+                    role,
+                    values["rolinherit"],
+                    values["rolbypassrls"],
+                    values["service_role_member"],
+                )
+                for role, values in sorted(self.connection.roles.items())
             ]
         elif "to_regprocedure" in sql:
             self.description = [("object_name",)]
@@ -83,6 +116,14 @@ class _Connection:
         self.commit_count = 0
         self.rollback_count = 0
         self.fail_sql = None
+        self.roles = {
+            "anon": {"rolinherit": False, "rolbypassrls": False, "service_role_member": False},
+            "authenticated": {"rolinherit": False, "rolbypassrls": False, "service_role_member": False},
+            "service_role": {"rolinherit": False, "rolbypassrls": True, "service_role_member": False},
+            "backend": {"rolinherit": True, "rolbypassrls": True, "service_role_member": True},
+            "executor": {"rolinherit": True, "rolbypassrls": True, "service_role_member": True},
+            "auditor": {"rolinherit": True, "rolbypassrls": True, "service_role_member": True},
+        }
 
     def cursor(self):
         return _Cursor(self)
@@ -92,6 +133,17 @@ class _Connection:
 
     def rollback(self):
         self.rollback_count += 1
+
+
+class _CleanupFailureConnection(_Connection):
+    def __init__(self, fail_on_rollback: int):
+        super().__init__()
+        self.fail_on_rollback = fail_on_rollback
+
+    def rollback(self):
+        self.rollback_count += 1
+        if self.rollback_count >= self.fail_on_rollback:
+            raise RuntimeError("simulated cleanup failure")
 
 
 class _HandlerProbeContext:
@@ -269,6 +321,20 @@ class RuntimeCaseExecutionTests(unittest.TestCase):
         error = _DbError("", "23514", message_primary="OFFICIAL_RQSPF_HANDICAP_REQUIRED")
         self.assertTrue(match_expected_rejection(error, expected))
 
+    def test_outer_normalizer_preserves_diag_only_sqlstate(self):
+        binding = next(item for item in load_runtime_case_bindings(self.repo_root)["enforcement"] if item.case_id == "NEG-08")
+        result = _normalize_adapter_result(
+            binding,
+            {
+                "status": "PASS",
+                "actual_outcome": "REJECT",
+                "error": _DiagOnlyError("23514", "OFFICIAL_AVAILABLE_MARKET_REQUIRES_PAYLOAD"),
+                "verification": {"no_row": True},
+            },
+        )
+        self.assertEqual("PASS_EXPECTED_REJECT", result["status"])
+        self.assertEqual("23514", result["error_sqlstate"])
+
     def test_unique_constraint_rejection_is_classified_from_driver_diagnostics(self):
         binding = next(item for item in load_runtime_case_bindings(self.repo_root)["smoke"] if item.case_id == "SMOKE-02")
         runner = object.__new__(RuntimeCaseHandlerRunner)
@@ -320,6 +386,41 @@ class RuntimeCaseExecutionTests(unittest.TestCase):
         self.assertNotIn("driver-detail-should-not-ship", json.dumps(redacted_result).lower())
         self.assertNotIn("error", redacted_result)
 
+    def test_redacted_governed_rejection_survives_outer_normalization(self):
+        binding = next(item for item in load_runtime_case_bindings(self.repo_root)["enforcement"] if item.case_id == "NEG-08")
+        runner = object.__new__(RuntimeCaseHandlerRunner)
+        evaluated = runner._evaluate(
+            binding,
+            {
+                "actual_outcome": "REJECT",
+                "error": _DbError("OFFICIAL_AVAILABLE_MARKET_REQUIRES_PAYLOAD", "23514"),
+                "verification": {"no_row": True},
+            },
+            "REJECT",
+        )
+        self.assertNotIn("error", evaluated)
+        normalized = _normalize_adapter_result(binding, evaluated)
+        self.assertEqual("PASS_EXPECTED_REJECT", normalized["status"])
+        self.assertTrue(normalized["expected_rejection_match"])
+        self.assertEqual("23514", normalized["error_sqlstate"])
+
+    def test_redacted_rejection_without_exact_governed_evidence_does_not_pass(self):
+        binding = next(item for item in load_runtime_case_bindings(self.repo_root)["enforcement"] if item.case_id == "NEG-08")
+        result = _normalize_adapter_result(
+            binding,
+            {
+                "status": "PASS_EXPECTED_REJECT",
+                "actual_outcome": "REJECT",
+                "verification": {"no_row": True},
+                "expected_mechanism": dict(binding.execution)["expected_mechanism"],
+                "expected_rejection_match": True,
+                "expected_rejection_match_reason": "MATCH",
+                "error_sqlstate": "23514",
+                "result_origin": "INJECTED_ADAPTER",
+            },
+        )
+        self.assertEqual("FAIL_UNEXPECTED_REJECT", result["status"])
+
     def test_case_context_uses_savepoints_and_rolls_back_complete_case(self):
         connection = _Connection()
         context = CaseContext(connection, "SMOKE-TEST", "unit-test-actor")
@@ -350,6 +451,20 @@ class RuntimeCaseExecutionTests(unittest.TestCase):
         self.assertTrue(any(statement.startswith("ROLLBACK TO SAVEPOINT") for statement in sql))
         self.assertGreaterEqual(connection.rollback_count, 2)
 
+    def test_cleanup_failure_quarantines_connection_before_next_case(self):
+        connection = _CleanupFailureConnection(fail_on_rollback=3)
+        runner = RuntimeCaseHandlerRunner(connection, actor="unit-test-actor")
+        binding = next(item for item in load_runtime_case_bindings(self.repo_root)["smoke"] if item.case_id == "SMOKE-17")
+        first = runner.run_case(binding)
+        second = runner.run_case(binding)
+        self.assertEqual("BLOCKED_ENVIRONMENT", first["status"])
+        self.assertEqual("CLEANUP", first["phase"])
+        self.assertEqual("FAIL", first["cleanup_phase"])
+        self.assertEqual("BLOCKED_ENVIRONMENT", second["status"])
+        self.assertFalse(second["actually_executed"])
+        self.assertTrue(second["contaminated_by_previous_case"])
+        self.assertEqual("CLEANUP", second["execution_phase"])
+
     def test_accept_postconditions_handle_native_driver_values(self):
         context = _HandlerProbeContext()
         runner = object.__new__(RuntimeCaseHandlerRunner)
@@ -362,6 +477,32 @@ class RuntimeCaseExecutionTests(unittest.TestCase):
                 context.case_id = case_id
                 result = getattr(runner, hook_name)(context)
                 self.assertTrue(all(result["verification"].values()))
+
+    def test_all_enforcement_handlers_reach_action_and_assert_in_probe_context(self):
+        context = _HandlerProbeContext()
+        runner = object.__new__(RuntimeCaseHandlerRunner)
+        bindings = load_runtime_case_bindings(self.repo_root)["enforcement"]
+        self.assertEqual(15, len(bindings))
+        for binding in bindings:
+            with self.subTest(case_id=binding.case_id):
+                context.case_id = binding.case_id
+                result = getattr(runner, binding.hook_name)(context)
+                self.assertEqual("REJECT", result["actual_outcome"])
+                self.assertTrue(result["verification"])
+                self.assertTrue(all(isinstance(value, bool) for value in result["verification"].values()))
+
+    def test_official_market_fixture_uses_authoritative_unavailable_semantics(self):
+        availability_json, reasons_json, payloads = _official_market_states(unavailable="rqspf")
+        availability = json.loads(availability_json)
+        reasons = json.loads(reasons_json)
+        self.assertEqual("UNAVAILABLE", availability["rqspf"]["status"])
+        self.assertEqual("OFFICIAL_MARKET_NOT_ON_SALE", availability["rqspf"]["reason"])
+        self.assertIsNone(payloads["rqspf"])
+        self.assertEqual("OFFICIAL_MARKET_NOT_ON_SALE", reasons["rqspf"])
+        for market in ("spf", "total_goals", "exact_score", "half_full"):
+            self.assertEqual("AVAILABLE", availability[market]["status"])
+            self.assertEqual("NOT_APPLICABLE", availability[market]["reason"])
+            self.assertEqual("NOT_APPLICABLE", reasons[market])
 
     def test_tier_a_mismatch_fixture_reaches_pair_action_after_valid_lineage_setup(self):
         context = _HandlerProbeContext()
@@ -384,6 +525,24 @@ class RuntimeCaseExecutionTests(unittest.TestCase):
         self.assertTrue(any("CREATE ROLE" in sql for sql, _ in connection.executed))
         self.assertTrue(any("GRANT service_role" in sql for sql, _ in connection.executed))
         self.assertEqual(1, connection.commit_count)
+
+    def test_disposable_role_simulation_teardown_drops_only_runner_created_roles(self):
+        connection = _Connection()
+        for role in ("backend", "executor", "auditor"):
+            connection.roles.pop(role)
+        runner = RuntimeCaseHandlerRunner(connection, actor="unit-test-actor")
+        preparation = runner.prepare()
+        self.assertEqual(["backend", "executor", "auditor"], preparation["role_simulation"]["created_roles"])
+        self.assertEqual(
+            ["backend", "executor", "auditor"],
+            preparation["role_simulation"]["granted_service_role_memberships"],
+        )
+        cleanup = runner.teardown()
+        self.assertEqual("PASS", cleanup["status"])
+        self.assertEqual({"anon", "authenticated", "service_role"}, set(connection.roles))
+        self.assertTrue(any("REVOKE service_role FROM" in sql for sql, _ in connection.executed))
+        self.assertTrue(any("DROP ROLE IF EXISTS" in sql for sql, _ in connection.executed))
+        self.assertEqual(cleanup, runner.teardown())
 
     def test_blocked_preparation_produces_closed_result_vocabulary(self):
         report = run_runtime_cases(self.repo_root, _BlockedAdapter())
@@ -460,6 +619,67 @@ class RuntimeCaseExecutionTests(unittest.TestCase):
         self.assertIn("NEG-08", rendered)
         self.assertIn("NOT_RUN_IN_DISPOSABLE", rendered)
         self.assertNotIn("password", rendered.lower())
+
+    def test_runtime_report_writer_persists_unique_runs_and_latest_selection(self):
+        report = {
+            "status": "RUNTIME_VALIDATION_FAILED",
+            "contract_version": "v4-runtime-executor@1.0.0",
+            "mode": "APPLY",
+            "target": {"target_id": "jcfb-v4-disposable-runtime", "environment": "DISPOSABLE_LOCAL"},
+            "hash_verification": {"status": "PASS", "matched_count": 9, "candidate_count": 9},
+            "runtime_case_wiring": {
+                "smoke_executable_handler_count": 20,
+                "enforcement_executable_handler_count": 15,
+                "smoke_count": 20,
+                "enforcement_count": 15,
+            },
+            "runtime_validation": {
+                "status": "FAIL",
+                "passed_smoke": 7,
+                "passed_enforcement": 0,
+                "smoke_count": 20,
+                "enforcement_count": 15,
+                "results": [],
+            },
+            "staging_readiness": {"status": "BLOCKED_RUNTIME_VALIDATION"},
+        }
+        with tempfile.TemporaryDirectory(dir=str(self.repo_root)) as directory:
+            report_dir = Path(directory) / "prebatch04"
+            first = write_runtime_report(
+                report,
+                self.repo_root,
+                report_dir=report_dir,
+                started_at="2026-09-03T10:00:00+00:00",
+                finished_at="2026-09-03T10:00:01+00:00",
+                git_head="a" * 40,
+            )
+            second = write_runtime_report(
+                report,
+                self.repo_root,
+                report_dir=report_dir,
+                started_at="2026-09-03T10:01:00+00:00",
+                finished_at="2026-09-03T10:01:01+00:00",
+                git_head="b" * 40,
+            )
+            self.assertNotEqual(first["json"], second["json"])
+            self.assertNotEqual(first["run_id"], second["run_id"])
+            selected = select_latest_runtime_report(report_dir)
+            self.assertEqual(Path(second["json"]).resolve(), selected)
+            loaded = load_latest_runtime_report(report_dir)
+            self.assertEqual(second["run_id"], loaded["run_id"])
+            self.assertEqual("b" * 40, loaded["git_head"])
+            self.assertEqual(7, loaded["smoke_passed"])
+            self.assertEqual(0, loaded["enforcement_passed"])
+            self.assertIn("PRE_BATCH_04_SMOKE_PASSED=7/20", loaded["runtime_summary_lines"])
+            self.assertIn("PRE_BATCH_04_ENFORCEMENT_PASSED=0/15", loaded["runtime_summary_lines"])
+            pointer = json.loads(Path(second["latest"]).read_text(encoding="utf-8"))
+            self.assertEqual(second["run_id"], pointer["run_id"])
+            self.assertEqual(second["json"], str(report_dir / pointer["json"]).replace("\\", "/"))
+            markdown = Path(second["markdown"]).read_text(encoding="utf-8")
+            for field in ("run_id", "started_at", "finished_at", "git_head", "smoke_passed", "enforcement_passed"):
+                self.assertIn(f"- {field}: ", markdown)
+            self.assertIn("PRE_BATCH_04_SMOKE_PASSED=7/20", markdown)
+            self.assertIn("PRE_BATCH_04_ENFORCEMENT_PASSED=0/15", markdown)
 
 
 if __name__ == "__main__":

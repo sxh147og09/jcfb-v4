@@ -123,12 +123,19 @@ V4-018/V4-019.
 
 ## Capture and teardown
 
-Review these redacted files after local execution:
+Review the redacted latest pointer and the immutable per-run files after local
+execution:
 
 ```text
-.runtime\reports\prebatch04\prebatch04_runtime_validation.json
-.runtime\reports\prebatch04\prebatch04_runtime_validation.md
+.runtime\reports\prebatch04\latest.json
+.runtime\reports\prebatch04\runs\<run_id>\prebatch04_runtime_validation.json
+.runtime\reports\prebatch04\runs\<run_id>\prebatch04_runtime_validation.md
 ```
+
+The report writer never overwrites an earlier run. Use the persisted `run_id`,
+timestamps, `git_head`, and `runtime_summary_lines` to match the terminal
+summary to one exact invocation; the selector also scans all run directories
+when recovering the newest valid report.
 
 Stop the container when finished:
 

@@ -6,7 +6,7 @@
 -- source_design_file: database/migrations/v4/0007_security_rls.sql
 -- source_design_commit: cd7ebfd5135275536c2d54ca1ecd980bb386dcfa
 -- candidate_manifest: database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.md
--- canonical_migration_hash: sha256:d173aca3dfe5af43fca1a6efd01eeb6abc0dde09bae332afd5e0faa3f3b7b243
+-- canonical_migration_hash: sha256:952ae622fba16f831389b8bfd3b0bfa05b6278f721c41c768532f37d6178a4b0
 -- production_status: PRODUCTION_REVIEW_REQUIRED
 --
 -- migration_id: migration@20260901.007
@@ -16,7 +16,7 @@
 -- depends_on: [migration@20260901.006]
 -- schema_contract_version: v4-database-schema@1.0.0
 -- authored_at: 2026-09-01T00:00:00+08:00
--- migration_hash: sha256:d173aca3dfe5af43fca1a6efd01eeb6abc0dde09bae332afd5e0faa3f3b7b243
+-- migration_hash: sha256:952ae622fba16f831389b8bfd3b0bfa05b6278f721c41c768532f37d6178a4b0
 -- status: DRAFT
 -- This candidate installs the disposable security, trigger, RLS, and role boundary.
 
@@ -271,7 +271,12 @@ BEGIN
         END IF;
       END LOOP;
     ELSE
-      IF status_value <> 'UNAVAILABLE' OR market_reason = '' OR market_payload IS NOT NULL THEN
+      -- to_jsonb(NEW) represents a nullable JSONB column as JSON null.  Treat
+      -- SQL NULL and JSON null alike for an explicitly unavailable market,
+      -- while still rejecting any object, scalar, or array payload.
+      IF status_value <> 'UNAVAILABLE'
+         OR market_reason = ''
+         OR (market_payload IS NOT NULL AND jsonb_typeof(market_payload) IS DISTINCT FROM 'null') THEN
         RAISE EXCEPTION 'OFFICIAL_UNAVAILABLE_MARKET_REQUIRES_REASON_AND_NO_PAYLOAD for %', market_name USING ERRCODE = '23514';
       END IF;
       IF btrim(COALESCE(unavailable_reasons->>market_name, '')) = '' THEN

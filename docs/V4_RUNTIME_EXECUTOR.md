@@ -143,6 +143,13 @@ the candidate schema has no equivalent role. Existing `anon` and
 reported as `DISPOSABLE_ROLE_SIMULATION`; it is not a Supabase auth runtime.
 Supabase Advisor remains `NOT_RUN_IN_DISPOSABLE`.
 
+The local role simulation records which `backend`, `executor`, and `auditor`
+roles or `service_role` memberships were absent before preparation. After the
+35 cases, it revokes and drops only those runner-created objects. A failed
+case rollback or role teardown quarantines the connection and blocks further
+case execution; the operator-owned container/data-directory teardown remains a
+separate final reset boundary.
+
 The runtime schema audit is read-only after migration apply. It checks the
 candidate tables, functions, fixed `search_path` for security-definer
 functions, security-invoker views, RLS, critical triggers, constraints,
@@ -155,6 +162,11 @@ Explicit local execution may write only redacted reports below
 `.runtime/reports/prebatch04/`. A blocked or failed runtime case blocks staging
 readiness. The PowerShell wrapper now accepts `-ApplyDisposable` only when all
 35 executable cases pass, the schema/security gates pass, and the report says
-`READY_FOR_PRODUCTION_REVIEW`. This executor does not change V4 task
-checkboxes, does not approve BATCH-04, and does not perform Production or
-Supabase writes.
+`READY_FOR_PRODUCTION_REVIEW`. Each write gets a unique `run_id` and is stored
+under `.runtime/reports/prebatch04/runs/<run_id>/`; `latest.json` is an atomic
+pointer to the newest run. The JSON and Markdown files persist `started_at`,
+`finished_at`, `git_head`, `smoke_passed`, `enforcement_passed`, and the exact
+PowerShell summary lines. Report selection compares all valid run files so a
+stale pointer or legacy fixed-name report cannot hide a newer run. This
+executor does not change V4 task checkboxes, does not approve BATCH-04, and
+does not perform Production or Supabase writes.

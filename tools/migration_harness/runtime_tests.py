@@ -15,7 +15,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Protocol
 
 from .common import read_json
-from .runtime_case_handlers import RuntimeCaseHandlerRunner, match_expected_rejection
+from .runtime_case_handlers import (
+    RUNTIME_HANDLER_RESULT_ORIGIN,
+    RuntimeCaseHandlerRunner,
+    match_expected_rejection,
+)
 
 
 SMOKE_CATALOG_RELATIVE = "config/migration_harness/v4_smoke_test_catalog.json"
@@ -236,6 +240,40 @@ class PostgresRuntimeCaseAdapter:
         self.role_simulation = self._runner.role_simulation
         return result
 
+    def teardown(self) -> Mapping[str, Any]:
+        if self._runner is None:
+            return {
+                "status": "PASS",
+                "transaction_state": "NOT_STARTED",
+                "roles_dropped": [],
+                "memberships_revoked": [],
+            }
+        result = self._runner.teardown()
+        self.role_simulation = self._runner.role_simulation
+        return result
+
+
+def _normalized_rejection_matches(
+    value: Mapping[str, Any], binding: RuntimeCaseBinding
+) -> bool:
+    """Validate redacted evidence emitted by the governed case evaluator.
+
+    The handler evaluator intentionally removes the driver exception before a
+    result reaches the report.  Requiring the origin, exact MATCH reason,
+    non-empty SQLSTATE, and the same mechanism contract lets the outer adapter
+    verify that the exact matcher already ran without accepting a generic
+    ``actual_outcome=REJECT`` or an arbitrary error as a pass.
+    """
+
+    expected_mechanism = dict(binding.execution).get("expected_mechanism", {})
+    return (
+        value.get("result_origin") == RUNTIME_HANDLER_RESULT_ORIGIN
+        and value.get("expected_mechanism") == expected_mechanism
+        and value.get("expected_rejection_match") is True
+        and value.get("expected_rejection_match_reason") == "MATCH"
+        and bool(str(value.get("error_sqlstate") or "").strip())
+    )
+
 
 def _normalize_adapter_result(binding: RuntimeCaseBinding, result: Mapping[str, Any]) -> Dict[str, Any]:
     value = dict(result)
@@ -268,7 +306,14 @@ def _normalize_adapter_result(binding: RuntimeCaseBinding, result: Mapping[str, 
             status = "FAIL_UNEXPECTED_ACCEPT"
             value.setdefault("reason", "Accepted case result did not satisfy its explicit postcondition")
     elif status == "PASS_EXPECTED_REJECT":
-        if expected != "REJECT" or actual != "REJECT" or not verification_pass or not match_expected_rejection(raw_error, dict(binding.execution).get("expected_mechanism", {})):
+        rejection_matches = (
+            match_expected_rejection(
+                raw_error, dict(binding.execution).get("expected_mechanism", {})
+            )
+            if raw_error is not None
+            else _normalized_rejection_matches(value, binding)
+        )
+        if expected != "REJECT" or actual != "REJECT" or not verification_pass or not rejection_matches:
             status = "FAIL_UNEXPECTED_REJECT"
             value.setdefault("reason", "Rejected case result did not match its explicit SQLSTATE/mechanism contract")
     if status not in CASE_RESULT_STATUSES:
@@ -284,8 +329,16 @@ def _normalize_adapter_result(binding: RuntimeCaseBinding, result: Mapping[str, 
     if raw_error is not None:
         # Never carry a driver exception (and therefore never carry its
         # message, password, URL, or server detail) into the JSON report.
-        value["error_sqlstate"] = getattr(raw_error, "sqlstate", None) or getattr(raw_error, "pgcode", None)
-        value["error_constraint"] = getattr(getattr(raw_error, "diag", None), "constraint_name", None)
+        diag = getattr(raw_error, "diag", None)
+        value["error_sqlstate"] = (
+            getattr(raw_error, "sqlstate", None)
+            or getattr(raw_error, "pgcode", None)
+            or getattr(diag, "sqlstate", None)
+        )
+        value["error_constraint"] = (
+            getattr(raw_error, "constraint_name", None)
+            or getattr(diag, "constraint_name", None)
+        )
         value.pop("error", None)
     if value.get("case_id") != binding.case_id:
         value = {
@@ -328,6 +381,13 @@ def run_runtime_cases(repo_root: Path, adapter: RuntimeCaseAdapter) -> Dict[str,
                     "expected_outcome": binding.expected_outcome,
                     "actually_executed": False,
                     "phase": "ROLE_SIMULATION",
+                    "execution_phase": "SETUP",
+                    "setup_phase": "BLOCKED",
+                    "action_phase": "NOT_RUN",
+                    "assert_phase": "NOT_RUN",
+                    "cleanup_phase": "NOT_RUN",
+                    "transaction_state": "NOT_STARTED",
+                    "contaminated_by_previous_case": False,
                     "blocked_reason": preparation.get("reason", "Runtime preparation was blocked"),
                 }
             else:
@@ -343,9 +403,35 @@ def run_runtime_cases(repo_root: Path, adapter: RuntimeCaseAdapter) -> Dict[str,
                         "expected_outcome": binding.expected_outcome,
                         "actually_executed": False,
                         "phase": "ADAPTER_DISPATCH",
+                        "execution_phase": "SETUP",
+                        "setup_phase": "FAILED",
+                        "action_phase": "NOT_RUN",
+                        "assert_phase": "NOT_RUN",
+                        "cleanup_phase": "NOT_RUN",
+                        "transaction_state": "UNKNOWN",
+                        "contaminated_by_previous_case": False,
                         "blocked_reason": "Runtime adapter dispatch failed before a governed result was produced",
                     }
             results.append(result)
+
+    teardown = getattr(adapter, "teardown", None)
+    if callable(teardown):
+        try:
+            cleanup = dict(teardown())
+        except Exception:
+            cleanup = {
+                "status": "FAIL",
+                "transaction_state": "UNKNOWN",
+                "roles_dropped": [],
+                "memberships_revoked": [],
+            }
+    else:
+        cleanup = {
+            "status": "NOT_RUN",
+            "transaction_state": "NOT_REQUIRED",
+            "roles_dropped": [],
+            "memberships_revoked": [],
+        }
 
     passed_accept = sum(1 for result in results if result.get("status") == "PASS_EXPECTED_ACCEPT")
     passed_reject = sum(1 for result in results if result.get("status") == "PASS_EXPECTED_REJECT")
@@ -391,12 +477,17 @@ def run_runtime_cases(repo_root: Path, adapter: RuntimeCaseAdapter) -> Dict[str,
         runtime_gates[name] == "PASS"
         for name in ("no_future_leakage", "frozen_immutability", "tier_a_same_frozen_input", "production_uniqueness", "rls_role_boundary", "canonical_latest_update")
     ) else ("BLOCKED" if any(runtime_gates[name] == "BLOCKED" for name in runtime_gates) else "FAIL")
+    cleanup_status = str(cleanup.get("status"))
+    cleanup_gate = "PASS" if cleanup_status in {"PASS", "RECOVERED", "NOT_RUN"} else "BLOCKED"
+    runtime_gates["case_cleanup"] = cleanup_gate
     if len(results) == 35 and passed == 35:
         status = "PASS"
     elif failed:
         status = "FAIL"
     else:
         status = "BLOCKED"
+    if cleanup_gate == "BLOCKED":
+        status = "BLOCKED" if not failed else "FAIL"
     role_simulation = getattr(adapter, "role_simulation", None)
     return {
         "status": status,
@@ -420,6 +511,7 @@ def run_runtime_cases(repo_root: Path, adapter: RuntimeCaseAdapter) -> Dict[str,
             status: sum(1 for result in results if result.get("status") == status)
             for status in CASE_RESULT_STATUSES
         },
+        "cleanup": cleanup,
         "role_simulation": dict(role_simulation) if isinstance(role_simulation, Mapping) else None,
         "results": results,
     }

@@ -50,6 +50,8 @@ HASH_PROFILE = "v4-canonical-json@1.0"
 HASH_ALGORITHM = "SHA-256"
 MARKETS = ("spf", "rqspf", "total_goals", "exact_score", "half_full")
 ROLE_NAMES = {"anon", "authenticated", "service_role", "backend", "executor", "auditor"}
+DISPOSABLE_ROLE_NAMES = ("backend", "executor", "auditor")
+RUNTIME_HANDLER_RESULT_ORIGIN = "RUNTIME_CASE_HANDLER"
 
 POSTGRES_ERROR_CLASSES = {
     "23503": "foreign_key_violation",
@@ -212,6 +214,12 @@ def match_expected_rejection(exc: Optional[BaseException], expected: Mapping[str
     return _expected_rejection_match_reason(exc, expected) == "MATCH"
 
 
+def _quote_runtime_role(role: str) -> str:
+    if role not in ROLE_NAMES:
+        raise RuntimeCaseBlocked("runtime role is not in the disposable role allow-list")
+    return '"' + role.replace('"', '""') + '"'
+
+
 class CaseContext:
     """Transaction and savepoint helper shared by every runtime case."""
 
@@ -220,21 +228,84 @@ class CaseContext:
         self.case_id = case_id
         self.actor = actor
         self._savepoint_counter = 0
+        self.transaction_state = "NOT_STARTED"
+        self._closed = False
+        self._cleanup_result: Optional[Dict[str, Any]] = None
 
     def begin(self) -> None:
         rollback = getattr(self.connection, "rollback", None)
-        if callable(rollback):
+        if not callable(rollback):
+            self.transaction_state = "UNKNOWN"
+            raise RuntimeCaseBlocked("case connection cannot reset its transaction")
+        try:
+            # A previous failed statement may have left the driver in an
+            # aborted transaction.  Reset before BEGIN so case boundaries do
+            # not inherit server-side transaction state.
             rollback()
-        self.execute("BEGIN")
-        self.execute("SET LOCAL TIME ZONE 'UTC'")
-        self.execute("SELECT set_config('v4.actor', %s, true)", (self.actor,))
-        self.execute("SELECT set_config('v4.actor_role', %s, true)", ("runtime_case",))
-        self.execute("SET CONSTRAINTS ALL DEFERRED")
+            self.execute("BEGIN")
+            self.execute("SET LOCAL TIME ZONE 'UTC'")
+            self.execute("SELECT set_config('v4.actor', %s, true)", (self.actor,))
+            self.execute("SELECT set_config('v4.actor_role', %s, true)", ("runtime_case",))
+            self.execute("SET CONSTRAINTS ALL DEFERRED")
+        except BaseException:
+            self.transaction_state = "UNKNOWN"
+            raise
+        self.transaction_state = "ACTIVE"
 
-    def close(self) -> None:
+    def close(self) -> Dict[str, Any]:
+        """Rollback the case and return redacted connection-recovery evidence.
+
+        A rollback failure must never escape from ``finally`` and replace the
+        governed case result.  When the driver offers ``reset()``, use it as a
+        recovery path; otherwise the owning runner must quarantine the
+        connection and block the next case.
+        """
+
+        if self._cleanup_result is not None:
+            return dict(self._cleanup_result)
         rollback = getattr(self.connection, "rollback", None)
-        if callable(rollback):
-            rollback()
+        if not callable(rollback):
+            result = {
+                "status": "FAIL",
+                "transaction_state": "UNKNOWN",
+                "recovery": "NO_ROLLBACK_METHOD",
+            }
+        else:
+            try:
+                rollback()
+            except BaseException:
+                reset = getattr(self.connection, "reset", None)
+                if callable(reset):
+                    try:
+                        reset()
+                    except BaseException:
+                        result = {
+                            "status": "FAIL",
+                            "transaction_state": "UNKNOWN",
+                            "recovery": "RESET_FAILED",
+                        }
+                    else:
+                        result = {
+                            "status": "RECOVERED",
+                            "transaction_state": "RESET_AFTER_ROLLBACK_FAILURE",
+                            "recovery": "CONNECTION_RESET",
+                        }
+                else:
+                    result = {
+                        "status": "FAIL",
+                        "transaction_state": "UNKNOWN",
+                        "recovery": "NO_CONNECTION_RESET",
+                    }
+            else:
+                result = {
+                    "status": "PASS",
+                    "transaction_state": "ROLLED_BACK",
+                    "recovery": "CASE_ROLLBACK",
+                }
+        self.transaction_state = str(result["transaction_state"])
+        self._closed = True
+        self._cleanup_result = result
+        return dict(result)
 
     def execute(self, sql: str, params: Optional[Sequence[Any]] = None) -> None:
         cursor = self.connection.cursor()
@@ -267,9 +338,7 @@ class CaseContext:
         return values[0] if values else {}
 
     def set_role(self, role: str) -> None:
-        if role not in ROLE_NAMES:
-            raise RuntimeCaseBlocked("runtime role is not in the disposable role allow-list")
-        quoted = '"' + role.replace('"', '""') + '"'
+        quoted = _quote_runtime_role(role)
         self.execute(f"SET LOCAL ROLE {quoted}")
         self.execute("SELECT set_config('v4.actor_role', %s, true)", (role,))
 
@@ -301,7 +370,9 @@ class CaseContext:
                 self.execute(f"RELEASE SAVEPOINT {name}")
                 self.execute("SET CONSTRAINTS ALL DEFERRED")
             except BaseException as cleanup_exc:
+                self.transaction_state = "UNKNOWN"
                 raise RuntimeCaseBlocked("action savepoint could not be restored") from cleanup_exc
+            self.transaction_state = "ACTIVE"
             return Attempt(False, exc, role)
 
 
@@ -860,15 +931,23 @@ def _official_market_states(*, unavailable: Optional[str] = None, missing_state_
     payloads: Dict[str, Optional[Dict[str, Any]]] = {}
     for market in MARKETS:
         if market == unavailable:
-            availability[market] = {"available": False, "status": "UNAVAILABLE", "reason": "not offered"}
-            reasons[market] = "not offered"
+            availability[market] = {
+                "available": False,
+                "status": "UNAVAILABLE",
+                "reason": "OFFICIAL_MARKET_NOT_ON_SALE",
+            }
+            reasons[market] = "OFFICIAL_MARKET_NOT_ON_SALE"
             payloads[market] = None
         else:
-            state: Dict[str, Any] = {"available": True, "status": "AVAILABLE", "reason": "verified"}
+            state: Dict[str, Any] = {
+                "available": True,
+                "status": "AVAILABLE",
+                "reason": "NOT_APPLICABLE",
+            }
             if missing_state_field == market:
                 state.pop("available", None)
             availability[market] = state
-            reasons[market] = "verified"
+            reasons[market] = "NOT_APPLICABLE"
             if market == "rqspf" and not rqspf_handicap:
                 payloads[market] = {"home": 1.9, "away": 3.2}
             elif market == "rqspf":
@@ -1090,14 +1169,31 @@ class RuntimeCaseHandlerRunner:
         self.actor = actor
         self.role_simulation: Optional[Dict[str, Any]] = None
         self.preparation: Optional[Dict[str, Any]] = None
+        self._created_roles: List[str] = []
+        self._granted_service_role_memberships: List[str] = []
+        self._teardown_result: Optional[Dict[str, Any]] = None
+        self._connection_unusable = False
 
     def prepare(self) -> Mapping[str, Any]:
         if self.preparation is not None:
             return self.preparation
         try:
             rollback = getattr(self.connection, "rollback", None)
-            if callable(rollback):
-                rollback()
+            if not callable(rollback):
+                raise RuntimeCaseBlocked("role preparation cannot reset the connection")
+            rollback()
+            before_rows = self._rows(
+                "SELECT rolname, rolinherit, rolbypassrls, pg_catalog.pg_has_role(rolname, 'service_role', 'member') AS service_role_member FROM pg_catalog.pg_roles WHERE rolname IN ('anon','authenticated','service_role','backend','executor','auditor') ORDER BY rolname"
+            )
+            before_by_name = {str(row.get("rolname")): row for row in before_rows}
+            self._created_roles = [
+                role for role in DISPOSABLE_ROLE_NAMES if role not in before_by_name
+            ]
+            self._granted_service_role_memberships = [
+                role
+                for role in DISPOSABLE_ROLE_NAMES
+                if not bool(before_by_name.get(role, {}).get("service_role_member"))
+            ]
             cursor = self.connection.cursor()
             try:
                 cursor.execute(
@@ -1107,7 +1203,9 @@ class RuntimeCaseHandlerRunner:
                     "EXECUTE format('CREATE ROLE %I NOLOGIN INHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION BYPASSRLS', role_name); "
                     "END IF; END LOOP; END $$"
                 )
-                cursor.execute("GRANT service_role TO backend, executor, auditor")
+                cursor.execute(
+                    "GRANT service_role TO backend, executor, auditor"
+                )
             finally:
                 close = getattr(cursor, "close", None)
                 if callable(close):
@@ -1139,6 +1237,9 @@ class RuntimeCaseHandlerRunner:
                 "status": "PASS" if ok else "BLOCKED",
                 "mode": "DISPOSABLE_ROLE_SIMULATION",
                 "roles": role_rows,
+                "created_roles": list(self._created_roles),
+                "granted_service_role_memberships": list(self._granted_service_role_memberships),
+                "teardown": {"status": "PENDING"},
                 "supabase_auth_runtime": False,
                 "notes": "No Supabase auth runtime is emulated; anon/authenticated are no-login read roles and backend/executor/auditor are no-login local server-side fixtures.",
             }
@@ -1152,6 +1253,9 @@ class RuntimeCaseHandlerRunner:
                 "status": "BLOCKED",
                 "mode": "DISPOSABLE_ROLE_SIMULATION",
                 "roles": [],
+                "created_roles": list(self._created_roles),
+                "granted_service_role_memberships": list(self._granted_service_role_memberships),
+                "teardown": {"status": "PENDING"},
                 "supabase_auth_runtime": False,
                 "notes": "Role preparation could not be completed; driver detail is intentionally redacted.",
             }
@@ -1161,6 +1265,60 @@ class RuntimeCaseHandlerRunner:
                 "reason": "Disposable role simulation could not be prepared",
             }
         return self.preparation
+
+    def teardown(self) -> Mapping[str, Any]:
+        """Remove only roles/memberships created by this disposable runner."""
+
+        if self._teardown_result is not None:
+            return dict(self._teardown_result)
+        result: Dict[str, Any]
+        try:
+            rollback = getattr(self.connection, "rollback", None)
+            commit = getattr(self.connection, "commit", None)
+            if not callable(rollback) or not callable(commit):
+                raise RuntimeCaseBlocked("role teardown cannot control the connection transaction")
+            rollback()
+            cursor = self.connection.cursor()
+            try:
+                if self._granted_service_role_memberships:
+                    members = ", ".join(
+                        _quote_runtime_role(role)
+                        for role in self._granted_service_role_memberships
+                    )
+                    cursor.execute(f"REVOKE service_role FROM {members}")
+                for role in reversed(self._created_roles):
+                    cursor.execute(f"DROP ROLE IF EXISTS {_quote_runtime_role(role)}")
+            finally:
+                close = getattr(cursor, "close", None)
+                if callable(close):
+                    close()
+            commit()
+            result = {
+                "status": "PASS",
+                "transaction_state": "COMMITTED",
+                "roles_dropped": list(reversed(self._created_roles)),
+                "memberships_revoked": list(self._granted_service_role_memberships),
+            }
+        except BaseException:
+            try:
+                rollback = getattr(self.connection, "rollback", None)
+                if callable(rollback):
+                    rollback()
+            except BaseException:
+                pass
+            result = {
+                "status": "FAIL",
+                "transaction_state": "UNKNOWN",
+                "roles_dropped": [],
+                "memberships_revoked": [],
+            }
+        self._teardown_result = result
+        if self.role_simulation is not None:
+            self.role_simulation["teardown"] = dict(result)
+            self.role_simulation["teardown_status"] = result["status"]
+            if result["status"] != "PASS":
+                self.role_simulation["status"] = "BLOCKED"
+        return dict(result)
 
     def _rows(self, sql: str, params: Optional[Sequence[Any]] = None) -> List[Dict[str, Any]]:
         cursor = self.connection.cursor()
@@ -1177,32 +1335,137 @@ class RuntimeCaseHandlerRunner:
                 close()
 
     def run_case(self, binding: Any) -> Dict[str, Any]:
+        contaminated_by_previous_case = self._connection_unusable
+        if contaminated_by_previous_case:
+            result = self._blocked(
+                binding,
+                "CLEANUP",
+                "Previous case cleanup did not restore a usable connection",
+            )
+            result.update(
+                {
+                    "execution_phase": "CLEANUP",
+                    "setup_phase": "NOT_RUN",
+                    "action_phase": "NOT_RUN",
+                    "assert_phase": "NOT_RUN",
+                    "cleanup_phase": "BLOCKED",
+                    "transaction_state": "UNKNOWN",
+                    "contaminated_by_previous_case": True,
+                }
+            )
+            return result
         preparation = self.prepare()
         if preparation.get("status") != "PASS":
-            return self._blocked(binding, "ROLE_SIMULATION", preparation.get("reason") or "Runtime preparation is blocked")
+            result = self._blocked(binding, "ROLE_SIMULATION", preparation.get("reason") or "Runtime preparation is blocked")
+            result.update(
+                {
+                    "execution_phase": "SETUP",
+                    "setup_phase": "BLOCKED",
+                    "action_phase": "NOT_RUN",
+                    "assert_phase": "NOT_RUN",
+                    "cleanup_phase": "NOT_RUN",
+                    "transaction_state": "NOT_STARTED",
+                    "contaminated_by_previous_case": False,
+                }
+            )
+            return result
         handler = getattr(self, str(binding.hook_name), None)
         if not callable(handler):
-            return self._blocked(binding, "HANDLER_DISPATCH", "Execution contract handler is not implemented")
+            result = self._blocked(binding, "HANDLER_DISPATCH", "Execution contract handler is not implemented")
+            result.update(
+                {
+                    "execution_phase": "SETUP",
+                    "setup_phase": "PASS",
+                    "action_phase": "NOT_RUN",
+                    "assert_phase": "NOT_RUN",
+                    "cleanup_phase": "NOT_RUN",
+                    "transaction_state": "NOT_STARTED",
+                    "contaminated_by_previous_case": False,
+                }
+            )
+            return result
         ctx = CaseContext(self.connection, binding.case_id, self.actor)
         raw: Mapping[str, Any] = {}
+        result: Dict[str, Any]
+        execution_phase = "SETUP"
+        setup_phase = "NOT_RUN"
+        action_phase = "NOT_RUN"
+        assert_phase = "NOT_RUN"
         try:
             ctx.begin()
+            setup_phase = "PASS"
+            execution_phase = "ACTION"
             raw = handler(ctx) or {}
+            actual = str(raw.get("actual_outcome") or "").upper()
+            action_phase = actual or "MISSING"
+            execution_phase = "ASSERT"
             expected = binding.expected_outcome or dict(binding.execution).get("expected_outcome")
             result = self._evaluate(binding, raw, expected)
             result["role_simulation"] = self.role_simulation
-            return result
+            verification = result.get("verification")
+            verification_pass = verification is True or (
+                isinstance(verification, Mapping)
+                and bool(verification)
+                and all(value is True for value in verification.values())
+            )
+            assert_phase = "PASS" if (
+                result.get("status") in {"PASS_EXPECTED_ACCEPT", "PASS_EXPECTED_REJECT"}
+                or (
+                    result.get("expected_outcome") == "REJECT"
+                    and result.get("actual_outcome") == "REJECT"
+                    and verification_pass
+                    and result.get("expected_rejection_match") is True
+                )
+            ) else "FAIL"
         except RuntimeCaseBlocked as exc:
-            return self._blocked(binding, "ENVIRONMENT", str(exc))
+            result = self._blocked(binding, "ENVIRONMENT", str(exc))
         except BaseException:
-            return self._blocked(binding, "HANDLER_SETUP", "Case setup or verification could not complete")
+            result = self._blocked(binding, "HANDLER_SETUP", "Case setup or verification could not complete")
         finally:
-            ctx.close()
+            try:
+                cleanup = ctx.close()
+            except BaseException:
+                cleanup = {
+                    "status": "FAIL",
+                    "transaction_state": "UNKNOWN",
+                    "recovery": "CLOSE_EXCEPTION",
+                }
+            cleanup_status = str(cleanup.get("status"))
+            if cleanup_status not in {"PASS", "RECOVERED"}:
+                self._connection_unusable = True
+            result.update(
+                {
+                    "execution_phase": "CLEANUP" if cleanup_status not in {"PASS", "RECOVERED"} else execution_phase,
+                    "setup_phase": setup_phase,
+                    "action_phase": action_phase,
+                    "assert_phase": assert_phase,
+                    "cleanup_phase": cleanup_status,
+                    "transaction_state": cleanup.get("transaction_state"),
+                    "contaminated_by_previous_case": contaminated_by_previous_case,
+                    "case_isolation": (
+                        "PASS"
+                        if cleanup_status == "PASS"
+                        else "RECOVERED"
+                        if cleanup_status == "RECOVERED"
+                        else "FAIL"
+                    ),
+                }
+            )
+            if cleanup_status not in {"PASS", "RECOVERED"}:
+                result["status"] = "BLOCKED_ENVIRONMENT"
+                result["phase"] = "CLEANUP"
+                result["actually_executed"] = True
+                result["blocked_reason"] = "Case cleanup could not restore a usable connection"
+        return result
 
     def _evaluate(self, binding: Any, raw: Mapping[str, Any], expected: str) -> Dict[str, Any]:
         actual = str(raw.get("actual_outcome") or "").upper()
         verification = raw.get("verification")
-        verification_pass = verification is True or (isinstance(verification, Mapping) and all(value is True for value in verification.values()))
+        verification_pass = verification is True or (
+            isinstance(verification, Mapping)
+            and bool(verification)
+            and all(value is True for value in verification.values())
+        )
         error = raw.get("error") if isinstance(raw.get("error"), BaseException) else None
         expected_mechanism = dict(binding.execution).get("expected_mechanism", {})
         rejection_match_reason = _expected_rejection_match_reason(error, expected_mechanism) if expected == "REJECT" else None
@@ -1237,6 +1500,7 @@ class RuntimeCaseHandlerRunner:
             "verification": dict(verification) if isinstance(verification, Mapping) else verification,
             "expected_rejection_match": rejection_match_reason == "MATCH" if expected == "REJECT" else None,
             "expected_rejection_match_reason": rejection_match_reason,
+            "result_origin": RUNTIME_HANDLER_RESULT_ORIGIN,
             "error_sqlstate": _sqlstate(error) if error is not None else None,
             "error_constraint": _constraint_name(error) if error is not None else None,
             "error_class": _error_class(error),
@@ -1260,8 +1524,31 @@ class RuntimeCaseHandlerRunner:
             "hard_gate": bool(dict(binding.execution).get("hard_gate", False)),
         }
 
-    def _accept(self, role: str, verification: Mapping[str, bool], *, observed: Optional[Mapping[str, Any]] = None, reason: Optional[str] = None) -> Dict[str, Any]:
-        return {"actual_outcome": "ACCEPT", "action_role": role, "verification": dict(verification), "observed_mechanism": dict(observed or {}), "reason": reason}
+    def _accept(
+        self,
+        role: str,
+        verification: Mapping[str, bool],
+        *,
+        attempt: Optional[Attempt] = None,
+        observed: Optional[Mapping[str, Any]] = None,
+        reason: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        result: Dict[str, Any] = {
+            "actual_outcome": "ACCEPT",
+            "action_role": role,
+            "verification": dict(verification),
+            "observed_mechanism": dict(observed or {}),
+            "reason": reason,
+        }
+        if attempt is not None and not attempt.accepted:
+            result.update(
+                {
+                    "actual_outcome": "REJECT",
+                    "action_role": attempt.role,
+                    "error": attempt.error,
+                }
+            )
+        return result
 
     def _reject(self, attempt: Attempt, verification: Mapping[str, bool], *, observed: Optional[Mapping[str, Any]] = None, reason: Optional[str] = None) -> Dict[str, Any]:
         return {"actual_outcome": "REJECT", "action_role": attempt.role, "error": attempt.error, "verification": dict(verification), "observed_mechanism": dict(observed or {}), "reason": reason}
@@ -1296,7 +1583,16 @@ class RuntimeCaseHandlerRunner:
         fixture = _core_fixture(ctx, case_id)
         attempt, snapshot_id = _official_snapshot(ctx, case_id, fixture["match_id"], unavailable="rqspf")
         row = ctx.one("SELECT status = 'AVAILABLE' AS snapshot_row, (rqspf IS NULL AND (market_availability->'rqspf'->>'available')::boolean IS FALSE) AS unavailable_without_payload FROM market.official_odds_snapshots WHERE snapshot_id = %s", (snapshot_id,))
-        return self._accept("executor", {"snapshot_row": attempt.accepted and row.get("snapshot_row") is True, "unavailable_without_payload": row.get("unavailable_without_payload") is True}, observed={"postcondition": "explicit_unavailable_market"})
+        return self._accept(
+            "executor",
+            {
+                "snapshot_row": attempt.accepted and row.get("snapshot_row") is True,
+                "unavailable_without_payload": row.get("unavailable_without_payload") is True,
+            },
+            attempt=attempt,
+            observed={"postcondition": "explicit_unavailable_market"},
+            reason="Official unavailable market snapshot must remain an accepted row with an explicit unavailable state",
+        )
 
     def smoke_04_available_market_without_payload(self, ctx: CaseContext) -> Dict[str, Any]:
         case_id = ctx.case_id
@@ -1425,7 +1721,17 @@ class RuntimeCaseHandlerRunner:
         backend = ctx.attempt(sql, params, role="backend")
         service = ctx.attempt(sql, (service_id, "1617", "1617", f"runtime://{case_id}/service", HASH_PROFILE, CONTRACT_VERSION, SCHEMA_VERSION, fixture["match_id"]), role="service_role")
         audit = ctx.one("SELECT count(*) AS count FROM governance.audit_logs WHERE entity_type = 'core.matches' AND entity_id IN (%s, %s)", (backend_id, service_id))
-        return self._accept("backend/service_role", {"controlled_role_write": backend.accepted and service.accepted, "audit_row": int(audit.get("count", 0)) >= 2, "trigger_path": True}, observed={"role_gate": "controlled_server_side_write"})
+        failed_attempt = backend if not backend.accepted else service if not service.accepted else None
+        return self._accept(
+            "backend/service_role",
+            {
+                "controlled_role_write": backend.accepted and service.accepted,
+                "audit_row": int(audit.get("count", 0)) >= 2,
+                "trigger_path": True,
+            },
+            attempt=failed_attempt,
+            observed={"role_gate": "controlled_server_side_write"},
+        )
 
     def smoke_17_security_definer_local_catalog_review(self, ctx: CaseContext) -> Dict[str, Any]:
         ctx.set_role("auditor")
@@ -1442,7 +1748,17 @@ class RuntimeCaseHandlerRunner:
         ctx.set_role("authenticated")
         public_row = ctx.one("SELECT canonical_latest_update_at FROM public.v_public_predictions WHERE match_id = %s", (fixture["match_id"],))
         expected = LATEST_BUSINESS_TIMESTAMP
-        return self._accept("anon/authenticated", {"max_business_timestamp": projection.accepted and _as_iso(row.get("canonical_latest_update_at")) == expected, "not_published_at": _as_iso(row.get("canonical_latest_update_at")) != _as_iso(PAGE_TIME), "not_created_at": _as_iso(public_row.get("canonical_latest_update_at")) == expected}, observed={"view": "v_canonical_latest_update", "source": "business_timestamps"})
+        failed_projection = None if projection.accepted else projection
+        return self._accept(
+            "anon/authenticated",
+            {
+                "max_business_timestamp": projection.accepted and _as_iso(row.get("canonical_latest_update_at")) == expected,
+                "not_published_at": _as_iso(row.get("canonical_latest_update_at")) != _as_iso(PAGE_TIME),
+                "not_created_at": _as_iso(public_row.get("canonical_latest_update_at")) == expected,
+            },
+            attempt=failed_projection,
+            observed={"view": "v_canonical_latest_update", "source": "business_timestamps"},
+        )
 
     def smoke_19_lifecycle_audit_coverage(self, ctx: CaseContext) -> Dict[str, Any]:
         fixture = _core_fixture(ctx, ctx.case_id)
