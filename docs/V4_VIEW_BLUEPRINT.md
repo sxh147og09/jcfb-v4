@@ -4,6 +4,10 @@ Status: V4-010 PUBLIC READ VIEW DESIGN (DESIGN-ONLY)
 
 The views below are candidates only. No view is created or exposed by this task. They read an append-only, Production-only safe projection ledger; they are not alternate sources of truth.
 
+The runtime forward-fix reserves the explicit V4-owned public name prefix
+`public.v4_`. The unprefixed `public.v_*` names are retained as a protected
+V3.3.3 compatibility surface and must never be replaced or dropped by V4.
+
 ## 1. View security contract
 
 - Use explicit column lists; never `SELECT *`.
@@ -30,7 +34,7 @@ The publication gate verifies these values against the exact upstream Production
 
 ## 3. Required candidate views
 
-### 3.1 `public.v_public_predictions`
+### 3.1 `public.v4_public_predictions`
 
 Purpose: public-facing current Production prediction summary.
 
@@ -40,7 +44,7 @@ Safe columns:
 
 Source: latest `PUBLISHED` projection row per `match_id`, ordered by `projection_revision` and `created_at` after the Production Frozen Prediction/publication gate has passed; latest is a query ordering, never an identity. No raw model payload, internal risk decomposition, Shadow/Experiment ID, source reference, or secret is selected.
 
-### 3.2 `public.v_public_latest_odds`
+### 3.2 `public.v4_public_latest_odds`
 
 Purpose: public-safe latest official market summary.
 
@@ -48,7 +52,7 @@ Safe columns: `match_id`, `kickoff_at`, `safe_odds_summary`, `odds_business_at`,
 
 Source: published Projection ledger only. The summary is populated from an official snapshot and retains explicit unavailable-market states/reasons. The view never queries an external snapshot as official and never fabricates a missing market.
 
-### 3.3 `public.v_current_frozen_predictions`
+### 3.3 `public.v4_current_frozen_predictions`
 
 Purpose: public-safe Production Frozen Prediction read model.
 
@@ -56,7 +60,7 @@ Safe columns: `match_id`, `kickoff_at`, `safe_selection_summary`, `frozen_at`, `
 
 Predicate: `publication_status='PUBLISHED'` and the projection's internal role/reference checks have passed. It exposes a summary, not the embedded private Prediction snapshot.
 
-### 3.4 `public.v_canonical_latest_update`
+### 3.4 `public.v4_canonical_latest_update`
 
 Purpose: business-data freshness projection.
 
@@ -80,7 +84,7 @@ WHERE p.publication_status = 'PUBLISHED';
 
 `GREATEST` is the row-level form of `MAX` over the declared source timestamps. If a future implementation aggregates multiple projection revisions, it must apply `MAX` over these derived business times after selecting only valid published rows. The view must never use `published_at`, `created_at`, page build time, deploy time, or API request time as a substitute. Missing required source time fails publication; optional postmatch times remain NULL and are ignored by the explicit `COALESCE` sentinels.
 
-### 3.5 `public.v_tier_a_progress`
+### 3.5 `public.v4_tier_a_progress`
 
 Purpose: controlled progress summary for Promotion Review/internal governance.
 
@@ -88,7 +92,7 @@ Safe aggregate columns: `eligible_sample_count`, `rejected_sample_count`, `block
 
 Source: `evaluation.tier_a_samples` with explicit V4 role/hash/gate predicates. Default grant is `v4_review_promotion`/approved internal readers only, not `anon`. It does not expose individual private payloads or allow a client to qualify a sample.
 
-### 3.6 `public.v_model_registry_public`
+### 3.6 `public.v4_model_registry_public`
 
 Purpose: optional public display of the currently active Production model identity.
 
@@ -100,7 +104,7 @@ Source: an approved public-safe registry projection or safe fields copied by the
 
 ```sql
 -- Candidate only; do not apply from the blueprint.
-CREATE OR REPLACE VIEW public.v_public_predictions
+CREATE VIEW public.v4_public_predictions
 WITH (security_invoker = true)
 AS
 SELECT
@@ -125,7 +129,11 @@ FROM public.public_read_projections AS p
 WHERE p.publication_status = 'PUBLISHED';
 ```
 
-The other views use the same explicit-column, published-only pattern. The final migration must verify view replacement/rebuild behavior and treat a view definition change as a new immutable `schema_version`/migration identity where the exposed contract changes.
+The other views use the same explicit-column, published-only pattern. The runtime
+candidate creates only the V4-prefixed names. A pre-existing unprefixed view is
+reusable only after an exact definition, `security_invoker`, and grant-contract
+assertion; an incompatible object is fail-closed and must be given an explicit
+V4-owned name. No V3.3.3 view is replaced, dropped, or rebuilt.
 
 ## 5. Projection validation before publication
 
@@ -148,19 +156,19 @@ After security review, the intended grant is:
 
 ```sql
 -- Candidate only; do not apply from this blueprint.
-GRANT SELECT ON public.v_public_predictions,
-               public.v_public_latest_odds,
-               public.v_current_frozen_predictions,
-               public.v_canonical_latest_update
+GRANT SELECT ON public.v4_public_predictions,
+               public.v4_public_latest_odds,
+               public.v4_current_frozen_predictions,
+               public.v4_canonical_latest_update
   TO anon, authenticated;
-REVOKE INSERT, UPDATE, DELETE ON public.v_public_predictions,
-                                public.v_public_latest_odds,
-                                public.v_current_frozen_predictions,
-                                public.v_canonical_latest_update
+REVOKE INSERT, UPDATE, DELETE ON public.v4_public_predictions,
+                                public.v4_public_latest_odds,
+                                public.v4_current_frozen_predictions,
+                                public.v4_canonical_latest_update
   FROM anon, authenticated;
 ```
 
-The view names are read models, not writable views. `v_tier_a_progress` and `v_model_registry_public` receive only their approved internal/public grants after a column-level review.
+The view names are read models, not writable views. `v4_tier_a_progress` and `v4_model_registry_public` receive only their approved internal/public grants after a column-level review.
 
 ## 7. Older-version fallback
 

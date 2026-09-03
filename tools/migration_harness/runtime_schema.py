@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Set
 
+from .view_compatibility import V4_PUBLIC_VIEW_NAMES
+
 
 class RuntimeSchemaInspectionError(RuntimeError):
     """Raised when a catalog-only runtime inspection cannot complete."""
@@ -74,14 +76,7 @@ EXPECTED_FUNCTIONS: Set[str] = {
     "append_audit_event",
 }
 
-EXPECTED_VIEWS: Set[str] = {
-    "public.v_public_predictions",
-    "public.v_public_latest_odds",
-    "public.v_current_frozen_predictions",
-    "public.v_canonical_latest_update",
-    "public.v_tier_a_progress",
-    "public.v_model_registry_public",
-}
+EXPECTED_VIEWS: Set[str] = set(V4_PUBLIC_VIEW_NAMES)
 
 EXPECTED_POLICIES = {"v4_public_projection_published_read"}
 EXPECTED_CRITICAL_TRIGGERS = {
@@ -282,7 +277,7 @@ def collect_runtime_schema_checks(connection: Any) -> Dict[str, Any]:
         "checked_constraint_count": len(constraint_rows),
     }
 
-    canonical_latest_view = "public.v_canonical_latest_update" in actual_views
+    canonical_latest_view = "public.v4_canonical_latest_update" in actual_views
     canonical_latest_index = "public_projection_business_latest_idx" in actual_indexes
     canonical_check = {
         "status": "PASS" if canonical_latest_view and canonical_latest_index else "FAIL",

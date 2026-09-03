@@ -9,14 +9,25 @@ rewritten or treated as deployment approval.
 
 ## Reserved service_role forward-fix
 
-The `RESERVED_ROLE_MUTATION` Production attempt exposed an incompatibility in
+The earlier `RESERVED_ROLE_MUTATION` Production attempt exposed an incompatibility in
 the unapplied runtime candidate 0001. The candidate now verifies a pre-existing
 provider-owned `service_role` with `rolbypassrls = true` and fails closed when
 that prerequisite is missing or false; it never changes the reserved role.
-After this SQL revision, the canonical verifier must regenerate candidate 0001
+For that service-role revision, the canonical verifier regenerated candidate 0001
 and the dependent 0009 registry-seed value. Candidates 0002 through 0008 remain
 unchanged unless a verifier reports otherwise. Generated hashes remain
 disposable/staging evidence and do not grant Production approval.
+
+## 0008 views/projections forward-fix
+
+The later `JCFB V4 0008 VIEWS/PROJECTIONS FORWARD-FIX 1.0` is a separate
+candidate repair. It changes only the unapplied runtime candidate 0008 and the
+dependent 0009 registry-seed value. Because the V4 view semantics are not
+equivalent to the supplied V3.3.3 `public.v_*` view surface, the repaired 0008
+uses the explicit `public.v4_` name prefix and never drops or replaces a legacy
+view. Candidates 0001 through 0007 remain frozen at their applied canonical
+hashes. See `docs/JCFB_V4_0008_VIEWS_PROJECTIONS_FORWARD_FIX_REPORT.md` for the
+partial-apply history and compatibility evidence.
 
 The machine-readable source of truth is
 `0000_runtime_candidate_manifest.json`. The Markdown manifest is the review

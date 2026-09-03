@@ -19,8 +19,8 @@
 | 0005 | database/migrations/v4_runtime_candidate/0005_evaluation.sql | database/migrations/v4/0005_evaluation.sql @ cd7ebfd51352 | migration@20260901.004 | da6658b3e665f085c3968c3010ccfa0e17211824fdd28523faaa49aa750b4e81 | sha256:b4c5b6a276b42117a0dd830c56c8a8856f273c13016bf200838ba690b5e80394 |
 | 0006 | database/migrations/v4_runtime_candidate/0006_governance_audit.sql | database/migrations/v4/0006_governance_audit.sql @ cd7ebfd51352 | migration@20260901.005 | 1ba475b2585f3f25d4984f82e2c7e8a94c815f47ff91a2d4728707adc9ee71b8 | sha256:85386b242f6f1ef8fabd1aa09b07f1b4c3082b589b0c6c320bb9705883a5a52d |
 | 0007 | database/migrations/v4_runtime_candidate/0007_security_rls.sql | database/migrations/v4/0007_security_rls.sql @ cd7ebfd51352 | migration@20260901.006 | 367c0b4d52d84e60bca6c1bee797a45f5fc7ea769cf21508efacf9cb2a6978c3 | sha256:952ae622fba16f831389b8bfd3b0bfa05b6278f721c41c768532f37d6178a4b0 |
-| 0008 | database/migrations/v4_runtime_candidate/0008_views_projections.sql | database/migrations/v4/0008_views_projections.sql @ cd7ebfd51352 | migration@20260901.007 | 7cfc47800fb4ac0154468c49eb3e88290dfe80cd529c2048fc1e18e4fcc4046e | sha256:066964964caf34d44c80012120b79f1c09a9e246fe1125d1a7dbb2a88f2a3ce2 |
-| 0009 | database/migrations/v4_runtime_candidate/0009_seed_and_smoke.sql | database/migrations/v4/0009_seed_and_smoke.sql @ cd7ebfd51352 | migration@20260901.008 | 8d4bec203e1d1b97374c974962f87ad711515a6138599b5e56e77a8dde76c091 | sha256:009467fa464f08457ade762500245918bb7ac251077c5b2ec0b539ca981aadb7 |
+| 0008 | database/migrations/v4_runtime_candidate/0008_views_projections.sql | database/migrations/v4/0008_views_projections.sql @ cd7ebfd51352 | migration@20260901.007 | dc19e7a76839b2b2fd594f3c871d8340b4231fd4d9defb9dc6eb7f592012ca48 | sha256:f2ddf1fd7a69e38bc224c5e19c8db08824d76a6f566eae9fa722a52c644584e3 |
+| 0009 | database/migrations/v4_runtime_candidate/0009_seed_and_smoke.sql | database/migrations/v4/0009_seed_and_smoke.sql @ cd7ebfd51352 | migration@20260901.008 | fa121ad345087e870339ae143ed94d3f90edc39dd594e0723c918bf176ed95ce | sha256:b02ab037d2ad065a06e87512baec1caa9567303404881ecb9a86bb3426cdac05 |
 
 ## Candidate execution contract
 
@@ -40,6 +40,23 @@ migration@20260901.001
   -> .002 -> .003 -> .004 -> .005 -> .006 -> .007 -> .008 -> .009
 
 The graph is intentionally serial. No candidate is independently executable on a clean target.
+
+## 0008 forward-fix provenance
+
+- Forward-fix identity: `JCFB V4 0008 VIEWS/PROJECTIONS FORWARD-FIX 1.0`
+- Base HEAD reviewed: `2d6f6fca463883a455eb038e1f55bff9778826b1`
+- Partial apply state: `PARTIAL`; the committed prefix is `0001` through `0007`.
+- Failed candidate: `0008`; the transaction rolled back after the existing
+  `public.v_public_predictions` V3.3.3 view rejected the attempted create.
+- Existing `public.v_public_predictions` compatibility: `INCOMPATIBLE`.
+- Other known baseline collisions: `public.v_public_latest_odds`,
+  `public.v_current_frozen_predictions`, `public.v_canonical_latest_update`,
+  and `public.v_tier_a_progress`.
+- V4 strategy: `V4_RENAME` using the `public.v4_` name prefix. No V3.3.3
+  public view is dropped, replaced, renamed, or permission-modified.
+- 0001–0007 canonical hashes: frozen. 0008 and dependent 0009 hashes are
+  regenerated after this candidate repair.
+- Resume scope after independent approval: `0008 THEN 0009 ONLY`.
 
 ## Review boundary
 

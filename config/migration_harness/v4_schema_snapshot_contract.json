@@ -143,12 +143,12 @@
       "governance.validate_public_projection"
     ],
     "views": [
-      "public.v_public_predictions",
-      "public.v_public_latest_odds",
-      "public.v_current_frozen_predictions",
-      "public.v_canonical_latest_update",
-      "public.v_tier_a_progress",
-      "public.v_model_registry_public"
+      "public.v4_public_predictions",
+      "public.v4_public_latest_odds",
+      "public.v4_current_frozen_predictions",
+      "public.v4_canonical_latest_update",
+      "public.v4_tier_a_progress",
+      "public.v4_model_registry_public"
     ],
     "triggers": [
       "model_registry_update_guard",

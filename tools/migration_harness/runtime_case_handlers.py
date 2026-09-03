@@ -1702,7 +1702,7 @@ class RuntimeCaseHandlerRunner:
         anon = _projection(ctx, case_id, fixture, label="anon-attempt", production_prediction_id=fixture["shadow_prediction_id"], production_frozen_prediction_id=fixture["shadow_frozen_prediction_id"], role="anon")[0]
         service = _projection(ctx, case_id, fixture, label="shadow-attempt", production_prediction_id=fixture["shadow_prediction_id"], production_frozen_prediction_id=fixture["shadow_frozen_prediction_id"], role="service_role")[0]
         ctx.set_role("anon")
-        visible = ctx.rows("SELECT match_id FROM public.v_public_predictions WHERE match_id = %s", (fixture["match_id"],))
+        visible = ctx.rows("SELECT match_id FROM public.v4_public_predictions WHERE match_id = %s", (fixture["match_id"],))
         selected = service if not service.accepted else anon
         return self._reject(selected, {"public_rejected": not service.accepted, "no_nonproduction_view_row": not visible}, observed={"trigger": "v4_public_projection_scope_gate"})
 
@@ -1762,9 +1762,9 @@ class RuntimeCaseHandlerRunner:
         fixture = _runtime_fixture(ctx, case_id, active_production=True)
         projection, projection_id = _projection(ctx, case_id, fixture)
         ctx.set_role("anon")
-        row = ctx.one("SELECT canonical_latest_update_at FROM public.v_canonical_latest_update WHERE match_id = %s", (fixture["match_id"],))
+        row = ctx.one("SELECT canonical_latest_update_at FROM public.v4_canonical_latest_update WHERE match_id = %s", (fixture["match_id"],))
         ctx.set_role("authenticated")
-        public_row = ctx.one("SELECT canonical_latest_update_at FROM public.v_public_predictions WHERE match_id = %s", (fixture["match_id"],))
+        public_row = ctx.one("SELECT canonical_latest_update_at FROM public.v4_public_predictions WHERE match_id = %s", (fixture["match_id"],))
         expected = LATEST_BUSINESS_TIMESTAMP
         failed_projection = None if projection.accepted else projection
         return self._accept(
@@ -1775,7 +1775,7 @@ class RuntimeCaseHandlerRunner:
                 "not_created_at": _as_iso(public_row.get("canonical_latest_update_at")) == expected,
             },
             attempt=failed_projection,
-            observed={"view": "v_canonical_latest_update", "source": "business_timestamps"},
+            observed={"view": "v4_canonical_latest_update", "source": "business_timestamps"},
         )
 
     def smoke_19_lifecycle_audit_coverage(self, ctx: CaseContext) -> Dict[str, Any]:

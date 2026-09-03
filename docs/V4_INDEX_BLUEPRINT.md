@@ -67,7 +67,7 @@ These are candidate indexes, not executed statements. Unique constraints may cre
 
 ## 4. Public latest-update support
 
-`public.v_canonical_latest_update` derives the business timestamp from the projection ledger, not from a page build/deploy field. The underlying candidate expression index is:
+`public.v4_canonical_latest_update` derives the business timestamp from the projection ledger, not from a page build/deploy field. The underlying candidate expression index is:
 
 ```sql
 -- Candidate only; do not apply from this blueprint.

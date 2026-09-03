@@ -6,7 +6,7 @@
 -- source_design_file: database/migrations/v4/0009_seed_and_smoke.sql
 -- source_design_commit: cd7ebfd5135275536c2d54ca1ecd980bb386dcfa
 -- candidate_manifest: database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.md
--- canonical_migration_hash: sha256:009467fa464f08457ade762500245918bb7ac251077c5b2ec0b539ca981aadb7
+-- canonical_migration_hash: sha256:b02ab037d2ad065a06e87512baec1caa9567303404881ecb9a86bb3426cdac05
 -- production_status: PRODUCTION_REVIEW_REQUIRED
 --
 -- migration_id: migration@20260901.009
@@ -16,7 +16,7 @@
 -- depends_on: [migration@20260901.008]
 -- schema_contract_version: v4-database-schema@1.0.0
 -- authored_at: 2026-09-01T00:00:00+08:00
--- migration_hash: sha256:009467fa464f08457ade762500245918bb7ac251077c5b2ec0b539ca981aadb7
+-- migration_hash: sha256:b02ab037d2ad065a06e87512baec1caa9567303404881ecb9a86bb3426cdac05
 -- status: DRAFT
 -- This candidate records only DRAFT acceptance metadata; it inserts no match, prediction,
 -- or result rows. It is executable only on the disposable target named by the manifest.
@@ -90,8 +90,8 @@ VALUES
   ('migration@20260901.005', 5, 'v4-evaluation', 'migration@20260901.005', ARRAY['migration@20260901.004'], 'v4-database-schema@1.0.0', '2026-09-01T00:00:00+08:00', 'sha256:b4c5b6a276b42117a0dd830c56c8a8856f273c13016bf200838ba690b5e80394', 'DRAFT', false, 'disposable-candidate manifest entry'),
   ('migration@20260901.006', 6, 'v4-governance-audit', 'migration@20260901.006', ARRAY['migration@20260901.005'], 'v4-database-schema@1.0.0', '2026-09-01T00:00:00+08:00', 'sha256:85386b242f6f1ef8fabd1aa09b07f1b4c3082b589b0c6c320bb9705883a5a52d', 'DRAFT', false, 'disposable-candidate manifest entry'),
   ('migration@20260901.007', 7, 'v4-security-rls', 'migration@20260901.007', ARRAY['migration@20260901.006'], 'v4-database-schema@1.0.0', '2026-09-01T00:00:00+08:00', 'sha256:952ae622fba16f831389b8bfd3b0bfa05b6278f721c41c768532f37d6178a4b0', 'DRAFT', false, 'disposable-candidate manifest entry'),
-  ('migration@20260901.008', 8, 'v4-views-projections', 'migration@20260901.008', ARRAY['migration@20260901.007'], 'v4-database-schema@1.0.0', '2026-09-01T00:00:00+08:00', 'sha256:066964964caf34d44c80012120b79f1c09a9e246fe1125d1a7dbb2a88f2a3ce2', 'DRAFT', false, 'disposable-candidate manifest entry'),
-  ('migration@20260901.009', 9, 'v4-seed-smoke', 'migration@20260901.009', ARRAY['migration@20260901.008'], 'v4-database-schema@1.0.0', '2026-09-01T00:00:00+08:00', 'sha256:009467fa464f08457ade762500245918bb7ac251077c5b2ec0b539ca981aadb7', 'DRAFT', false, 'disposable-candidate manifest entry');
+  ('migration@20260901.008', 8, 'v4-views-projections', 'migration@20260901.008', ARRAY['migration@20260901.007'], 'v4-database-schema@1.0.0', '2026-09-01T00:00:00+08:00', 'sha256:f2ddf1fd7a69e38bc224c5e19c8db08824d76a6f566eae9fa722a52c644584e3', 'DRAFT', false, 'disposable-candidate manifest entry'),
+  ('migration@20260901.009', 9, 'v4-seed-smoke', 'migration@20260901.009', ARRAY['migration@20260901.008'], 'v4-database-schema@1.0.0', '2026-09-01T00:00:00+08:00', 'sha256:b02ab037d2ad065a06e87512baec1caa9567303404881ecb9a86bb3426cdac05', 'DRAFT', false, 'disposable-candidate manifest entry');
 
 -- Runtime smoke harness functions/scripts are specified in
 -- docs/V4_MIGRATION_SMOKE_TESTS.md. They must run on a disposable target,

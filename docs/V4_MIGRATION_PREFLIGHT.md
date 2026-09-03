@@ -110,6 +110,32 @@ The baseline identity sample is intentionally marked
 identity evidence. A complete `pg_catalog`/`information_schema` identity
 recapture is mandatory before apply.
 
+### 1.3 0008 public-view collision decision
+
+The V4 runtime candidate does not claim any of the unprefixed public view names
+above. The supplied `public.v_public_predictions` definition is a V3.3.3 view
+over the legacy `public` data surface, while the V4 intended definition reads
+the V4 `public_read_projections` ledger; its semantics, columns, source
+lineage, `security_invoker` contract, and grants are not equivalent. The other
+known name collisions are likewise unproven from the supplied baseline and are
+not eligible for implicit reuse.
+
+The forward-fix therefore creates these V4-owned names only:
+
+```text
+public.v4_public_predictions
+public.v4_public_latest_odds
+public.v4_current_frozen_predictions
+public.v4_canonical_latest_update
+public.v4_tier_a_progress
+public.v4_model_registry_public
+```
+
+No V3.3.3 view is dropped, replaced, renamed, or granted new permissions by
+0008. An equivalent pre-existing view may be reused only after an exact
+definition, `security_invoker`, and grant assertion; an incompatible collision
+is fail-closed and requires an explicit V4-owned name.
+
 ## 2. Apply-before mandatory checklist
 
 Every item below is a blocking gate. The checked-in plan records the required

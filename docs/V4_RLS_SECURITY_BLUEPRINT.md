@@ -64,10 +64,10 @@ REVOKE ALL ON ALL FUNCTIONS IN SCHEMA core, market, context, model, evaluation, 
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
 
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
-GRANT SELECT ON public.v_public_predictions,
-               public.v_public_latest_odds,
-               public.v_current_frozen_predictions,
-               public.v_canonical_latest_update
+GRANT SELECT ON public.v4_public_predictions,
+               public.v4_public_latest_odds,
+               public.v4_current_frozen_predictions,
+               public.v4_canonical_latest_update
   TO anon, authenticated;
 
 -- If security-invoker views require base-table privileges, grant only these
@@ -85,7 +85,7 @@ ON public.public_read_projections TO anon, authenticated;
 
 No `GRANT ALL ON ALL TABLES` is permitted. Custom backend roles receive only the tables/functions required for their path, and sequence usage is granted only where an identity sequence is directly used by that controlled writer. If `security_invoker` view execution requires underlying privileges, grant only the exact safe projection columns or move the view into a private API schema with a reviewed safe function; never grant private raw tables to satisfy a view.
 
-`v_tier_a_progress` and `v_model_registry_public` are not automatically public. They are exposed only if their final columns are approved as public-safe and the underlying privilege/RLS path is tested.
+`v4_tier_a_progress` and `v4_model_registry_public` are not automatically public. They are exposed only if their final columns are approved as public-safe and the underlying privilege/RLS path is tested.
 
 ## 4. RLS policy model
 
@@ -171,11 +171,15 @@ Candidate controlled functions include `governance.append_audit_log`, `governanc
 
 ## 6. Public view security
 
-The six named public objects are explicit-column views. Where the deployed PostgreSQL version supports it, they use `WITH (security_invoker = true)`. The migration must verify the deployed version and test view behavior under `anon` and `authenticated`:
+The six named V4 public objects use the explicit `public.v4_*` name prefix so
+they cannot collide with the protected V3.3.3 `public.v_*` surface. Where the
+deployed PostgreSQL version supports it, they use `WITH (security_invoker =
+true)`. The migration must verify the deployed version and test view behavior
+under `anon` and `authenticated`:
 
-- `v_public_predictions`, `v_public_latest_odds`, `v_current_frozen_predictions`, and `v_canonical_latest_update` may be public-safe after column review;
-- `v_tier_a_progress` exposes only an approved aggregate and is normally internal/authenticated-only;
-- `v_model_registry_public` exposes only approved Production registry display metadata and is public only if a safe projection path exists;
+- `v4_public_predictions`, `v4_public_latest_odds`, `v4_current_frozen_predictions`, and `v4_canonical_latest_update` may be public-safe after column review;
+- `v4_tier_a_progress` exposes only an approved aggregate and is normally internal/authenticated-only;
+- `v4_model_registry_public` exposes only approved Production registry display metadata and is public only if a safe projection path exists;
 - no view uses `SELECT *` or exposes raw payloads, feature values, source references, internal confidence decomposition, Shadow/Experiment identity, secrets, or debug traces;
 - no view invokes a model, mutates a table, or bypasses a gate.
 

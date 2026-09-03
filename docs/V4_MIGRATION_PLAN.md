@@ -112,7 +112,7 @@ Rollback: before production, disable/remove unreferenced policies/functions/trig
 Scope:
 
 - create `public.public_read_projections` ledger with no client write policy;
-- create explicit-column `v_public_predictions`, `v_public_latest_odds`, `v_current_frozen_predictions`, `v_canonical_latest_update`, `v_tier_a_progress`, and `v_model_registry_public`;
+- create explicit-column V4-prefixed views `v4_public_predictions`, `v4_public_latest_odds`, `v4_current_frozen_predictions`, `v4_canonical_latest_update`, `v4_tier_a_progress`, and `v4_model_registry_public`; preserve all pre-existing unprefixed V3.3.3 view names;
 - grant only approved public/internal views and, if required by security-invoker semantics, only safe underlying columns;
 - verify latest update is computed from real business timestamps and not page/deploy time.
 

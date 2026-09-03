@@ -227,6 +227,35 @@ if (Test-Path -LiteralPath $jsonManifestPath -PathType Leaf) {
 
 Assert-Check ($allCandidateText -match '(?im)CREATE\s+POLICY') 'Candidate SQL does not create an RLS policy'
 
+$viewsPath = Join-Path $candidateDir '0008_views_projections.sql'
+if (Test-Path -LiteralPath $viewsPath -PathType Leaf) {
+    $viewsText = Read-Utf8 $viewsPath
+    $v4ViewNames = @(
+        'public.v4_public_predictions',
+        'public.v4_public_latest_odds',
+        'public.v4_current_frozen_predictions',
+        'public.v4_canonical_latest_update',
+        'public.v4_tier_a_progress',
+        'public.v4_model_registry_public'
+    )
+    foreach ($viewName in $v4ViewNames) {
+        Assert-Check ($viewsText -match ('(?im)^\s*CREATE\s+VIEW\s+' + [regex]::Escape($viewName) + '\s*$')) ("0008 is missing approved V4 view: {0}" -f $viewName)
+        Assert-Check ($viewsText -match ('(?is)CREATE\s+VIEW\s+' + [regex]::Escape($viewName) + '\s+WITH\s*\(\s*security_invoker\s*=\s*true\s*\)')) ("0008 V4 view is not security_invoker: {0}" -f $viewName)
+        Assert-Check ($viewsText -match ('(?is)GRANT\s+SELECT\s+ON\s+[^;]*' + [regex]::Escape($viewName))) ("0008 is missing a grant contract for V4 view: {0}" -f $viewName)
+    }
+    Assert-Check (-not ($viewsText -match '(?im)^\s*DROP\s+VIEW\b')) '0008 must not drop a pre-existing public view'
+    Assert-Check (-not ($viewsText -match '(?im)^\s*CREATE\s+OR\s+REPLACE\s+VIEW\b')) '0008 must not replace a pre-existing public view'
+    foreach ($legacyView in @(
+        'public.v_canonical_latest_update',
+        'public.v_current_frozen_predictions',
+        'public.v_public_latest_odds',
+        'public.v_public_predictions',
+        'public.v_tier_a_progress'
+    )) {
+        Assert-Check (-not ($viewsText -match ('(?im)^\s*CREATE\s+VIEW\s+' + [regex]::Escape($legacyView) + '\s*$'))) ("0008 collides with the V3.3.3 public view: {0}" -f $legacyView)
+    }
+}
+
 if (Test-Path -LiteralPath $markdownManifestPath -PathType Leaf) {
     $markdownManifest = Read-Utf8 $markdownManifestPath
     foreach ($manifestMarker in @(

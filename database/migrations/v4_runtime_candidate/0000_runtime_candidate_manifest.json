@@ -186,8 +186,8 @@
       "depends_on": [
         "migration@20260901.007"
       ],
-      "canonical_migration_hash": "sha256:066964964caf34d44c80012120b79f1c09a9e246fe1125d1a7dbb2a88f2a3ce2",
-      "content_sha256_noncanonical": "7cfc47800fb4ac0154468c49eb3e88290dfe80cd529c2048fc1e18e4fcc4046e",
+      "canonical_migration_hash": "sha256:f2ddf1fd7a69e38bc224c5e19c8db08824d76a6f566eae9fa722a52c644584e3",
+      "content_sha256_noncanonical": "dc19e7a76839b2b2fd594f3c871d8340b4231fd4d9defb9dc6eb7f592012ca48",
       "status": "RUNTIME_VALIDATION_CANDIDATE",
       "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
     },
@@ -205,8 +205,8 @@
       "depends_on": [
         "migration@20260901.008"
       ],
-      "canonical_migration_hash": "sha256:009467fa464f08457ade762500245918bb7ac251077c5b2ec0b539ca981aadb7",
-      "content_sha256_noncanonical": "8d4bec203e1d1b97374c974962f87ad711515a6138599b5e56e77a8dde76c091",
+      "canonical_migration_hash": "sha256:b02ab037d2ad065a06e87512baec1caa9567303404881ecb9a86bb3426cdac05",
+      "content_sha256_noncanonical": "fa121ad345087e870339ae143ed94d3f90edc39dd594e0723c918bf176ed95ce",
       "status": "RUNTIME_VALIDATION_CANDIDATE",
       "production_approval": "NOT_APPROVED_FOR_PRODUCTION"
     }
@@ -287,5 +287,36 @@
     "v333_mutation": "FORBIDDEN",
     "business_seed_data": "NONE",
     "next_gate": "Pre-BATCH-04 Runtime Validation Gate after disposable DB bootstrap"
+  },
+  "forward_fix": {
+    "identity": "JCFB V4 0008 VIEWS/PROJECTIONS FORWARD-FIX 1.0",
+    "base_head": "2d6f6fca463883a455eb038e1f55bff9778826b1",
+    "partial_apply_state": "PARTIAL",
+    "applied_prefix": [
+      "migration@20260901.001",
+      "migration@20260901.002",
+      "migration@20260901.003",
+      "migration@20260901.004",
+      "migration@20260901.005",
+      "migration@20260901.006",
+      "migration@20260901.007"
+    ],
+    "failed_migration": "migration@20260901.008",
+    "failed_statement": "CREATE VIEW public.v_public_predictions",
+    "failed_statement_result": "EXISTING_V3_3_3_OBJECT_COLLISION_ROLLED_BACK",
+    "unapplied_suffix": [
+      "migration@20260901.008",
+      "migration@20260901.009"
+    ],
+    "existing_v_public_predictions_compatibility": "INCOMPATIBLE",
+    "v4_view_strategy": "V4_RENAME",
+    "v4_public_view_name_prefix": "public.v4_",
+    "v333_objects_modified": false,
+    "applied_prefix_hashes_frozen": true,
+    "resume_scope": [
+      "migration@20260901.008",
+      "migration@20260901.009"
+    ],
+    "new_explicit_resume_approval_required": true
   }
 }

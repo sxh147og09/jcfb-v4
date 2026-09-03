@@ -6,7 +6,7 @@
 -- source_design_file: database/migrations/v4/0008_views_projections.sql
 -- source_design_commit: cd7ebfd5135275536c2d54ca1ecd980bb386dcfa
 -- candidate_manifest: database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.md
--- canonical_migration_hash: sha256:066964964caf34d44c80012120b79f1c09a9e246fe1125d1a7dbb2a88f2a3ce2
+-- canonical_migration_hash: sha256:f2ddf1fd7a69e38bc224c5e19c8db08824d76a6f566eae9fa722a52c644584e3
 -- production_status: PRODUCTION_REVIEW_REQUIRED
 --
 -- migration_id: migration@20260901.008
@@ -16,9 +16,16 @@
 -- depends_on: [migration@20260901.007]
 -- schema_contract_version: v4-database-schema@1.0.0
 -- authored_at: 2026-09-01T00:00:00+08:00
--- migration_hash: sha256:066964964caf34d44c80012120b79f1c09a9e246fe1125d1a7dbb2a88f2a3ce2
+-- migration_hash: sha256:f2ddf1fd7a69e38bc224c5e19c8db08824d76a6f566eae9fa722a52c644584e3
 -- status: DRAFT
 -- This candidate creates the public projection boundary; it publishes no Production output.
+--
+-- Forward-fix 1.0: the supplied V3.3.3 baseline already owns the public view
+-- names v_public_predictions, v_public_latest_odds,
+-- v_current_frozen_predictions, v_canonical_latest_update, and
+-- v_tier_a_progress. Their definitions and grants are not V4-equivalent.
+-- V4 therefore uses the explicit public.v4_* namespace-by-name below. This
+-- migration never drops, replaces, or reuses a V3.3.3 public view.
 
 BEGIN;
 
@@ -104,7 +111,7 @@ GRANT SELECT (
 )
 ON public.public_read_projections TO anon, authenticated;
 
-CREATE VIEW public.v_public_predictions
+CREATE VIEW public.v4_public_predictions
 WITH (security_invoker = true)
 AS
 WITH ranked AS (
@@ -135,7 +142,7 @@ SELECT
 FROM ranked AS r
 WHERE r.rn = 1;
 
-CREATE VIEW public.v_public_latest_odds
+CREATE VIEW public.v4_public_latest_odds
 WITH (security_invoker = true)
 AS
 WITH ranked AS (
@@ -152,7 +159,7 @@ WITH ranked AS (
 SELECT match_id, kickoff_at, safe_odds_summary, odds_business_at, publication_status
 FROM ranked WHERE rn = 1;
 
-CREATE VIEW public.v_current_frozen_predictions
+CREATE VIEW public.v4_current_frozen_predictions
 WITH (security_invoker = true)
 AS
 WITH ranked AS (
@@ -172,7 +179,7 @@ SELECT match_id, kickoff_at, safe_selection_summary,
        frozen_business_at, projection_revision
 FROM ranked WHERE rn = 1;
 
-CREATE VIEW public.v_canonical_latest_update
+CREATE VIEW public.v4_canonical_latest_update
 WITH (security_invoker = true)
 AS
 WITH business_updates AS (
@@ -190,7 +197,7 @@ WITH business_updates AS (
 SELECT match_id, MAX(business_update_at) AS canonical_latest_update_at
 FROM business_updates GROUP BY match_id;
 
-CREATE VIEW public.v_tier_a_progress
+CREATE VIEW public.v4_tier_a_progress
 WITH (security_invoker = true)
 AS
 SELECT
@@ -201,7 +208,7 @@ SELECT
   MAX(created_at) AS as_of_business_at
 FROM evaluation.tier_a_samples;
 
-CREATE VIEW public.v_model_registry_public
+CREATE VIEW public.v4_model_registry_public
 WITH (security_invoker = true)
 AS
 WITH ranked AS (
@@ -220,19 +227,27 @@ SELECT public_model_name, public_model_version, public_model_revision,
        publication_status, frozen_business_at AS effective_at
 FROM ranked WHERE rn = 1;
 
-GRANT SELECT ON public.v_public_predictions,
-               public.v_public_latest_odds,
-               public.v_current_frozen_predictions,
-               public.v_canonical_latest_update
+REVOKE ALL ON public.v4_public_predictions,
+             public.v4_public_latest_odds,
+             public.v4_current_frozen_predictions,
+             public.v4_canonical_latest_update,
+             public.v4_tier_a_progress,
+             public.v4_model_registry_public
+FROM PUBLIC, anon, authenticated;
+
+GRANT SELECT ON public.v4_public_predictions,
+               public.v4_public_latest_odds,
+               public.v4_current_frozen_predictions,
+               public.v4_canonical_latest_update
 TO anon, authenticated;
-GRANT SELECT ON public.v_public_predictions,
-               public.v_public_latest_odds,
-               public.v_current_frozen_predictions,
-               public.v_canonical_latest_update,
-               public.v_tier_a_progress,
-               public.v_model_registry_public
+GRANT SELECT ON public.v4_public_predictions,
+               public.v4_public_latest_odds,
+               public.v4_current_frozen_predictions,
+               public.v4_canonical_latest_update,
+               public.v4_tier_a_progress,
+               public.v4_model_registry_public
 TO service_role;
--- v_tier_a_progress and v_model_registry_public remain approved/internal
+-- v4_tier_a_progress and v4_model_registry_public remain approved/internal
 -- views until a separate public-safe column review grants them.
 
 CREATE INDEX public_projection_business_latest_idx

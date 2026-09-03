@@ -1563,9 +1563,10 @@ GRANT SELECT (
 ON public.public_read_projections TO anon, authenticated;
 
 -- TODO_DECISION: verify deployed PostgreSQL security_invoker support before
--- exposure. These are candidate views and must be created only after the
--- projection validator and safe-column grants are approved.
-CREATE OR REPLACE VIEW public.v_public_predictions
+-- exposure. These are candidate V4 views and must be created only after the
+-- projection validator and safe-column grants are approved. The public.v4_*
+-- names preserve the pre-existing unprefixed V3.3.3 view identities.
+CREATE VIEW public.v4_public_predictions
 WITH (security_invoker = true)
 AS
 WITH ranked AS (
@@ -1619,7 +1620,7 @@ SELECT
 FROM ranked AS r
 WHERE r.rn = 1;
 
-CREATE OR REPLACE VIEW public.v_public_latest_odds
+CREATE VIEW public.v4_public_latest_odds
 WITH (security_invoker = true)
 AS
 WITH ranked AS (
@@ -1641,7 +1642,7 @@ SELECT match_id, kickoff_at, safe_odds_summary, odds_business_at, publication_st
 FROM ranked
 WHERE rn = 1;
 
-CREATE OR REPLACE VIEW public.v_current_frozen_predictions
+CREATE VIEW public.v4_current_frozen_predictions
 WITH (security_invoker = true)
 AS
 WITH ranked AS (
@@ -1671,7 +1672,7 @@ SELECT
 FROM ranked
 WHERE rn = 1;
 
-CREATE OR REPLACE VIEW public.v_canonical_latest_update
+CREATE VIEW public.v4_canonical_latest_update
 WITH (security_invoker = true)
 AS
 WITH business_updates AS (
@@ -1693,7 +1694,7 @@ FROM business_updates
 GROUP BY match_id;
 
 -- Internal/approved-only views. No anon grant is implied.
-CREATE OR REPLACE VIEW public.v_tier_a_progress
+CREATE VIEW public.v4_tier_a_progress
 WITH (security_invoker = true)
 AS
 SELECT
@@ -1704,7 +1705,7 @@ SELECT
   MAX(created_at) AS as_of_business_at
 FROM evaluation.tier_a_samples;
 
-CREATE OR REPLACE VIEW public.v_model_registry_public
+CREATE VIEW public.v4_model_registry_public
 WITH (security_invoker = true)
 AS
 WITH ranked AS (
@@ -1733,10 +1734,10 @@ FROM ranked
 WHERE rn = 1;
 
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
-GRANT SELECT ON public.v_public_predictions,
-               public.v_public_latest_odds,
-               public.v_current_frozen_predictions,
-               public.v_canonical_latest_update
+GRANT SELECT ON public.v4_public_predictions,
+               public.v4_public_latest_odds,
+               public.v4_current_frozen_predictions,
+               public.v4_canonical_latest_update
   TO anon, authenticated;
 -- v_tier_a_progress and v_model_registry_public require a separate
 -- public-safe column review; do not grant them automatically.

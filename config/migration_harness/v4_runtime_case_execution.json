@@ -218,7 +218,7 @@
       "caller_roles": ["anon", "authenticated", "auditor"],
       "hard_gate": true,
       "setup": "Create an active Production projection with distinct real business timestamps and a later published/page timestamp.",
-      "action": "Read v_canonical_latest_update and v_public_predictions and compare the result to the maximum source business timestamp.",
+      "action": "Read v4_canonical_latest_update and v4_public_predictions and compare the result to the maximum source business timestamp.",
       "expected_mechanism": {"type": "view_postcondition", "required": ["max_business_timestamp", "not_published_at", "not_created_at"]},
       "cleanup": "Rollback the projection and all fixtures."
     },
