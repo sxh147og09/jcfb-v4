@@ -60,6 +60,10 @@
     "batch_05_complete": false,
     "next_recommended_task": "V4-022"
   },
-  "git_commit": "58598a4",
-  "working_tree": "CLEAN after implementation commit; acceptance closure metadata commit follows"
+  "git_commit": "20fc041",
+  "git_commits": [
+    "58598a4",
+    "20fc041"
+  ],
+  "working_tree": "CLEAN after acceptance closure commit"
 }
