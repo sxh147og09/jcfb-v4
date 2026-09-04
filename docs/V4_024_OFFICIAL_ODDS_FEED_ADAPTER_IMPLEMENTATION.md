@@ -2,7 +2,7 @@
 
 Workspace: `F:\Projects\jcfb-v4`
 
-Branch/HEAD: recorded in the acceptance evidence after the V4-024 implementation commit
+Branch/HEAD: `main` / `5bdf4db` (`feat(v4-024): add official odds feed adapter`)
 
 Implementation Status: `COMPLETE` for the V4-024 local, in-memory, no-write adapter boundary
 
