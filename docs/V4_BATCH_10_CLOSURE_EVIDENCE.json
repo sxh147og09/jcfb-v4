@@ -1,0 +1,42 @@
+{
+  "batch_id": "BATCH-10",
+  "workspace": "F:/Projects/jcfb-v4",
+  "branch": "main",
+  "manifest": "docs/V4_BATCH_10_EXECUTION_MANIFEST.json",
+  "manifest_frozen_at_head": "893e111",
+  "tasks": {
+    "V4-038": {"targeted_tests": "7/7", "dod": "PASS", "commit": "6fbbddf"},
+    "V4-039": {"targeted_tests": "5/5", "dod": "PASS", "commit": "6e9e47f"},
+    "V4-040": {"targeted_tests": "5/5", "dod": "PASS", "commit": "519e54f"}
+  },
+  "final_full_repository_tests": {"passed": 353, "total": 353, "status": "PASS"},
+  "acceptance": {
+    "feature_contract_version_registry": "PASS",
+    "typed_feature_state_semantics": "PASS",
+    "feature_quality_semantics": "PASS",
+    "upstream_lineage": "PASS",
+    "deterministic_replay": "PASS",
+    "feature_snapshot_hash": "PASS",
+    "schema_adapter_and_assembly": "PASS",
+    "missingness_state_preservation": "PASS",
+    "cutoff_future_data": "PASS",
+    "append_only_boundary": "PASS",
+    "frozen_input_downstream_only": "PASS",
+    "prediction_score_leakage": "NO",
+    "manifest_immutability": "PASS",
+    "v3333_isolation": "PASS",
+    "f_drive_policy": "PASS"
+  },
+  "boundaries": {
+    "production_supabase_reads_writes": "NO",
+    "migration_added_applied": "NO",
+    "v4_041_plus": "NOT_ENTERED",
+    "batch_11": "NOT_ENTERED",
+    "frozen_input_v4_076": "NOT_EXECUTED",
+    "prediction_score_engine": "NOT_EXECUTED",
+    "shadow_tier_a_public_promotion": "NOT_EXECUTED"
+  },
+  "closure_gate": "PASS",
+  "status": "COMPLETE",
+  "stop_after_batch": true
+}
