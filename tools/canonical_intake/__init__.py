@@ -158,6 +158,16 @@ from .feature_snapshot import (
     FeatureSnapshotResult,
     FeatureSnapshotValidationError,
 )
+from .feature_assembly import (
+    CONTRACT_VERSION as FEATURE_ASSEMBLY_CONTRACT_VERSION,
+    SOURCE_KINDS,
+    FeatureAssemblyResult,
+    FeatureAssemblyStore,
+    FeatureAssemblyValidationError,
+    SchemaAdapter,
+    SchemaAdapterRegistry,
+    VersionedSourceObject,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -287,5 +297,13 @@ __all__ = [
     "FeatureSnapshotHasher",
     "FeatureSnapshotResult",
     "FeatureSnapshotValidationError",
+    "FEATURE_ASSEMBLY_CONTRACT_VERSION",
+    "SOURCE_KINDS",
+    "FeatureAssemblyResult",
+    "FeatureAssemblyStore",
+    "FeatureAssemblyValidationError",
+    "SchemaAdapter",
+    "SchemaAdapterRegistry",
+    "VersionedSourceObject",
     "resolve_f_drive_output_path",
 ]

@@ -1,0 +1,8 @@
+{
+  "source_schema_version": "source-envelope@1.0.0",
+  "target_feature_schema_version": "feature-schema@1.0.0",
+  "adapter_version": "adapter@1.0.0",
+  "available_at": "2026-09-04T09:00:00+08:00",
+  "prediction_cutoff_at": "2026-09-04T09:10:00+08:00",
+  "kickoff_at": "2026-09-04T11:35:00+08:00"
+}
