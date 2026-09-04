@@ -1,0 +1,94 @@
+{
+  "manifest_contract_version": "v4-batch-execution-manifest@1.0.0",
+  "batch_id": "BATCH-07",
+  "objective": "External Market Intake & Time Normalization",
+  "workspace": "F:/Projects/jcfb-v4",
+  "branch": "main",
+  "baseline_head": "4bead73",
+  "working_tree_required": "CLEAN",
+  "execution_mode": "CONTINUOUS",
+  "wave_1": {
+    "planned_parallel": ["V4-028", "V4-029", "V4-030"],
+    "resolved_order": ["V4-028", "V4-029", "V4-030"],
+    "parallel_fallback_reason": "Shared canonical_intake exports, fixtures, acceptance evidence, and documentation boundaries make serialized execution the safe choice."
+  },
+  "wave_2": ["V4-031"],
+  "closure": ["BATCH-07 Closure Review"],
+  "approved_tasks": [
+    {
+      "task_id": "V4-028",
+      "task_name": "External European 1X2 Intake 1.0",
+      "dependency": ["V4-023"],
+      "classification": "BATCHABLE + SERIALIZED_WAVE_1"
+    },
+    {
+      "task_id": "V4-029",
+      "task_name": "External Asian Handicap Intake 1.0",
+      "dependency": ["V4-023"],
+      "classification": "BATCHABLE + SERIALIZED_WAVE_1"
+    },
+    {
+      "task_id": "V4-030",
+      "task_name": "External O/U Intake 1.0",
+      "dependency": ["V4-023"],
+      "classification": "BATCHABLE + SERIALIZED_WAVE_1"
+    },
+    {
+      "task_id": "V4-031",
+      "task_name": "External Source-Time Normalization 1.0",
+      "dependency": ["V4-028", "V4-029", "V4-030"],
+      "classification": "BATCHABLE + SERIAL"
+    }
+  ],
+  "contract_boundary": {
+    "external_contract_version": "external-market-snapshot@1.0.0",
+    "source_is_official": false,
+    "canonical_match_identity": "V4-020",
+    "append_only": true,
+    "correction_lineage": "supersedes_snapshot_id",
+    "official_market_overwrite": false,
+    "synthetic_snapshot": false,
+    "implicit_coercion": false,
+    "model_fields": false,
+    "future_cutoff_gate": "consume existing V4-022 semantics; do not alter frozen contract"
+  },
+  "acceptance_criteria": [
+    "provider/source/source_ref/market/line/prices/timestamps/provenance are typed and auditable",
+    "every accepted snapshot binds to a resolved V4-020 canonical match_id",
+    "external and official odds identities remain disjoint",
+    "missing, unknown, conflicting, stale, future, or blocked data remains explicit and fail-closed",
+    "original source, captured, observed, and ingested timestamps remain intact",
+    "V4-031 creates references to original snapshots only and no synthetic snapshot",
+    "no Production/Supabase write, migration add/apply, prediction, public deployment, or V3.3.3 modification"
+  ],
+  "out_of_scope": [
+    "V4-032+",
+    "BATCH-08",
+    "BATCH-09",
+    "Team Context downstream analysis",
+    "Market Intelligence downstream analysis",
+    "Feature Bundle",
+    "Prediction",
+    "Score Engine",
+    "Shadow / Tier A",
+    "Public Page",
+    "Promotion / Deployment",
+    "Production/Supabase writes",
+    "migration add/apply",
+    "V3.3.3 modification"
+  ],
+  "stop_conditions": [
+    "targeted or full repository test failure",
+    "task DoD failure",
+    "canonical match identity cannot be established",
+    "provider/source/source_ref/market/line/price/hash cannot be validated fail-closed",
+    "external/official boundary conflict",
+    "ambiguous time can only be repaired by guessing",
+    "frozen contract, enum, hash boundary, or major version change required",
+    "Production/Supabase access or migration required",
+    "V3.3.3 isolation risk",
+    "acceptance evidence cannot be replayed",
+    "scope requires BATCH-08 or V4-032+"
+  ],
+  "manifest_hash": "sha256:aacbe7cb90a1cd5765fbc9226e03cef0de8044e0c0cfdedf9410120da5c5e184"
+}

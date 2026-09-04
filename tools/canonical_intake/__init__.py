@@ -66,6 +66,18 @@ from .official_ledger import (
     OfficialOddsLedgerValidationError,
     OfficialOddsProvenanceLedger,
 )
+from .external_market import (
+    ExternalConflictEvidence,
+    ExternalEuropean1X2Adapter,
+    ExternalMarket,
+    ExternalMarketIntakeResult,
+    ExternalMarketObservation,
+    ExternalMarketSnapshot,
+    ExternalMarketSnapshotStore,
+    ExternalMarketStatus,
+    ExternalMarketValidationError,
+    European1X2Intake,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -117,5 +129,15 @@ __all__ = [
     "OddsProvenanceLedgerEntry",
     "OfficialOddsLedgerValidationError",
     "OfficialOddsProvenanceLedger",
+    "ExternalMarket",
+    "ExternalMarketStatus",
+    "ExternalMarketValidationError",
+    "ExternalConflictEvidence",
+    "ExternalMarketObservation",
+    "ExternalMarketSnapshot",
+    "ExternalMarketIntakeResult",
+    "ExternalMarketSnapshotStore",
+    "ExternalEuropean1X2Adapter",
+    "European1X2Intake",
     "resolve_f_drive_output_path",
 ]

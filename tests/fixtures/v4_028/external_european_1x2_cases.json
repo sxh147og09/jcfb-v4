@@ -1,0 +1,22 @@
+{
+  "base": {
+    "snapshot_kind": "CURRENT",
+    "created_at": "2026-09-04T09:11:00+08:00",
+    "source_timestamp": "2026-09-04T09:10:30+08:00",
+    "captured_at": "2026-09-04T09:10:30+08:00",
+    "observed_at": "2026-09-04T09:10:31+08:00",
+    "ingested_at": "2026-09-04T09:10:32+08:00",
+    "source": "Example External Provider Feed",
+    "source_type": "EXTERNAL_FEED",
+    "source_ref": "ref://external/example/20260904/001/1x2-091030",
+    "provider": "Example External Provider",
+    "market": "EUROPEAN_1X2",
+    "line": "NOT_APPLICABLE",
+    "prices": {"home": 2.11, "draw": 3.25, "away": 3.08},
+    "availability_status": "AVAILABLE",
+    "source_confidence": {"state": "ASSESSED", "score": 0.91, "basis": "Provider response with stable source reference"},
+    "liquidity_quality": "UNKNOWN",
+    "source_is_official": false,
+    "metadata": {"fixture_revision": "external-1x2-r1"}
+  }
+}
