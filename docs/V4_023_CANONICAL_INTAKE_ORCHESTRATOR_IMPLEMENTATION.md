@@ -2,7 +2,7 @@
 
 Workspace: `F:\Projects\jcfb-v4`
 
-Branch/HEAD: recorded in the acceptance evidence after the V4-023 implementation commit
+Branch/HEAD: `main` / `808b97d` (`feat(v4-023): add canonical intake orchestrator`)
 
 Implementation Status: `COMPLETE` for the V4-023 local, no-write implementation boundary
 
