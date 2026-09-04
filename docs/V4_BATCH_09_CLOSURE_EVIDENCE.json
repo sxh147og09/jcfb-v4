@@ -65,8 +65,8 @@
     "551add4",
     "652fe54",
     "fb4b484",
-    "PENDING_CLOSURE_COMMIT"
+    "3064e7b"
   ],
-  "working_tree": "PENDING_CLOSURE_COMMIT",
+  "working_tree": "CLEAN_AFTER_FINAL_CLOSURE_EVIDENCE_COMMIT",
   "closure_gate": "PASS"
 }
