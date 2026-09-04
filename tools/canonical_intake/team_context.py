@@ -1051,3 +1051,371 @@ class AvailabilityContextStore:
         self._observations.setdefault(observation_id, observation)
         self._events.append({"action": "BLOCKED_CONTEXT", "observation_id": observation_id, "match_id": observation.match_id, "team_id": observation.team_id, "side": observation.side.value, "error_code": code})
         return AvailabilityContextResult(False, "BLOCKED", code, observation_id, None, code)
+
+
+LINEUP_STATES = frozenset({"CONFIRMED", "PROJECTED", "UNKNOWN", "NOT_VERIFIED", "BLOCKED"})
+
+
+@dataclass(frozen=True)
+class ContextValue:
+    """A source-attributed context value, never a model interpretation."""
+
+    state: str
+    value: Any
+    basis_refs: Tuple[str, ...]
+    reason: Optional[str]
+
+    @classmethod
+    def from_dict(cls, raw: Any, field_name: str, *, allowed_states: frozenset[str] = CONTEXT_STATES) -> "ContextValue":
+        if not isinstance(raw, Mapping):
+            raise TeamContextValidationError("CONTEXT_VALUE_INVALID", f"{field_name} must be a typed object")
+        state = _text(raw.get("state"), f"{field_name}.state")
+        assert state is not None
+        state = state.upper()
+        if state not in allowed_states:
+            raise TeamContextValidationError("CONTEXT_STATE_INVALID", f"{field_name}.state is not governed")
+        value = raw.get("value")
+        if state in {"AVAILABLE", "CONFIRMED", "PROJECTED"} and value is None:
+            raise TeamContextValidationError("CONTEXT_VALUE_REQUIRED", f"{field_name}.{state} requires value")
+        basis_raw = raw.get("basis_refs", [])
+        if not isinstance(basis_raw, (list, tuple)) or any(not isinstance(item, str) or not item.strip() for item in basis_raw):
+            raise TeamContextValidationError("BASIS_REFS_INVALID", f"{field_name}.basis_refs must be strings")
+        basis_refs = tuple(item.strip() for item in basis_raw)
+        if state in {"AVAILABLE", "CONFIRMED", "PROJECTED"} and not basis_refs:
+            raise TeamContextValidationError("CONTEXT_EVIDENCE_REQUIRED", f"{field_name}.{state} requires basis_refs")
+        reason = _text(raw.get("reason"), f"{field_name}.reason", required=False)
+        if state not in {"AVAILABLE", "CONFIRMED", "PROJECTED"} and reason is None:
+            raise TeamContextValidationError("REASON_REQUIRED", f"{field_name}.{state} requires reason")
+        if value is not None:
+            forbidden = _find_forbidden(value, f"{field_name}.value")
+            if forbidden:
+                raise TeamContextValidationError("MODEL_FIELD_FORBIDDEN", f"context value cannot contain {forbidden}")
+        return cls(state, _freeze(value), basis_refs, reason)
+
+    def to_dict(self) -> Dict[str, Any]:
+        result: Dict[str, Any] = {"state": self.state, "basis_refs": list(self.basis_refs)}
+        if self.value is not None:
+            result["value"] = _thaw(self.value)
+        if self.reason is not None:
+            result["reason"] = self.reason
+        return result
+
+
+@dataclass(frozen=True)
+class StartingXIContext:
+    state: str
+    players: Optional[Tuple[str, ...]]
+    basis_refs: Tuple[str, ...]
+    reason: Optional[str]
+
+    @classmethod
+    def from_dict(cls, raw: Any) -> "StartingXIContext":
+        field_name = "starting_xi"
+        if not isinstance(raw, Mapping):
+            raise TeamContextValidationError("STARTING_XI_INVALID", "starting_xi must be a typed object")
+        state = _text(raw.get("state"), f"{field_name}.state")
+        assert state is not None
+        state = state.upper()
+        if state not in LINEUP_STATES:
+            raise TeamContextValidationError("LINEUP_STATE_INVALID", "starting_xi.state is not governed")
+        raw_players = raw.get("players")
+        if raw_players is not None and not isinstance(raw_players, (list, tuple)):
+            raise TeamContextValidationError("STARTING_XI_PLAYERS_INVALID", "starting_xi.players must be an array")
+        if state in {"UNKNOWN", "NOT_VERIFIED", "BLOCKED"} and raw_players is not None:
+            raise TeamContextValidationError("STARTING_XI_PLAYERS_FORBIDDEN", f"starting_xi.{state} must omit players")
+        if state in {"CONFIRMED", "PROJECTED"} and not raw_players:
+            raise TeamContextValidationError("STARTING_XI_PLAYERS_REQUIRED", f"starting_xi.{state} requires players")
+        players: Optional[Tuple[str, ...]] = None
+        if raw_players is not None:
+            normalized: List[str] = []
+            for index, player in enumerate(raw_players):
+                if isinstance(player, Mapping):
+                    player = player.get("player_id")
+                player_id = _text(player, f"{field_name}.players[{index}]")
+                assert player_id is not None
+                normalized.append(player_id)
+            if len(set(normalized)) != len(normalized):
+                raise TeamContextValidationError("STARTING_XI_DUPLICATE_PLAYER", "starting_xi.players must be unique")
+            players = tuple(normalized)
+        basis_raw = raw.get("basis_refs", [])
+        if not isinstance(basis_raw, (list, tuple)) or any(not isinstance(item, str) or not item.strip() for item in basis_raw):
+            raise TeamContextValidationError("BASIS_REFS_INVALID", "starting_xi.basis_refs must be strings")
+        basis_refs = tuple(item.strip() for item in basis_raw)
+        if state in {"CONFIRMED", "PROJECTED"} and not basis_refs:
+            raise TeamContextValidationError("STARTING_XI_EVIDENCE_REQUIRED", f"starting_xi.{state} requires basis_refs")
+        reason = _text(raw.get("reason"), f"{field_name}.reason", required=False)
+        if state not in {"CONFIRMED", "PROJECTED"} and reason is None:
+            raise TeamContextValidationError("REASON_REQUIRED", f"starting_xi.{state} requires reason")
+        return cls(state, players, basis_refs, reason)
+
+    def to_dict(self) -> Dict[str, Any]:
+        result: Dict[str, Any] = {"state": self.state, "basis_refs": list(self.basis_refs)}
+        if self.players is not None:
+            result["players"] = list(self.players)
+        if self.reason is not None:
+            result["reason"] = self.reason
+        return result
+
+
+@dataclass(frozen=True)
+class LineupCoachTacticalObservation:
+    match_id: str
+    team_id: str
+    side: TeamSide
+    lineup_status: ContextValue
+    starting_xi: StartingXIContext
+    coach: ContextValue
+    tactical_style: ContextValue
+    motivation: ContextValue
+    source: str
+    source_type: str
+    source_reference: str
+    source_timestamp: datetime
+    observed_at: datetime
+    ingested_at: datetime
+    effective_at: datetime
+    cutoff_at: datetime
+    provenance_ref: str
+    provenance_hash: Optional[str]
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def from_dict(cls, raw: Mapping[str, Any]) -> "LineupCoachTacticalObservation":
+        if not isinstance(raw, Mapping):
+            raise TeamContextValidationError("OBSERVATION_NOT_OBJECT", "lineup/context observation must be an object")
+        forbidden = _find_forbidden(raw)
+        if forbidden:
+            raise TeamContextValidationError("MODEL_FIELD_FORBIDDEN", f"lineup context cannot contain {forbidden}")
+        match_id = _uuid(raw.get("match_id"), "match_id")
+        team_id = _text(raw.get("team_id"), "team_id")
+        assert team_id is not None
+        side_raw = _text(raw.get("side"), "side")
+        assert side_raw is not None
+        try:
+            side = TeamSide(side_raw.upper())
+        except ValueError as exc:
+            raise TeamContextValidationError("SIDE_INVALID", "side must be HOME or AWAY") from exc
+        lineup_status = ContextValue.from_dict(raw.get("lineup_status"), "lineup_status", allowed_states=LINEUP_STATES)
+        if lineup_status.state in {"CONFIRMED", "PROJECTED"} and lineup_status.value != lineup_status.state:
+            raise TeamContextValidationError("LINEUP_STATUS_COERCION", "lineup_status value must equal its explicit state")
+        starting_xi = StartingXIContext.from_dict(raw.get("starting_xi"))
+        if starting_xi.state != lineup_status.state:
+            raise TeamContextValidationError("LINEUP_STATE_CONFLICT", "lineup_status and starting_xi states must agree")
+        coach = ContextValue.from_dict(raw.get("coach"), "coach")
+        tactical_style = ContextValue.from_dict(raw.get("tactical_style"), "tactical_style")
+        motivation = ContextValue.from_dict(raw.get("motivation"), "motivation")
+        source = _text(raw.get("source"), "source")
+        source_type = _token(raw.get("source_type", "TEAM_CONTEXT_SOURCE"), "source_type")
+        source_reference = _text(raw.get("source_reference", raw.get("source_ref")), "source_reference")
+        source_timestamp = _timestamp(raw.get("source_timestamp"), "source_timestamp")
+        observed_at = _timestamp(raw.get("observed_at"), "observed_at")
+        ingested_at = _timestamp(raw.get("ingested_at"), "ingested_at")
+        effective_at = _timestamp(raw.get("effective_at", raw.get("as_of_at")), "effective_at")
+        cutoff_at = _timestamp(raw.get("cutoff_at"), "cutoff_at")
+        if source_timestamp > observed_at:
+            raise TeamContextValidationError("SOURCE_TIME_AFTER_OBSERVED", "source_timestamp cannot follow observed_at")
+        if observed_at > ingested_at:
+            raise TeamContextValidationError("OBSERVED_AFTER_INGESTED", "observed_at cannot follow ingested_at")
+        if source_timestamp > cutoff_at or observed_at > cutoff_at or effective_at > cutoff_at:
+            raise TeamContextValidationError("POST_CUTOFF_CONTEXT", "lineup/context is not eligible at cutoff")
+        provenance_ref = _text(raw.get("provenance_ref", source_reference), "provenance_ref")
+        supplied_hash = raw.get("provenance_hash")
+        provenance_hash = _hash(supplied_hash, "provenance_hash") if supplied_hash is not None else None
+        metadata = raw.get("metadata", {})
+        if not isinstance(metadata, Mapping):
+            raise TeamContextValidationError("METADATA_NOT_OBJECT", "metadata must be an object")
+        assert source is not None and source_reference is not None and provenance_ref is not None
+        return cls(
+            match_id=match_id,
+            team_id=team_id,
+            side=side,
+            lineup_status=lineup_status,
+            starting_xi=starting_xi,
+            coach=coach,
+            tactical_style=tactical_style,
+            motivation=motivation,
+            source=source,
+            source_type=source_type,
+            source_reference=source_reference,
+            source_timestamp=source_timestamp,
+            observed_at=observed_at,
+            ingested_at=ingested_at,
+            effective_at=effective_at,
+            cutoff_at=cutoff_at,
+            provenance_ref=provenance_ref,
+            provenance_hash=provenance_hash,
+            metadata=_freeze(metadata),
+        )
+
+    @property
+    def observation_id(self) -> str:
+        return _source_observation_id(self.to_dict())
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "match_id": self.match_id,
+            "team_id": self.team_id,
+            "side": self.side.value,
+            "lineup_status": self.lineup_status.to_dict(),
+            "starting_xi": self.starting_xi.to_dict(),
+            "coach": self.coach.to_dict(),
+            "tactical_style": self.tactical_style.to_dict(),
+            "motivation": self.motivation.to_dict(),
+            "source": self.source,
+            "source_type": self.source_type,
+            "source_reference": self.source_reference,
+            "source_timestamp": _iso(self.source_timestamp),
+            "observed_at": _iso(self.observed_at),
+            "ingested_at": _iso(self.ingested_at),
+            "effective_at": _iso(self.effective_at),
+            "cutoff_at": _iso(self.cutoff_at),
+            "provenance_ref": self.provenance_ref,
+            "provenance_hash": self.provenance_hash,
+            "metadata": _thaw(self.metadata),
+        }
+
+
+@dataclass(frozen=True)
+class LineupCoachTacticalRecord:
+    object_id: str
+    contract_version: str
+    match_id: str
+    team_id: str
+    side: TeamSide
+    lineup_status: ContextValue
+    starting_xi: StartingXIContext
+    coach: ContextValue
+    tactical_style: ContextValue
+    motivation: ContextValue
+    source: str
+    source_type: str
+    source_reference: str
+    source_timestamp: str
+    observed_at: str
+    ingested_at: str
+    effective_at: str
+    cutoff_at: str
+    provenance_ref: str
+    provenance_hash: str
+    payload_hash: str
+    context_hash: str
+    observation_id: str
+    revision: int
+    supersedes_object_id: Optional[str]
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "object_id": self.object_id,
+            "contract_version": self.contract_version,
+            "match_id": self.match_id,
+            "team_id": self.team_id,
+            "side": self.side.value,
+            "lineup_status": self.lineup_status.to_dict(),
+            "starting_xi": self.starting_xi.to_dict(),
+            "coach": self.coach.to_dict(),
+            "tactical_style": self.tactical_style.to_dict(),
+            "motivation": self.motivation.to_dict(),
+            "source": self.source,
+            "source_type": self.source_type,
+            "source_reference": self.source_reference,
+            "source_timestamp": self.source_timestamp,
+            "observed_at": self.observed_at,
+            "ingested_at": self.ingested_at,
+            "effective_at": self.effective_at,
+            "cutoff_at": self.cutoff_at,
+            "provenance_ref": self.provenance_ref,
+            "provenance_hash": self.provenance_hash,
+            "payload_hash": self.payload_hash,
+            "context_hash": self.context_hash,
+            "observation_id": self.observation_id,
+            "revision": self.revision,
+            "supersedes_object_id": self.supersedes_object_id,
+            "metadata": _thaw(self.metadata),
+        }
+
+
+@dataclass(frozen=True)
+class LineupCoachTacticalResult:
+    accepted: bool
+    status: str
+    action: str
+    observation_id: str
+    record: Optional[LineupCoachTacticalRecord]
+    error_code: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {"accepted": self.accepted, "status": self.status, "action": self.action, "observation_id": self.observation_id, "record": self.record.to_dict() if self.record else None, "error_code": self.error_code}
+
+
+class LineupCoachTacticalStore:
+    """V4-034 attributed pre-match lineup/coach/tactical context store."""
+
+    def __init__(self, linker: TeamContextIdentityLinker):
+        if not isinstance(linker, TeamContextIdentityLinker):
+            raise TypeError("V4-034 requires a V4-032 TeamContextIdentityLinker")
+        self._linker = linker
+        self._observations: Dict[str, LineupCoachTacticalObservation] = {}
+        self._records: Dict[str, LineupCoachTacticalRecord] = {}
+        self._latest: Dict[Tuple[str, str, TeamSide], LineupCoachTacticalRecord] = {}
+        self._events: List[Mapping[str, Any]] = []
+
+    @property
+    def observations(self) -> Tuple[LineupCoachTacticalObservation, ...]:
+        return tuple(self._observations.values())
+
+    @property
+    def records(self) -> Tuple[LineupCoachTacticalRecord, ...]:
+        return tuple(self._records.values())
+
+    @property
+    def events(self) -> Tuple[Mapping[str, Any], ...]:
+        return tuple(self._events)
+
+    def ingest(self, raw: Union[LineupCoachTacticalObservation, Mapping[str, Any]]) -> LineupCoachTacticalResult:
+        try:
+            observation = raw if isinstance(raw, LineupCoachTacticalObservation) else LineupCoachTacticalObservation.from_dict(raw)
+        except (TeamContextValidationError, IdentityValidationError) as exc:
+            observation_id = _source_observation_id(raw if isinstance(raw, Mapping) else raw.to_dict())
+            code = getattr(exc, "code", "VALIDATION_FAILED")
+            self._events.append({"action": "BLOCKED_VALIDATION", "observation_id": observation_id, "error_code": code})
+            return LineupCoachTacticalResult(False, "BLOCKED", code, observation_id, None, code)
+        observation_id = observation.observation_id
+        if observation_id in self._observations:
+            existing = next((record for record in self._records.values() if record.observation_id == observation_id), None)
+            self._events.append({"action": "DUPLICATE_NOOP", "observation_id": observation_id, "object_id": existing.object_id if existing else None})
+            return LineupCoachTacticalResult(True, "AVAILABLE", "DUPLICATE_NOOP", observation_id, existing)
+        identity = self._linker.get_identity(observation.match_id)
+        if identity is None or identity.status != "AVAILABLE" or identity.identity_resolution_state != "RESOLVED":
+            return self._blocked(observation, "MATCH_IDENTITY_NOT_RESOLVED")
+        expected_team = identity.home_team_id if observation.side == TeamSide.HOME else identity.away_team_id
+        if observation.team_id != expected_team:
+            return self._blocked(observation, "TEAM_ID_SIDE_CONFLICT")
+        link = self._linker.latest(observation.match_id, observation.team_id, observation.side)
+        if link is None:
+            return self._blocked(observation, "TEAM_CONTEXT_LINK_NOT_FOUND")
+        kickoff = datetime.fromisoformat(identity.kickoff_at)
+        if not observation.cutoff_at < kickoff:
+            return self._blocked(observation, "CUTOFF_NOT_BEFORE_KICKOFF")
+        if any(moment >= kickoff for moment in (observation.source_timestamp, observation.observed_at, observation.effective_at)):
+            return self._blocked(observation, "POST_KICKOFF_CONTEXT")
+        self._observations[observation_id] = observation
+        key = (observation.match_id, observation.team_id, observation.side)
+        predecessor = self._latest.get(key)
+        revision = predecessor.revision + 1 if predecessor else 1
+        provenance_hash = observation.provenance_hash or sha256_json({"source": observation.source, "source_type": observation.source_type, "source_reference": observation.source_reference, "provenance_ref": observation.provenance_ref, "source_timestamp": _iso(observation.source_timestamp), "observed_at": _iso(observation.observed_at), "effective_at": _iso(observation.effective_at)})
+        logical = {"match_id": observation.match_id, "team_id": observation.team_id, "side": observation.side.value, "lineup_status": observation.lineup_status.to_dict(), "starting_xi": observation.starting_xi.to_dict(), "coach": observation.coach.to_dict(), "tactical_style": observation.tactical_style.to_dict(), "motivation": observation.motivation.to_dict(), "source_reference": observation.source_reference, "source_timestamp": _iso(observation.source_timestamp), "effective_at": _iso(observation.effective_at), "cutoff_at": _iso(observation.cutoff_at), "provenance_ref": observation.provenance_ref, "provenance_hash": provenance_hash}
+        payload_hash = sha256_json(logical)
+        context_hash = sha256_json({"identity_link_object_id": link.object_id, **logical})
+        object_id = str(uuid.uuid5(TEAM_CONTEXT_ID_NAMESPACE, f"lineup|{observation.match_id}|{observation.team_id}|{observation.side.value}|{observation_id}"))
+        record = LineupCoachTacticalRecord(object_id, CONTRACT_VERSION, observation.match_id, observation.team_id, observation.side, observation.lineup_status, observation.starting_xi, observation.coach, observation.tactical_style, observation.motivation, observation.source, observation.source_type, observation.source_reference, _iso(observation.source_timestamp), _iso(observation.observed_at), _iso(observation.ingested_at), _iso(observation.effective_at), _iso(observation.cutoff_at), observation.provenance_ref, provenance_hash, payload_hash, context_hash, observation_id, revision, predecessor.object_id if predecessor else None, MappingProxyType({"identity_link_object_id": link.object_id, "append_only_boundary": "V4-034 local context ledger; V4-036/V4-037 deferred", "attributed_fact_only": True}))
+        self._records[object_id] = record
+        self._latest[key] = record
+        self._events.append({"action": "ROOT_CREATED" if predecessor is None else "REVISION_APPENDED", "observation_id": observation_id, "object_id": object_id, "supersedes_object_id": predecessor.object_id if predecessor else None})
+        return LineupCoachTacticalResult(True, "AVAILABLE", "ROOT_CREATED" if predecessor is None else "REVISION_APPENDED", observation_id, record)
+
+    def _blocked(self, observation: LineupCoachTacticalObservation, code: str) -> LineupCoachTacticalResult:
+        observation_id = observation.observation_id
+        self._observations.setdefault(observation_id, observation)
+        self._events.append({"action": "BLOCKED_CONTEXT", "observation_id": observation_id, "match_id": observation.match_id, "team_id": observation.team_id, "side": observation.side.value, "error_code": code})
+        return LineupCoachTacticalResult(False, "BLOCKED", code, observation_id, None, code)

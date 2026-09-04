@@ -1,0 +1,21 @@
+{
+  "base": {
+    "match_id": "00000000-0000-5000-8000-000000000001",
+    "team_id": "team-home-001",
+    "side": "HOME",
+    "lineup_status": {"state": "PROJECTED", "value": "PROJECTED", "basis_refs": ["evidence://lineup/projected-001"]},
+    "starting_xi": {"state": "PROJECTED", "players": ["player-001", "player-002"], "basis_refs": ["evidence://lineup/projected-001"], "reason": "Projected XI, not confirmed"},
+    "coach": {"state": "AVAILABLE", "value": {"coach_id": "coach-001", "display_name": "Example Coach"}, "basis_refs": ["evidence://coach/001"]},
+    "tactical_style": {"state": "AVAILABLE", "value": "High press with wide progression", "basis_refs": ["evidence://tactical/001"]},
+    "motivation": {"state": "NOT_VERIFIED", "basis_refs": ["evidence://motivation/001"], "reason": "Reported priority is not independently verified"},
+    "source": "Example team context report",
+    "source_type": "CLUB_STATEMENT",
+    "source_reference": "ref://lineup/20260904/001/home/001",
+    "source_timestamp": "2026-09-04T08:40:00+08:00",
+    "observed_at": "2026-09-04T09:00:00+08:00",
+    "ingested_at": "2026-09-04T09:01:00+08:00",
+    "effective_at": "2026-09-04T08:40:00+08:00",
+    "cutoff_at": "2026-09-04T18:00:00+08:00",
+    "provenance_ref": "ref://lineup/20260904/001/home/001"
+  }
+}
