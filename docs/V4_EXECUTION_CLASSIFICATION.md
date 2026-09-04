@@ -129,3 +129,7 @@ The classification below is a complete register, not a candidate envelope. Accep
 ## 4. Batch mapping disposition
 
 The mapping remains the authoritative classification register. V4-012 is accepted as a design-only task, V4-013 through V4-015 as BATCH-02 implementation tasks, V4-016 through V4-017 as BATCH-03 readiness/package tasks, and V4-018 through V4-019 as the completed BATCH-04 Production schema/write-boundary tasks. V4-020 through V4-100 remain TODO; no downstream batch is authorized automatically.
+
+## Current Execution Status Override
+
+As of BATCH-07 Closure Review at HEAD `287b6b2`, the authoritative task acceptance evidence records V4-028, V4-029, V4-030, and V4-031 as COMPLETE. Historical TODO rows remain unchanged as classification snapshots; see `docs/V4_BATCH_07_CLOSURE_EVIDENCE.json`.

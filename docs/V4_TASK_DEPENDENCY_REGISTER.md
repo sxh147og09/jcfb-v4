@@ -161,3 +161,7 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 - Primary assignment conflicts: `0`; every V4-012–V4-100 task appears in one and only one primary batch.
 
 Topological task/batch order is documented in `docs/V4_DEPENDENCY_GRAPH_012_100.md`. The register contains no execution result and cannot authorize BATCH-01.
+
+## Current Execution Status Override
+
+As of BATCH-07 Closure Review at HEAD `287b6b2`, the authoritative task acceptance evidence records V4-028, V4-029, V4-030, and V4-031 as COMPLETE. See the four task evidence files and `docs/V4_BATCH_07_CLOSURE_EVIDENCE.json`. Historical TODO rows remain unchanged as registry snapshots.

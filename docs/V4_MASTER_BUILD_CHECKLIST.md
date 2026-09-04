@@ -284,3 +284,7 @@ Fresh disposable PostgreSQL evidence is complete: 20/20 smoke cases and 15/15 da
 - Acceptance rules: `docs/V4_BATCH_ACCEPTANCE_RULES.md`
 
 Next execution gate: **BATCH-07 Scope & Entry Review**. BATCH-04 / V4-018 through V4-019 is COMPLETE under `docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`; V4-020 through V4-027 and BATCH-06 Closure are complete under local no-write boundaries. No public deployment or prediction execution has started.
+
+## Current Execution Status Override
+
+The current authoritative BATCH-07 Closure Review at HEAD `287b6b2` records V4-028 through V4-031 as COMPLETE and the BATCH-07 Closure Gate as PASS. Historical checklist rows above remain unchanged as status snapshots; see `docs/V4_BATCH_07_CLOSURE_REVIEW.md` and `docs/V4_BATCH_07_CLOSURE_EVIDENCE.json`.
