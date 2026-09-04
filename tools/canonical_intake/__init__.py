@@ -33,6 +33,15 @@ from .orchestrator import (
     IntakeResult,
     OrchestratorValidationError,
 )
+from .official_odds import (
+    MarketAvailabilityStatus,
+    OfficialOddsIntakeResult,
+    OfficialOddsObservation,
+    OfficialOddsSnapshot,
+    OfficialOddsSnapshotStore,
+    OfficialOddsValidationError,
+    SnapshotKind,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -59,5 +68,12 @@ __all__ = [
     "IntakeOutcome",
     "IntakeResult",
     "OrchestratorValidationError",
+    "MarketAvailabilityStatus",
+    "OfficialOddsIntakeResult",
+    "OfficialOddsObservation",
+    "OfficialOddsSnapshot",
+    "OfficialOddsSnapshotStore",
+    "OfficialOddsValidationError",
+    "SnapshotKind",
     "resolve_f_drive_output_path",
 ]
