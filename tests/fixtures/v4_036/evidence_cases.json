@@ -1,0 +1,65 @@
+{
+  "base": {
+    "evidence_id": "evidence-20260904-001",
+    "claim_id": "claim-match-001",
+    "claim_type": "TEAM_AVAILABILITY",
+    "claim": {"team_id": "team-home-001", "side": "HOME", "availability": "AVAILABLE"},
+    "entity_refs": {
+      "match_id": "REPLACE_WITH_CANONICAL_MATCH_ID",
+      "team_id": "team-home-001",
+      "side": "HOME"
+    },
+    "relation": "SUPPORTS",
+    "source": "Example club report",
+    "source_type": "TEAM_CONTEXT_SOURCE",
+    "source_reference": "ref://club/availability/001",
+    "published_at": "2026-09-04T08:00:00+08:00",
+    "retrieved_at": "2026-09-04T09:00:00+08:00",
+    "valid_from": "2026-09-04T08:00:00+08:00",
+    "expires_at": "2026-09-04T18:00:00+08:00",
+    "confidence": {
+      "source_quality": "HIGH",
+      "verification_quality": "VERIFIED",
+      "freshness": "CURRENT",
+      "coverage": "COMPLETE",
+      "conflict_level": "NONE"
+    },
+    "verification_state": "VERIFIED",
+    "contradiction_state": "NONE",
+    "basis_refs": [],
+    "revision": 1,
+    "status": "ACTIVE",
+    "metadata": {"capture_ref": "capture://001"}
+  },
+  "conflict": {
+    "evidence_id": "evidence-20260904-002",
+    "claim_id": "claim-match-002",
+    "claim_type": "TEAM_AVAILABILITY",
+    "claim": {"team_id": "team-home-001", "side": "HOME", "availability": "UNAVAILABLE"},
+    "entity_refs": {
+      "match_id": "REPLACE_WITH_CANONICAL_MATCH_ID",
+      "team_id": "team-home-001",
+      "side": "HOME"
+    },
+    "relation": "CONTRADICTS",
+    "source": "Example medical report",
+    "source_type": "TEAM_CONTEXT_SOURCE",
+    "source_reference": "ref://medical/availability/002",
+    "published_at": "2026-09-04T08:30:00+08:00",
+    "retrieved_at": "2026-09-04T09:10:00+08:00",
+    "valid_from": "2026-09-04T08:30:00+08:00",
+    "expires_at": "2026-09-04T18:00:00+08:00",
+    "confidence": {
+      "source_quality": "MEDIUM",
+      "verification_quality": "VERIFIED",
+      "freshness": "CURRENT",
+      "coverage": "PARTIAL",
+      "conflict_level": "HIGH"
+    },
+    "verification_state": "VERIFIED",
+    "contradiction_state": "CONFLICTED",
+    "basis_refs": [],
+    "revision": 1,
+    "status": "ACTIVE"
+  }
+}
