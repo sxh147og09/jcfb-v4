@@ -1,6 +1,6 @@
 # JCFB V4 Batch Execution Plan 1.0
 
-Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS` / `BATCH-04 ACCEPTANCE PASS` / `V4-020 ACCEPTANCE PASS`
+Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS` / `BATCH-04 ACCEPTANCE PASS` / `V4-020 ACCEPTANCE PASS` / `V4-021 ACCEPTANCE PASS`
 
 Plan Identity: `v4-batch-execution-plan@1.0.0`
 Plan Revision: `r003`
@@ -19,7 +19,7 @@ The baseline repository and reachable Git history contained no original V4-013�
 - Exactly one primary batch exists for every task from V4-012 through V4-100.
 - A secondary parallel group may describe concurrency but never creates a second primary assignment.
 - A batch label is not a completion claim. Every child task still needs its own artifact, validation evidence, documentation, Git trace, and checklist decision.
-- V4-012 is accepted as the design-only BATCH-01 result. BATCH-02 / V4-013 through V4-015 is accepted as the no-write implementation boundary. BATCH-03 / V4-016 through V4-017 is accepted as the readiness and acceptance-package boundary. BATCH-04 / V4-018 through V4-019 is accepted after explicit approval, exact Production apply, and final verification. BATCH-05 is in progress: V4-020 is accepted within its local no-write boundary; V4-021 through V4-023 remain not started.
+- V4-012 is accepted as the design-only BATCH-01 result. BATCH-02 / V4-013 through V4-015 is accepted as the no-write implementation boundary. BATCH-03 / V4-016 through V4-017 is accepted as the readiness and acceptance-package boundary. BATCH-04 / V4-018 through V4-019 is accepted after explicit approval, exact Production apply, and final verification. BATCH-05 is in progress: V4-020 and V4-021 are accepted within their local no-write boundaries; V4-022 and V4-023 remain not started.
 - Supabase writes, Production/Shadow runtime, Promotion, activation, pointer switching, and release remain separately gated.
 
 ## 3. Formal batch register
@@ -90,4 +90,4 @@ For each future batch: freeze the manifest; verify all source task IDs; validate
 
 ## 7. Next execution boundary
 
-Next execution batch: **BATCH-05 — Canonical Data Intake Foundation**. BATCH-04 / V4-018 through V4-019 is COMPLETE under `docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`. No BATCH-05 work, model run, Shadow run, public deployment, Promotion, or V3.3.3 mutation occurred.
+Next execution task: **V4-022 — Cutoff, Timestamp & Provenance Lineage 1.0**. BATCH-04 / V4-018 through V4-019 is COMPLETE under `docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`; V4-020 and V4-021 are complete under their local no-write boundaries. No model run, Shadow run, public deployment, Promotion, or V3.3.3 mutation occurred.

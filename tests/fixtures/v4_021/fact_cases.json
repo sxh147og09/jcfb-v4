@@ -1,0 +1,32 @@
+{
+  "base": {
+    "fact_type": "fixture_schedule",
+    "subject": {
+      "match_id": "00000000-0000-5000-8000-000000000000",
+      "match_identity_key": "2026-09-04:001"
+    },
+    "source": "China Sports Lottery fixture feed",
+    "source_ref": "ref://official/fixture/20260904/001",
+    "payload": {
+      "kickoff_confirmed": true,
+      "competition_id": "competition-premier-example"
+    },
+    "availability_status": "AVAILABLE",
+    "published_at": "2026-09-04T08:55:00+08:00",
+    "observed_at": "2026-09-04T09:00:00+08:00",
+    "ingested_at": "2026-09-04T09:01:00+08:00",
+    "provenance_ref": "ref://official/fixture/20260904/001"
+  },
+  "conflict_evidence": [
+    {
+      "source": "Provider A",
+      "source_ref": "ref://provider-a/fact/001",
+      "payload": {"status": "CONFIRMED", "value": "A"}
+    },
+    {
+      "source": "Provider B",
+      "source_ref": "ref://provider-b/fact/8842",
+      "payload": {"status": "CONFIRMED", "value": "B"}
+    }
+  ]
+}

@@ -3,8 +3,8 @@
 ## Registry status
 
 - Registry Version: `v4-task-registry-001-100@1.0.0`
-- Recovery Status: `COMPLETE`; `V4-012` through `V4-020` are COMPLETE; V4-021 through V4-100 remain not started.
-- Live task status: `V4-020 = COMPLETE`; the V4-020 acceptance report and evidence are authoritative for the row below, whose legacy mojibake task label is retained unchanged.
+- Recovery Status: `COMPLETE`; `V4-012` through `V4-021` are COMPLETE; V4-022 through V4-100 remain not started.
+- Live task status: `V4-021 = COMPLETE`; the V4-020 and V4-021 acceptance reports/evidence are authoritative for the rows below, whose legacy mojibake task labels are retained unchanged.
 - Source of truth: `docs/V4_TASK_REGISTRY_001_100.md` is the authoritative task-definition registry. This checklist is the execution-status view.
 - Planning status: `V4-012–V4-100 Batch Planning = PASS`; BATCH-01 / V4-012 design-only acceptance = PASS.
 
@@ -29,8 +29,8 @@
 - [x] V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0
 - [x] V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0
 - [x] V4-019｜Production Database Write Activation HARD_GATE 1.0
-- [ ] V4-020｜Canonical Match Identity & Schedule Intake 1.0
-- [ ] V4-021｜Canonical Fact Envelope & Availability Semantics 1.0
+- [x] V4-020｜Canonical Match Identity & Schedule Intake 1.0
+- [x] V4-021｜Canonical Fact Envelope & Availability Semantics 1.0
 - [ ] V4-022｜Cutoff, Timestamp & Provenance Lineage 1.0
 - [ ] V4-023｜Canonical Intake Orchestrator & Deduplication 1.0
 - [ ] V4-024｜Official Lottery Five-Market Feed Adapter 1.0
@@ -121,7 +121,7 @@
 4. Documentation completed
 5. Git traceability exists
 
-A batch name, registry entry, or planning PASS is not task completion. V4-012 through V4-020 are marked `[x]` only because each has an independent engineering artifact, validation evidence, documentation, and Git traceability. V4-021 through V4-100 remain unchecked.
+A batch name, registry entry, or planning PASS is not task completion. V4-012 through V4-021 are marked `[x]` only because each has an independent engineering artifact, validation evidence, documentation, and Git traceability. V4-022 through V4-100 remain unchecked.
 
 ## 1. Task Name / Primary Batch / Classification mapping
 
@@ -147,7 +147,7 @@ A batch name, registry entry, or planning PASS is not task completion. V4-012 th
 | [x] | V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | BATCH-04 | SERIAL + HARD_GATE | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [x] | V4-019 | V4-019｜Production Database Write Activation HARD_GATE 1.0 | BATCH-04 | SERIAL + HARD_GATE | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCH-05 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
-| [ ] | V4-021 | V4-021｜Canonical Fact Envelope & Availability Semantics 1.0 | BATCH-05 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
+| [x] | V4-021 | V4-021｜Canonical Fact Envelope & Availability Semantics 1.0 | BATCH-05 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-022 | V4-022｜Cutoff, Timestamp & Provenance Lineage 1.0 | BATCH-05 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-023 | V4-023｜Canonical Intake Orchestrator & Deduplication 1.0 | BATCH-05 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-024 | V4-024｜Official Lottery Five-Market Feed Adapter 1.0 | BATCH-06 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
@@ -283,4 +283,4 @@ Fresh disposable PostgreSQL evidence is complete: 20/20 smoke cases and 15/15 da
 - Classification register: `docs/V4_EXECUTION_CLASSIFICATION.md`
 - Acceptance rules: `docs/V4_BATCH_ACCEPTANCE_RULES.md`
 
-Next execution batch: **BATCH-05 — Canonical Data Intake Foundation**. BATCH-04 / V4-018 through V4-019 is COMPLETE under `docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`; no BATCH-05 work, public deployment, or prediction execution has started.
+Next execution task: **V4-022 — Cutoff, Timestamp & Provenance Lineage 1.0**. BATCH-04 / V4-018 through V4-019 is COMPLETE under `docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`; V4-020 and V4-021 are complete under local no-write boundaries. No public deployment or prediction execution has started.

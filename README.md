@@ -3,7 +3,7 @@
 Next-Generation Football Prediction System
 
 Status:
-BATCH-04 PRODUCTION SCHEMA APPLY AND V4 WRITE BOUNDARY COMPLETE / BATCH-05 IN PROGRESS (V4-020 COMPLETE)
+BATCH-04 PRODUCTION SCHEMA APPLY AND V4 WRITE BOUNDARY COMPLETE / BATCH-05 IN PROGRESS (V4-020 AND V4-021 COMPLETE)
 
 Current Build Stage:
 V4-006 COMPLETE
@@ -20,7 +20,7 @@ V4-016 COMPLETE
 V4-017 COMPLETE
 V4-018 COMPLETE
 V4-019 COMPLETE
-V4-021 NEXT
+V4-022 NEXT
 
 Legacy Production:
 JCFB V3.3.3 remains independent and unchanged.
@@ -98,7 +98,7 @@ The architecture target is a design direction only at this bootstrap stage. Prod
 
 ## Current scope
 
-V4-001 through V4-020 are complete. BATCH-04 applied the approved V4 migration chain to the bound Supabase Production project and closed with the exact `0009 ONLY` resume recorded in [`docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`](docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md). V4-020 was then completed as a local, no-write canonical identity implementation with independent evidence in [`docs/V4_020_CANONICAL_MATCH_IDENTITY_IMPLEMENTATION.md`](docs/V4_020_CANONICAL_MATCH_IDENTITY_IMPLEMENTATION.md). Official migration history is 18 rows: the nine V3.3.3 rows are unchanged and the nine V4 rows are applied. No prediction, Shadow run, public deployment, canonical pointer switch, or V3.3.3 mutation occurred. V4-021 through V4-100 remain future work.
+V4-001 through V4-021 are complete. BATCH-04 applied the approved V4 migration chain to the bound Supabase Production project and closed with the exact `0009 ONLY` resume recorded in [`docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`](docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md). V4-020 and V4-021 were then completed as local, no-write canonical intake implementations with independent evidence in [`docs/V4_020_CANONICAL_MATCH_IDENTITY_IMPLEMENTATION.md`](docs/V4_020_CANONICAL_MATCH_IDENTITY_IMPLEMENTATION.md) and [`docs/V4_021_CANONICAL_FACT_ENVELOPE_IMPLEMENTATION.md`](docs/V4_021_CANONICAL_FACT_ENVELOPE_IMPLEMENTATION.md). Official migration history is 18 rows: the nine V3.3.3 rows are unchanged and the nine V4 rows are applied. No prediction, Shadow run, public deployment, canonical pointer switch, or V3.3.3 mutation occurred. V4-022 through V4-100 remain future work.
 
 ## Local storage on the project drive
 
