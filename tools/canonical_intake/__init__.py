@@ -129,6 +129,14 @@ from .evidence_graph import (
     EvidenceRelation,
     VerificationState,
 )
+from .source_conflict import (
+    ConflictResolutionRecord,
+    EvidenceQualityResult,
+    FreshnessState,
+    SourceConflictResolver,
+    SourceQualityAssessment,
+    SourceQualityBand,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -235,5 +243,11 @@ __all__ = [
     "EvidenceItem",
     "EvidenceRelation",
     "VerificationState",
+    "ConflictResolutionRecord",
+    "EvidenceQualityResult",
+    "FreshnessState",
+    "SourceConflictResolver",
+    "SourceQualityAssessment",
+    "SourceQualityBand",
     "resolve_f_drive_output_path",
 ]
