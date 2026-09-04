@@ -1,0 +1,77 @@
+{
+  "manifest_version": "batch-execution-manifest@1.0.0",
+  "batch_id": "BATCH-09",
+  "frozen_at_head": "c99f085da431ac89dd834537482f9520766bee12",
+  "workspace": "F:/Projects/jcfb-v4",
+  "scope": [
+    {
+      "task_id": "V4-036",
+      "name": "Evidence Graph Claim & Evidence Model 1.0",
+      "direct_dependency": "V4-034",
+      "execution_wave": 1
+    },
+    {
+      "task_id": "V4-037",
+      "name": "Source Quality, Expiry & Conflict Resolver 1.0",
+      "direct_dependency": "V4-036",
+      "execution_wave": 2
+    }
+  ],
+  "closure": {
+    "execution_wave": 3,
+    "name": "BATCH-09 Closure Review"
+  },
+  "contract_versions": {
+    "evidence": "evidence@1.0.0",
+    "team_context": "team-context@1.0.0",
+    "canonical_match": "canonical-match@1.0.0",
+    "canonical_fact": "canonical-fact@1.0.0",
+    "time_lineage": "time-lineage@1.0.0"
+  },
+  "state_semantics": {
+    "verification_state": ["VERIFIED", "NOT_VERIFIED", "CONFLICTED", "STALE", "REJECTED"],
+    "contradiction_state": ["NONE", "PENDING", "CONFLICTED", "RESOLVED", "NOT_APPLICABLE"],
+    "availability_state": ["AVAILABLE", "UNAVAILABLE", "UNKNOWN", "CONFLICT", "STALE", "FUTURE_DATA", "BLOCKED"],
+    "unknown_time": "UNKNOWN_TIME / REQUIRES_REVIEW / BLOCKED",
+    "resolved_conflict": "documented resolution only; competing evidence remains immutable and queryable"
+  },
+  "hash_boundaries": [
+    "claim",
+    "entity_refs",
+    "source identity and source reference",
+    "published/retrieved/valid/expiry times",
+    "verification and contradiction state",
+    "payload and provenance",
+    "supersession lineage"
+  ],
+  "acceptance_criteria": [
+    "Every trusted claim has attributable evidence and stable canonical entity references",
+    "Evidence is independently addressable, time-scoped, hashable, and auditable",
+    "Verification and contradiction state remain separate",
+    "Conflicting claims are all preserved and cannot be silently selected",
+    "Stale, rejected, unsupported, unverifiable, and future evidence remains visible",
+    "Corrections append a new revision with explicit supersedes lineage",
+    "Evidence confidence is source/verification quality only and is not prediction confidence",
+    "No Feature, Market Intelligence, Prediction, Score Engine, Shadow, Public, or Promotion output is created"
+  ],
+  "boundaries": {
+    "production_supabase": "NO",
+    "migration_add_or_apply": "NO",
+    "v3333_modification": "NO",
+    "f_drive_only": true,
+    "append_only": true,
+    "fail_closed": true,
+    "next_batch": "BATCH-10 remains out of scope"
+  },
+  "blocking_conditions": [
+    "targeted or full tests fail",
+    "DoD fails",
+    "contract, enum, major version, or hash boundary change is required",
+    "conflict can continue only through silent source selection or unapproved authoritative override",
+    "time or cutoff ambiguity requires guessing",
+    "Production/Supabase access or migration is required",
+    "V3.3.3 isolation risk is found",
+    "execution scope enters V4-038 or BATCH-10"
+  ],
+  "status": "FROZEN"
+}
