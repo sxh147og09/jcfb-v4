@@ -4,7 +4,7 @@ Workspace: `F:\Projects\jcfb-v4`
 
 Baseline: `main` / `7c5f023`
 
-Final HEAD: `56a406e` (`docs(batch-06): close continuous execution`)
+Final HEAD: `b09afc4` (`docs(batch-06): finalize closure evidence`)
 
 ## Closure Decision
 
