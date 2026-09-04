@@ -2,7 +2,7 @@
 
 Workspace: `F:\Projects\jcfb-v4`
 
-Branch/HEAD: recorded in the acceptance evidence after the V4-026 implementation commit
+Branch/HEAD: `main` / `1494a24` (`feat(v4-026): add official market availability gate`)
 
 Implementation Status: `COMPLETE` for the V4-026 local, in-memory, no-write market gate boundary
 
