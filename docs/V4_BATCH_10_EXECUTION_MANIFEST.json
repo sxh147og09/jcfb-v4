@@ -1,0 +1,126 @@
+{
+  "manifest_version": "batch-execution-manifest@1.0.0",
+  "batch_id": "BATCH-10",
+  "frozen_at_head": "893e111",
+  "workspace": "F:/Projects/jcfb-v4",
+  "scope": [
+    {
+      "task_id": "V4-038",
+      "name": "Feature Bundle Contract & Version Registry 1.0",
+      "direct_dependency": "V4-021, V4-022, V4-027, V4-031, V4-037",
+      "execution_wave": 1
+    },
+    {
+      "task_id": "V4-039",
+      "name": "Feature Snapshot Hash & Reproducibility 1.0",
+      "direct_dependency": "V4-038",
+      "execution_wave": 2
+    },
+    {
+      "task_id": "V4-040",
+      "name": "Feature Assembly & Schema Adapter Layer 1.0",
+      "direct_dependency": "V4-039",
+      "execution_wave": 3
+    }
+  ],
+  "contract_versions": {
+    "feature_bundle": "feature-bundle@2.0.0",
+    "feature_snapshot": "feature-snapshot@1.0.0",
+    "frozen_input_consumer": "frozen-input@2.0.0",
+    "canonical_match": "canonical-match@1.0.0",
+    "canonical_fact": "canonical-fact@1.0.0",
+    "official_odds": "official-odds@1.0.0",
+    "external_market": "external-market@1.0.0",
+    "team_context": "team-context@1.0.0",
+    "evidence": "evidence@1.0.0"
+  },
+  "feature_state_vocabulary": [
+    "AVAILABLE",
+    "UNKNOWN",
+    "UNAVAILABLE",
+    "NOT_VERIFIED",
+    "CONFLICTED",
+    "STALE",
+    "FUTURE_DATA",
+    "BLOCKED",
+    "NOT_APPLICABLE"
+  ],
+  "feature_quality_semantics": [
+    "coverage",
+    "verification",
+    "freshness",
+    "completeness",
+    "conflict",
+    "provenance"
+  ],
+  "upstream_lineage_boundary": [
+    "canonical_entity_refs",
+    "canonical_fact_refs",
+    "official_odds_snapshot_refs",
+    "external_market_refs",
+    "team_context_refs",
+    "evidence_graph_refs",
+    "prediction_cutoff_at",
+    "kickoff_at",
+    "feature_schema_version",
+    "generator_version",
+    "role",
+    "config_version",
+    "config_hash"
+  ],
+  "hash_boundaries": {
+    "input_hash": "accepted upstream lineage, exact hashes, cutoff/kickoff, schema/generator/config identity; excludes Frozen Input, Prediction, Engine Output, and volatile timestamps",
+    "feature_snapshot_hash": "deterministic feature values/states/units/source refs/derivations plus schema/generator/config/cutoff scope; excludes declared volatile timestamps, Frozen Input, Prediction, and Engine Output",
+    "payload_hash": "typed feature payload and explicit states",
+    "provenance_hash": "source/evidence references and lineage metadata"
+  },
+  "deterministic_replay": [
+    "same logical accepted inputs produce the same hash",
+    "field order and collection order are canonical",
+    "any logical feature value/state/unit/source/derivation/schema/generator/config/cutoff change changes the snapshot hash",
+    "declared volatile timestamps are excluded only from the declared hash boundary"
+  ],
+  "missingness_and_future_rules": [
+    "UNKNOWN is not zero, mean, previous value, or empty-state coercion",
+    "UNAVAILABLE does not create a synthetic feature",
+    "NOT_VERIFIED cannot become AVAILABLE",
+    "CONFLICTED retains all source/evidence refs and is not silently resolved",
+    "STALE is not current",
+    "FUTURE_DATA is fail-closed",
+    "BLOCKED is not a replacement value"
+  ],
+  "boundaries": {
+    "frozen_input": "downstream_only; V4-076 not implemented in BATCH-10",
+    "prediction_score": "NO",
+    "production_supabase": "NO",
+    "migration_add_or_apply": "NO",
+    "v3333_modification": "NO",
+    "batch_11_and_v4_041_plus": "NO",
+    "f_drive_only": true,
+    "append_only": true,
+    "fail_closed": true
+  },
+  "acceptance_criteria": [
+    "typed Feature Bundle v2 boundary and registry are stable",
+    "all seven feature categories are schema-governed",
+    "feature states and feature_quality semantics are explicit",
+    "upstream identity/source/evidence/hash lineage is complete",
+    "Frozen Input is not required upstream",
+    "no prediction/model/engine fields enter the bundle",
+    "no implicit default, imputation, conflict selection, or future-data coercion",
+    "append-only correction/supersedes boundary remains intact"
+  ],
+  "blocking_conditions": [
+    "targeted or full tests fail",
+    "task DoD fails",
+    "active contract/version/enum/hash boundary conflict",
+    "feature quality leaks prediction/model confidence",
+    "upstream lineage cannot be replayed",
+    "future/cutoff data cannot fail closed",
+    "Frozen Input or V4-076 implementation becomes necessary",
+    "Production/Supabase access or migration is required",
+    "V3.3.3 isolation risk is found",
+    "execution scope enters V4-041 or BATCH-11"
+  ],
+  "status": "FROZEN"
+}
