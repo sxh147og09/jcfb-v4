@@ -287,4 +287,4 @@ Next execution gate: **BATCH-07 Scope & Entry Review**. BATCH-04 / V4-018 throug
 
 ## Current Execution Status Override
 
-The current authoritative BATCH-07 Closure Review at HEAD `287b6b2` records V4-028 through V4-031 as COMPLETE and the BATCH-07 Closure Gate as PASS. Historical checklist rows above remain unchanged as status snapshots; see `docs/V4_BATCH_07_CLOSURE_REVIEW.md` and `docs/V4_BATCH_07_CLOSURE_EVIDENCE.json`.
+The current authoritative BATCH-07 Closure Review at HEAD `c03d804` records V4-028 through V4-031 as COMPLETE and the BATCH-07 Closure Gate as PASS. Historical checklist rows above remain unchanged as status snapshots; see `docs/V4_BATCH_07_CLOSURE_REVIEW.md` and `docs/V4_BATCH_07_CLOSURE_EVIDENCE.json`.

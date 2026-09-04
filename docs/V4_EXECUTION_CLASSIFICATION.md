@@ -132,4 +132,4 @@ The mapping remains the authoritative classification register. V4-012 is accepte
 
 ## Current Execution Status Override
 
-As of BATCH-07 Closure Review at HEAD `287b6b2`, the authoritative task acceptance evidence records V4-028, V4-029, V4-030, and V4-031 as COMPLETE. Historical TODO rows remain unchanged as classification snapshots; see `docs/V4_BATCH_07_CLOSURE_EVIDENCE.json`.
+As of BATCH-07 Closure Review at HEAD `c03d804`, the authoritative task acceptance evidence records V4-028, V4-029, V4-030, and V4-031 as COMPLETE. Historical TODO rows remain unchanged as classification snapshots; see `docs/V4_BATCH_07_CLOSURE_EVIDENCE.json`.

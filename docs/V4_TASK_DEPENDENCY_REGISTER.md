@@ -164,4 +164,4 @@ Topological task/batch order is documented in `docs/V4_DEPENDENCY_GRAPH_012_100.
 
 ## Current Execution Status Override
 
-As of BATCH-07 Closure Review at HEAD `287b6b2`, the authoritative task acceptance evidence records V4-028, V4-029, V4-030, and V4-031 as COMPLETE. See the four task evidence files and `docs/V4_BATCH_07_CLOSURE_EVIDENCE.json`. Historical TODO rows remain unchanged as registry snapshots.
+As of BATCH-07 Closure Review at HEAD `c03d804`, the authoritative task acceptance evidence records V4-028, V4-029, V4-030, and V4-031 as COMPLETE. See the four task evidence files and `docs/V4_BATCH_07_CLOSURE_EVIDENCE.json`. Historical TODO rows remain unchanged as registry snapshots.
