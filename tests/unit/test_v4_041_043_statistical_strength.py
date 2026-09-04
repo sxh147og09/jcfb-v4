@@ -124,6 +124,8 @@ class V4041ToV4043StatisticalStrengthTests(unittest.TestCase):
         return HistoricalInputManifest.build(
             target_match_id=self.target_id,
             target_match_identity_hash=self.target_hash,
+            target_competition_id=self.cases["target"]["competition_id"],
+            target_season_id=self.cases["target"]["season_id"],
             target_prediction_cutoff_at=self.cases["target"]["cutoff_at"],
             target_kickoff_at=self.cases["target"]["kickoff_at"],
             observations=self.observations() if observations is None else observations,
@@ -230,6 +232,14 @@ class V4041ToV4043StatisticalStrengthTests(unittest.TestCase):
         self.assertGreaterEqual(manifest.excluded_sample_counts["FUTURE_DATA"], 1)
         self.assertGreaterEqual(manifest.excluded_sample_counts["MODEL_FIELD_FORBIDDEN"], 1)
         self.assertGreaterEqual(manifest.excluded_sample_counts["AVAILABILITY_STATUS_INVALID"], 1)
+
+    def test_cross_competition_history_is_not_silently_aggregated(self):
+        observations = self.observations(count=5)
+        observations[0]["competition_id"] = "competition-cup-example"
+        observations[0]["historical_input_id"] = "cross-competition-observation"
+        manifest = self.manifest(observations)
+        self.assertEqual(1, manifest.excluded_sample_counts["COMPETITION_SCOPE_MISMATCH"])
+        self.assertNotIn("cross-competition-observation", {item.historical_input_id for item in manifest.observations})
 
     def test_append_only_feature_store_and_f_drive_boundary(self):
         feature = DynamicTeamRatingEngine(self.config).generate(manifest=self.manifest(), team_id="team-home-001", feature_bundle=self.feature_bundle)

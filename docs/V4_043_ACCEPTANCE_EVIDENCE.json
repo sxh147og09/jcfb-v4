@@ -1,0 +1,39 @@
+{
+  "task_id": "V4-043",
+  "task_name": "Opponent Adjustment, Form Decay & League Strength 1.0",
+  "workspace": "F:/Projects/jcfb-v4",
+  "contracts": {
+    "historical_input": "historical-statistical-input@1.0.0",
+    "feature_bundle": "feature-bundle@2.0.0",
+    "statistical_config": "statistical-strength-config@1.0.0",
+    "config_hash": "sha256:eadb7e85c4e170ba922f4a5a404e1f28861951c954bb8c1c06ea90ad3ceaf653"
+  },
+  "targeted_tests": {"passed": 2, "total": 2, "status": "PASS"},
+  "full_repository_tests": {"passed": 371, "total": 371, "status": "PASS"},
+  "acceptance": {
+    "v4041_v4042_upstream_lineage_required": "PASS",
+    "opponent_team_identity_required": "PASS",
+    "opponent_adjustment_minimum_five": "PASS",
+    "form_decay_minimum_five": "PASS",
+    "league_strength_minimum_twenty_unique_matches": "PASS",
+    "rolling_twenty_or_730_days": "PASS",
+    "exponential_decay_half_life_ten": "PASS",
+    "competition_season_scope": "PASS",
+    "cross_competition_not_silently_mixed": "PASS",
+    "transition_mapping_missing_is_blocked": "PASS",
+    "typed_transition_output": "PASS",
+    "deterministic_replay_and_output_hash": "PASS",
+    "prediction_score_boundary": "PASS",
+    "v3333_isolation": "PASS",
+    "f_drive_policy": "PASS"
+  },
+  "boundaries": {
+    "production_supabase_reads_writes": "NO",
+    "migration_added_applied": "NO",
+    "prediction_score_engine": "NOT_EXECUTED",
+    "frozen_input": "NOT_EXECUTED",
+    "batch_12": "NOT_ENTERED"
+  },
+  "dod": "PASS",
+  "status": "COMPLETE"
+}

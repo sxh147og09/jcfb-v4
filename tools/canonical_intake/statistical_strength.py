@@ -322,6 +322,8 @@ class HistoricalObservation:
         venue_status = _text(raw.get("venue_status"), "venue_status")
         if venue_status not in {"HOME", "AWAY", "NEUTRAL", "UNKNOWN"}:
             raise StatisticalStrengthValidationError("VENUE_STATUS_INVALID", "venue_status is invalid")
+        if venue_status != "UNKNOWN" and venue_status != side:
+            raise StatisticalStrengthValidationError("SIDE_VENUE_MISMATCH", "venue_status must match the canonical source side")
         source = _text(raw.get("source"), "source")
         source_reference = _text(raw.get("source_reference"), "source_reference")
         raw_evidence = raw.get("evidence_refs")
@@ -474,6 +476,8 @@ class HistoricalInputManifest:
     contract_version: str
     target_match_id: str
     target_match_identity_hash: str
+    target_competition_id: str
+    target_season_id: str
     target_prediction_cutoff_at: datetime
     target_kickoff_at: datetime
     observations: Tuple[HistoricalObservation, ...]
@@ -488,6 +492,8 @@ class HistoricalInputManifest:
         *,
         target_match_id: str,
         target_match_identity_hash: str,
+        target_competition_id: str,
+        target_season_id: str,
         target_prediction_cutoff_at: str,
         target_kickoff_at: str,
         observations: Iterable[Mapping[str, Any]],
@@ -496,6 +502,8 @@ class HistoricalInputManifest:
     ) -> "HistoricalInputManifest":
         target_match_id = _text(target_match_id, "target_match_id")
         target_hash = _hash(target_match_identity_hash, "target_match_identity_hash")
+        target_competition_id = _text(target_competition_id, "target_competition_id")
+        target_season_id = _text(target_season_id, "target_season_id")
         cutoff = _iso(target_prediction_cutoff_at, "target_prediction_cutoff_at")
         kickoff = _iso(target_kickoff_at, "target_kickoff_at")
         if not cutoff < kickoff:
@@ -518,6 +526,8 @@ class HistoricalInputManifest:
                 reason = "SOURCE_IDENTITY_NOT_RESOLVED"
             elif source_identity.payload_hash != item.source_match_identity_hash:
                 reason = "SOURCE_IDENTITY_HASH_MISMATCH"
+            elif item.competition_id != target_competition_id or item.season_id != target_season_id:
+                reason = "COMPETITION_SCOPE_MISMATCH"
             else:
                 reason = item.eligibility_reason(target_match_id=target_match_id, cutoff_at=cutoff, kickoff_at=kickoff)
             if reason:
@@ -550,6 +560,8 @@ class HistoricalInputManifest:
             "manifest_id": manifest_id,
             "target_match_id": target_match_id,
             "target_match_identity_hash": target_hash,
+            "target_competition_id": target_competition_id,
+            "target_season_id": target_season_id,
             "target_prediction_cutoff_at": cutoff.isoformat(),
             "target_kickoff_at": kickoff.isoformat(),
             "config_version": config.config_version,
@@ -574,6 +586,8 @@ class HistoricalInputManifest:
             contract_version=HISTORICAL_CONTRACT_VERSION,
             target_match_id=target_match_id,
             target_match_identity_hash=target_hash,
+            target_competition_id=target_competition_id,
+            target_season_id=target_season_id,
             target_prediction_cutoff_at=cutoff,
             target_kickoff_at=kickoff,
             observations=tuple(selected),
@@ -593,6 +607,8 @@ class HistoricalInputManifest:
             "contract_version": self.contract_version,
             "target_match_id": self.target_match_id,
             "target_match_identity_hash": self.target_match_identity_hash,
+            "target_competition_id": self.target_competition_id,
+            "target_season_id": self.target_season_id,
             "target_prediction_cutoff_at": self.target_prediction_cutoff_at.isoformat(),
             "target_kickoff_at": self.target_kickoff_at.isoformat(),
             "observations": [item.to_dict() for item in self.observations],
