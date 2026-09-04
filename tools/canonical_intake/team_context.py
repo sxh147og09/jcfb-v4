@@ -407,6 +407,11 @@ class TeamContextIdentityLinker:
     def get(self, object_id: str) -> Optional[TeamIdentityLink]:
         return self._links.get(object_id)
 
+    def get_identity(self, match_id: str) -> Optional[Any]:
+        """Expose the already-resolved V4-020 identity for downstream validation."""
+
+        return self._identity_store.get(match_id)
+
     def latest(self, match_id: str, team_id: str, side: Union[TeamSide, str]) -> Optional[TeamIdentityLink]:
         try:
             normalized_side = side if isinstance(side, TeamSide) else TeamSide(str(side).upper())
@@ -644,3 +649,405 @@ class TeamContextIdentityLinker:
             )
         )
 
+
+CONTEXT_STATES = frozenset(
+    {
+        "AVAILABLE",
+        "UNKNOWN",
+        "NONE_CONFIRMED",
+        "NOT_VERIFIED",
+        "CONFLICTED",
+        "STALE",
+        "FUTURE_DATA",
+        "BLOCKED",
+    }
+)
+
+
+@dataclass(frozen=True)
+class TypedFactCollection:
+    """Explicit collection semantics for injuries, suspensions, or availability."""
+
+    state: str
+    items: Optional[Tuple[Mapping[str, Any], ...]]
+    basis_refs: Tuple[str, ...]
+    reason: Optional[str]
+
+    @classmethod
+    def from_dict(cls, raw: Any, field_name: str) -> "TypedFactCollection":
+        if not isinstance(raw, Mapping):
+            raise TeamContextValidationError("FACT_COLLECTION_INVALID", f"{field_name} must be a typed object")
+        state = _text(raw.get("state"), f"{field_name}.state")
+        assert state is not None
+        state = state.upper()
+        if state not in CONTEXT_STATES:
+            raise TeamContextValidationError("CONTEXT_STATE_INVALID", f"{field_name}.state is not governed")
+        raw_items = raw.get("items")
+        if raw_items is not None and not isinstance(raw_items, (list, tuple)):
+            raise TeamContextValidationError("FACT_COLLECTION_ITEMS_INVALID", f"{field_name}.items must be an array")
+        if state == "UNKNOWN" and raw_items is not None:
+            raise TeamContextValidationError("UNKNOWN_ITEMS_FORBIDDEN", f"{field_name}.UNKNOWN must omit items")
+        if state == "NONE_CONFIRMED":
+            if raw_items != []:
+                raise TeamContextValidationError("NONE_CONFIRMED_ITEMS_REQUIRED", f"{field_name}.NONE_CONFIRMED requires items=[]")
+        if state == "AVAILABLE" and not raw_items:
+            raise TeamContextValidationError("AVAILABLE_ITEMS_REQUIRED", f"{field_name}.AVAILABLE requires non-empty items")
+        basis_raw = raw.get("basis_refs", [])
+        if not isinstance(basis_raw, (list, tuple)) or any(not isinstance(item, str) or not item.strip() for item in basis_raw):
+            raise TeamContextValidationError("BASIS_REFS_INVALID", f"{field_name}.basis_refs must be non-empty strings")
+        basis_refs = tuple(item.strip() for item in basis_raw)
+        if state == "NONE_CONFIRMED" and not basis_refs:
+            raise TeamContextValidationError("NONE_CONFIRMED_EVIDENCE_REQUIRED", f"{field_name}.NONE_CONFIRMED requires basis_refs")
+        if state == "CONFLICTED" and len(basis_refs) < 2:
+            raise TeamContextValidationError("CONFLICT_EVIDENCE_REQUIRED", f"{field_name}.CONFLICTED requires both claim refs")
+        reason = _text(raw.get("reason"), f"{field_name}.reason", required=False)
+        if state != "AVAILABLE" and reason is None:
+            raise TeamContextValidationError("REASON_REQUIRED", f"{field_name}.{state} requires reason")
+        items: Optional[Tuple[Mapping[str, Any], ...]] = None
+        if raw_items is not None:
+            frozen_items = []
+            for index, item in enumerate(raw_items):
+                if not isinstance(item, Mapping):
+                    raise TeamContextValidationError("FACT_ITEM_INVALID", f"{field_name}.items[{index}] must be an object")
+                forbidden = _find_forbidden(item, f"{field_name}.items[{index}]")
+                if forbidden:
+                    raise TeamContextValidationError("MODEL_FIELD_FORBIDDEN", f"context fact cannot contain {forbidden}")
+                frozen_items.append(_freeze(item))
+            items = tuple(frozen_items)
+        return cls(state, items, basis_refs, reason)
+
+    def to_dict(self) -> Dict[str, Any]:
+        result: Dict[str, Any] = {
+            "state": self.state,
+            "basis_refs": list(self.basis_refs),
+        }
+        if self.items is not None:
+            result["items"] = [_thaw(item) for item in self.items]
+        if self.reason is not None:
+            result["reason"] = self.reason
+        return result
+
+
+@dataclass(frozen=True)
+class AvailabilityContextObservation:
+    match_id: str
+    team_id: str
+    side: TeamSide
+    injuries: TypedFactCollection
+    suspensions: TypedFactCollection
+    availability: TypedFactCollection
+    source: str
+    source_type: str
+    source_reference: str
+    source_timestamp: datetime
+    observed_at: datetime
+    ingested_at: datetime
+    effective_at: datetime
+    cutoff_at: datetime
+    expires_at: Optional[datetime]
+    provenance_ref: str
+    provenance_hash: Optional[str]
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def from_dict(cls, raw: Mapping[str, Any]) -> "AvailabilityContextObservation":
+        if not isinstance(raw, Mapping):
+            raise TeamContextValidationError("OBSERVATION_NOT_OBJECT", "availability observation must be an object")
+        forbidden = _find_forbidden(raw)
+        if forbidden:
+            raise TeamContextValidationError("MODEL_FIELD_FORBIDDEN", f"availability context cannot contain {forbidden}")
+        match_id = _uuid(raw.get("match_id"), "match_id")
+        team_id = _text(raw.get("team_id"), "team_id")
+        assert team_id is not None
+        side_raw = _text(raw.get("side"), "side")
+        assert side_raw is not None
+        try:
+            side = TeamSide(side_raw.upper())
+        except ValueError as exc:
+            raise TeamContextValidationError("SIDE_INVALID", "side must be HOME or AWAY") from exc
+        collections = {
+            name: TypedFactCollection.from_dict(raw.get(name), name)
+            for name in ("injuries", "suspensions", "availability")
+        }
+        source = _text(raw.get("source"), "source")
+        source_type = _token(raw.get("source_type", "TEAM_CONTEXT_SOURCE"), "source_type")
+        source_reference = _text(raw.get("source_reference", raw.get("source_ref")), "source_reference")
+        source_timestamp = _timestamp(raw.get("source_timestamp"), "source_timestamp")
+        observed_at = _timestamp(raw.get("observed_at"), "observed_at")
+        ingested_at = _timestamp(raw.get("ingested_at"), "ingested_at")
+        effective_at = _timestamp(raw.get("effective_at", raw.get("as_of_at")), "effective_at")
+        cutoff_at = _timestamp(raw.get("cutoff_at"), "cutoff_at")
+        expires_at = _timestamp(raw.get("expires_at"), "expires_at") if raw.get("expires_at") is not None else None
+        if source_timestamp > observed_at:
+            raise TeamContextValidationError("SOURCE_TIME_AFTER_OBSERVED", "source_timestamp cannot follow observed_at")
+        if observed_at > ingested_at:
+            raise TeamContextValidationError("OBSERVED_AFTER_INGESTED", "observed_at cannot follow ingested_at")
+        if effective_at > cutoff_at or observed_at > cutoff_at or source_timestamp > cutoff_at:
+            raise TeamContextValidationError("POST_CUTOFF_CONTEXT", "availability context is not eligible at cutoff")
+        if expires_at is not None and expires_at < effective_at:
+            raise TeamContextValidationError("EXPIRY_BEFORE_EFFECTIVE", "expires_at cannot precede effective_at")
+        if any(collection.state == "STALE" for collection in collections.values()) and expires_at is None:
+            raise TeamContextValidationError("STALE_EXPIRY_REQUIRED", "STALE collections require expires_at")
+        provenance_ref = _text(raw.get("provenance_ref", source_reference), "provenance_ref")
+        supplied_hash = raw.get("provenance_hash")
+        provenance_hash = _hash(supplied_hash, "provenance_hash") if supplied_hash is not None else None
+        metadata = raw.get("metadata", {})
+        if not isinstance(metadata, Mapping):
+            raise TeamContextValidationError("METADATA_NOT_OBJECT", "metadata must be an object")
+        assert source is not None and source_reference is not None and provenance_ref is not None
+        return cls(
+            match_id=match_id,
+            team_id=team_id,
+            side=side,
+            injuries=collections["injuries"],
+            suspensions=collections["suspensions"],
+            availability=collections["availability"],
+            source=source,
+            source_type=source_type,
+            source_reference=source_reference,
+            source_timestamp=source_timestamp,
+            observed_at=observed_at,
+            ingested_at=ingested_at,
+            effective_at=effective_at,
+            cutoff_at=cutoff_at,
+            expires_at=expires_at,
+            provenance_ref=provenance_ref,
+            provenance_hash=provenance_hash,
+            metadata=_freeze(metadata),
+        )
+
+    @property
+    def observation_id(self) -> str:
+        return _source_observation_id(self.to_dict())
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "match_id": self.match_id,
+            "team_id": self.team_id,
+            "side": self.side.value,
+            "injuries": self.injuries.to_dict(),
+            "suspensions": self.suspensions.to_dict(),
+            "availability": self.availability.to_dict(),
+            "source": self.source,
+            "source_type": self.source_type,
+            "source_reference": self.source_reference,
+            "source_timestamp": _iso(self.source_timestamp),
+            "observed_at": _iso(self.observed_at),
+            "ingested_at": _iso(self.ingested_at),
+            "effective_at": _iso(self.effective_at),
+            "cutoff_at": _iso(self.cutoff_at),
+            "expires_at": _iso(self.expires_at) if self.expires_at else None,
+            "provenance_ref": self.provenance_ref,
+            "provenance_hash": self.provenance_hash,
+            "metadata": _thaw(self.metadata),
+        }
+
+
+@dataclass(frozen=True)
+class AvailabilityContextRecord:
+    object_id: str
+    contract_version: str
+    match_id: str
+    team_id: str
+    side: TeamSide
+    injuries: TypedFactCollection
+    suspensions: TypedFactCollection
+    availability: TypedFactCollection
+    source: str
+    source_type: str
+    source_reference: str
+    source_timestamp: str
+    observed_at: str
+    ingested_at: str
+    effective_at: str
+    cutoff_at: str
+    expires_at: Optional[str]
+    provenance_ref: str
+    provenance_hash: str
+    payload_hash: str
+    context_hash: str
+    observation_id: str
+    revision: int
+    supersedes_object_id: Optional[str]
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "object_id": self.object_id,
+            "contract_version": self.contract_version,
+            "match_id": self.match_id,
+            "team_id": self.team_id,
+            "side": self.side.value,
+            "injuries": self.injuries.to_dict(),
+            "suspensions": self.suspensions.to_dict(),
+            "availability": self.availability.to_dict(),
+            "source": self.source,
+            "source_type": self.source_type,
+            "source_reference": self.source_reference,
+            "source_timestamp": self.source_timestamp,
+            "observed_at": self.observed_at,
+            "ingested_at": self.ingested_at,
+            "effective_at": self.effective_at,
+            "cutoff_at": self.cutoff_at,
+            "expires_at": self.expires_at,
+            "provenance_ref": self.provenance_ref,
+            "provenance_hash": self.provenance_hash,
+            "payload_hash": self.payload_hash,
+            "context_hash": self.context_hash,
+            "observation_id": self.observation_id,
+            "revision": self.revision,
+            "supersedes_object_id": self.supersedes_object_id,
+            "metadata": _thaw(self.metadata),
+        }
+
+
+@dataclass(frozen=True)
+class AvailabilityContextResult:
+    accepted: bool
+    status: str
+    action: str
+    observation_id: str
+    record: Optional[AvailabilityContextRecord]
+    error_code: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "accepted": self.accepted,
+            "status": self.status,
+            "action": self.action,
+            "observation_id": self.observation_id,
+            "record": self.record.to_dict() if self.record else None,
+            "error_code": self.error_code,
+        }
+
+
+class AvailabilityContextStore:
+    """V4-033 append-only availability/injury/suspension intake."""
+
+    def __init__(self, linker: TeamContextIdentityLinker):
+        if not isinstance(linker, TeamContextIdentityLinker):
+            raise TypeError("V4-033 requires a V4-032 TeamContextIdentityLinker")
+        self._linker = linker
+        self._observations: Dict[str, AvailabilityContextObservation] = {}
+        self._records: Dict[str, AvailabilityContextRecord] = {}
+        self._latest: Dict[Tuple[str, str, TeamSide], AvailabilityContextRecord] = {}
+        self._events: List[Mapping[str, Any]] = []
+
+    @property
+    def observations(self) -> Tuple[AvailabilityContextObservation, ...]:
+        return tuple(self._observations.values())
+
+    @property
+    def records(self) -> Tuple[AvailabilityContextRecord, ...]:
+        return tuple(self._records.values())
+
+    @property
+    def events(self) -> Tuple[Mapping[str, Any], ...]:
+        return tuple(self._events)
+
+    def latest(self, match_id: str, team_id: str, side: Union[TeamSide, str]) -> Optional[AvailabilityContextRecord]:
+        normalized = side if isinstance(side, TeamSide) else TeamSide(str(side).upper())
+        return self._latest.get((match_id, team_id, normalized))
+
+    def ingest(self, raw: Union[AvailabilityContextObservation, Mapping[str, Any]]) -> AvailabilityContextResult:
+        try:
+            observation = raw if isinstance(raw, AvailabilityContextObservation) else AvailabilityContextObservation.from_dict(raw)
+        except (TeamContextValidationError, IdentityValidationError) as exc:
+            observation_id = _source_observation_id(raw if isinstance(raw, Mapping) else raw.to_dict())
+            code = getattr(exc, "code", "VALIDATION_FAILED")
+            self._events.append({"action": "BLOCKED_VALIDATION", "observation_id": observation_id, "error_code": code})
+            return AvailabilityContextResult(False, "BLOCKED", code, observation_id, None, code)
+        observation_id = observation.observation_id
+        if observation_id in self._observations:
+            existing = next((record for record in self._records.values() if record.observation_id == observation_id), None)
+            self._events.append({"action": "DUPLICATE_NOOP", "observation_id": observation_id, "object_id": existing.object_id if existing else None})
+            return AvailabilityContextResult(True, "AVAILABLE", "DUPLICATE_NOOP", observation_id, existing)
+
+        identity = self._linker.get_identity(observation.match_id)
+        if identity is None or identity.status != "AVAILABLE" or identity.identity_resolution_state != "RESOLVED":
+            return self._blocked(observation, "MATCH_IDENTITY_NOT_RESOLVED")
+        expected_team = identity.home_team_id if observation.side == TeamSide.HOME else identity.away_team_id
+        if observation.team_id != expected_team:
+            return self._blocked(observation, "TEAM_ID_SIDE_CONFLICT")
+        link = self._linker.latest(observation.match_id, observation.team_id, observation.side)
+        if link is None:
+            return self._blocked(observation, "TEAM_CONTEXT_LINK_NOT_FOUND")
+        kickoff = datetime.fromisoformat(identity.kickoff_at)
+        if not observation.cutoff_at < kickoff:
+            return self._blocked(observation, "CUTOFF_NOT_BEFORE_KICKOFF")
+        if any(
+            collection.state == "FUTURE_DATA"
+            for collection in (observation.injuries, observation.suspensions, observation.availability)
+        ):
+            return self._blocked(observation, "FUTURE_DATA_NOT_ELIGIBLE")
+
+        self._observations[observation_id] = observation
+        key = (observation.match_id, observation.team_id, observation.side)
+        predecessor = self._latest.get(key)
+        revision = predecessor.revision + 1 if predecessor else 1
+        provenance_hash = observation.provenance_hash or sha256_json(
+            {
+                "source": observation.source,
+                "source_type": observation.source_type,
+                "source_reference": observation.source_reference,
+                "provenance_ref": observation.provenance_ref,
+                "source_timestamp": _iso(observation.source_timestamp),
+                "observed_at": _iso(observation.observed_at),
+                "effective_at": _iso(observation.effective_at),
+            }
+        )
+        logical = {
+            "match_id": observation.match_id,
+            "team_id": observation.team_id,
+            "side": observation.side.value,
+            "injuries": observation.injuries.to_dict(),
+            "suspensions": observation.suspensions.to_dict(),
+            "availability": observation.availability.to_dict(),
+            "source_reference": observation.source_reference,
+            "source_timestamp": _iso(observation.source_timestamp),
+            "effective_at": _iso(observation.effective_at),
+            "cutoff_at": _iso(observation.cutoff_at),
+            "expires_at": _iso(observation.expires_at) if observation.expires_at else None,
+            "provenance_ref": observation.provenance_ref,
+            "provenance_hash": provenance_hash,
+        }
+        payload_hash = sha256_json(logical)
+        context_hash = sha256_json({"identity_link_object_id": link.object_id, **logical})
+        object_id = str(uuid.uuid5(TEAM_CONTEXT_ID_NAMESPACE, f"availability|{observation.match_id}|{observation.team_id}|{observation.side.value}|{observation_id}"))
+        record = AvailabilityContextRecord(
+            object_id=object_id,
+            contract_version=CONTRACT_VERSION,
+            match_id=observation.match_id,
+            team_id=observation.team_id,
+            side=observation.side,
+            injuries=observation.injuries,
+            suspensions=observation.suspensions,
+            availability=observation.availability,
+            source=observation.source,
+            source_type=observation.source_type,
+            source_reference=observation.source_reference,
+            source_timestamp=_iso(observation.source_timestamp),
+            observed_at=_iso(observation.observed_at),
+            ingested_at=_iso(observation.ingested_at),
+            effective_at=_iso(observation.effective_at),
+            cutoff_at=_iso(observation.cutoff_at),
+            expires_at=_iso(observation.expires_at) if observation.expires_at else None,
+            provenance_ref=observation.provenance_ref,
+            provenance_hash=provenance_hash,
+            payload_hash=payload_hash,
+            context_hash=context_hash,
+            observation_id=observation_id,
+            revision=revision,
+            supersedes_object_id=predecessor.object_id if predecessor else None,
+            metadata=MappingProxyType({"identity_link_object_id": link.object_id, "append_only_boundary": "V4-033 local context ledger; V4-036/V4-037 deferred"}),
+        )
+        self._records[object_id] = record
+        self._latest[key] = record
+        self._events.append({"action": "ROOT_CREATED" if predecessor is None else "REVISION_APPENDED", "observation_id": observation_id, "object_id": object_id, "supersedes_object_id": predecessor.object_id if predecessor else None})
+        return AvailabilityContextResult(True, "AVAILABLE", "ROOT_CREATED" if predecessor is None else "REVISION_APPENDED", observation_id, record)
+
+    def _blocked(self, observation: AvailabilityContextObservation, code: str) -> AvailabilityContextResult:
+        observation_id = observation.observation_id
+        self._observations.setdefault(observation_id, observation)
+        self._events.append({"action": "BLOCKED_CONTEXT", "observation_id": observation_id, "match_id": observation.match_id, "team_id": observation.team_id, "side": observation.side.value, "error_code": code})
+        return AvailabilityContextResult(False, "BLOCKED", code, observation_id, None, code)

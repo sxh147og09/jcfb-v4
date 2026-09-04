@@ -1,0 +1,32 @@
+{
+  "base": {
+    "match_id": "00000000-0000-5000-8000-000000000001",
+    "team_id": "team-home-001",
+    "side": "HOME",
+    "injuries": {
+      "state": "AVAILABLE",
+      "items": [{"player_id": "player-001", "status": "OUT"}],
+      "basis_refs": ["evidence://availability/injury-001"]
+    },
+    "suspensions": {
+      "state": "NONE_CONFIRMED",
+      "items": [],
+      "basis_refs": ["evidence://availability/suspension-clear-001"],
+      "reason": "The accepted source explicitly confirms no suspensions"
+    },
+    "availability": {
+      "state": "NOT_VERIFIED",
+      "basis_refs": ["evidence://availability/report-001"],
+      "reason": "The source report is not independently verified"
+    },
+    "source": "Example club availability report",
+    "source_type": "CLUB_STATEMENT",
+    "source_reference": "ref://availability/20260904/001/home/001",
+    "source_timestamp": "2026-09-04T08:30:00+08:00",
+    "observed_at": "2026-09-04T09:00:00+08:00",
+    "ingested_at": "2026-09-04T09:01:00+08:00",
+    "effective_at": "2026-09-04T08:30:00+08:00",
+    "cutoff_at": "2026-09-04T18:00:00+08:00",
+    "provenance_ref": "ref://availability/20260904/001/home/001"
+  }
+}
