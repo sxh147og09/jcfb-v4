@@ -1,0 +1,109 @@
+{
+  "manifest_version": "batch-11-execution-manifest@1.0.0",
+  "status": "FROZEN",
+  "approved_scope": ["V4-041", "V4-042", "V4-043"],
+  "execution_waves": [
+    {"wave": 1, "tasks": ["V4-041", "V4-042"], "mode": "PARALLEL_IF_NO_OVERLAP_ELSE_SERIAL"},
+    {"wave": 2, "tasks": ["V4-043"], "mode": "SERIAL"},
+    {"wave": 3, "tasks": ["BATCH-11-CLOSURE-REVIEW"], "mode": "SERIAL"}
+  ],
+  "direct_dependencies": {
+    "V4-041": ["V4-040", "historical-statistical-input@1.0.0", "statistical-strength-config@1.0.0"],
+    "V4-042": ["V4-040", "historical-statistical-input@1.0.0", "statistical-strength-config@1.0.0"],
+    "V4-043": ["V4-041", "V4-042", "historical-statistical-input@1.0.0", "statistical-strength-config@1.0.0"]
+  },
+  "contract_versions": {
+    "feature_bundle": "feature-bundle@2.0.0",
+    "historical_input": "historical-statistical-input@1.0.0",
+    "statistical_strength_config": "statistical-strength-config@1.0.0",
+    "feature_schema": "feature-schema@1.0.0"
+  },
+  "statistical_config": {
+    "config_hash": "sha256:eadb7e85c4e170ba922f4a5a404e1f28861951c954bb8c1c06ea90ad3ceaf653",
+    "minimum_eligible_matches": 5,
+    "maximum_eligible_matches": 20,
+    "maximum_historical_days": 730,
+    "half_life_matches": 10,
+    "home_advantage_min_scope_matches": 20,
+    "league_strength_min_scope_matches": 20,
+    "promotion_relegation_prior_min_matches": 5
+  },
+  "historical_input_eligibility": [
+    "source_match_id != target_match_id",
+    "source_match_identity is canonical and resolvable",
+    "target_match_identity is canonical and resolvable",
+    "availability_at <= target_prediction_cutoff_at < target_kickoff_at",
+    "exact visible revision and hash are reproducible at target cutoff",
+    "not FUTURE_DATA",
+    "no post-cutoff correction substitution"
+  ],
+  "target_self_result_rejection": "PERMANENT_FAIL_CLOSED",
+  "league_season_competition_policy": {
+    "same_competition_same_season": "ALLOWED",
+    "cross_competition": "BLOCKED_UNLESS_MAPPED",
+    "cross_season": "TRANSITION_POLICY_REQUIRED",
+    "league_cup_mixing": "BLOCKED"
+  },
+  "home_away_neutral_policy": {
+    "home_away": "SOURCE_CANONICAL_SIDE_ONLY",
+    "neutral": "NOT_APPLICABLE",
+    "unknown_venue": "BLOCKED"
+  },
+  "feature_quality_semantics": [
+    "coverage",
+    "verification",
+    "freshness",
+    "completeness",
+    "conflict",
+    "provenance"
+  ],
+  "sparse_data_policy": {
+    "below_minimum": "NO_NUMERIC_VALUE",
+    "state": "UNKNOWN",
+    "reason_code": "INSUFFICIENT_SAMPLE",
+    "quality": "PARTIAL",
+    "transition_without_mapping": "BLOCKED",
+    "default_zero_mean_previous_value_fallback": "FORBIDDEN"
+  },
+  "deterministic_replay_hash_boundary": [
+    "accepted observation IDs/revisions/hashes",
+    "target cutoff and kickoff",
+    "competition/season scope",
+    "sample/window/decay/normalization policy",
+    "generator version",
+    "implementation hash",
+    "config version/hash",
+    "output hash"
+  ],
+  "append_only_boundary": "correction creates a new revision with supersedes_id; prior observation remains immutable",
+  "no_prediction_score_engine_boundary": true,
+  "no_production_no_migration_boundary": true,
+  "v3_3_3_isolation_boundary": "V4-only; no V3.3.3 read, copy, mutation, or publication",
+  "batch_12_exclusion_boundary": [
+    "V4-044+",
+    "BATCH-12",
+    "Football Intelligence",
+    "Market Intelligence",
+    "Prediction",
+    "Score Engine",
+    "Frozen Input",
+    "Shadow/Tier A",
+    "Public Page",
+    "Promotion",
+    "Deployment",
+    "Production/Supabase",
+    "migration"
+  ],
+  "pause_conditions": [
+    "targeted or full tests fail",
+    "task DoD fails",
+    "canonical identity or historical eligibility cannot be proven",
+    "target self-result leakage is detected",
+    "sample/decay/window/normalization requires an unapproved change",
+    "conflict, stale, future, or blocked state requires silent coercion",
+    "deterministic replay or hash verification fails",
+    "Prediction/Score Engine or BATCH-12 scope is required",
+    "Production/Supabase or migration access is required",
+    "V3.3.3 isolation risk is detected"
+  ]
+}
