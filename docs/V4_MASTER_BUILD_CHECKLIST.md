@@ -146,7 +146,7 @@ A batch name, registry entry, or planning PASS is not task completion. V4-012 th
 | [x] | V4-017 | V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | BATCH-03 | SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [x] | V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | BATCH-04 | SERIAL + HARD_GATE | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [x] | V4-019 | V4-019｜Production Database Write Activation HARD_GATE 1.0 | BATCH-04 | SERIAL + HARD_GATE | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
-| [ ] | V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCH-05 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
+| [x] | V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCH-05 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [x] | V4-021 | V4-021｜Canonical Fact Envelope & Availability Semantics 1.0 | BATCH-05 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [x] | V4-022 | V4-022｜Cutoff, Timestamp & Provenance Lineage 1.0 | BATCH-05 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [x] | V4-023 | V4-023｜Canonical Intake Orchestrator & Deduplication 1.0 | BATCH-05 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |

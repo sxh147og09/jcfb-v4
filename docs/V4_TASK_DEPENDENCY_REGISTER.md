@@ -1,6 +1,6 @@
 # JCFB V4 Task Dependency Register 001–100 1.0
 
-Status: `PASS` for registry coverage and acyclic planning graph; `V4-012` through `V4-023 COMPLETE`; BATCH-05 Closure Review is the next execution boundary.
+Status: `PASS` for registry coverage and acyclic planning graph; `V4-012` through `V4-023 COMPLETE`; BATCH-05 Closure Gate is PASS.
 
 Dependency Identity: `v4-task-dependency-register-001-100@1.0.0`
 Revision: `r002`
