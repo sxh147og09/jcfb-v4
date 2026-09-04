@@ -1,0 +1,41 @@
+{
+  "base": {
+    "source": "China Sports Lottery fixture feed",
+    "source_type": "OFFICIAL_FEED",
+    "source_reference": "ref://official/fixture/20260904/001",
+    "official_match_no": "001",
+    "source_match_ref": "csl-20260904-001",
+    "data_date": "2026-09-04",
+    "competition_id": "competition-premier-example",
+    "competition_name": "Example Premier League",
+    "kickoff_at": "2026-09-04T19:35:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "home_team_id": "team-home-001",
+    "home_team_name": "Example Home",
+    "away_team_id": "team-away-002",
+    "away_team_name": "Example Away",
+    "published_at": "2026-09-04T08:55:00+08:00",
+    "observed_at": "2026-09-04T09:00:00+08:00",
+    "ingested_at": "2026-09-04T09:01:00+08:00",
+    "metadata": {"fixture_revision": "source-r1"}
+  },
+  "second_source": {
+    "source": "Example schedule provider",
+    "source_type": "EXTERNAL_FEED",
+    "source_reference": "ref://provider-b/fixture/ex-8842",
+    "source_match_ref": "provider-b-ex-8842",
+    "data_date": "2026-09-04",
+    "competition_id": "competition-premier-example",
+    "competition_name": "Example Premier League",
+    "kickoff_at": "2026-09-04T19:35:00+08:00",
+    "timezone": "Asia/Shanghai",
+    "home_team_id": "team-home-001",
+    "home_team_name": "Example Home FC",
+    "away_team_id": "team-away-002",
+    "away_team_name": "Example Away FC",
+    "published_at": "2026-09-04T09:02:00+08:00",
+    "observed_at": "2026-09-04T09:03:00+08:00",
+    "ingested_at": "2026-09-04T09:04:00+08:00",
+    "metadata": {"provider_revision": "p1"}
+  }
+}

@@ -35,7 +35,7 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 | V4-017 | V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | BATCH-03 | V4-016 | V4-018 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | BATCH-04 | V4-017 | V4-019 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-019 | V4-019｜Production Database Write Activation HARD_GATE 1.0 | BATCH-04 | V4-018 | V4-020 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
-| V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCH-05 | V4-019 | V4-021, V4-022, V4-023 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
+| V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCH-05 | V4-019 | V4-021, V4-022, V4-023 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-021 | V4-021｜Canonical Fact Envelope & Availability Semantics 1.0 | BATCH-05 | V4-020 | V4-022, V4-023, V4-038, V4-050 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-022 | V4-022｜Cutoff, Timestamp & Provenance Lineage 1.0 | BATCH-05 | V4-020, V4-021 | V4-023, V4-038, V4-050, V4-076 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-023 | V4-023｜Canonical Intake Orchestrator & Deduplication 1.0 | BATCH-05 | V4-020, V4-021, V4-022 | V4-024, V4-025, V4-028, V4-029, V4-030, V4-032 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |

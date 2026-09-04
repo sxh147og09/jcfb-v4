@@ -3,7 +3,7 @@
 Registry Identity: `v4-task-registry-001-100@1.0.0`
 Registry Revision: `r002`
 Audit Date: `2026-09-04` (`Asia/Shanghai`)
-Status: `COMPLETE` for registry construction; `V4-012` through `V4-019` are COMPLETE; execution status remains `NOT_STARTED` for V4-020 through V4-100.
+Status: `COMPLETE` for registry construction; `V4-012` through `V4-020` are COMPLETE; execution status remains `NOT_STARTED` for V4-021 through V4-100.
 
 Source of truth: **This registry is the authoritative definition source for V4 task names, scope, provenance, dependencies, deliverables, acceptance, classification, and primary batch.** `docs/V4_MASTER_BUILD_CHECKLIST.md` is an execution-status view and must not invent or silently rename a task.
 

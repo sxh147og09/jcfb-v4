@@ -127,6 +127,6 @@ The safe outcome is BLOCKED, RUN_INVALID, or NOT_VERIFIED with retained evidence
 
 ## 9. Checklist and current disposition
 
-V4-012 through V4-019 are marked `[x]` only after each independent artifact, validation, documentation, and Git trace passes. V4-020 through V4-100 remain unchecked. BATCH-04 is accepted by the final Production 0009 apply report.
+V4-012 through V4-020 are marked `[x]` only after each independent artifact, validation, documentation, and Git trace passes. V4-021 through V4-100 remain unchecked. BATCH-04 is accepted by the final Production 0009 apply report; V4-020 is accepted by its independent local no-write evidence.
 
-Next execution batch: **BATCH-05 — Canonical Data Intake Foundation**. BATCH-04 / V4-018 and V4-019 is accepted after explicit approval and final verification. This acceptance does not authorize BATCH-05, model execution, public deployment, or V3.3.3 mutation.
+Current execution batch: **BATCH-05 — Canonical Data Intake Foundation**. V4-020 is accepted only within its local no-write scope; V4-021 is the next task and requires its own acceptance. This acceptance does not authorize model execution, public deployment, Production/Supabase writes, or V3.3.3 mutation.

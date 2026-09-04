@@ -29,7 +29,7 @@ The classification below is a complete register, not a candidate envelope. Accep
 | V4-017 | V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | SERIAL | BATCH-03 | V4-016 | NO | NO | NO | COMPLETE |
 | V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-04 | V4-017 | YES | NO | YES | COMPLETE |
 | V4-019 | V4-019｜Production Database Write Activation HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-04 | V4-018 | YES | YES | YES | COMPLETE |
-| V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCHABLE + SERIAL | BATCH-05 | V4-019 | YES | NO | NO | TODO |
+| V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCHABLE + SERIAL | BATCH-05 | V4-019 | YES | NO | NO | COMPLETE |
 | V4-021 | V4-021｜Canonical Fact Envelope & Availability Semantics 1.0 | BATCHABLE + PARALLEL | BATCH-05 | V4-020 | YES | NO | NO | TODO |
 | V4-022 | V4-022｜Cutoff, Timestamp & Provenance Lineage 1.0 | BATCHABLE + PARALLEL | BATCH-05 | V4-020, V4-021 | YES | NO | NO | TODO |
 | V4-023 | V4-023｜Canonical Intake Orchestrator & Deduplication 1.0 | BATCHABLE + SERIAL | BATCH-05 | V4-020, V4-021, V4-022 | YES | NO | NO | TODO |

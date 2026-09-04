@@ -1,6 +1,6 @@
 # JCFB V4 Dependency Graph 012–100 1.0
 
-Status: `DEPENDENCY GRAPH PASS` / `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS` / `BATCH-04 ACCEPTANCE PASS` / `BATCH-05 NEXT`
+Status: `DEPENDENCY GRAPH PASS` / `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS` / `BATCH-04 ACCEPTANCE PASS` / `V4-020 ACCEPTANCE PASS` / `BATCH-05 IN PROGRESS`
 
 Graph Identity: `v4-dependency-graph-012-100@1.0.0`
 Revision: `r003`
@@ -129,4 +129,4 @@ The fan-out groups are parallel development opportunities only after their upstr
 - Kahn-style cycle check: all task and batch nodes removed; residual nodes `0`; dependency cycles `0`.
 - The only historical edge is V4-011 -> V4-012. All later edges are explicitly reconstructed planning edges.
 
-No graph edge authorizes execution. BATCH-01 through BATCH-04 are accepted within their recorded scopes; BATCH-04 crossed its Production hard gate only after explicit approval and final verification. The next execution boundary is BATCH-05, which remains unauthorized and not started.
+No graph edge authorizes execution. BATCH-01 through BATCH-04 are accepted within their recorded scopes; BATCH-04 crossed its Production hard gate only after explicit approval and final verification. BATCH-05 is in progress only for the explicitly scoped V4-020 local no-write task; V4-021 through V4-023 remain separate child tasks.
