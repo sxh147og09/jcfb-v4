@@ -4,6 +4,7 @@
 
 - Registry Version: `v4-task-registry-001-100@1.0.0`
 - Recovery Status: `COMPLETE`; `V4-012` through `V4-020` are COMPLETE; V4-021 through V4-100 remain not started.
+- Live task status: `V4-020 = COMPLETE`; the V4-020 acceptance report and evidence are authoritative for the row below, whose legacy mojibake task label is retained unchanged.
 - Source of truth: `docs/V4_TASK_REGISTRY_001_100.md` is the authoritative task-definition registry. This checklist is the execution-status view.
 - Planning status: `V4-012–V4-100 Batch Planning = PASS`; BATCH-01 / V4-012 design-only acceptance = PASS.
 
