@@ -1419,3 +1419,293 @@ class LineupCoachTacticalStore:
         self._observations.setdefault(observation_id, observation)
         self._events.append({"action": "BLOCKED_CONTEXT", "observation_id": observation_id, "match_id": observation.match_id, "team_id": observation.team_id, "side": observation.side.value, "error_code": code})
         return LineupCoachTacticalResult(False, "BLOCKED", code, observation_id, None, code)
+
+
+OPERATIONAL_CONTEXT_FIELDS = ("schedule_pressure", "fatigue", "travel", "weather", "pitch")
+OPERATIONAL_CONTEXT_STATES = frozenset(set(CONTEXT_STATES) | {"UNAVAILABLE"})
+
+
+@dataclass(frozen=True)
+class OperationalContextItem:
+    category: str
+    state: str
+    payload: Optional[Mapping[str, Any]]
+    reason: Optional[str]
+    source: str
+    source_reference: str
+    source_timestamp: datetime
+    retrieved_at: datetime
+    effective_at: datetime
+    expires_at: datetime
+    provenance_ref: str
+    provenance_hash: Optional[str]
+    payload_hash: str
+
+    @classmethod
+    def from_dict(cls, category: str, raw: Any) -> "OperationalContextItem":
+        if not isinstance(raw, Mapping):
+            raise TeamContextValidationError("OPERATIONAL_ITEM_INVALID", f"{category} must be a typed object")
+        state = _text(raw.get("state"), f"{category}.state")
+        assert state is not None
+        state = state.upper()
+        if state not in OPERATIONAL_CONTEXT_STATES:
+            raise TeamContextValidationError("CONTEXT_STATE_INVALID", f"{category}.state is not governed")
+        payload_raw = raw.get("payload")
+        if payload_raw is not None and not isinstance(payload_raw, Mapping):
+            raise TeamContextValidationError("OPERATIONAL_PAYLOAD_INVALID", f"{category}.payload must be an object")
+        if state == "AVAILABLE" and not payload_raw:
+            raise TeamContextValidationError("AVAILABLE_PAYLOAD_REQUIRED", f"{category}.AVAILABLE requires a non-empty payload")
+        if state != "AVAILABLE" and payload_raw is not None:
+            forbidden = _find_forbidden(payload_raw, f"{category}.payload")
+            if forbidden:
+                raise TeamContextValidationError("MODEL_FIELD_FORBIDDEN", f"operational context cannot contain {forbidden}")
+        if payload_raw is not None:
+            forbidden = _find_forbidden(payload_raw, f"{category}.payload")
+            if forbidden:
+                raise TeamContextValidationError("MODEL_FIELD_FORBIDDEN", f"operational context cannot contain {forbidden}")
+        reason = _text(raw.get("reason"), f"{category}.reason", required=False)
+        if state != "AVAILABLE" and reason is None:
+            raise TeamContextValidationError("REASON_REQUIRED", f"{category}.{state} requires reason")
+        basis_refs = raw.get("basis_refs", [])
+        if not isinstance(basis_refs, (list, tuple)) or any(not isinstance(ref, str) or not ref.strip() for ref in basis_refs):
+            raise TeamContextValidationError("BASIS_REFS_INVALID", f"{category}.basis_refs must be strings")
+        if state == "AVAILABLE" and not basis_refs:
+            raise TeamContextValidationError("CONTEXT_EVIDENCE_REQUIRED", f"{category}.AVAILABLE requires basis_refs")
+        if state == "CONFLICTED" and len(basis_refs) < 2:
+            raise TeamContextValidationError("CONFLICT_EVIDENCE_REQUIRED", f"{category}.CONFLICTED requires both claim refs")
+        source = _text(raw.get("source"), f"{category}.source")
+        source_reference = _text(raw.get("source_reference", raw.get("source_ref")), f"{category}.source_reference")
+        source_timestamp = _timestamp(raw.get("source_timestamp"), f"{category}.source_timestamp")
+        retrieved_at = _timestamp(raw.get("retrieved_at", raw.get("observed_at")), f"{category}.retrieved_at")
+        effective_at = _timestamp(raw.get("effective_at", raw.get("as_of_at")), f"{category}.effective_at")
+        expires_at = _timestamp(raw.get("expires_at"), f"{category}.expires_at")
+        if source_timestamp > retrieved_at:
+            raise TeamContextValidationError("SOURCE_TIME_AFTER_RETRIEVED", f"{category}.source_timestamp cannot follow retrieved_at")
+        if expires_at < effective_at:
+            raise TeamContextValidationError("EXPIRY_BEFORE_EFFECTIVE", f"{category}.expires_at cannot precede effective_at")
+        provenance_ref = _text(raw.get("provenance_ref", source_reference), f"{category}.provenance_ref")
+        supplied_hash = raw.get("provenance_hash")
+        provenance_hash = _hash(supplied_hash, f"{category}.provenance_hash") if supplied_hash is not None else None
+        payload = _freeze(payload_raw) if payload_raw is not None else None
+        payload_hash = sha256_json({"category": category, "state": state, "payload": _thaw(payload), "reason": reason, "basis_refs": list(basis_refs)})
+        assert source is not None and source_reference is not None and provenance_ref is not None
+        return cls(category, state, payload, reason, source, source_reference, source_timestamp, retrieved_at, effective_at, expires_at, provenance_ref, provenance_hash, payload_hash)
+
+    def to_dict(self) -> Dict[str, Any]:
+        result: Dict[str, Any] = {
+            "category": self.category,
+            "state": self.state,
+            "source": self.source,
+            "source_reference": self.source_reference,
+            "source_timestamp": _iso(self.source_timestamp),
+            "retrieved_at": _iso(self.retrieved_at),
+            "effective_at": _iso(self.effective_at),
+            "expires_at": _iso(self.expires_at),
+            "provenance_ref": self.provenance_ref,
+            "provenance_hash": self.provenance_hash,
+            "payload_hash": self.payload_hash,
+        }
+        if self.payload is not None:
+            result["payload"] = _thaw(self.payload)
+        if self.reason is not None:
+            result["reason"] = self.reason
+        return result
+
+
+@dataclass(frozen=True)
+class OperationalContextObservation:
+    match_id: str
+    team_id: str
+    side: TeamSide
+    schedule_pressure: OperationalContextItem
+    fatigue: OperationalContextItem
+    travel: OperationalContextItem
+    weather: OperationalContextItem
+    pitch: OperationalContextItem
+    ingested_at: datetime
+    cutoff_at: datetime
+    provenance_ref: str
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def from_dict(cls, raw: Mapping[str, Any]) -> "OperationalContextObservation":
+        if not isinstance(raw, Mapping):
+            raise TeamContextValidationError("OBSERVATION_NOT_OBJECT", "operational context observation must be an object")
+        forbidden = _find_forbidden(raw)
+        if forbidden:
+            raise TeamContextValidationError("MODEL_FIELD_FORBIDDEN", f"operational context cannot contain {forbidden}")
+        match_id = _uuid(raw.get("match_id"), "match_id")
+        team_id = _text(raw.get("team_id"), "team_id")
+        assert team_id is not None
+        side_raw = _text(raw.get("side"), "side")
+        assert side_raw is not None
+        try:
+            side = TeamSide(side_raw.upper())
+        except ValueError as exc:
+            raise TeamContextValidationError("SIDE_INVALID", "side must be HOME or AWAY") from exc
+        items = {category: OperationalContextItem.from_dict(category, raw.get(category)) for category in OPERATIONAL_CONTEXT_FIELDS}
+        ingested_at = _timestamp(raw.get("ingested_at"), "ingested_at")
+        cutoff_at = _timestamp(raw.get("cutoff_at"), "cutoff_at")
+        for item in items.values():
+            if item.retrieved_at > cutoff_at or item.source_timestamp > cutoff_at or item.effective_at > cutoff_at:
+                raise TeamContextValidationError("POST_CUTOFF_CONTEXT", f"{item.category} is not eligible at cutoff")
+            if item.state == "FUTURE_DATA":
+                raise TeamContextValidationError("FUTURE_DATA_NOT_ELIGIBLE", f"{item.category} is future data")
+        provenance_ref = _text(raw.get("provenance_ref", f"context://{match_id}/{team_id}/{side.value}"), "provenance_ref")
+        metadata = raw.get("metadata", {})
+        if not isinstance(metadata, Mapping):
+            raise TeamContextValidationError("METADATA_NOT_OBJECT", "metadata must be an object")
+        assert provenance_ref is not None
+        return cls(match_id, team_id, side, items["schedule_pressure"], items["fatigue"], items["travel"], items["weather"], items["pitch"], ingested_at, cutoff_at, provenance_ref, _freeze(metadata))
+
+    @property
+    def observation_id(self) -> str:
+        return _source_observation_id(self.to_dict())
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "match_id": self.match_id,
+            "team_id": self.team_id,
+            "side": self.side.value,
+            "schedule_pressure": self.schedule_pressure.to_dict(),
+            "fatigue": self.fatigue.to_dict(),
+            "travel": self.travel.to_dict(),
+            "weather": self.weather.to_dict(),
+            "pitch": self.pitch.to_dict(),
+            "ingested_at": _iso(self.ingested_at),
+            "cutoff_at": _iso(self.cutoff_at),
+            "provenance_ref": self.provenance_ref,
+            "metadata": _thaw(self.metadata),
+        }
+
+
+@dataclass(frozen=True)
+class OperationalContextRecord:
+    object_id: str
+    contract_version: str
+    match_id: str
+    team_id: str
+    side: TeamSide
+    schedule_pressure: OperationalContextItem
+    fatigue: OperationalContextItem
+    travel: OperationalContextItem
+    weather: OperationalContextItem
+    pitch: OperationalContextItem
+    ingested_at: str
+    cutoff_at: str
+    provenance_ref: str
+    provenance_hash: str
+    payload_hash: str
+    context_hash: str
+    observation_id: str
+    revision: int
+    supersedes_object_id: Optional[str]
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "object_id": self.object_id,
+            "contract_version": self.contract_version,
+            "match_id": self.match_id,
+            "team_id": self.team_id,
+            "side": self.side.value,
+            "schedule_pressure": self.schedule_pressure.to_dict(),
+            "fatigue": self.fatigue.to_dict(),
+            "travel": self.travel.to_dict(),
+            "weather": self.weather.to_dict(),
+            "pitch": self.pitch.to_dict(),
+            "ingested_at": self.ingested_at,
+            "cutoff_at": self.cutoff_at,
+            "provenance_ref": self.provenance_ref,
+            "provenance_hash": self.provenance_hash,
+            "payload_hash": self.payload_hash,
+            "context_hash": self.context_hash,
+            "observation_id": self.observation_id,
+            "revision": self.revision,
+            "supersedes_object_id": self.supersedes_object_id,
+            "metadata": _thaw(self.metadata),
+        }
+
+
+@dataclass(frozen=True)
+class OperationalContextResult:
+    accepted: bool
+    status: str
+    action: str
+    observation_id: str
+    record: Optional[OperationalContextRecord]
+    error_code: Optional[str] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {"accepted": self.accepted, "status": self.status, "action": self.action, "observation_id": self.observation_id, "record": self.record.to_dict() if self.record else None, "error_code": self.error_code}
+
+
+class OperationalContextStore:
+    """V4-035 time-bound operational context intake without feature derivation."""
+
+    def __init__(self, linker: TeamContextIdentityLinker):
+        if not isinstance(linker, TeamContextIdentityLinker):
+            raise TypeError("V4-035 requires a V4-032 TeamContextIdentityLinker")
+        self._linker = linker
+        self._observations: Dict[str, OperationalContextObservation] = {}
+        self._records: Dict[str, OperationalContextRecord] = {}
+        self._latest: Dict[Tuple[str, str, TeamSide], OperationalContextRecord] = {}
+        self._events: List[Mapping[str, Any]] = []
+
+    @property
+    def observations(self) -> Tuple[OperationalContextObservation, ...]:
+        return tuple(self._observations.values())
+
+    @property
+    def records(self) -> Tuple[OperationalContextRecord, ...]:
+        return tuple(self._records.values())
+
+    @property
+    def events(self) -> Tuple[Mapping[str, Any], ...]:
+        return tuple(self._events)
+
+    def ingest(self, raw: Union[OperationalContextObservation, Mapping[str, Any]]) -> OperationalContextResult:
+        try:
+            observation = raw if isinstance(raw, OperationalContextObservation) else OperationalContextObservation.from_dict(raw)
+        except (TeamContextValidationError, IdentityValidationError) as exc:
+            observation_id = _source_observation_id(raw if isinstance(raw, Mapping) else raw.to_dict())
+            code = getattr(exc, "code", "VALIDATION_FAILED")
+            self._events.append({"action": "BLOCKED_VALIDATION", "observation_id": observation_id, "error_code": code})
+            return OperationalContextResult(False, "BLOCKED", code, observation_id, None, code)
+        observation_id = observation.observation_id
+        if observation_id in self._observations:
+            existing = next((record for record in self._records.values() if record.observation_id == observation_id), None)
+            self._events.append({"action": "DUPLICATE_NOOP", "observation_id": observation_id, "object_id": existing.object_id if existing else None})
+            return OperationalContextResult(True, "AVAILABLE", "DUPLICATE_NOOP", observation_id, existing)
+        identity = self._linker.get_identity(observation.match_id)
+        if identity is None or identity.status != "AVAILABLE" or identity.identity_resolution_state != "RESOLVED":
+            return self._blocked(observation, "MATCH_IDENTITY_NOT_RESOLVED")
+        expected_team = identity.home_team_id if observation.side == TeamSide.HOME else identity.away_team_id
+        if observation.team_id != expected_team:
+            return self._blocked(observation, "TEAM_ID_SIDE_CONFLICT")
+        link = self._linker.latest(observation.match_id, observation.team_id, observation.side)
+        if link is None:
+            return self._blocked(observation, "TEAM_CONTEXT_LINK_NOT_FOUND")
+        kickoff = datetime.fromisoformat(identity.kickoff_at)
+        if not observation.cutoff_at < kickoff:
+            return self._blocked(observation, "CUTOFF_NOT_BEFORE_KICKOFF")
+        self._observations[observation_id] = observation
+        key = (observation.match_id, observation.team_id, observation.side)
+        predecessor = self._latest.get(key)
+        revision = predecessor.revision + 1 if predecessor else 1
+        items = [getattr(observation, category) for category in OPERATIONAL_CONTEXT_FIELDS]
+        provenance_hash = sha256_json({"provenance_ref": observation.provenance_ref, "items": [{"source": item.source, "source_reference": item.source_reference, "source_timestamp": _iso(item.source_timestamp), "retrieved_at": _iso(item.retrieved_at), "effective_at": _iso(item.effective_at), "expires_at": _iso(item.expires_at), "provenance_hash": item.provenance_hash} for item in items]})
+        payload_hash = sha256_json({"match_id": observation.match_id, "team_id": observation.team_id, "side": observation.side.value, "items": [item.to_dict() for item in items]})
+        context_hash = sha256_json({"identity_link_object_id": link.object_id, "payload_hash": payload_hash, "cutoff_at": _iso(observation.cutoff_at), "provenance_hash": provenance_hash})
+        object_id = str(uuid.uuid5(TEAM_CONTEXT_ID_NAMESPACE, f"operational|{observation.match_id}|{observation.team_id}|{observation.side.value}|{observation_id}"))
+        record = OperationalContextRecord(object_id, CONTRACT_VERSION, observation.match_id, observation.team_id, observation.side, observation.schedule_pressure, observation.fatigue, observation.travel, observation.weather, observation.pitch, _iso(observation.ingested_at), _iso(observation.cutoff_at), observation.provenance_ref, provenance_hash, payload_hash, context_hash, observation_id, revision, predecessor.object_id if predecessor else None, MappingProxyType({"identity_link_object_id": link.object_id, "append_only_boundary": "V4-035 local context ledger; feature/market intelligence deferred", "default_fallback": False}))
+        self._records[object_id] = record
+        self._latest[key] = record
+        self._events.append({"action": "ROOT_CREATED" if predecessor is None else "REVISION_APPENDED", "observation_id": observation_id, "object_id": object_id, "supersedes_object_id": predecessor.object_id if predecessor else None})
+        return OperationalContextResult(True, "AVAILABLE", "ROOT_CREATED" if predecessor is None else "REVISION_APPENDED", observation_id, record)
+
+    def _blocked(self, observation: OperationalContextObservation, code: str) -> OperationalContextResult:
+        observation_id = observation.observation_id
+        self._observations.setdefault(observation_id, observation)
+        self._events.append({"action": "BLOCKED_CONTEXT", "observation_id": observation_id, "match_id": observation.match_id, "team_id": observation.team_id, "side": observation.side.value, "error_code": code})
+        return OperationalContextResult(False, "BLOCKED", code, observation_id, None, code)

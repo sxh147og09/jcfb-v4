@@ -1,0 +1,70 @@
+{
+  "base": {
+    "match_id": "00000000-0000-5000-8000-000000000001",
+    "team_id": "team-home-001",
+    "side": "HOME",
+    "schedule_pressure": {
+      "state": "AVAILABLE",
+      "payload": {"matches_in_window": 3, "window_days": 10},
+      "basis_refs": ["evidence://schedule/001"],
+      "source": "Example schedule feed",
+      "source_reference": "ref://schedule/001",
+      "source_timestamp": "2026-09-04T07:00:00+08:00",
+      "retrieved_at": "2026-09-04T09:00:00+08:00",
+      "effective_at": "2026-09-04T07:00:00+08:00",
+      "expires_at": "2026-09-04T19:00:00+08:00",
+      "provenance_ref": "ref://schedule/001"
+    },
+    "fatigue": {
+      "state": "UNKNOWN",
+      "basis_refs": [],
+      "reason": "No granular workload source is available",
+      "source": "Example workload feed",
+      "source_reference": "ref://fatigue/001",
+      "source_timestamp": "2026-09-04T07:00:00+08:00",
+      "retrieved_at": "2026-09-04T09:00:00+08:00",
+      "effective_at": "2026-09-04T07:00:00+08:00",
+      "expires_at": "2026-09-04T19:00:00+08:00",
+      "provenance_ref": "ref://fatigue/001"
+    },
+    "travel": {
+      "state": "AVAILABLE",
+      "payload": {"travel_class": "LOW", "distance_km": 120},
+      "basis_refs": ["evidence://travel/001"],
+      "source": "Example travel record",
+      "source_reference": "ref://travel/001",
+      "source_timestamp": "2026-09-04T07:15:00+08:00",
+      "retrieved_at": "2026-09-04T09:00:00+08:00",
+      "effective_at": "2026-09-04T07:15:00+08:00",
+      "expires_at": "2026-09-04T19:00:00+08:00",
+      "provenance_ref": "ref://travel/001"
+    },
+    "weather": {
+      "state": "UNAVAILABLE",
+      "basis_refs": ["evidence://weather/001"],
+      "reason": "Accepted source has no venue forecast",
+      "source": "Example weather feed",
+      "source_reference": "ref://weather/001",
+      "source_timestamp": "2026-09-04T07:30:00+08:00",
+      "retrieved_at": "2026-09-04T09:00:00+08:00",
+      "effective_at": "2026-09-04T07:30:00+08:00",
+      "expires_at": "2026-09-04T19:00:00+08:00",
+      "provenance_ref": "ref://weather/001"
+    },
+    "pitch": {
+      "state": "NOT_VERIFIED",
+      "basis_refs": ["evidence://pitch/001"],
+      "reason": "Pitch report is not verified",
+      "source": "Example venue report",
+      "source_reference": "ref://pitch/001",
+      "source_timestamp": "2026-09-04T07:45:00+08:00",
+      "retrieved_at": "2026-09-04T09:00:00+08:00",
+      "effective_at": "2026-09-04T07:45:00+08:00",
+      "expires_at": "2026-09-04T19:00:00+08:00",
+      "provenance_ref": "ref://pitch/001"
+    },
+    "ingested_at": "2026-09-04T09:01:00+08:00",
+    "cutoff_at": "2026-09-04T18:00:00+08:00",
+    "provenance_ref": "ref://operational/20260904/001/home/001"
+  }
+}
