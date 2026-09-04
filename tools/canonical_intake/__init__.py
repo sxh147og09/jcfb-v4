@@ -121,17 +121,12 @@ from .team_context import (
 )
 from .evidence_graph import (
     ContradictionState,
-    ConflictResolutionRecord,
     EvidenceConfidence,
     EvidenceGraphStore,
     EvidenceGraphValidationError,
     EvidenceIntakeResult,
     EvidenceItem,
     EvidenceRelation,
-    FreshnessState,
-    SourceConflictResolver,
-    SourceQualityAssessment,
-    SourceQualityBand,
     VerificationState,
 )
 
@@ -233,17 +228,12 @@ __all__ = [
     "TeamSide",
     "TypedFactCollection",
     "ContradictionState",
-    "ConflictResolutionRecord",
     "EvidenceConfidence",
     "EvidenceGraphStore",
     "EvidenceGraphValidationError",
     "EvidenceIntakeResult",
     "EvidenceItem",
     "EvidenceRelation",
-    "FreshnessState",
-    "SourceConflictResolver",
-    "SourceQualityAssessment",
-    "SourceQualityBand",
     "VerificationState",
     "resolve_f_drive_output_path",
 ]
