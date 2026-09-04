@@ -1,0 +1,37 @@
+{
+  "task_id": "V4-042",
+  "task_name": "Attack, Defence & Home Advantage Model 1.0",
+  "workspace": "F:/Projects/jcfb-v4",
+  "contracts": {
+    "historical_input": "historical-statistical-input@1.0.0",
+    "feature_bundle": "feature-bundle@2.0.0",
+    "statistical_config": "statistical-strength-config@1.0.0",
+    "config_hash": "sha256:eadb7e85c4e170ba922f4a5a404e1f28861951c954bb8c1c06ea90ad3ceaf653"
+  },
+  "targeted_tests": {"passed": 2, "total": 2, "status": "PASS"},
+  "full_repository_tests": {"passed": 370, "total": 370, "status": "PASS"},
+  "acceptance": {
+    "attack_strength_typed": "PASS",
+    "defence_strength_typed": "PASS",
+    "attack_defence_minimum_five": "PASS",
+    "home_advantage_minimum_twenty": "PASS",
+    "canonical_home_side_only": "PASS",
+    "neutral_not_applicable": "PASS",
+    "unknown_venue_blocked": "PASS",
+    "no_default_or_hidden_home_value": "PASS",
+    "cutoff_valid_historical_inputs": "PASS",
+    "prediction_score_boundary": "PASS",
+    "deterministic_output_hash": "PASS",
+    "v3333_isolation": "PASS",
+    "f_drive_policy": "PASS"
+  },
+  "boundaries": {
+    "production_supabase_reads_writes": "NO",
+    "migration_added_applied": "NO",
+    "prediction_score_engine": "NOT_EXECUTED",
+    "frozen_input": "NOT_EXECUTED",
+    "batch_12": "NOT_ENTERED"
+  },
+  "dod": "PASS",
+  "status": "COMPLETE"
+}
