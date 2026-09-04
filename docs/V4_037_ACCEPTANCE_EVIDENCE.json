@@ -1,0 +1,44 @@
+{
+  "task_id": "V4-037",
+  "task_name": "Source Quality, Expiry & Conflict Resolver 1.0",
+  "workspace": "F:/Projects/jcfb-v4",
+  "branch": "main",
+  "targeted_tests": {
+    "command": "python -m unittest tests.unit.test_v4_037_source_conflict -v",
+    "passed": 5,
+    "total": 5,
+    "status": "PASS"
+  },
+  "full_repository_tests": {
+    "command": "python -m unittest discover -s tests -p \"test_*.py\"",
+    "passed": 328,
+    "total": 328,
+    "status": "PASS"
+  },
+  "acceptance": {
+    "source_quality_is_explicit": "PASS",
+    "quality_revision_is_append_only": "PASS",
+    "expiry_and_stale_semantics": "PASS",
+    "unknown_time_fails_closed": "PASS",
+    "future_data_and_cutoff_fail_closed": "PASS",
+    "conflicting_claims_all_retained": "PASS",
+    "silent_source_selection_rejected": "PASS",
+    "documented_resolution_record": "PASS",
+    "source_confidence_prediction_confidence_isolation": "PASS",
+    "f_drive_policy": "PASS",
+    "v3333_isolation": "PASS"
+  },
+  "boundaries": {
+    "production_supabase_reads_writes": "NO",
+    "migration_added_applied": "NO",
+    "feature_prediction_score_engine": "NOT_EXECUTED",
+    "batch_10": "NOT_ENTERED"
+  },
+  "commits": [
+    "3e17014 fix(v4-036): restore evidence graph task boundary",
+    "551add4 feat(v4-037): add source conflict resolver"
+  ],
+  "working_tree": "CLEAN_AFTER_ACCEPTANCE_DOC_COMMIT",
+  "dod": "PASS",
+  "status": "COMPLETE"
+}
