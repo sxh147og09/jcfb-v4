@@ -43,6 +43,8 @@ REQUIRED_FILES = (
     "docs/V4_CANONICAL_MIGRATION_HASH.md",
     "docs/V4_RUNTIME_EXECUTOR.md",
     "docs/V4_PRE_BATCH_04_LOCAL_EXECUTION.md",
+    "docs/JCFB_V4_0009_PGCRYPTO_SCHEMA_FORWARD_FIX_REPORT.md",
+    "tests/migration_harness/test_pgcrypto_schema_forward_fix.py",
     "config/migration_harness/v4_production_target_identity.json",
     "config/migration_harness/v4_production_target_identity.schema.json",
     "tools/migration_harness/production_target.py",
@@ -122,6 +124,45 @@ def _service_role_forward_fix_audit(repo_root: Path) -> Dict[str, Any]:
         "candidate_reserved_role_mutation": any(RESERVED_ROLE_MUTATION_RE.search(text) for text in candidate_texts),
         "generator_reserved_role_mutation": RESERVED_ROLE_MUTATION_RE.search(generator.read_text(encoding="utf-8") if generator.is_file() else "") is not None,
         "local_bootstrap_separate": bootstrap.is_file() and "JCFB V4 DISPOSABLE LOCAL ROLE BOOTSTRAP" in bootstrap_text,
+    }
+
+
+def _pgcrypto_schema_forward_fix_audit(repo_root: Path) -> Dict[str, Any]:
+    """Audit the 0009 digest forward-fix and disposable extension placement."""
+
+    issues: List[str] = []
+    candidate_0009 = repo_root / "database/migrations/v4_runtime_candidate/0009_seed_and_smoke.sql"
+    bootstrap = repo_root / "database/runtime/0000_service_role.sql"
+    candidate_text = candidate_0009.read_text(encoding="utf-8") if candidate_0009.is_file() else ""
+    bootstrap_text = bootstrap.read_text(encoding="utf-8") if bootstrap.is_file() else ""
+    if not candidate_0009.is_file():
+        issues.append("MISSING:database/migrations/v4_runtime_candidate/0009_seed_and_smoke.sql")
+    for marker in (
+        "Forward-fix 1.0",
+        "PGCRYPTO_SCHEMA_MISMATCH",
+        "SQLSTATE 42883",
+        "CREATE OR REPLACE FUNCTION governance.append_audit_event()",
+        "extensions.digest(",
+        "production_resume_scope: 0009 ONLY",
+    ):
+        if marker not in candidate_text:
+            issues.append(f"0009_MISSING:{marker}")
+    if "public.digest(" in candidate_text:
+        issues.append("0009_PUBLIC_DIGEST_REFERENCE")
+    for marker in (
+        "CREATE SCHEMA IF NOT EXISTS extensions",
+        "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions",
+        "ALTER DATABASE %I SET search_path = \"$user\", public, extensions",
+        "GRANT USAGE ON SCHEMA extensions TO service_role",
+    ):
+        if marker not in bootstrap_text:
+            issues.append(f"BOOTSTRAP_MISSING:{marker}")
+    return {
+        "status": "PASS" if not issues else "FAIL",
+        "issues": issues,
+        "candidate_0009_explicit_extensions_digest": "extensions.digest(" in candidate_text and "public.digest(" not in candidate_text,
+        "bootstrap_pgcrypto_schema": "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions" in bootstrap_text,
+        "bootstrap_extensions_usage_granted_to_service_role": "GRANT USAGE ON SCHEMA extensions TO service_role" in bootstrap_text,
     }
 
 
@@ -242,6 +283,7 @@ def run_remediation_self_audit(repo_root: Path) -> Dict[str, Any]:
     cross_doc = run_production_target_cross_doc_consistency(root)
     preflight = build_supabase_preflight_report(root, binding.get("production_target"))
     service_role = _service_role_forward_fix_audit(root)
+    pgcrypto = _pgcrypto_schema_forward_fix_audit(root)
     checks = {
         "required_files": _required_files(root),
         "canonical_hashes": {
@@ -276,6 +318,7 @@ def run_remediation_self_audit(repo_root: Path) -> Dict[str, Any]:
         "production_target_cross_doc_consistency": cross_doc,
         "supabase_preflight_plan": preflight,
         "service_role_forward_fix": service_role,
+        "pgcrypto_schema_forward_fix": pgcrypto,
         "secret_scan": secrets,
         "git": git,
     }
@@ -291,6 +334,7 @@ def run_remediation_self_audit(repo_root: Path) -> Dict[str, Any]:
         checks["production_target_cross_doc_consistency"].get("status") == "PASS",
         checks["supabase_preflight_plan"].get("status") == "PASS",
         checks["service_role_forward_fix"].get("status") == "PASS",
+        checks["pgcrypto_schema_forward_fix"].get("status") == "PASS",
         secrets.get("status") == "PASS",
     )
     return {

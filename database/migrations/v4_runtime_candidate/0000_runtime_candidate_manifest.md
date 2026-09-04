@@ -20,7 +20,7 @@
 | 0006 | database/migrations/v4_runtime_candidate/0006_governance_audit.sql | database/migrations/v4/0006_governance_audit.sql @ cd7ebfd51352 | migration@20260901.005 | 1ba475b2585f3f25d4984f82e2c7e8a94c815f47ff91a2d4728707adc9ee71b8 | sha256:85386b242f6f1ef8fabd1aa09b07f1b4c3082b589b0c6c320bb9705883a5a52d |
 | 0007 | database/migrations/v4_runtime_candidate/0007_security_rls.sql | database/migrations/v4/0007_security_rls.sql @ cd7ebfd51352 | migration@20260901.006 | 367c0b4d52d84e60bca6c1bee797a45f5fc7ea769cf21508efacf9cb2a6978c3 | sha256:952ae622fba16f831389b8bfd3b0bfa05b6278f721c41c768532f37d6178a4b0 |
 | 0008 | database/migrations/v4_runtime_candidate/0008_views_projections.sql | database/migrations/v4/0008_views_projections.sql @ cd7ebfd51352 | migration@20260901.007 | dc19e7a76839b2b2fd594f3c871d8340b4231fd4d9defb9dc6eb7f592012ca48 | sha256:f2ddf1fd7a69e38bc224c5e19c8db08824d76a6f566eae9fa722a52c644584e3 |
-| 0009 | database/migrations/v4_runtime_candidate/0009_seed_and_smoke.sql | database/migrations/v4/0009_seed_and_smoke.sql @ cd7ebfd51352 | migration@20260901.008 | fa121ad345087e870339ae143ed94d3f90edc39dd594e0723c918bf176ed95ce | sha256:b02ab037d2ad065a06e87512baec1caa9567303404881ecb9a86bb3426cdac05 |
+| 0009 | database/migrations/v4_runtime_candidate/0009_seed_and_smoke.sql | database/migrations/v4/0009_seed_and_smoke.sql @ cd7ebfd51352 | migration@20260901.008 | 57e0e3a0bf7b0d0e83f671c8caded6ffb0544568cdc81c9328cddfbcf1583132 | sha256:e4c96f434a8359b54e397f209e565b94162a01037c1cf91e9bd96bf0b948bc20 |
 
 ## Candidate execution contract
 
@@ -41,22 +41,27 @@ migration@20260901.001
 
 The graph is intentionally serial. No candidate is independently executable on a clean target.
 
-## 0008 forward-fix provenance
+## 0009 pgcrypto schema forward-fix provenance
 
-- Forward-fix identity: `JCFB V4 0008 VIEWS/PROJECTIONS FORWARD-FIX 1.0`
-- Base HEAD reviewed: `2d6f6fca463883a455eb038e1f55bff9778826b1`
-- Partial apply state: `PARTIAL`; the committed prefix is `0001` through `0007`.
-- Failed candidate: `0008`; the transaction rolled back after the existing
-  `public.v_public_predictions` V3.3.3 view rejected the attempted create.
-- Existing `public.v_public_predictions` compatibility: `INCOMPATIBLE`.
-- Other known baseline collisions: `public.v_public_latest_odds`,
-  `public.v_current_frozen_predictions`, `public.v_canonical_latest_update`,
-  and `public.v_tier_a_progress`.
-- V4 strategy: `V4_RENAME` using the `public.v4_` name prefix. No V3.3.3
-  public view is dropped, replaced, renamed, or permission-modified.
-- 0001–0007 canonical hashes: frozen. 0008 and dependent 0009 hashes are
-  regenerated after this candidate repair.
-- Resume scope after independent approval: `0008 THEN 0009 ONLY`.
+- Forward-fix identity: `JCFB V4 0009 PGCRYPTO SCHEMA FORWARD-FIX 1.0`
+- Base HEAD reviewed: `aa59693621db29ea815f76da1afbcbb8928ee0f3`.
+- Partial apply state: `0009_FAILED_ROLLED_BACK`; Production has the exact
+  applied prefix `0001` through `0008`, and 0009 has no history row.
+- Failed candidate: `0009`; the first audited registry seed insert raised
+  `SQLSTATE 42883` (`PGCRYPTO_SCHEMA_MISMATCH`) because the frozen 0007 audit
+  function called `public.digest(...)` while Production exposes pgcrypto under
+  `extensions`.
+- Forward repair: 0009 replaces the still-unapplied
+  `governance.append_audit_event()` body and calls `extensions.digest(...)`
+  explicitly. No `public.digest` wrapper is created and the extension is not
+  moved.
+- 0001–0008 canonical hashes and SQL bytes: frozen. Only 0009 and its embedded
+  registry seed value are regenerated after this repair.
+- Disposable bootstrap: pgcrypto is installed in `extensions` before 0001 and
+  the database search path includes that schema so frozen UUID defaults resolve
+  as they do on the production-like target.
+- Resume scope after independent approval: `0009 ONLY`.
+- New explicit resume approval: `YES`.
 
 ## Review boundary
 

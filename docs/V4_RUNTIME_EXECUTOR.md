@@ -136,9 +136,10 @@ The result vocabulary is deliberately closed:
 only when SQLSTATE and the contract's stable constraint/error marker match;
 an arbitrary SQL error is never accepted as evidence.
 
-The disposable container's first-time initialization provisions only a local
-compatibility `service_role` with the platform-equivalent `BYPASSRLS`
-capability. Candidate 0001 verifies that the role already exists with
+The disposable container's first-time initialization installs `pgcrypto` in
+the provider-compatible `extensions` schema and adds that schema to the
+database search path. It also provisions a local compatibility `service_role`
+with the platform-equivalent `BYPASSRLS` capability. Candidate 0001 verifies that the role already exists with
 `rolbypassrls = true` and fails closed for a missing or false capability; it
 does not create or alter the provider-owned role. It also fails closed if
 `anon` or `authenticated` has `rolbypassrls = true`. The runtime case adapter
@@ -159,7 +160,20 @@ The runtime schema audit is read-only after migration apply. It checks the
 candidate tables, functions, fixed `search_path` for security-definer
 functions, security-invoker views, RLS, critical triggers, constraints,
 production uniqueness indexes, no-future-leakage triggers, and the canonical
-latest-business-timestamp view.
+latest-business-timestamp view. Runtime preflight/postflight also records the
+installed pgcrypto schema, and `SMOKE-16` is promoted to an explicit
+`audit_trigger_execution` gate proving the repaired audit trigger path runs.
+
+The disposable executor has one narrowly scoped bootstrap accommodation for
+the immutable 0001-0008 prefix. Frozen 0007 installs the history audit trigger
+with its historical `public.digest` body, so a provider-like `extensions`
+installation would otherwise fail while the executor records the 0007 and
+0008 history rows, before 0009 can apply the forward fix. For `DISPOSABLE_LOCAL`
+only, the executor disables only `v4_schema_history_audit_event` around each of
+those two bookkeeping inserts and re-enables it before the migration
+transaction commits. It does not rewrite or rerun 0001-0008, move pgcrypto,
+create a `public.digest` wrapper, or bypass the trigger for 0009 or runtime
+data; `SMOKE-16` remains the executable audit-trigger gate.
 
 ## Reports and gate
 

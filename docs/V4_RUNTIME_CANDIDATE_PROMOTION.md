@@ -36,7 +36,9 @@ The candidates resolve only decisions needed to make a fresh disposable
 PostgreSQL target executable and testable:
 
 1. The session timezone is UTC.
-2. pgcrypto is installed in the local public namespace.
+2. pgcrypto is installed in the provider-compatible local `extensions`
+   namespace. The disposable database search path includes `extensions` so
+   frozen UUID defaults remain resolvable.
 3. The disposable container bootstrap provisions a local compatibility
    `service_role` without a password. Candidate 0001 verifies that the role
    exists with `rolbypassrls = true`, verifies that `anon` and `authenticated`
@@ -52,6 +54,11 @@ PostgreSQL target executable and testable:
    append-only mutation, public projection, audit, triggers, and RLS.
 7. Candidate 0009 contains registry/acceptance metadata only; it does not seed
    business matches, odds, predictions, or results.
+8. The 0009 pgcrypto schema forward-fix replaces the still-unapplied
+   `governance.append_audit_event()` body before its first audited seed insert
+   and calls `extensions.digest(...)` explicitly. It records the prior
+   `SQLSTATE 42883` / `PGCRYPTO_SCHEMA_MISMATCH` provenance and is resumable only
+   as `0009 ONLY` after new explicit approval.
 
 Production extension availability, role mapping and ownership, namespace
 coexistence, security_invoker support, audit hash profile, release executor,

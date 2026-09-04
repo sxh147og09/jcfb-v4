@@ -33,6 +33,25 @@ The machine-readable source of truth is
 `0000_runtime_candidate_manifest.json`. The Markdown manifest is the review
 surface and must agree with the JSON manifest and the SQL headers.
 
+## 0009 pgcrypto schema forward-fix
+
+The subsequent `JCFB V4 0009 PGCRYPTO SCHEMA FORWARD-FIX 1.0` repairs only the
+unapplied 0009 path. The failed attempt raised `SQLSTATE 42883` with provenance
+`PGCRYPTO_SCHEMA_MISMATCH`: the frozen 0007 audit trigger function resolved
+`public.digest(...)`, while Supabase Production provides pgcrypto as
+`extensions.digest(...)`. Candidate 0009 now replaces that function body before
+its first audited registry seed insert and calls `extensions.digest(...)`
+explicitly. It creates no `public.digest` wrapper and does not move the
+extension. The disposable bootstrap mirrors the Production placement in
+`extensions` and adds that schema to the disposable database search path so the
+frozen UUID defaults remain executable.
+
+Candidates 0001 through 0008 retain their applied SQL bytes and canonical
+hashes. Only 0009 and its dependent registry-seed value are regenerated. The
+Production resume scope is `0009 ONLY` and requires a new explicit approval.
+See `docs/JCFB_V4_0009_PGCRYPTO_SCHEMA_FORWARD_FIX_REPORT.md` for the failure
+provenance and runtime evidence.
+
 ## Canonical input
 
 Each digest is serialized as `sha256:<64 lowercase hexadecimal characters>`.

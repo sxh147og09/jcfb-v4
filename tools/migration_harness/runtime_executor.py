@@ -292,6 +292,11 @@ def _runtime_summary_lines(report: Mapping[str, Any]) -> List[str]:
     enforcement_passed = _safe_report_count(
         report.get("enforcement_passed", runtime.get("passed_enforcement", 0)), 0
     )
+    preflight = report.get("preflight") if isinstance(report.get("preflight"), Mapping) else {}
+    catalog_summary = preflight.get("catalog_summary") if isinstance(preflight.get("catalog_summary"), Mapping) else {}
+    extensions = catalog_summary.get("extensions") if isinstance(catalog_summary.get("extensions"), list) else []
+    pgcrypto = next((item for item in extensions if isinstance(item, Mapping) and item.get("name") == "pgcrypto"), {})
+    audit = runtime.get("audit_trigger_execution") if isinstance(runtime.get("audit_trigger_execution"), Mapping) else {}
     return [
         f"PRE_BATCH_04_RUNTIME_MODE={report.get('mode', 'UNKNOWN')}",
         f"PRE_BATCH_04_RUNTIME_STATUS={report.get('status', 'UNKNOWN')}",
@@ -300,6 +305,8 @@ def _runtime_summary_lines(report: Mapping[str, Any]) -> List[str]:
         f"PRE_BATCH_04_ENFORCEMENT_EXECUTABLE_HANDLERS={_safe_report_count(wiring.get('enforcement_executable_handler_count'), 0)}/{enforcement_count}",
         f"PRE_BATCH_04_SMOKE_PASSED={smoke_passed}/{smoke_count}",
         f"PRE_BATCH_04_ENFORCEMENT_PASSED={enforcement_passed}/{enforcement_count}",
+        f"PRE_BATCH_04_PGCRYPTO_SCHEMA={pgcrypto.get('schema_name', 'UNKNOWN')}",
+        f"PRE_BATCH_04_AUDIT_TRIGGER_EXECUTION={audit.get('status', 'UNKNOWN')}",
         f"PRE_BATCH_04_STAGING_READINESS={readiness.get('status', 'UNKNOWN')}",
     ]
 
@@ -819,7 +826,11 @@ class RuntimeExecutor:
                 return finalize(_blocking_report(plan, error_code))
             plan["execution_boundary"]["apply_reached"] = True
             phase = "SQL_APPLY"
-            apply_report = self._apply_candidates(connection, plan["hash_verification"])
+            apply_report = self._apply_candidates(
+                connection,
+                plan["hash_verification"],
+                target=target,
+            )
             plan["migrations"] = apply_report
             plan["migration_apply_path"] = {
                 "status": "PASS" if apply_report.get("status") in {"PASS", "ALREADY_APPLIED"} else "FAIL",
@@ -828,6 +839,7 @@ class RuntimeExecutor:
                 "validated_history_count": apply_report.get("applied_count", 0) + apply_report.get("skipped_count", 0),
                 "history_recording": "PASS" if apply_report.get("status") in {"PASS", "ALREADY_APPLIED"} else "FAIL",
                 "transactional_ddl_and_history": True,
+                "history_trigger_policy": apply_report.get("history_trigger_policy", "NORMAL"),
             }
             if apply_report.get("status") not in {"PASS", "ALREADY_APPLIED"}:
                 error_code = str(apply_report.get("error_code") or SQL_APPLY_FAILED)
@@ -903,6 +915,19 @@ class RuntimeExecutor:
             runtime = plan.get("runtime_validation", {})
             schema = plan.get("schema_checks", {})
             gates = runtime.get("runtime_gates", {}) if isinstance(runtime, Mapping) else {}
+            preflight_summary = plan.get("preflight", {}).get("catalog_summary", {}) if isinstance(plan.get("preflight", {}), Mapping) else {}
+            runtime_extensions = preflight_summary.get("extensions", []) if isinstance(preflight_summary, Mapping) else []
+            pgcrypto_schema_pass = any(
+                isinstance(item, Mapping)
+                and item.get("name") == "pgcrypto"
+                and item.get("installed") is True
+                and item.get("schema_name") == "extensions"
+                for item in runtime_extensions
+            )
+            audit_trigger_pass = (
+                isinstance(runtime.get("audit_trigger_execution"), Mapping)
+                and runtime.get("audit_trigger_execution", {}).get("status") == "PASS"
+            )
             history_ok = (
                 apply_report.get("status") in {"PASS", "ALREADY_APPLIED"}
                 and int(plan.get("postflight", {}).get("history_row_count", 0)) == 9
@@ -911,6 +936,8 @@ class RuntimeExecutor:
                 "migrations_9_of_9": history_ok,
                 "smoke_20_of_20": runtime.get("passed_smoke", 0) == 20 and runtime.get("smoke_count") == 20,
                 "enforcement_15_of_15": runtime.get("passed_enforcement", 0) == 15 and runtime.get("enforcement_count") == 15,
+                "pgcrypto_extensions_schema": pgcrypto_schema_pass,
+                "audit_trigger_execution": audit_trigger_pass,
                 "schema_constraints": schema.get("constraints", {}).get("status") == "PASS",
                 "rls": schema.get("rls", {}).get("status") == "PASS",
                 "triggers": schema.get("triggers", {}).get("status") == "PASS",
@@ -979,7 +1006,15 @@ class RuntimeExecutor:
         version = catalog.get("database_version", {})
         add("RPF-02", version.get("compatibility_approved") is True, "PostgreSQL 16 compatibility is proven", major=version.get("major"))
         extensions = catalog.get("extensions", [])
-        add("RPF-03", any(item.get("name") == "pgcrypto" and item.get("approved") is True for item in extensions), "pgcrypto is installed or available for the candidate bootstrap")
+        pgcrypto = next((item for item in extensions if item.get("name") == "pgcrypto"), {})
+        add(
+            "RPF-03",
+            pgcrypto.get("approved") is True
+            and pgcrypto.get("installed") is True
+            and pgcrypto.get("schema_name") == "extensions",
+            "pgcrypto is installed in the provider-compatible extensions schema",
+            extension=pgcrypto,
+        )
         add("RPF-04", not catalog.get("v333_objects"), "No V3.3.3-like object is present in the local target")
         history = catalog.get("migration_history", {})
         history_rows = self._read_history_rows(connection)
@@ -998,6 +1033,7 @@ class RuntimeExecutor:
             "catalog_summary": {
                 "database_version": catalog.get("database_version"),
                 "target_identity": catalog.get("target_identity"),
+                "extensions": catalog.get("extensions", []),
                 "namespace_count": len(catalog.get("namespaces", [])),
                 "object_count": len(catalog.get("objects", [])),
                 "v333_object_count": len(catalog.get("v333_objects", [])),
@@ -1015,6 +1051,8 @@ class RuntimeExecutor:
         history = catalog.get("migration_history", {})
         history_rows = self._read_history_rows(connection)
         history_prefix, history_issue = self._validated_history_prefix(history_rows, candidates)
+        extensions = catalog.get("extensions", [])
+        pgcrypto = next((item for item in extensions if item.get("name") == "pgcrypto"), {})
         checks = [
             {
                 "id": "RPO-01",
@@ -1038,15 +1076,32 @@ class RuntimeExecutor:
                 "reason": "All nine immutable migration history rows match the candidate manifest",
                 "details": {"history_issue": history_issue},
             },
+            {
+                "id": "RPO-04",
+                "status": "PASS"
+                if pgcrypto.get("name") == "pgcrypto"
+                and pgcrypto.get("installed") is True
+                and pgcrypto.get("schema_name") == "extensions"
+                else "BLOCKED",
+                "reason": "pgcrypto is installed in the provider-compatible extensions schema",
+                "details": {"extension": pgcrypto},
+            },
         ]
         return {
             "status": "PASS" if all(check["status"] == "PASS" for check in checks) else "BLOCKED",
             "checks": checks,
             "history_row_count": len(history.get("rows", [])),
             "v333_object_count": len(catalog.get("v333_objects", [])),
+            "extensions": catalog.get("extensions", []),
         }
 
-    def _apply_candidates(self, connection: Any, hash_report: Mapping[str, Any]) -> Dict[str, Any]:
+    def _apply_candidates(
+        self,
+        connection: Any,
+        hash_report: Mapping[str, Any],
+        *,
+        target: Optional[Mapping[str, Any]] = None,
+    ) -> Dict[str, Any]:
         manifest = load_candidate_manifest(self.repo_root)
         candidates = [item for item in manifest.get("candidates", []) if isinstance(item, Mapping)]
         if hash_report.get("status") != "PASS" or len(candidates) != 9:
@@ -1065,6 +1120,7 @@ class RuntimeExecutor:
             return {"status": "ALREADY_APPLIED", "applied_count": 0, "records": [], "skipped_count": prefix}
 
         records: List[Dict[str, Any]] = []
+        history_trigger_policy = self._history_trigger_policy(target)
         previous_hash = candidates[prefix - 1].get("canonical_migration_hash") if prefix else None
         for entry in candidates[prefix:]:
             started_at = self.clock()
@@ -1097,6 +1153,11 @@ class RuntimeExecutor:
                     success=True,
                     partial_state=False,
                     notes="runtime candidate applied by explicit local/staging executor",
+                    history_trigger_policy=(
+                        history_trigger_policy
+                        if entry.get("sequence") in {7, 8}
+                        else "NORMAL"
+                    ),
                 )
                 self._commit(connection)
                 sql_applied = True
@@ -1121,8 +1182,34 @@ class RuntimeExecutor:
                     "applied_count": sum(item["status"] == "APPLIED" for item in records),
                     "records": records,
                     "error_code": SQL_APPLY_FAILED,
+                    "history_trigger_policy": history_trigger_policy,
                 }
-        return {"status": "PASS", "applied_count": len(records), "records": records, "skipped_count": prefix}
+        return {
+            "status": "PASS",
+            "applied_count": len(records),
+            "records": records,
+            "skipped_count": prefix,
+            "history_trigger_policy": history_trigger_policy,
+        }
+
+    @staticmethod
+    def _history_trigger_policy(target: Optional[Mapping[str, Any]]) -> str:
+        """Return the disposable-only policy for the frozen 0007/0008 prefix.
+
+        Candidate 0007 is immutable and installs the history audit trigger with
+        the pre-fix ``public.digest`` reference.  On a provider-like target
+        whose pgcrypto lives in ``extensions``, that trigger would abort the
+        executor's bookkeeping insert for 0007 (and 0008) before candidate
+        0009 can apply its forward fix.  The executor therefore disables only
+        that one history-audit trigger around those two bookkeeping inserts;
+        the trigger is re-enabled before the surrounding migration transaction
+        commits.  No migration SQL, function, extension, or public wrapper is
+        changed, and 0009 history plus runtime audit events execute normally.
+        """
+
+        if isinstance(target, Mapping) and target.get("environment") == "DISPOSABLE_LOCAL":
+            return "DISPOSABLE_LOCAL_FROZEN_PREFIX_HISTORY_AUDIT_TRIGGER_BYPASS"
+        return "NORMAL"
 
     @staticmethod
     def _execute_sql(connection: Any, sql_text: str) -> None:
@@ -1234,6 +1321,7 @@ class RuntimeExecutor:
         success: bool,
         partial_state: bool,
         notes: str,
+        history_trigger_policy: str = "NORMAL",
     ) -> None:
         sql = (
             "INSERT INTO governance.schema_migrations "
@@ -1260,9 +1348,35 @@ class RuntimeExecutor:
             json.dumps({"executor_contract": RUNTIME_EXECUTOR_CONTRACT_VERSION}, separators=(",", ":")),
         )
         cursor = connection.cursor()
+        history_trigger_disabled = False
         try:
+            if history_trigger_policy == "DISPOSABLE_LOCAL_FROZEN_PREFIX_HISTORY_AUDIT_TRIGGER_BYPASS":
+                # Frozen candidate 0007's audit function still contains the
+                # historical public.digest reference.  On the disposable
+                # provider-like bootstrap pgcrypto is deliberately installed
+                # in extensions, so the history trigger would fail before
+                # 0009 can replace that function body.  Disable only this
+                # bookkeeping trigger for the one INSERT, then restore it in
+                # the same transaction.  This does not alter migration SQL,
+                # extension placement, or create a public wrapper.
+                cursor.execute(
+                    "ALTER TABLE governance.schema_migrations "
+                    "DISABLE TRIGGER v4_schema_history_audit_event"
+                )
+                history_trigger_disabled = True
             cursor.execute(sql, values)
         finally:
+            if history_trigger_disabled:
+                try:
+                    cursor.execute(
+                        "ALTER TABLE governance.schema_migrations "
+                        "ENABLE TRIGGER v4_schema_history_audit_event"
+                    )
+                except Exception:
+                    # The caller will roll the transaction back.  Avoid
+                    # masking the original INSERT error with a secondary
+                    # trigger-state error.
+                    pass
             close = getattr(cursor, "close", None)
             if callable(close):
                 close()
@@ -1310,6 +1424,10 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
     migrations = report.get("migrations", {})
     schema = report.get("schema_checks", {})
     readiness = report.get("staging_readiness", {})
+    preflight = report.get("preflight") if isinstance(report.get("preflight"), Mapping) else {}
+    catalog_summary = preflight.get("catalog_summary") if isinstance(preflight.get("catalog_summary"), Mapping) else {}
+    extensions = catalog_summary.get("extensions") if isinstance(catalog_summary.get("extensions"), list) else []
+    pgcrypto = next((item for item in extensions if isinstance(item, Mapping) and item.get("name") == "pgcrypto"), {})
     taxonomy = report.get("failure_taxonomy", {})
     error = report.get("error", {})
     runtime_summary_lines = report.get("runtime_summary_lines")
@@ -1329,6 +1447,8 @@ def render_runtime_report_markdown(report: Mapping[str, Any]) -> str:
         f"- repo_root: `{_markdown_scalar(report.get('repo_root'))}`",
         f"- smoke_passed: `{report.get('smoke_passed', runtime.get('passed_smoke', 0))}/{runtime.get('smoke_count', 20)}`",
         f"- enforcement_passed: `{report.get('enforcement_passed', runtime.get('passed_enforcement', 0))}/{runtime.get('enforcement_count', 15)}`",
+        f"- pgcrypto_schema: `{_markdown_scalar(pgcrypto.get('schema_name'), 'UNKNOWN')}`",
+        f"- audit_trigger_execution: `{_markdown_scalar((runtime.get('audit_trigger_execution') or {}).get('status'), 'NOT_RUN') if isinstance(runtime.get('audit_trigger_execution'), Mapping) else 'NOT_RUN'}`",
         "",
         f"- Status: `{report.get('status')}`",
         f"- runtime_status: `{report.get('runtime_status', report.get('status'))}`",

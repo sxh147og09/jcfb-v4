@@ -257,6 +257,24 @@ applied history row manually. A clean prefix that is not yet complete is also
   transactionally reversible empty-target operation; it never rewrites history
   and never affects V3.3.3.
 
+### 6.1 Current 0009 pgcrypto incident and forward-fix
+
+Production currently has V4 `0001` through `0008` applied. The first `0009`
+`v4_seed_and_smoke` attempt failed and rolled back before writing migration
+history. Its first audited registry seed insert raised `SQLSTATE 42883`
+(`PGCRYPTO_SCHEMA_MISMATCH`) because the frozen 0007
+`governance.append_audit_event()` body called `public.digest(...)`; the
+provider-owned Supabase extension is installed in `extensions`, where
+`extensions.digest(bytea,text)` and `extensions.digest(text,text)` exist.
+
+The repaired 0009 candidate replaces that still-unapplied function body before
+any audited 0009 insert and calls `extensions.digest(...)` explicitly. It does
+not create a `public.digest` wrapper, move the extension, edit 0001–0008, repair
+history by hand, or write Production during remediation. The only permitted
+future Production resume scope is `0009 ONLY`, and a new explicit resume
+approval is required. See
+`docs/JCFB_V4_0009_PGCRYPTO_SCHEMA_FORWARD_FIX_REPORT.md`.
+
 ## 7. Post-apply mandatory verification plan
 
 The following fourteen checks are required after any future approved apply;
@@ -316,14 +334,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\validate_v4_supabase
 python -m tools.migration_harness --repo-root . production-readiness
 ```
 
-The canonical hash command is verification-only in this task:
+The canonical hash command is verification-only after the forward-fix package is
+generated. During this repair, the explicit `--write` maintenance operation was
+used only to regenerate 0009 and its embedded registry-seed value; 0001–0008
+were verified unchanged:
 
 ```powershell
 python -m tools.migration_harness --repo-root . canonical-hash
 ```
 
-No `--write` hash maintenance operation is part of this completion. The
-Production target binding validator remains required and must continue to
+The Production target binding validator remains required and must continue to
 pass.
 
 ## 10. Completion disposition

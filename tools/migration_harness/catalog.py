@@ -101,16 +101,20 @@ def collect_runtime_catalog(
     installed_extensions = _rows(
         connection,
         "installed_extensions",
-        "SELECT extname AS name, extversion AS version FROM pg_catalog.pg_extension ORDER BY extname",
+        "SELECT e.extname AS name, e.extversion AS version, n.nspname AS schema_name, true AS installed "
+        "FROM pg_catalog.pg_extension e "
+        "JOIN pg_catalog.pg_namespace n ON n.oid = e.extnamespace "
+        "ORDER BY e.extname",
     )
     available_extensions = _rows(
         connection,
         "available_extensions",
-        "SELECT name, default_version AS version FROM pg_catalog.pg_available_extensions WHERE name = 'pgcrypto'",
+        "SELECT name, default_version AS version, NULL::text AS schema_name, false AS installed "
+        "FROM pg_catalog.pg_available_extensions WHERE name = 'pgcrypto'",
     )
-    # Keep both installed and available rows.  On a fresh PostgreSQL image the
-    # installed list normally contains only plpgsql, while pgcrypto is present
-    # in the available-extension catalog until migration 0001 installs it.
+    # Keep both installed and available rows while preserving the installed
+    # row first. The schema placement is part of the runtime evidence because
+    # Supabase installs pgcrypto under the provider-owned `extensions` schema.
     extension_rows = [*installed_extensions, *available_extensions]
     seen_extensions = set()
     safe_extensions: List[Dict[str, Any]] = []
@@ -121,7 +125,15 @@ def collect_runtime_catalog(
         if name in seen_extensions:
             continue
         seen_extensions.add(name)
-        safe_extensions.append({"name": name, "version": str(row.get("version")), "approved": name == "pgcrypto"})
+        safe_extensions.append(
+            {
+                "name": name,
+                "version": str(row.get("version")),
+                "schema_name": str(row.get("schema_name")) if row.get("schema_name") else None,
+                "installed": bool(row.get("installed")),
+                "approved": name == "pgcrypto",
+            }
+        )
     extension_rows = safe_extensions
 
     namespace_rows = _rows(

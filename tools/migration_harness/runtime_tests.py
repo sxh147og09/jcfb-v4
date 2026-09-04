@@ -470,12 +470,13 @@ def run_runtime_cases(repo_root: Path, adapter: RuntimeCaseAdapter) -> Dict[str,
         "tier_a_same_frozen_input": gate(("SMOKE-11", "SMOKE-12", "NEG-15", "NEG-16")),
         "production_uniqueness": gate(("SMOKE-14", "NEG-18")),
         "rls_role_boundary": gate(("SMOKE-15", "SMOKE-16", "NEG-20")),
+        "audit_trigger_execution": gate(("SMOKE-16",)),
         "canonical_latest_update": gate(("SMOKE-18", "NEG-21")),
         "market_semantics": gate(("SMOKE-03", "SMOKE-04", "SMOKE-05", "NEG-08", "NEG-09", "NEG-10", "NEG-22")),
     }
     runtime_gates["hard_gates"] = "PASS" if all(
         runtime_gates[name] == "PASS"
-        for name in ("no_future_leakage", "frozen_immutability", "tier_a_same_frozen_input", "production_uniqueness", "rls_role_boundary", "canonical_latest_update")
+        for name in ("no_future_leakage", "frozen_immutability", "tier_a_same_frozen_input", "production_uniqueness", "rls_role_boundary", "audit_trigger_execution", "canonical_latest_update")
     ) else ("BLOCKED" if any(runtime_gates[name] == "BLOCKED" for name in runtime_gates) else "FAIL")
     cleanup_status = str(cleanup.get("status"))
     cleanup_gate = "PASS" if cleanup_status in {"PASS", "RECOVERED", "NOT_RUN"} else "BLOCKED"
@@ -506,6 +507,16 @@ def run_runtime_cases(repo_root: Path, adapter: RuntimeCaseAdapter) -> Dict[str,
         "smoke_count": len(bindings["smoke"]),
         "enforcement_count": len(bindings["enforcement"]),
         "expected_reject_matching": expected_reject_matching,
+        "audit_trigger_execution": {
+            "status": runtime_gates["audit_trigger_execution"],
+            "case_id": "SMOKE-16",
+            "required_verification": ["audit_row", "trigger_path"],
+            "evidence": (
+                by_id.get("SMOKE-16", {}).get("verification", {})
+                if isinstance(by_id.get("SMOKE-16"), Mapping)
+                else {}
+            ),
+        },
         "runtime_gates": runtime_gates,
         "case_status_counts": {
             status: sum(1 for result in results if result.get("status") == status)

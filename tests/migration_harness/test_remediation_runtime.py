@@ -420,6 +420,45 @@ class RemediationRuntimeTests(unittest.TestCase):
         self.assertEqual(0, connection.commit_count)
         self.assertEqual(1, len(connection.cursor_value.executed))
 
+    def test_disposable_frozen_prefix_history_policy_only_toggles_audit_trigger(self):
+        connection = _Connection()
+        RuntimeExecutor(Path(self.repo_root))._record_history(
+            connection,
+            {
+                "migration_id": "migration@20260901.007",
+                "sequence": 7,
+                "name": "fixture",
+                "migration_version": "migration@20260901.007",
+                "schema_contract_version": "v4-database-schema@1.0.0",
+                "canonical_migration_hash": "sha256:" + "a" * 64,
+            },
+            applied_at="2026-09-01T00:00:00+08:00",
+            applied_by="test",
+            previous_hash=None,
+            chain_hash="sha256:" + "b" * 64,
+            status="APPLIED",
+            success=True,
+            partial_state=False,
+            notes="fixture",
+            history_trigger_policy="DISPOSABLE_LOCAL_FROZEN_PREFIX_HISTORY_AUDIT_TRIGGER_BYPASS",
+        )
+        executed = [item[0] for item in connection.cursor_value.executed]
+        self.assertEqual(3, len(executed))
+        self.assertIn("DISABLE TRIGGER v4_schema_history_audit_event", executed[0])
+        self.assertIn("INSERT INTO governance.schema_migrations", executed[1])
+        self.assertIn("ENABLE TRIGGER v4_schema_history_audit_event", executed[2])
+
+    def test_disposable_history_policy_is_not_used_for_other_targets(self):
+        self.assertEqual(
+            "DISPOSABLE_LOCAL_FROZEN_PREFIX_HISTORY_AUDIT_TRIGGER_BYPASS",
+            RuntimeExecutor._history_trigger_policy(default_disposable_target()),
+        )
+        self.assertEqual(
+            "NORMAL",
+            RuntimeExecutor._history_trigger_policy({"environment": "STAGING"}),
+        )
+        self.assertEqual("NORMAL", RuntimeExecutor._history_trigger_policy(None))
+
     def test_runtime_case_wiring_is_exactly_twenty_plus_fifteen(self):
         report = validate_runtime_case_wiring(self.repo_root)
         self.assertEqual("PASS", report["status"])

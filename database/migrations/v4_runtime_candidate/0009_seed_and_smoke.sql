@@ -6,7 +6,7 @@
 -- source_design_file: database/migrations/v4/0009_seed_and_smoke.sql
 -- source_design_commit: cd7ebfd5135275536c2d54ca1ecd980bb386dcfa
 -- candidate_manifest: database/migrations/v4_runtime_candidate/0000_runtime_candidate_manifest.md
--- canonical_migration_hash: sha256:b02ab037d2ad065a06e87512baec1caa9567303404881ecb9a86bb3426cdac05
+-- canonical_migration_hash: sha256:e4c96f434a8359b54e397f209e565b94162a01037c1cf91e9bd96bf0b948bc20
 -- production_status: PRODUCTION_REVIEW_REQUIRED
 --
 -- migration_id: migration@20260901.009
@@ -16,14 +16,103 @@
 -- depends_on: [migration@20260901.008]
 -- schema_contract_version: v4-database-schema@1.0.0
 -- authored_at: 2026-09-01T00:00:00+08:00
--- migration_hash: sha256:b02ab037d2ad065a06e87512baec1caa9567303404881ecb9a86bb3426cdac05
+-- migration_hash: sha256:e4c96f434a8359b54e397f209e565b94162a01037c1cf91e9bd96bf0b948bc20
 -- status: DRAFT
 -- This candidate records only DRAFT acceptance metadata; it inserts no match, prediction,
 -- or result rows. It is executable only on the disposable target named by the manifest.
+--
+-- Forward-fix 1.0: the prior 0009 attempt rolled back on SQLSTATE 42883 because
+-- the existing 0007 audit trigger function resolved the public.digest symbol, while
+-- the provider-owned pgcrypto extension is installed in extensions. This
+-- candidate replaces that still-unapplied function body before any 0009 audited
+-- insert. It uses extensions.digest(...) explicitly, creates no public.digest
+-- wrapper, and does not move the extension.
+-- failure_provenance: PGCRYPTO_SCHEMA_MISMATCH / SQLSTATE 42883
+-- production_resume_scope: 0009 ONLY
+-- requires_new_explicit_resume_approval: YES
 
 BEGIN;
 
 SET LOCAL TIME ZONE 'UTC';
+
+-- The function was created by the frozen 0007 candidate. Replacing its body is
+-- the forward-only repair for the failed, unapplied 0009 path; existing trigger
+-- bindings remain intact and V3.3.3 objects are not touched.
+CREATE OR REPLACE FUNCTION governance.append_audit_event()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = pg_catalog, governance
+AS $$
+DECLARE
+  new_data jsonb := to_jsonb(NEW);
+  old_data jsonb := CASE WHEN TG_OP = 'INSERT' THEN '{}'::jsonb ELSE to_jsonb(OLD) END;
+  actor_value text := COALESCE(NULLIF(current_setting('v4.actor', true), ''), current_user);
+  actor_role_value text := COALESCE(NULLIF(current_setting('v4.actor_role', true), ''), current_role);
+  entity_type_value text := TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME;
+  entity_id_value text;
+  match_id_value uuid;
+  previous_hash text;
+  happened_at_value timestamptz := clock_timestamp();
+  audit_metadata jsonb := jsonb_build_object(
+    'trigger_name', TG_NAME,
+    'candidate_manifest', 'v4-runtime-candidate-manifest@1.0.0',
+    'hash_profile', 'disposable-runtime-audit-envelope@1.0'
+  );
+  audit_envelope jsonb;
+  entry_hash_value text;
+BEGIN
+  entity_id_value := COALESCE(
+    new_data->>'model_version_id', new_data->>'engine_version_id',
+    new_data->>'match_id', new_data->>'evidence_id',
+    new_data->>'team_context_id', new_data->>'evidence_bundle_id',
+    new_data->>'frozen_input_id', new_data->>'feature_bundle_id',
+    new_data->>'engine_run_id', new_data->>'prediction_id',
+    new_data->>'frozen_prediction_id', new_data->>'result_id',
+    new_data->>'review_id', new_data->>'tier_a_sample_id',
+    new_data->>'promotion_review_id', new_data->>'calibration_record_id',
+    new_data->>'release_pointer_event_id', new_data->>'incident_id',
+    new_data->>'registry_record_id', new_data->>'migration_id',
+    new_data->>'hash_algorithm', new_data->>'acceptance_snapshot_id',
+    new_data->>'projection_id', 'unidentified'
+  );
+  IF (new_data->>'match_id') ~ '^[0-9a-fA-F-]{36}$' THEN
+    match_id_value := (new_data->>'match_id')::uuid;
+  END IF;
+  PERFORM pg_advisory_xact_lock(pg_catalog.hashtext(entity_type_value || ':' || entity_id_value));
+  SELECT entry_hash INTO previous_hash
+    FROM governance.audit_logs
+   WHERE entity_type = entity_type_value AND entity_id = entity_id_value
+   ORDER BY happened_at DESC, audit_log_id DESC
+   LIMIT 1
+   FOR UPDATE;
+  audit_envelope := jsonb_build_object(
+    'actor', actor_value,
+    'actor_role', actor_role_value,
+    'action', TG_OP,
+    'entity_type', entity_type_value,
+    'entity_id', entity_id_value,
+    'match_id', match_id_value,
+    'before_state', old_data,
+    'after_state', new_data,
+    'metadata', audit_metadata,
+    'happened_at', happened_at_value
+  );
+  entry_hash_value := 'sha256:' || encode(
+    extensions.digest(convert_to(audit_envelope::text, 'UTF8'), 'sha256'), 'hex'
+  );
+  INSERT INTO governance.audit_logs (
+    actor, actor_role, action, entity_type, entity_id, match_id,
+    before_state, after_state, metadata, happened_at, prev_hash, entry_hash,
+    hash_algorithm, hash_profile
+  ) VALUES (
+    actor_value, actor_role_value, TG_OP, entity_type_value, entity_id_value, match_id_value,
+    old_data, new_data, audit_metadata, happened_at_value, previous_hash, entry_hash_value,
+    'SHA-256', 'disposable-runtime-audit-envelope@1.0'
+  );
+  RETURN NEW;
+END;
+$$;
 
 -- Acceptance snapshots are append-only evidence for the deployment acceptance gate.
 CREATE TABLE governance.deployment_acceptance_snapshots (
@@ -91,7 +180,7 @@ VALUES
   ('migration@20260901.006', 6, 'v4-governance-audit', 'migration@20260901.006', ARRAY['migration@20260901.005'], 'v4-database-schema@1.0.0', '2026-09-01T00:00:00+08:00', 'sha256:85386b242f6f1ef8fabd1aa09b07f1b4c3082b589b0c6c320bb9705883a5a52d', 'DRAFT', false, 'disposable-candidate manifest entry'),
   ('migration@20260901.007', 7, 'v4-security-rls', 'migration@20260901.007', ARRAY['migration@20260901.006'], 'v4-database-schema@1.0.0', '2026-09-01T00:00:00+08:00', 'sha256:952ae622fba16f831389b8bfd3b0bfa05b6278f721c41c768532f37d6178a4b0', 'DRAFT', false, 'disposable-candidate manifest entry'),
   ('migration@20260901.008', 8, 'v4-views-projections', 'migration@20260901.008', ARRAY['migration@20260901.007'], 'v4-database-schema@1.0.0', '2026-09-01T00:00:00+08:00', 'sha256:f2ddf1fd7a69e38bc224c5e19c8db08824d76a6f566eae9fa722a52c644584e3', 'DRAFT', false, 'disposable-candidate manifest entry'),
-  ('migration@20260901.009', 9, 'v4-seed-smoke', 'migration@20260901.009', ARRAY['migration@20260901.008'], 'v4-database-schema@1.0.0', '2026-09-01T00:00:00+08:00', 'sha256:b02ab037d2ad065a06e87512baec1caa9567303404881ecb9a86bb3426cdac05', 'DRAFT', false, 'disposable-candidate manifest entry');
+  ('migration@20260901.009', 9, 'v4-seed-smoke', 'migration@20260901.009', ARRAY['migration@20260901.008'], 'v4-database-schema@1.0.0', '2026-09-01T00:00:00+08:00', 'sha256:e4c96f434a8359b54e397f209e565b94162a01037c1cf91e9bd96bf0b948bc20', 'DRAFT', false, 'disposable-candidate manifest entry');
 
 -- Runtime smoke harness functions/scripts are specified in
 -- docs/V4_MIGRATION_SMOKE_TESTS.md. They must run on a disposable target,
