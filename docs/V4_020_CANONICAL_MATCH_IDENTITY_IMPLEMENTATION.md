@@ -2,7 +2,7 @@
 
 Workspace: `F:\Projects\jcfb-v4`
 
-Branch/HEAD: `main` / recorded in the acceptance commit
+Branch/HEAD: `main` / `fa76bb35f7077c0fe597f1489f7fbd9712be205b`
 
 Implementation Status: `COMPLETE` for the V4-020 local, no-write implementation boundary
 
@@ -44,7 +44,7 @@ Production/Supabase Writes: `NO`
 
 Migration Applied: `NO`
 
-Git Commit: recorded after acceptance verification
+Git Commit: `fa76bb35f7077c0fe597f1489f7fbd9712be205b` (`feat(v4-020): add canonical match identity intake`)
 
 Working Tree: `CLEAN` after the acceptance commit
 
