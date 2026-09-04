@@ -21,7 +21,7 @@ This document defines ownership and prohibited cross-layer behavior. A component
 | Evidence Graph 1.0 | Claims and source evidence | Claim lifecycle, evidence hash, contradiction state | Admit an unsupported claim as trusted context |
 | Market Intelligence Engine 4.0 | Official and external odds time series | Market features, movement, heat, divergence, trap-risk signal | Assert bookmaker intent, fabricate market facts, or override football facts |
 | Feature Representation Layer 4.0 | Validated data and intelligence outputs | Versioned feature bundles and `feature_snapshot_hash` | Read raw unversioned input directly into an engine or rewrite source facts |
-| Statistical Strength Model 4.0 | Versioned features and pre-match facts | Strength, attack, defence, home advantage, and opponent-adjusted signals | Make a large rating change from a short streak alone or read results from the future |
+| Statistical Strength Model 4.0 | Versioned Feature Bundle plus target-scoped `historical-statistical-input@1.0.0` and other eligible pre-match facts | Strength, attack, defence, home advantage, and opponent-adjusted signals | Make a large rating change from a short streak alone, read target postmatch data, or read results from the future |
 | Outcome Engine 4.0 | Its declared feature bundle and config | Home / Draw / Away probabilities | Mechanically determine all other markets or edit another engine's output |
 | Handicap Engine 4.0 | Its declared feature bundle and config | Handicap outcome and goal-difference distribution | Copy Outcome output as its own judgment without an independent run |
 | Goals Engine 4.0 | Its declared feature bundle and config | 0–7+ goal distribution and bands | Treat score selection as its distribution or read post-match goals |

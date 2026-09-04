@@ -24,7 +24,7 @@ The arrows describe controlled references, not unrestricted writes. A downstream
 | Logical namespace | Source of truth | May be read by | May append | Must never contain |
 |---|---|---|---|---|
 | `core` / canonical facts | attributed objective source intake | governed V4 roles and review | Fact/odds/context/evidence intake authority | model probabilities, recommendation, confidence grade, V3.3.3 data |
-| `model` / runtime | Frozen Input, Feature Bundle, Engine Run, Prediction and Frozen Prediction contracts | role-scoped runtime and controlled review | role-owned runtime path and Freeze Gate | postmatch facts in a pre-match input, cross-role overwrite, secrets |
+| `model` / runtime | Frozen Input, Feature Bundle, historical statistical input, Engine Run, Prediction and Frozen Prediction contracts | role-scoped runtime and controlled review | role-owned runtime path and Freeze Gate | target-match postmatch facts in a pre-match input, cross-role overwrite, secrets |
 | `evaluation` / postmatch | verified Result and immutable pre-match outputs | review/promotion/calibration services | controlled review/promotion service | mutable KPI history, Experiment-as-Tier-A, pre-match write-back |
 | `governance` / registry/audit | version/release registry, active pointers, incidents, audit chain | authorized operators/services | registry, incident, and audit authorities | hidden state transitions, unaudited promotion, deleted history |
 | `public` / read projection | canonical Production publication gate | Public Web and approved read clients | Production publication gate only | Shadow/Experiment IDs, internal payloads, secrets, debug traces |
@@ -87,6 +87,8 @@ canonical match identity
 The Feature Bundle is the handoff from accepted shared facts/evidence to typed model-private representation. Frozen Input is the downstream handoff to a formal run: it is immutable after `FROZEN`, carries `frozen_input_hash`, and retains the exact Feature Bundle identity and `feature_snapshot_hash`. A role-specific `input_hash` is permitted to differ because it includes role and component identity.
 
 No runtime path may bypass Frozen Input to read a raw screenshot, unversioned JSON, post-cutoff source, or another role's output. If exact lineage cannot be resolved, the path is `BLOCKED`.
+
+BATCH-11 may persist a target-scoped historical statistical input manifest containing references to completed source-match observations. The manifest does not copy a postmatch fact into the target match, and every referenced observation must satisfy `historical-statistical-input@1.0.0`. The target match's own postmatch result/statistics remain prohibited.
 
 ## 6. Persistence versus projection
 

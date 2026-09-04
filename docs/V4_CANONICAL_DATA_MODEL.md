@@ -161,6 +161,8 @@ AND future_information_leakage = FALSE
 AND all referenced hashes resolve
 ```
 
+For a BATCH-11 historical statistical input, `no forbidden result/event/postmatch reference exists` means no postmatch artifact from the target match is selected. A prior source-match result/statistic may be referenced only through `historical-statistical-input@1.0.0`, with source/target separation, exact visible revision/hash, and target-cutoff availability proven.
+
 If any term cannot be proven, the consuming artifact is `BLOCKED`/`INVALID`, Tier A eligibility is false, and the offending history remains append-only.
 
 ## 7. Logical uniqueness and key rules

@@ -110,7 +110,7 @@ For a same-match Forward A/B:
 
 ## 7. Result and review lifecycle
 
-Official Result arrives only after the match and is stored under `evaluation`. Its default scope is `REGULATION_90_PLUS_STOPPAGE`; extra time and penalties remain auditable but do not silently change evaluation.
+Official Result arrives only after the match and is stored under `evaluation`. Its default scope is `REGULATION_90_PLUS_STOPPAGE`; extra time and penalties remain auditable but do not silently change evaluation. It remains postmatch for its source match; a later target may reference the exact completed observation only through `historical-statistical-input@1.0.0` and its target-cutoff gate.
 
 Two independent postmatch review paths exist:
 
@@ -162,6 +162,12 @@ At minimum, append an Audit Log event for:
 
 `BLOCKED`, `INVALID`, `REJECTED`, `STALE`, `SUPERSEDED`, and `WITHDRAWN` do not erase data. A recovery path appends new identities and hashes, links the predecessor, and records why the old state remains ineligible. No process may restore eligibility by deleting the offending evidence.
 
-## 11. V3.3.3 boundary
+## 11. BATCH-11 historical statistical input lifecycle
+
+The historical statistical input is a target-scoped, append-only selection manifest over completed source-match facts/statistics. It must preserve source and target canonical identities, exact revisions/hashes, evidence, source/stat availability timestamps, scope policies, sample counts, and the target cutoff. `source_match_id = target_match_id`, unknown historical availability, post-cutoff corrections, future data, unresolved conflict, and missing identity are fail-closed.
+
+The manifest is a model-private input selection artifact, not a replacement canonical fact, not a postmatch review, and not a Frozen Input. It cannot read V3.3.3 artifacts and cannot feed Prediction or Score Engine output.
+
+## 12. V3.3.3 boundary
 
 The lifecycle is V4-only. V3.3.3 results, reviews, samples, parameters, and audit history do not enter any V4 stage. A separately authorized benchmark is not a V4 lifecycle input and cannot become Tier A or Promotion evidence.

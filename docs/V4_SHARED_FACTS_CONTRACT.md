@@ -164,7 +164,15 @@ Corrections to objective facts are append-only observations with source, timesta
 
 For team or tactical facts, the Evidence Graph additionally records claim, published time, retrieval time, valid-from, expiry, confidence, contradiction state, and evidence hash. Unsupported, expired, or contradictory claims cannot silently become valid shared facts.
 
-## 12. Contract acceptance
+## 12. BATCH-11 cross-match historical reuse amendment
+
+`POSTMATCH_ONLY` is relative to the match identified by the source fact. An Official Result or post-match statistic cannot enter that source match's own pre-match run and remains a postmatch objective fact for that source match.
+
+A later target match may use a prior source-match result or statistic only through `historical-statistical-input@1.0.0`. The target-scoped manifest must preserve `source_match_id`, `target_match_id`, source identity/hash, evidence, revision, source/stat availability time, and the target cutoff. It must prove `source_match_id != target_match_id` and `availability_at <= target_prediction_cutoff_at < target_kickoff_at`. The historical observation is not copied into the target match's ordinary pre-match fact record.
+
+The target match's own result, post-match xG, shots, possession, events, review, reconciliation, calibration, and error-attribution data remain ineligible for that target's pre-match features. Unknown, conflicting, corrected-after-cutoff, or unverifiable historical availability is `NOT_VERIFIED`/`BLOCKED`.
+
+## 13. Contract acceptance
 
 The contract is satisfied when:
 

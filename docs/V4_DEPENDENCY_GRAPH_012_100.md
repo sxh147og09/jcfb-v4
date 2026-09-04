@@ -111,6 +111,8 @@ BATCH-27, BATCH-28, BATCH-29, BATCH-30
 
 The fan-out groups are parallel development opportunities only after their upstream contracts are accepted. Fan-in tasks remain blocked until every required upstream edge is PASS.
 
+For BATCH-11, acceptance of the task edge from BATCH-10 also requires the approved `historical-statistical-input@1.0.0` contract and `statistical-strength-config@1.0.0`. These contract prerequisites do not add a graph node or change the BATCH-10 -> BATCH-11 -> later-batch topology.
+
 ## 5. Hard-gate cut points
 
 | Gate node | Task | Required transition evidence |

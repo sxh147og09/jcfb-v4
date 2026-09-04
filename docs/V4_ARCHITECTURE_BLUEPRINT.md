@@ -147,7 +147,7 @@ The `Five-Market Prediction Orchestrator 4.0` organizes SPF, RQSPF, Total Goals,
 
 ## 9. Statistical and score architecture
 
-`Statistical Strength Model 4.0` is planned to support Dynamic Team Rating, attack and defence ratings, home advantage, opponent adjustment, form decay, league strength, and promotion/relegation adjustment. It must be time-decay aware, sample-size aware, and opponent adjusted; a short winning streak is not by itself a sufficient reason for a large rating change.
+`Statistical Strength Model 4.0` is planned to support Dynamic Team Rating, attack and defence ratings, home advantage, opponent adjustment, form decay, league strength, and promotion/relegation adjustment. It must be time-decay aware, sample-size aware, and opponent adjusted; a short winning streak is not by itself a sufficient reason for a large rating change. Historical results and match statistics must enter through a target-scoped, cutoff-eligible historical input manifest; the target match's own postmatch data is never a pre-match input.
 
 `Score Engine 4.0` is a separate system with the following planned interfaces:
 

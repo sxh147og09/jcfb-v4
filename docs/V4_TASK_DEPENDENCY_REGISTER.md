@@ -152,6 +152,10 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 | BATCH-29 | BATCH-28 | V4-099 | Gate-bearing; separate approval required. |
 | BATCH-30 | BATCH-25, BATCH-26, BATCH-29 | V4-100 | Gate-bearing; separate approval required. |
 
+## BATCH-11 contract prerequisite
+
+The task DAG is unchanged. V4-041, V4-042, and V4-043 additionally require the approved target-scoped `historical-statistical-input@1.0.0` contract and `statistical-strength-config@1.0.0`. These are contract/config prerequisites, not new task nodes or dependency edges. Historical source-match results/statistics remain postmatch for their source match and enter a target run only through the cross-match eligibility predicate.
+
 ## 4. Cycle audit
 
 - Task nodes: `100`; task edges are derived from the upstream column above.

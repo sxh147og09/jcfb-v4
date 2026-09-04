@@ -41,3 +41,14 @@ All selected inputs must be eligible by `prediction_cutoff_at`, with cutoff befo
 
 Frozen Input is not implemented by this amendment; V4-076 remains the approved implementation task in BATCH-20.
 
+```json
+{
+  "contract_version": "frozen-input@2.0.0",
+  "feature_bundle_id": "019a0000-0000-7000-8000-000000000001",
+  "feature_snapshot_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "feature_bundle_contract_version": "feature-bundle@2.0.0",
+  "frozen_input_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "immutable": true,
+  "status": "FROZEN"
+}
+```

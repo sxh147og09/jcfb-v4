@@ -27,6 +27,7 @@ The contract registry is:
 | Evidence | `V4_EVIDENCE_CONTRACT.md` | Claim, provenance, verification, and contradiction lifecycle |
 | Frozen Input | `V4_FROZEN_INPUT_CONTRACT.md` | Immutable pre-match input boundary downstream of Feature Bundle |
 | Feature Bundle | `V4_FEATURE_BUNDLE_CONTRACT.md` (`feature-bundle@2.0.0`; v1 archived separately) | Versioned, reproducible feature representation from accepted upstream lineage |
+| Historical Statistical Input | `V4_STATISTICAL_HISTORICAL_INPUT_CONTRACT.md` (`historical-statistical-input@1.0.0`) | Target-scoped, cutoff-eligible selection of prior source-match observations for BATCH-11 |
 | Engine Output | `V4_ENGINE_OUTPUT_CONTRACT.md` | Common independent-engine envelope and payloads |
 | Prediction | `V4_PREDICTION_CONTRACT.md` | Independent five-market prediction and Frozen Prediction |
 | Result and Review | `V4_RESULT_REVIEW_CONTRACT.md` | Official result, model evaluation, and match explanation |
@@ -244,12 +245,18 @@ Each layer references only stable upstream identities and hashes:
 | Engine Output | Versioned feature/input interface | Hide role, hashes, disagreement, or errors |
 | Prediction | Independent engine outputs | Mechanically derive all five markets from SPF or equate probability to confidence |
 | Frozen Prediction | A passed Prediction and gate evidence | Update historical output |
-| Official Result | Official result authority after match | Become a pre-match input |
+| Official Result | Official result authority after match | Become the same match's pre-match input; a later target may reference it only through `historical-statistical-input@1.0.0` |
 | Postmatch Review | Frozen Prediction + Official Result for model evaluation; separate postmatch evidence for explanation | Write explanation back into model evaluation or prediction |
 
 The Production and Shadow A/B pair must use the same `frozen_input_hash`. Their `input_hash` may differ because role and engine identity are part of the engine input envelope. Experiment inputs may differ only when the experiment declares that it is not a Forward A/B pair.
 
-## 12. Baseline validation checklist
+## 12. BATCH-11 cross-match historical input clarification
+
+The existing `POSTMATCH_ONLY` and no-future rules remain unchanged for a source match. A historical Official Result or match statistic may be selected for a different later target match only by a target-scoped `historical-statistical-input@1.0.0` manifest. The manifest must prove canonical `source_match_id` and `target_match_id`, `source_match_id != target_match_id`, exact visible revision/hash, attributable evidence, and `availability_at <= target_prediction_cutoff_at < target_kickoff_at`.
+
+The target match's own result, post-match statistics, events, review, calibration, and error-attribution artifacts remain forbidden in that target's pre-match input. The historical manifest is a selection/lineage artifact, not a copied target fact and not an exception to the cutoff gate.
+
+## 13. Baseline validation checklist
 
 Every contract-specific validator must check, as applicable:
 
@@ -268,6 +275,6 @@ Every contract-specific validator must check, as applicable:
 
 The repeatable V4-008 repository check is `scripts/validate_v4_data_contracts.ps1`. This script validates documentation presence, required vocabulary, JSON example syntax, cross-file references, and protected-boundary checks; it does not run a model or touch a database.
 
-## 13. V3.3.3 and implementation boundary
+## 14. V3.3.3 and implementation boundary
 
 This contract is V4-only. V3.3.3 files, code, parameters, predictions, Frozen Predictions, reviews, Tier A records, and database history are protected and unchanged. A shared objective fact may be read by both model lines only through its canonical identity, timestamp, provenance, and hash. No V4 data contract authorizes migration, copying, renaming, or mutation of V3.3.3 artifacts.

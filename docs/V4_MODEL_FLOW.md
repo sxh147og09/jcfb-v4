@@ -88,7 +88,7 @@ An engine output must identify its role as `PRODUCTION`, `SHADOW`, or `EXPERIMEN
 
 ## 5. Statistical and intelligence inputs
 
-The Statistical Strength Model 4.0 plans Dynamic Team Rating, attack, defence, home advantage, opponent adjustment, form decay, league strength, and promotion/relegation adjustment. It must support time decay, sample-size awareness, and opponent adjustment. Recent results alone do not authorize a large rating change.
+The Statistical Strength Model 4.0 plans Dynamic Team Rating, attack, defence, home advantage, opponent adjustment, form decay, league strength, and promotion/relegation adjustment. It must support time decay, sample-size awareness, and opponent adjustment. Recent results alone do not authorize a large rating change. Historical results and match statistics are eligible only through the target-scoped `historical-statistical-input@1.0.0` contract; the target match's own result/statistics remain prohibited.
 
 Football Intelligence supplies context features, evidence conflicts, and risk flags. Market Intelligence supplies timestamped movement, direction, heat, divergence, liquidity/availability quality, and trap-risk signals. A trap signal is a risk input, not a fact about intent.
 

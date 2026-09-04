@@ -57,6 +57,10 @@ The baseline repository and reachable Git history contained no original V4-013�
 | BATCH-29 | V4-099 | Promotion Review -> Production Activation HARD_GATE<br>V4-099｜Production Activation & Rollback HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-28 | NO | YES | YES only for approved activation path | YES only after activation approval | Immutable Production revision; activation and rollback evidence | Explicit approval; one active Production revision; rollback target and audit event. | BATCH-30 |
 | BATCH-30 | V4-100 | Final Production Release / Canonical Pointer Switch / Closure HARD_GATE<br>V4-100｜Final Production Release, Canonical Pointer Switch & Post-Release Closure HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-25, BATCH-26, BATCH-29 | NO | YES | YES only for approved release/projection path | YES only after release approval | V4.0.0 release; public canonical pointer event; monitoring, first sample, closure | Explicit release approval; safe Production output only; pointer, rollback, monitoring, and closure evidence pass. | None |
 
+## BATCH-11 historical input governance prerequisite
+
+The BATCH-11 acceptance boundary includes `historical-statistical-input@1.0.0` and `statistical-strength-config@1.0.0`. A historical observation is eligible only when its source match differs from the target match and its exact revision/hash and availability time satisfy the target cutoff. This is a contract prerequisite, not an additional task or batch.
+
 ## 4. Ordered execution shape
 
 ```text

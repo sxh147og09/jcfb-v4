@@ -45,6 +45,8 @@ Use only when identity is valid, the input time is known, and the formal inequal
 
 Use for information that becomes available at or after kickoff, including match events, official result, post-match statistics, and post-match explanation. It may enter Review or Match Explanation but not a pre-match run.
 
+This rule is source-match-relative. A completed source match's postmatch observation may be selected for a different later target match only through the target-scoped historical eligibility contract in section 10. It remains `POSTMATCH_ONLY` for the source match and is never treated as the source match's pre-match fact.
+
 ### `UNKNOWN_TIME = BLOCKED`
 
 Use when the publication or observation time cannot be verified, timestamps conflict, timezone conversion is ambiguous, or the system cannot prove that information was available by the cutoff. The fact requires review and remains blocked until proven eligible.
@@ -100,3 +102,20 @@ The invalid run, source record, decision, and evidence remain available. Removin
 ## 9. Publication time boundary
 
 `canonical_latest_update_at` is derived only from the maximum real business-data update time in the read projection. Page build time, cache refresh time, and HTML generation time are not data timestamps and cannot be used to make a stale fact appear current.
+
+## 10. BATCH-11 cross-match historical eligibility
+
+For a historical observation from source match `S` to enter a target match `T` statistical input, the following must all hold:
+
+```text
+S != T
+source_match_identity is canonical
+target_match_identity is canonical
+source/statistic is attributable, verified, and hashable
+availability_at(S observation) <= target_prediction_cutoff_at(T)
+target_prediction_cutoff_at(T) < target_kickoff_at(T)
+revision/hash visible at target cutoff is reproducible
+no post-cutoff correction replaces the visible revision
+```
+
+`result_known_at` and `stat_available_at` are retained when applicable. `retrieved_at` and `ingested_at` never prove historical availability. The target's own Official Result or post-match statistic is always rejected from its pre-match feature generation, even when generation is replayed after kickoff.

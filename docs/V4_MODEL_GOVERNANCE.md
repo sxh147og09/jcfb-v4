@@ -51,6 +51,8 @@ The complete field-level identity envelope, role-scoped revisions, canonical has
 
 Changing an algorithm, feature, weight, selector, calibration method, simulation behavior, league profile, or threshold creates a new implementation/config/version identity. A parameter change cannot be hidden under an old version number.
 
+For BATCH-11, the historical sample policy, sparse-data behavior, rolling window, decay function, normalization, priors, league/season transition, and home/away treatment are model-affecting configuration. They must use the approved `statistical-strength-config@1.0.0` identity and its exact `config_hash`; changing any of them creates a new configuration/revision identity.
+
 ## 4. Roles
 
 ### `PRODUCTION`

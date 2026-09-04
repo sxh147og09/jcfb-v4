@@ -16,8 +16,8 @@ flowchart TD
     CF --> VAL["Validation"]
     VAL --> TG["Timestamp Gate"]
     TG --> PROV["Provenance + Hash"]
-    PROV --> FI["Frozen Input"]
-    FI --> FB["Feature Bundles"]
+    PROV --> FB["Feature Bundles"]
+    FB --> FI["Frozen Input"]
     FB --> ENG["Independent Engines"]
     ENG --> PRED["Prediction"]
     PRED --> FREEZE["Freeze"]
@@ -146,7 +146,7 @@ If a required bundle is incomplete, the result is `BLOCKED`, `UNKNOWN`, or `NOT_
 
 Independent engines produce raw outputs. The Five-Market Orchestrator, consistency checks, risk decision, and Final Prediction Gate operate before the prediction becomes formal. A successful gate produces a Frozen Prediction that references the Frozen Input and stores its own `output_hash` and `frozen_at`.
 
-After the match, Official Result Intake appends the result. Postmatch review compares the immutable frozen output against the result. It may attach post-match statistics as separately labeled evidence, but it must not mutate the Frozen Input or Frozen Prediction and must not make post-match data available to a later pre-match run.
+After the match, Official Result Intake appends the result. Postmatch review compares the immutable frozen output against the result. It may attach post-match statistics as separately labeled evidence, but it must not mutate the Frozen Input or Frozen Prediction and must not make post-match data for that target match available to its pre-match run. A later target match may consume a prior source match's completed result/statistic only through the target-scoped historical statistical input contract.
 
 ## 11. Role-specific data flow
 
@@ -160,13 +160,18 @@ Role labels are part of audit identity. A Shadow or Experiment result cannot be 
 
 ## 12. No-future-leakage invariants
 
-- Pre-match features cannot depend on Official Result.
-- Pre-match features cannot depend on post-kickoff events or statistics.
+- A target match's pre-match features cannot depend on that target's Official Result.
+- A target match's pre-match features cannot depend on that target's post-kickoff events or statistics.
+- A prior source match's postmatch observation may be used only when the cross-match historical eligibility predicate proves source/target separation and target-cutoff availability.
 - Future odds snapshots cannot be selected because they appear newer or more predictive.
 - `ingested_at` cannot substitute for source availability time.
 - Review and calibration data are append-only post-match artifacts.
 - Reproducibility checks use the original cutoff, fact snapshot, feature hash, and frozen input hash.
 
-## 13. Deferred implementation
+## 13. BATCH-11 historical statistical input handoff
+
+The Statistical Strength Feature Engines consume a target-scoped `historical-statistical-input@1.0.0` manifest in addition to the accepted Feature Bundle lineage. The manifest references exact prior source-match observations and revisions; it does not create a target fact, change the source lifecycle, or bypass the cutoff gate. Sparse, conflicted, stale, future, or correction-after-cutoff observations remain excluded or blocked with explicit quality state.
+
+## 14. Deferred implementation
 
 This flow defines interfaces and gates only. It does not choose a database, implement ingestion, write model code, select a Score Engine algorithm, run simulation, import historical data, or publish a web page.

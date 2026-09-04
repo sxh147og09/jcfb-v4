@@ -1,0 +1,51 @@
+{
+  "target": {
+    "match_id": "target-match-001",
+    "cutoff_at": "2026-09-04T11:00:00+00:00",
+    "kickoff_at": "2026-09-04T19:00:00+00:00"
+  },
+  "eligible_historical_result": {
+    "source_match_id": "source-match-001",
+    "source_match_identity_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "target_match_id": "target-match-001",
+    "availability_at": "2026-09-03T20:00:00+00:00",
+    "revision_visible_at_cutoff": 1,
+    "result_known_at": "2026-09-03T20:00:00+00:00",
+    "verification_state": "VERIFIED",
+    "quality_state": "AVAILABLE",
+    "content_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+  },
+  "future_observation": {
+    "source_match_id": "source-match-002",
+    "target_match_id": "target-match-001",
+    "availability_at": "2026-09-04T12:00:00+00:00",
+    "revision_visible_at_cutoff": 1,
+    "verification_state": "VERIFIED",
+    "quality_state": "AVAILABLE"
+  },
+  "target_self_result": {
+    "source_match_id": "target-match-001",
+    "target_match_id": "target-match-001",
+    "availability_at": "2026-09-03T20:00:00+00:00",
+    "revision_visible_at_cutoff": 1,
+    "verification_state": "VERIFIED",
+    "quality_state": "AVAILABLE"
+  },
+  "unknown_time": {
+    "source_match_id": "source-match-003",
+    "target_match_id": "target-match-001",
+    "availability_at": null,
+    "revision_visible_at_cutoff": null,
+    "verification_state": "NOT_VERIFIED",
+    "quality_state": "UNKNOWN"
+  },
+  "post_cutoff_correction": {
+    "source_match_id": "source-match-004",
+    "target_match_id": "target-match-001",
+    "availability_at": "2026-09-03T18:00:00+00:00",
+    "revision_visible_at_cutoff": 2,
+    "correction_published_at": "2026-09-04T12:00:00+00:00",
+    "verification_state": "VERIFIED",
+    "quality_state": "AVAILABLE"
+  }
+}

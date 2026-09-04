@@ -13,6 +13,7 @@ $contractFiles = @(
     'docs/V4_EVIDENCE_CONTRACT.md',
     'docs/V4_FROZEN_INPUT_CONTRACT.md',
     'docs/V4_FEATURE_BUNDLE_CONTRACT.md',
+    'docs/V4_STATISTICAL_HISTORICAL_INPUT_CONTRACT.md',
     'docs/V4_ENGINE_OUTPUT_CONTRACT.md',
     'docs/V4_PREDICTION_CONTRACT.md',
     'docs/V4_RESULT_REVIEW_CONTRACT.md'
@@ -24,8 +25,9 @@ $requiredTerms = @{
     'docs/V4_ODDS_SNAPSHOT_CONTRACT.md' = @('snapshot_id', 'snapshot_kind', 'captured_at', 'source_is_official', 'market_availability', 'market_unavailable_reason', 'spf', 'rqspf', 'total_goals', 'exact_score', 'half_full', 'EUROPEAN_1X2', 'ASIAN_HANDICAP', 'OVER_UNDER')
     'docs/V4_TEAM_CONTEXT_CONTRACT.md' = @('injuries', 'suspensions', 'lineup_status', 'starting_xi', 'coach', 'tactical_style', 'motivation', 'schedule_pressure', 'fatigue', 'travel', 'weather', 'pitch', 'source_summary', 'context_confidence', 'conflicts', 'NONE_CONFIRMED')
     'docs/V4_EVIDENCE_CONTRACT.md' = @('evidence_id', 'claim_type', 'claim', 'entity_refs', 'published_at', 'retrieved_at', 'valid_from', 'verification_state', 'contradiction_state', 'VERIFIED', 'NOT_VERIFIED', 'CONFLICTED', 'STALE', 'REJECTED')
-    'docs/V4_FROZEN_INPUT_CONTRACT.md' = @('canonical_match_identity_ref', 'official_odds_snapshot_refs', 'external_market_snapshot_refs', 'team_context_ref', 'evidence_bundle_ref', 'feature_schema_version', 'prediction_cutoff_at', 'model_version_registry_refs', 'engine_version_registry_refs', 'frozen_input_revision', 'frozen_input_hash', 'immutable', 'append-only')
+    'docs/V4_FROZEN_INPUT_CONTRACT.md' = @('feature_bundle_id', 'feature_snapshot_hash', 'feature_bundle_contract_version', 'frozen_input_hash', 'immutable', 'FROZEN', 'downstream freeze artifact')
     'docs/V4_FEATURE_BUNDLE_CONTRACT.md' = @('statistical_features', 'football_context_features', 'market_features', 'league_features', 'tactical_features', 'score_features', 'quality_features', 'feature_bundle_id', 'feature_schema_version', 'generator_version', 'input_hash', 'feature_hash', 'generated_at', 'missingness_summary', 'quality_flags')
+    'docs/V4_STATISTICAL_HISTORICAL_INPUT_CONTRACT.md' = @('historical_input_id', 'source_match_id', 'target_match_id', 'availability_at', 'result_known_at', 'stat_available_at', 'INSUFFICIENT_SAMPLE', 'half_life_matches=10', 'competition_id + season_id', 'supersedes_id')
     'docs/V4_ENGINE_OUTPUT_CONTRACT.md' = @('engine_run_id', 'role', 'model_version', 'engine_name', 'engine_version', 'revision', 'implementation_hash', 'config_hash', 'input_hash', 'output_hash', 'run_at', 'runtime_ms', 'status', 'warnings', 'errors', 'payload', 'Outcome', 'Handicap', 'Goals', 'HTFT', 'Score', 'Upset', 'Simulation', 'Consensus', 'Uncertainty', 'Risk')
     'docs/V4_PREDICTION_CONTRACT.md' = @('prediction_id', 'prediction_revision', 'frozen_input_id', 'engine_run_refs', 'market_predictions', 'consensus', 'disagreement', 'uncertainty', 'risk', 'confidence_grade', 'recommendation_state', 'recommendation_strength', 'SPF', 'RQSPF', 'Total Goals', 'Exact Score', 'Half-Full', 'Frozen Prediction', 'supersedes_frozen_prediction_id')
     'docs/V4_RESULT_REVIEW_CONTRACT.md' = @('result_id', 'full_time_home', 'full_time_away', 'half_time_home', 'half_time_away', 'result_scope', 'REGULATION_90_PLUS_STOPPAGE', 'official_result_payload', 'verified_at', 'result_hash', 'MODEL_EVALUATION', 'MATCH_EXPLANATION', 'market_hit_results', 'score_metrics', 'error_attribution', 'reviewed_at', 'review_hash')

@@ -39,7 +39,7 @@ The following fields are required unless a field is explicitly marked as a gover
 | `input_hash` | Deterministically derived from the complete accepted upstream reference/hash set and declared temporal/config identities. |
 | `generated_at` | Envelope generation timestamp; excluded from substantive replay hash when declared volatile. |
 | `prediction_cutoff_at`, `kickoff_at` | Required time boundary; cutoff precedes kickoff. |
-| `feature_values` | The seven governed categories with typed values and explicit state. |
+| `feature_values` | The seven governed categories with typed values and explicit state: `statistical_features`, `football_context_features`, `market_features`, `league_features`, `tactical_features`, `score_features`, and `quality_features`. |
 | `missingness_summary` | Reconciles every feature state; no hidden omissions. |
 | `feature_quality` | Typed data-quality object defined in section 5; not prediction confidence. |
 | `quality_flags` | Explicit blockers, conflicts, stale/future states, and provenance conditions. |
@@ -67,6 +67,8 @@ feature_schema_version / generator_version
 ```
 
 `input_hash` covers this set after canonical serialization, including each referenced object's exact hash and governed status. It does not include `frozen_input_id`, `frozen_input_hash`, downstream engine output, Prediction, recommendation, or model interpretation.
+
+For BATCH-11 statistical features, `canonical_fact_refs` may include the exact accepted prior source-match observations selected by `historical-statistical-input@1.0.0`. The statistical feature's `source_refs`/`derivation_ref` must retain the historical manifest identity and observation hashes. This is a target-cutoff eligibility reference, not a target-match fact copy; the existing Feature Bundle field shape and hash boundary remain unchanged.
 
 ## 4. Feature value and availability semantics
 
@@ -120,3 +122,30 @@ Feature Bundle is a representation artifact, not a Feature Engine, Market Intell
 The envelope must reject fields named or semantically equivalent to `prediction`, `recommendation`, `confidence` (when unqualified), `model_confidence`, `win_probability`, `betting_confidence`, `selection`, `risk_decision`, `engine_output`, or `score_selection`. A feature may cite an upstream fact and derive a typed representation, but it cannot silently rewrite a fact or create a decision.
 
 Validation fails closed when any required identity/hash cannot resolve, a status is inferred from payload shape, a future source enters the pre-match object, a feature schema or generator is unregistered, a hash cannot be recomputed, or the bundle would require a Frozen Input that does not yet exist.
+
+## 9. BATCH-11 historical input clarification
+
+An Official Result or post-match statistic is `POSTMATCH_ONLY` for its own source match. It may be represented in a later target Feature Bundle only when the historical statistical input contract proves a different source match, canonical identity, exact visible revision, attributable evidence, and `availability_at <= target_prediction_cutoff_at < target_kickoff_at`. The target match's own result and post-match statistics remain prohibited.
+
+```json
+{
+  "contract_version": "feature-bundle@2.0.0",
+  "feature_values": {
+    "statistical_features": {"state": "UNKNOWN"},
+    "football_context_features": {"state": "UNKNOWN"},
+    "market_features": {"state": "UNKNOWN"},
+    "league_features": {"state": "UNKNOWN"},
+    "tactical_features": {"state": "UNKNOWN"},
+    "score_features": {"state": "NOT_APPLICABLE"},
+    "quality_features": {"state": "AVAILABLE"}
+  },
+  "feature_quality": {
+    "coverage": "PARTIAL",
+    "verification": "PARTIAL",
+    "freshness": "CURRENT",
+    "completeness": "PARTIAL",
+    "conflict": "NONE",
+    "provenance": "RESOLVED"
+  }
+}
+```
