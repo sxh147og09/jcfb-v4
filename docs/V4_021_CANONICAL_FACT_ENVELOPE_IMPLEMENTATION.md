@@ -2,7 +2,7 @@
 
 Workspace: `F:\Projects\jcfb-v4`
 
-Branch/HEAD: `main` / recorded in the acceptance evidence after the focused commit
+Branch/HEAD: `main` / `58598a4` (`feat(v4-021): add canonical fact envelope`; acceptance-closure metadata is committed immediately after)
 
 Implementation Status: `COMPLETE` for the V4-021 local, no-write implementation boundary
 
@@ -94,5 +94,7 @@ The local store retains validated source observations, immutable fact envelopes,
 V4-021 DoD: `PASS`
 
 V4-021 Status: `COMPLETE`
+
+Git Commit(s): `58598a4` (`feat(v4-021): add canonical fact envelope`), followed by the acceptance-closure metadata commit.
 
 Next Recommended Task: `V4-022` only; V4-023 remains outside this implementation.
