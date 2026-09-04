@@ -2,7 +2,7 @@
 
 Workspace: `F:\Projects\jcfb-v4`
 
-Branch/HEAD: recorded in the acceptance evidence after the V4-025 implementation commit
+Branch/HEAD: `main` / `0853c50` (`feat(v4-025): add official screenshot evidence boundary`)
 
 Implementation Status: `COMPLETE` for the V4-025 local, in-memory, no-write screenshot evidence boundary
 
