@@ -42,6 +42,14 @@ from .official_odds import (
     OfficialOddsValidationError,
     SnapshotKind,
 )
+from .official_screenshot import (
+    OfficialScreenshotEvidence,
+    OfficialScreenshotEvidenceStore,
+    OfficialScreenshotObservation,
+    ScreenshotIntakeResult,
+    ScreenshotVerificationState,
+    ScreenshotValidationError,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -75,5 +83,11 @@ __all__ = [
     "OfficialOddsSnapshotStore",
     "OfficialOddsValidationError",
     "SnapshotKind",
+    "OfficialScreenshotEvidence",
+    "OfficialScreenshotEvidenceStore",
+    "OfficialScreenshotObservation",
+    "ScreenshotIntakeResult",
+    "ScreenshotVerificationState",
+    "ScreenshotValidationError",
     "resolve_f_drive_output_path",
 ]
