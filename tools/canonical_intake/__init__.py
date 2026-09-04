@@ -150,6 +150,14 @@ from .feature_bundle import (
     FeatureSchemaRegistry,
     FeatureState,
 )
+from .feature_snapshot import (
+    CONTRACT_VERSION as FEATURE_SNAPSHOT_CONTRACT_VERSION,
+    HASH_PROFILE as FEATURE_SNAPSHOT_HASH_PROFILE,
+    VOLATILE_FIELDS as FEATURE_SNAPSHOT_VOLATILE_FIELDS,
+    FeatureSnapshotHasher,
+    FeatureSnapshotResult,
+    FeatureSnapshotValidationError,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -273,5 +281,11 @@ __all__ = [
     "FeatureSchema",
     "FeatureSchemaRegistry",
     "FeatureState",
+    "FEATURE_SNAPSHOT_CONTRACT_VERSION",
+    "FEATURE_SNAPSHOT_HASH_PROFILE",
+    "FEATURE_SNAPSHOT_VOLATILE_FIELDS",
+    "FeatureSnapshotHasher",
+    "FeatureSnapshotResult",
+    "FeatureSnapshotValidationError",
     "resolve_f_drive_output_path",
 ]

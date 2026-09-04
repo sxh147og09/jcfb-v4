@@ -1,0 +1,8 @@
+{
+  "expected_rules": {
+    "same_logical_inputs_same_hash": true,
+    "generated_at_is_volatile": true,
+    "frozen_input_is_excluded": true,
+    "prediction_is_excluded": false
+  }
+}
