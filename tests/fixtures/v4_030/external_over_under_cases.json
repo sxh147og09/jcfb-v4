@@ -1,0 +1,21 @@
+{
+  "base": {
+    "snapshot_kind": "CURRENT",
+    "created_at": "2026-09-04T09:31:00+08:00",
+    "source_timestamp": "2026-09-04T09:30:30+08:00",
+    "captured_at": "2026-09-04T09:30:30+08:00",
+    "observed_at": "2026-09-04T09:30:31+08:00",
+    "ingested_at": "2026-09-04T09:30:32+08:00",
+    "source": "Example Totals Provider Feed",
+    "source_type": "EXTERNAL_FEED",
+    "source_ref": "ref://external/totals/20260904/001/ou-093030",
+    "provider": "Example Totals Provider",
+    "market": "OVER_UNDER",
+    "line": 2.5,
+    "prices": {"over": 1.88, "under": 1.96},
+    "availability_status": "AVAILABLE",
+    "source_confidence": {"state": "ASSESSED", "basis": "Provider response with stable source reference"},
+    "source_is_official": false,
+    "metadata": {"fixture_revision": "external-ou-r1"}
+  }
+}

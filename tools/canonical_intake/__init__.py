@@ -78,7 +78,9 @@ from .external_market import (
     ExternalMarketSnapshotStore,
     ExternalMarketStatus,
     ExternalMarketValidationError,
+    ExternalOUAdapter,
     European1X2Intake,
+    OverUnderIntake,
 )
 
 __all__ = [
@@ -143,5 +145,7 @@ __all__ = [
     "European1X2Intake",
     "ExternalAsianHandicapAdapter",
     "AsianHandicapIntake",
+    "ExternalOUAdapter",
+    "OverUnderIntake",
     "resolve_f_drive_output_path",
 ]
