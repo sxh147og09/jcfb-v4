@@ -25,7 +25,8 @@
     "duplicate_noop_and_id_reuse_fail_closed": "PASS",
     "model_prediction_feature_field_rejection": "PASS",
     "f_drive_policy": "PASS",
-    "v3333_isolation": "PASS"
+    "v3333_isolation": "PASS",
+    "v4037_early_implementation_removed_before_task_entry": "PASS"
   },
   "boundaries": {
     "production_supabase_reads_writes": "NO",
@@ -35,7 +36,9 @@
   },
   "commits": [
     "6e85a1c docs(v4): freeze batch 09 execution manifest",
-    "fa5339d feat(v4-036): add evidence graph claim model"
+    "fa5339d feat(v4-036): add evidence graph claim model",
+    "3e17014 fix(v4-036): restore evidence graph task boundary",
+    "f884efe docs(v4-036): close acceptance evidence"
   ],
   "working_tree": "CLEAN_AFTER_ACCEPTANCE_DOC_COMMIT",
   "dod": "PASS",
