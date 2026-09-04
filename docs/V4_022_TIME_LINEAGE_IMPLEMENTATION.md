@@ -2,7 +2,7 @@
 
 Workspace: `F:\Projects\jcfb-v4`
 
-Branch/HEAD: recorded in the acceptance evidence after the V4-022 implementation and closure commits
+Branch/HEAD: `main` / `6473a1f` (`feat(v4-022): add cutoff time lineage gate`)
 
 Implementation Status: `COMPLETE` for the V4-022 local, no-write implementation boundary
 
@@ -80,3 +80,5 @@ V4-022 DoD: `PASS`
 V4-022 Status: `COMPLETE`
 
 Next Recommended Task: `V4-023` only; V4-024 and later tasks remain outside this execution boundary.
+
+Git Commit: `6473a1f` (`feat(v4-022): add cutoff time lineage gate`)
