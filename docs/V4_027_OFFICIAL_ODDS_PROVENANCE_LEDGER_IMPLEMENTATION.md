@@ -2,7 +2,7 @@
 
 Workspace: `F:\Projects\jcfb-v4`
 
-Branch/HEAD: recorded in the acceptance evidence after the V4-027 implementation commit
+Branch/HEAD: `main` / `4003423` (`feat(v4-027): add official odds provenance ledger`)
 
 Implementation Status: `COMPLETE` for the V4-027 local, append-only, no-write official odds provenance boundary
 
