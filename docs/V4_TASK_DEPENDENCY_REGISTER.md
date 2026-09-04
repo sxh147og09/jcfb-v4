@@ -132,7 +132,7 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 | BATCH-09 | BATCH-08 | V4-036–V4-037 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-10 | BATCH-06, BATCH-07, BATCH-09 | V4-038–V4-040 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-11 | BATCH-10 | V4-041–V4-043 | Ordinary dependency edge; child acceptance remains independent. |
-| BATCH-12 | BATCH-10 | V4-044–V4-045 | Ordinary dependency edge; child acceptance remains independent. |
+| BATCH-12 | BATCH-10, BATCH-11 | V4-044–V4-045 | Governance-amended upstream set; child acceptance remains independent. |
 | BATCH-13 | BATCH-06, BATCH-07, BATCH-10 | V4-046–V4-048 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-14 | BATCH-09, BATCH-10, BATCH-12 | V4-049–V4-051 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-15 | BATCH-11, BATCH-12, BATCH-13, BATCH-14 | V4-052–V4-055 | Ordinary dependency edge; child acceptance remains independent. |
@@ -169,3 +169,11 @@ Topological task/batch order is documented in `docs/V4_DEPENDENCY_GRAPH_012_100.
 ## Current Execution Status Override
 
 As of BATCH-07 Closure Review at HEAD `c03d804`, the authoritative task acceptance evidence records V4-028, V4-029, V4-030, and V4-031 as COMPLETE. See the four task evidence files and `docs/V4_BATCH_07_CLOSURE_EVIDENCE.json`. Historical TODO rows remain unchanged as registry snapshots.
+
+## BATCH-12 governance resolution override
+
+The current approved BATCH-12 batch-level upstream set is `BATCH-10, BATCH-11`.
+The task-level path remains `V4-040 + V4-043 -> V4-044 -> V4-045`; no task IDs
+are changed. This section records the governance amendment and its rationale.
+V4-044 and V4-045 are pre-Frozen feature generators and do not use the formal
+`engine-output@1.0.0` run envelope.

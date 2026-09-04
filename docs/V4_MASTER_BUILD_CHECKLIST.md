@@ -288,3 +288,16 @@ Next execution gate: **BATCH-07 Scope & Entry Review**. BATCH-04 / V4-018 throug
 ## Current Execution Status Override
 
 The current authoritative BATCH-07 Closure Review at HEAD `c03d804` records V4-028 through V4-031 as COMPLETE and the BATCH-07 Closure Gate as PASS. Historical checklist rows above remain unchanged as status snapshots; see `docs/V4_BATCH_07_CLOSURE_REVIEW.md` and `docs/V4_BATCH_07_CLOSURE_EVIDENCE.json`.
+
+## BATCH-12 governance resolution override
+
+The BATCH-12 architecture blocker is resolved by
+`docs/V4_BATCH_12_ARCHITECTURE_GOVERNANCE_DECISION.md`. Its approved upstream
+set is `BATCH-10, BATCH-11`, with task path
+`V4-040 + V4-043 -> V4-044 -> V4-045`. V4-044/V4-045 are pre-Frozen feature
+generators, not formal Prediction Engine runs. Active governance artifacts are
+`football-intelligence-feature@1.0.0`,
+`football-context-integration@1.0.0`, and
+`football-intelligence-config@1.0.0`. Historical checklist rows remain
+unchanged; V4-044/V4-045 implementation status remains NOT IMPLEMENTED until
+the separate BATCH-12 Scope & Entry Review passes.

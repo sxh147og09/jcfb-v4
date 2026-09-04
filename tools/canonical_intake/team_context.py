@@ -28,7 +28,7 @@ from .match_identity import (
 )
 
 
-CONTRACT_VERSION = "team-context@1.0.0"
+CONTRACT_VERSION = "team-context@2.0.0"
 TEAM_CONTEXT_ID_NAMESPACE = uuid.UUID("d3b37b9a-0d19-5b91-8f6a-d5d2c4ed5d5a")
 HASH_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")

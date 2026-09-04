@@ -161,3 +161,17 @@ Risk must retain each risk flag, severity, evidence/engine refs, and `abstention
 `output_hash` includes the logical envelope identity, role/version/revision references, input hash, engine payload, warnings/errors that affect interpretation, and declared references. It excludes `created_at`, `ingested_at`, `run_at`, `run_completed_at`, `runtime_ms`, transport headers, and non-authoritative trace metadata by default. `input_hash` includes the frozen input ref/hash, cutoff, role, component versions, and feature references.
 
 Adding an optional payload annotation is `MINOR`; changing envelope field meaning/requiredness, role semantics, probability keys, distribution support, hash boundary, or no-future rules is `MAJOR`; documentation-only clarification is `PATCH`. A behavior/config/implementation change still requires a new revision and forward evidence even if the schema change is additive.
+
+## 7. Pre-Frozen feature artifact boundary
+
+`engine-output@1.0.0` remains the formal contract for an Engine Run. It is not
+the creation contract for V4-044 Football Intelligence Feature Generation or
+V4-045 Context Integration. Those tasks produce pre-Frozen artifacts under
+`football-intelligence-feature@1.0.0` and
+`football-context-integration@1.0.0`, which bind directly to accepted upstream
+Feature Bundle, statistical feature, Team Context, and Evidence Graph
+references. A pre-Frozen artifact does not require or contain
+`frozen_input_id`/`frozen_input_hash` and must not be presented as a formal
+Prediction, Score, Risk, Consensus, or other Engine Run. V4-076 remains the
+downstream task that creates the Frozen Input boundary and may later be
+consumed by formal Engine Runs.

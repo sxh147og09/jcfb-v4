@@ -1,0 +1,247 @@
+{
+  "config_version": "football-intelligence-config@1.0.0",
+  "mapping_registry_version": "football-intelligence-mapping@1.0.0",
+  "scope": "BATCH-12 pre-Frozen feature generation only",
+  "approved_model_effect_coefficients": [],
+  "policy": {
+    "non_consumable_states": [
+      "BLOCKED",
+      "CONFLICTED",
+      "FUTURE_DATA",
+      "NOT_VERIFIED",
+      "STALE",
+      "UNAVAILABLE",
+      "UNKNOWN"
+    ],
+    "interaction_default": "SEPARATE_DIMENSIONS_ONLY",
+    "missing_behavior": "PRESERVE_STATE",
+    "unknown_is_not_zero": true,
+    "projected_is_not_confirmed": true,
+    "conflict_requires_all_claims": true,
+    "frozen_input_dependency": "FORBIDDEN_AT_PRE_FREEZE"
+  },
+  "numeric_mappings": [
+    {
+      "feature_key": "rest_days",
+      "category": "schedule",
+      "unit": "days",
+      "raw_source": "accepted prior canonical fixture kickoff times",
+      "transformation": "calendar_day_difference_from_target_pre_match_anchor",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE"
+    },
+    {
+      "feature_key": "matches_in_7d",
+      "category": "schedule",
+      "unit": "matches",
+      "raw_source": "accepted prior canonical fixture schedule",
+      "transformation": "count_prior_fixtures_with_kickoff_in_7_day_window",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE"
+    },
+    {
+      "feature_key": "matches_in_14d",
+      "category": "schedule",
+      "unit": "matches",
+      "raw_source": "accepted prior canonical fixture schedule",
+      "transformation": "count_prior_fixtures_with_kickoff_in_14_day_window",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE"
+    },
+    {
+      "feature_key": "matches_in_30d",
+      "category": "schedule",
+      "unit": "matches",
+      "raw_source": "accepted prior canonical fixture schedule",
+      "transformation": "count_prior_fixtures_with_kickoff_in_30_day_window",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE"
+    },
+    {
+      "feature_key": "consecutive_short_rest_count",
+      "category": "schedule",
+      "unit": "matches",
+      "raw_source": "accepted prior canonical fixture kickoff times",
+      "transformation": "count_adjacent_prior_intervals_with_rest_days_less_than_threshold",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE",
+      "short_rest_threshold_days": 3
+    },
+    {
+      "feature_key": "travel_distance_km",
+      "category": "travel",
+      "unit": "km",
+      "raw_source": "accepted source-provided travel distance",
+      "transformation": "identity",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE"
+    },
+    {
+      "feature_key": "timezone_delta_hours",
+      "category": "travel",
+      "unit": "hours",
+      "raw_source": "accepted source-provided venue/team timezone identities",
+      "transformation": "absolute_timezone_offset_difference",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE"
+    },
+    {
+      "feature_key": "consecutive_away_count",
+      "category": "travel",
+      "unit": "matches",
+      "raw_source": "accepted prior canonical fixture home-away sides",
+      "transformation": "count_adjacent_prior_away_fixtures",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE"
+    },
+    {
+      "feature_key": "confirmed_absence_count",
+      "category": "availability",
+      "unit": "players",
+      "raw_source": "Team Context confirmed injury and suspension collections",
+      "transformation": "count_confirmed_unavailable_items_only",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE"
+    },
+    {
+      "feature_key": "confirmed_availability_count",
+      "category": "availability",
+      "unit": "players",
+      "raw_source": "Team Context explicitly confirmed available players",
+      "transformation": "count_confirmed_available_items_only",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE"
+    },
+    {
+      "feature_key": "temperature_c",
+      "category": "weather",
+      "unit": "celsius",
+      "raw_source": "accepted weather observation or forecast",
+      "transformation": "identity",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE"
+    },
+    {
+      "feature_key": "wind_speed_mps",
+      "category": "weather",
+      "unit": "m_per_s",
+      "raw_source": "accepted weather observation or forecast",
+      "transformation": "identity",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE"
+    },
+    {
+      "feature_key": "precipitation_mm",
+      "category": "weather",
+      "unit": "mm",
+      "raw_source": "accepted weather observation or forecast",
+      "transformation": "identity",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE"
+    },
+    {
+      "feature_key": "humidity_pct",
+      "category": "weather",
+      "unit": "percent",
+      "raw_source": "accepted weather observation or forecast",
+      "transformation": "identity",
+      "normalization": "NATIVE_UNIT",
+      "clipping": "NONE",
+      "missing_behavior": "PRESERVE_STATE"
+    }
+  ],
+  "categorical_mappings": [
+    {
+      "feature_key": "lineup_state",
+      "category": "lineup",
+      "representation": "CONFIRMED_LINEUP|PROJECTED_LINEUP|UNKNOWN|NOT_VERIFIED|BLOCKED",
+      "numeric_effect": "FORBIDDEN"
+    },
+    {
+      "feature_key": "coach_change_state",
+      "category": "coach",
+      "representation": "NO_CHANGE_CONFIRMED|CHANGE_RECENT_CONFIRMED|UNKNOWN|NOT_VERIFIED|CONFLICTED|STALE|BLOCKED",
+      "numeric_effect": "FORBIDDEN"
+    },
+    {
+      "feature_key": "tactical_style",
+      "category": "tactical",
+      "representation": "SOURCE_ATTRIBUTED_VOCABULARY",
+      "numeric_effect": "FORBIDDEN"
+    },
+    {
+      "feature_key": "formation_state",
+      "category": "tactical",
+      "representation": "SOURCE_ATTRIBUTED_VOCABULARY",
+      "numeric_effect": "FORBIDDEN"
+    },
+    {
+      "feature_key": "motivation_evidence_state",
+      "category": "motivation",
+      "representation": "EVIDENCE_PRESENT|NOT_VERIFIED|UNKNOWN|CONFLICTED|STALE|BLOCKED",
+      "numeric_effect": "FORBIDDEN"
+    },
+    {
+      "feature_key": "tactical_matchup",
+      "category": "tactical",
+      "representation": "ATTRIBUTED_RELATION_WITH_BASIS_REFS",
+      "numeric_effect": "FORBIDDEN"
+    },
+    {
+      "feature_key": "pitch_state",
+      "category": "pitch",
+      "representation": "SOURCE_GOVERNED_VOCABULARY_ONLY",
+      "numeric_effect": "FORBIDDEN"
+    }
+  ],
+  "interaction_policy": {
+    "approved_rules": [],
+    "default": "SEPARATE_DIMENSIONS_ONLY",
+    "batch_11_values_are_immutable": true,
+    "derived_interaction_requires_new_contract": true
+  },
+  "hash_boundary": {
+    "includes": [
+      "feature_bundle_id_and_feature_snapshot_hash",
+      "statistical_feature_refs_and_hashes",
+      "team_context_refs_and_hashes",
+      "evidence_refs_and_hashes",
+      "prediction_cutoff_at",
+      "kickoff_at",
+      "generator_version",
+      "config_version_and_config_hash",
+      "mapping_registry_version",
+      "typed_feature_values_and_states"
+    ],
+    "excludes": [
+      "frozen_input_id",
+      "frozen_input_hash",
+      "prediction",
+      "recommendation",
+      "runtime_transport_metadata"
+    ],
+    "algorithm": "SHA-256 over V4 canonical JSON"
+  },
+  "production_boundary": {
+    "production_runtime": "NOT_AUTHORIZED",
+    "shadow_runtime": "NOT_AUTHORIZED",
+    "supabase_read": "NOT_AUTHORIZED",
+    "supabase_write": "NOT_AUTHORIZED",
+    "migration_add": "NOT_AUTHORIZED",
+    "migration_apply": "NOT_AUTHORIZED",
+    "v333_modification": "FORBIDDEN"
+  }
+}

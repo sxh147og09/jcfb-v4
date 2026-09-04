@@ -128,6 +128,16 @@ Every row below is a separate task record. V4-028 through V4-100 remain `TODO`; 
 
 V4-041, V4-042, and V4-043 consume the approved target-scoped `historical-statistical-input@1.0.0` contract and `statistical-strength-config@1.0.0`. This prerequisite defines cross-match historical eligibility, minimum samples, sparse semantics, rolling/decay, league/season scope, home/away handling, normalization, and transition rules. It does not add a task node or change the primary batch assignment.
 
+## BATCH-12 governance resolution override
+
+V4-044 and V4-045 retain their task IDs, primary batch, and task-level path
+`V4-040 + V4-043 -> V4-044 -> V4-045`. For lifecycle purposes, both tasks are
+pre-Frozen feature generators governed by
+`football-intelligence-feature@1.0.0` and
+`football-context-integration@1.0.0`; they are not formal
+`engine-output@1.0.0` Engine Runs and do not require Frozen Input at creation.
+The approved BATCH-12 batch-level upstream set is `BATCH-10, BATCH-11`.
+
 ## 3. Registry invariants
 
 - IDs are exactly `V4-001` through `V4-100`, with no gap and no duplicate.

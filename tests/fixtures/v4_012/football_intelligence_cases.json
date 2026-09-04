@@ -1,0 +1,85 @@
+{
+  "base_artifact": {
+    "artifact_id": "football-intelligence-artifact-001",
+    "artifact_kind": "PRE_FREEZE_FEATURE_ARTIFACT",
+    "contract_version": "football-intelligence-feature@1.0.0",
+    "feature_bundle_id": "feature-bundle-001",
+    "feature_bundle_ref": {
+      "id": "feature-bundle-001",
+      "feature_snapshot_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "statistical_feature_refs": [
+      {"id": "statistical-feature-001", "hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"}
+    ],
+    "team_context_refs": [
+      {"id": "team-context-001", "hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333"}
+    ],
+    "evidence_refs": [
+      {"id": "evidence-001", "hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"}
+    ],
+    "canonical_entity_refs": {
+      "match_id": "match-001",
+      "home_team_id": "team-home-001",
+      "away_team_id": "team-away-001"
+    },
+    "role": "EXPERIMENT",
+    "generator_version": "football-intelligence-generator@1.0.0",
+    "config_version": "football-intelligence-config@1.0.0",
+    "config_hash": "sha256:cd555f25c3a4ee1ef8e30257af5ae1bdf006ff99e6aa9607219508e9f7ebdc3c",
+    "mapping_registry_version": "football-intelligence-mapping@1.0.0",
+    "prediction_cutoff_at": "2026-09-04T12:00:00+08:00",
+    "kickoff_at": "2026-09-04T19:35:00+08:00",
+    "features": [
+      {
+        "feature_key": "rest_days",
+        "category": "schedule",
+        "kind": "NUMERIC",
+        "state": "AVAILABLE",
+        "value": 5,
+        "unit": "days",
+        "context_state": "CONFIRMED",
+        "basis_refs": ["evidence-001"],
+        "source_refs": ["team-context-001"],
+        "derivation_ref": "football-intelligence-mapping@1.0.0/rest_days",
+        "reason_code": null,
+        "reason_detail": null
+      },
+      {
+        "feature_key": "lineup_state",
+        "category": "lineup",
+        "kind": "CATEGORICAL",
+        "state": "AVAILABLE",
+        "value": "PROJECTED_LINEUP",
+        "unit": "category",
+        "context_state": "PROJECTED",
+        "basis_refs": ["evidence-001"],
+        "source_refs": ["team-context-001"],
+        "derivation_ref": "football-intelligence-mapping@1.0.0/lineup_state",
+        "reason_code": null,
+        "reason_detail": null
+      }
+    ],
+    "feature_quality": {
+      "coverage": "PARTIAL",
+      "verification": "PARTIAL",
+      "freshness": "CURRENT",
+      "completeness": "PARTIAL",
+      "conflict": "NONE",
+      "provenance": "RESOLVED"
+    },
+    "input_hash": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "payload_hash": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+    "provenance_hash": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+    "revision": 1,
+    "supersedes_artifact_id": null
+  },
+  "non_consumable_states": [
+    "UNKNOWN",
+    "UNAVAILABLE",
+    "NOT_VERIFIED",
+    "CONFLICTED",
+    "STALE",
+    "FUTURE_DATA",
+    "BLOCKED"
+  ]
+}

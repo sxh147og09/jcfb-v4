@@ -1,14 +1,6 @@
-# JCFB V4 Team Context Contract 2.0
+# JCFB V4 Team Context Contract 1.0
 
-Status: **BATCH-12 GOVERNANCE AMENDMENT / ACTIVE CONTRACT**
-
-Contract version: `team-context@2.0.0`
-
-Supersedes: `team-context@1.0.0` in `docs/V4_TEAM_CONTEXT_CONTRACT_1.0.md`
-
-This is a breaking semantic clarification. Historical `team-context@1.0.0`
-objects remain immutable and addressable; new formal Team Context objects use
-the active v2 contract.
+Status: V4-008 DATA CONTRACT DESIGN ARTIFACT
 
 ## 1. Purpose and boundary
 
@@ -21,7 +13,7 @@ A Team Context object is tied to one `match_id`, one team side, and one declared
 | Field | Type | Requiredness | Rule |
 |---|---|---|---|
 | `object_id` / `team_context_id` | UUID/UUIDv7 | REQUIRED | Stable context identity. |
-| `contract_version` | string | REQUIRED | Exact `team-context@2.0.0` for new formal objects. |
+| `contract_version` | string | REQUIRED | `team-context@MAJOR.MINOR.PATCH`. |
 | `match_id` | UUID/UUIDv7 | REQUIRED | Canonical match reference. |
 | `team_id` / `team_display_name` | stable ID/string | REQUIRED | ID and display name are separate. |
 | `side` | `HOME`/`AWAY` | REQUIRED | Must agree with the canonical match identity. |
@@ -73,7 +65,7 @@ When the state is `UNKNOWN`, `items` must be omitted, not set to an empty array.
 
 ## 3. Unknown, negative, and conflict rules
 
-- `UNKNOWN` means V4 does not know the state. It is not “no injury”, “no suspension”, “no rotation”, “stable lineup”, or zero.
+- `UNKNOWN` means V4 does not know the state. It is not 鈥渘o injury鈥? 鈥渘o suspension鈥? 鈥渘o rotation鈥? 鈥渟table lineup鈥? or zero.
 - `NONE_CONFIRMED` means the accepted source explicitly confirmed an empty collection. It is a positive factual claim with provenance.
 - `NOT_VERIFIED` means a claim exists but the required verification has not passed; it cannot silently become `AVAILABLE`.
 - `CONFLICTED`/`conflicts[]` retain both claims, source references, timestamps, and the unresolved resolution state. Do not choose a preferred claim silently.
@@ -81,16 +73,6 @@ When the state is `UNKNOWN`, `items` must be omitted, not set to an empty array.
 - `BLOCKED` means a gate prevents use; it is not a value and cannot be converted to an average or default.
 
 The `context_confidence` value measures source coverage, verification, freshness, and conflict level. It is not a probability of a match outcome and not the prediction's confidence grade.
-
-### 3.1 Canonical confidence field amendment
-
-`context_confidence` is the only canonical confidence field on a Team Context
-object. A bare `confidence` field is forbidden in new `team-context@2.0.0`
-objects, including minimum examples, validation fixtures, and generated
-payloads. The field can only describe context coverage, verification,
-freshness, completeness, conflict, and provenance quality. It must never be
-interpreted as win probability, model confidence, betting confidence, or a
-recommendation grade.
 
 ## 4. Minimum legal JSON example
 
@@ -107,7 +89,7 @@ recommendation grade.
   "source": "Example club and competition reports",
   "source_type": "CLUB_STATEMENT",
   "source_reference": "ref://context/20260901/001/home/105000",
-  "context_confidence": {"state": "ASSESSED", "score": 0.86, "basis": "Multiple time-valid attributed sources"},
+  "confidence": {"state": "ASSESSED", "score": 0.86, "basis": "Multiple time-valid attributed sources"},
   "provenance_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
   "payload_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
   "status": "AVAILABLE",
@@ -154,8 +136,6 @@ recommendation grade.
 ### Required and type checks
 
 - All fields in section 2 marked required and all common required metadata are present.
-- New formal objects use `contract_version=team-context@2.0.0`; the v1 object remains an immutable historical compatibility artifact.
-- A bare `confidence` field is rejected; the canonical field is `context_confidence`.
 - `side` is `HOME` or `AWAY`; `team_id` matches the corresponding canonical team ID.
 - Every `FactCollection` has a state. `items=[]` is valid for `NONE_CONFIRMED`, invalid as a substitute for `UNKNOWN`.
 - `starting_xi.players` is present only for `CONFIRMED` or `PROJECTED`; each player has a stable ID or a declared `NOT_VERIFIED` state.
@@ -185,8 +165,4 @@ recommendation grade.
 
 The logical payload includes `match_id`, `team_id`, `side`, `as_of_at`, each context field's state/value/basis references/reason, and the conflict list. It includes source/evidence references needed to reproduce the context. It excludes transport-only timestamps and non-authoritative trace metadata.
 
-Adding a new optional context category is `MINOR`; changing `UNKNOWN`,
-`NONE_CONFIRMED`, or `PROJECTED` semantics, changing a field type, removing
-the ambiguous bare `confidence` example, or allowing post-kickoff facts into
-pre-match context is `MAJOR`; a wording clarification is `PATCH`. Context
-corrections are new append-only objects.
+Adding a new optional context category is `MINOR`; changing `UNKNOWN`, `NONE_CONFIRMED`, or `PROJECTED` semantics, changing a field type, or allowing post-kickoff facts into pre-match context is `MAJOR`; a wording clarification is `PATCH`. Context corrections are new append-only objects.

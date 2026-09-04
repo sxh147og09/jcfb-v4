@@ -95,3 +95,13 @@ For each future batch: freeze the manifest; verify all source task IDs; validate
 ## 7. Next execution boundary
 
 Batch state: **BATCH-06 COMPLETE / CLOSURE REVIEW PASS**. V4-024 through V4-027 are complete under their local no-write boundaries. No model run, Shadow run, public deployment, Promotion, or V3.3.3 mutation occurred. The next permitted activity is a separate BATCH-07 Scope & Entry Review.
+
+## BATCH-12 governance resolution override
+
+The current approved BATCH-12 upstream set is `BATCH-10, BATCH-11`, as shown
+in the batch table above. V4-044 and V4-045 are pre-Frozen feature generators,
+not formal Engine Runs; they bind to accepted upstream Feature Bundle,
+statistical, Team Context, and Evidence Graph references and do not require
+`frozen_input_id` or `frozen_input_hash`. V4-076 remains the downstream Frozen
+Input task. This governance clarification does not authorize implementation
+of V4-044 or V4-045 until the BATCH-12 Entry Gate passes.

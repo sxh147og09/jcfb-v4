@@ -188,6 +188,17 @@ from .statistical_strength import (
     StatisticalStrengthValidationError,
     verify_feature_hash,
 )
+from .football_intelligence_governance import (
+    CONFIG_PATH as FOOTBALL_INTELLIGENCE_CONFIG_PATH,
+    CONFIG_VERSION as FOOTBALL_INTELLIGENCE_CONFIG_VERSION,
+    CONTEXT_INTEGRATION_CONTRACT_VERSION,
+    FEATURE_CONTRACT_VERSION as FOOTBALL_INTELLIGENCE_FEATURE_CONTRACT_VERSION,
+    FootballIntelligenceGovernanceError,
+    calculate_governance_hash,
+    load_approved_config,
+    validate_approved_config,
+    validate_pre_freeze_artifact,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -344,4 +355,13 @@ __all__ = [
     "StatisticalStrengthConfig",
     "StatisticalStrengthValidationError",
     "verify_feature_hash",
+    "FOOTBALL_INTELLIGENCE_CONFIG_PATH",
+    "FOOTBALL_INTELLIGENCE_CONFIG_VERSION",
+    "CONTEXT_INTEGRATION_CONTRACT_VERSION",
+    "FOOTBALL_INTELLIGENCE_FEATURE_CONTRACT_VERSION",
+    "FootballIntelligenceGovernanceError",
+    "calculate_governance_hash",
+    "load_approved_config",
+    "validate_approved_config",
+    "validate_pre_freeze_artifact",
 ]

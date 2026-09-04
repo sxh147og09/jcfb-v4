@@ -30,6 +30,7 @@ flowchart TD
   B07 --> B10
   B09 --> B10
   B10 --> B11["BATCH-11 Statistical"]
+  B10 --> B12["BATCH-12 Football"]
   B11 --> B12["BATCH-12 Football"]
   B10 --> B13["BATCH-13 Market"]
   B10 --> B14["BATCH-14 Quality/Tactical"]
@@ -79,7 +80,7 @@ flowchart TD
 | BATCH-09 | BATCH-08 | V4-036–V4-037 | Evidence Graph & Source Conflict Handling; child edges are in the task dependency register. |
 | BATCH-10 | BATCH-06, BATCH-07, BATCH-09 | V4-038–V4-040 | Feature Representation Layer; Feature Bundle is upstream of downstream V4-076 Frozen Input; child edges are in the task dependency register. |
 | BATCH-11 | BATCH-10 | V4-041–V4-043 | Statistical Strength Feature Engines; child edges are in the task dependency register. |
-| BATCH-12 | BATCH-10 | V4-044–V4-045 | Football Intelligence & Context Feature Engines; child edges are in the task dependency register. |
+| BATCH-12 | BATCH-10, BATCH-11 | V4-044–V4-045 | Governance-amended upstream set; Football Intelligence & Context Feature Engines; child edges are in the task dependency register. |
 | BATCH-13 | BATCH-06, BATCH-07, BATCH-10 | V4-046–V4-048 | Market Intelligence Feature Engines; child edges are in the task dependency register. |
 | BATCH-14 | BATCH-09, BATCH-10, BATCH-12 | V4-049–V4-051 | Tactical, Quality & Provenance Gates; child edges are in the task dependency register. |
 | BATCH-15 | BATCH-11, BATCH-12, BATCH-13, BATCH-14 | V4-052–V4-055 | Core Prediction Engines: Outcome / Handicap / Goals / HTFT; child edges are in the task dependency register. |
@@ -98,6 +99,13 @@ flowchart TD
 | BATCH-28 | BATCH-23, BATCH-24, BATCH-27 | V4-098 | Shadow-Only Pilot -> Promotion Review HARD_GATE; child edges are in the task dependency register. |
 | BATCH-29 | BATCH-28 | V4-099 | Promotion Review -> Production Activation HARD_GATE; child edges are in the task dependency register. |
 | BATCH-30 | BATCH-25, BATCH-26, BATCH-29 | V4-100 | Final Production Release / Canonical Pointer Switch / Closure HARD_GATE; child edges are in the task dependency register. |
+
+## BATCH-12 governance resolution override
+
+The current approved batch-level upstream set is `BATCH-10, BATCH-11`. The
+task-level path remains `V4-040 + V4-043 -> V4-044 -> V4-045`. This section
+records the governance amendment and its rationale; it does not change task
+IDs or introduce a dependency cycle.
 
 ## 4. Topological order
 
