@@ -1,0 +1,51 @@
+{
+  "schema": {
+    "schema_version": "feature-schema@1.0.0",
+    "generator_version": "feature-generator@1.0.0",
+    "categories": [
+      "statistical_features",
+      "football_context_features",
+      "market_features",
+      "league_features",
+      "tactical_features",
+      "score_features",
+      "quality_features"
+    ],
+    "registered_by": "v4-038-test",
+    "metadata": {"hash_profile": "v4-canonical-json@1.0"}
+  },
+  "base": {
+    "contract_version": "feature-bundle@2.0.0",
+    "feature_schema_version": "feature-schema@1.0.0",
+    "generator_version": "feature-generator@1.0.0",
+    "role": "EXPERIMENT",
+    "config_version": "feature-config@1.0.0",
+    "config_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "canonical_entity_refs": {
+      "match_id": "REPLACE_WITH_CANONICAL_MATCH_ID",
+      "home_team_id": "team-home-001",
+      "away_team_id": "team-away-002",
+      "match_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "canonical_fact_refs": [{"ref_id": "fact-001", "hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}],
+    "official_odds_snapshot_refs": [{"ref_id": "official-001", "hash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "source_is_official": true}],
+    "external_market_refs": [{"ref_id": "external-001", "hash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "source_is_official": false}],
+    "team_context_refs": [{"ref_id": "context-001", "hash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"}],
+    "evidence_graph_refs": [{"ref_id": "evidence-001", "hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111"}],
+    "prediction_cutoff_at": "2026-09-04T09:10:00+08:00",
+    "kickoff_at": "2026-09-04T11:35:00+08:00",
+    "generated_at": "2026-09-04T09:11:00+08:00",
+    "feature_values": {
+      "statistical_features": [{"value": 1.25, "state": "AVAILABLE", "unit": "ratio", "source_refs": ["fact-001"], "evidence_refs": ["evidence-001"], "derivation_ref": "derivation-stat-1"}],
+      "football_context_features": [{"value": null, "state": "UNKNOWN", "source_refs": ["context-001"], "evidence_refs": ["evidence-001"], "reason_code": "SOURCE_NOT_VERIFIED", "reason_detail": "Context source has not been verified"}],
+      "market_features": [{"value": null, "state": "UNAVAILABLE", "source_refs": ["official-001"], "evidence_refs": [], "reason_code": "MARKET_NOT_OFFERED", "reason_detail": "Official market was explicitly unavailable"}],
+      "league_features": [{"value": null, "state": "NOT_VERIFIED", "source_refs": ["fact-001"], "evidence_refs": [], "reason_code": "LEAGUE_UNVERIFIED", "reason_detail": "League mapping is not verified"}],
+      "tactical_features": [{"value": null, "state": "CONFLICTED", "source_refs": ["context-001"], "evidence_refs": ["evidence-001"], "reason_code": "CONFLICTING_CLAIMS", "reason_detail": "Competing attributed claims remain unresolved"}],
+      "score_features": [{"value": null, "state": "STALE", "source_refs": ["fact-001"], "evidence_refs": [], "reason_code": "SOURCE_EXPIRED", "reason_detail": "Source is outside freshness policy"}],
+      "quality_features": [{"value": null, "state": "BLOCKED", "source_refs": ["evidence-001"], "evidence_refs": ["evidence-001"], "reason_code": "QUALITY_GATE_BLOCKED", "reason_detail": "Critical quality gate did not pass"}]
+    },
+    "missingness_summary": {"AVAILABLE": 1, "UNKNOWN": 1, "UNAVAILABLE": 1, "NOT_VERIFIED": 1, "CONFLICTED": 1, "STALE": 1, "BLOCKED": 1},
+    "feature_quality": {"coverage": "PARTIAL", "verification": "PARTIAL", "freshness": "UNKNOWN", "completeness": "PARTIAL", "conflict": "PRESENT", "provenance": "RESOLVED"},
+    "quality_flags": ["PARTIAL_UPSTREAM_COVERAGE"]
+  }
+}

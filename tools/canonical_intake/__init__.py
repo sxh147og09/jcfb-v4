@@ -137,6 +137,19 @@ from .source_conflict import (
     SourceQualityAssessment,
     SourceQualityBand,
 )
+from .feature_bundle import (
+    CONTRACT_VERSION as FEATURE_BUNDLE_CONTRACT_VERSION,
+    FEATURE_CATEGORIES,
+    FeatureBundle,
+    FeatureBundleResult,
+    FeatureBundleStore,
+    FeatureBundleValidationError,
+    FeatureQuality,
+    FeatureRecord,
+    FeatureSchema,
+    FeatureSchemaRegistry,
+    FeatureState,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -249,5 +262,16 @@ __all__ = [
     "SourceConflictResolver",
     "SourceQualityAssessment",
     "SourceQualityBand",
+    "FEATURE_BUNDLE_CONTRACT_VERSION",
+    "FEATURE_CATEGORIES",
+    "FeatureBundle",
+    "FeatureBundleResult",
+    "FeatureBundleStore",
+    "FeatureBundleValidationError",
+    "FeatureQuality",
+    "FeatureRecord",
+    "FeatureSchema",
+    "FeatureSchemaRegistry",
+    "FeatureState",
     "resolve_f_drive_output_path",
 ]
