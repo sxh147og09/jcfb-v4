@@ -1,0 +1,43 @@
+{
+  "task_id": "V4-036",
+  "task_name": "Evidence Graph Claim & Evidence Model 1.0",
+  "workspace": "F:/Projects/jcfb-v4",
+  "branch": "main",
+  "targeted_tests": {
+    "command": "python -m unittest tests.unit.test_v4_036_evidence_graph -v",
+    "passed": 8,
+    "total": 8,
+    "status": "PASS"
+  },
+  "full_repository_tests": {
+    "command": "python -m unittest discover -s tests -p \"test_*.py\"",
+    "passed": 323,
+    "total": 323,
+    "status": "PASS"
+  },
+  "acceptance": {
+    "stable_claim_and_evidence_identity": "PASS",
+    "canonical_v4020_match_binding": "PASS",
+    "source_claim_basis_and_time_lineage": "PASS",
+    "verification_and_contradiction_states_separate": "PASS",
+    "hash_boundary_recomputable": "PASS",
+    "append_only_revision_and_supersedes": "PASS",
+    "duplicate_noop_and_id_reuse_fail_closed": "PASS",
+    "model_prediction_feature_field_rejection": "PASS",
+    "f_drive_policy": "PASS",
+    "v3333_isolation": "PASS"
+  },
+  "boundaries": {
+    "production_supabase_reads_writes": "NO",
+    "migration_added_applied": "NO",
+    "feature_prediction_score_engine": "NOT_EXECUTED",
+    "batch_10": "NOT_ENTERED"
+  },
+  "commits": [
+    "6e85a1c docs(v4): freeze batch 09 execution manifest",
+    "fa5339d feat(v4-036): add evidence graph claim model"
+  ],
+  "working_tree": "CLEAN_AFTER_ACCEPTANCE_DOC_COMMIT",
+  "dod": "PASS",
+  "status": "COMPLETE"
+}
