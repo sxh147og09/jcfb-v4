@@ -1,0 +1,34 @@
+{
+  "target": {
+    "match_id": "TARGET-V4-011-001",
+    "target_match_identity_hash": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+    "cutoff_at": "2026-09-04T11:00:00+00:00",
+    "kickoff_at": "2026-09-04T19:00:00+00:00",
+    "home_team_id": "team-home-001",
+    "away_team_id": "team-away-002",
+    "competition_id": "competition-premier-example",
+    "season_id": "season-2026"
+  },
+  "source_matches": [
+    {"source_match_id": "SOURCE-V4-011-001", "source_event_at": "2026-08-20T12:00:00+00:00", "home_points": 3, "away_points": 0, "home_goals_for": 2, "home_goals_against": 0, "away_goals_for": 0, "away_goals_against": 2},
+    {"source_match_id": "SOURCE-V4-011-002", "source_event_at": "2026-08-18T12:00:00+00:00", "home_points": 1, "away_points": 1, "home_goals_for": 1, "home_goals_against": 1, "away_goals_for": 1, "away_goals_against": 1},
+    {"source_match_id": "SOURCE-V4-011-003", "source_event_at": "2026-08-16T12:00:00+00:00", "home_points": 3, "away_points": 0, "home_goals_for": 3, "home_goals_against": 1, "away_goals_for": 1, "away_goals_against": 3},
+    {"source_match_id": "SOURCE-V4-011-004", "source_event_at": "2026-08-14T12:00:00+00:00", "home_points": 0, "away_points": 3, "home_goals_for": 0, "home_goals_against": 2, "away_goals_for": 2, "away_goals_against": 0},
+    {"source_match_id": "SOURCE-V4-011-005", "source_event_at": "2026-08-12T12:00:00+00:00", "home_points": 3, "away_points": 0, "home_goals_for": 2, "home_goals_against": 1, "away_goals_for": 1, "away_goals_against": 2},
+    {"source_match_id": "SOURCE-V4-011-006", "source_event_at": "2026-08-10T12:00:00+00:00", "home_points": 1, "away_points": 1, "home_goals_for": 0, "home_goals_against": 0, "away_goals_for": 0, "away_goals_against": 0},
+    {"source_match_id": "SOURCE-V4-011-007", "source_event_at": "2026-08-08T12:00:00+00:00", "home_points": 3, "away_points": 0, "home_goals_for": 1, "home_goals_against": 0, "away_goals_for": 0, "away_goals_against": 1},
+    {"source_match_id": "SOURCE-V4-011-008", "source_event_at": "2026-08-06T12:00:00+00:00", "home_points": 0, "away_points": 3, "home_goals_for": 1, "home_goals_against": 2, "away_goals_for": 2, "away_goals_against": 1},
+    {"source_match_id": "SOURCE-V4-011-009", "source_event_at": "2026-08-04T12:00:00+00:00", "home_points": 3, "away_points": 0, "home_goals_for": 2, "home_goals_against": 0, "away_goals_for": 0, "away_goals_against": 2},
+    {"source_match_id": "SOURCE-V4-011-010", "source_event_at": "2026-08-02T12:00:00+00:00", "home_points": 1, "away_points": 1, "home_goals_for": 2, "home_goals_against": 2, "away_goals_for": 2, "away_goals_against": 2},
+    {"source_match_id": "SOURCE-V4-011-011", "source_event_at": "2026-07-31T12:00:00+00:00", "home_points": 3, "away_points": 0, "home_goals_for": 3, "home_goals_against": 0, "away_goals_for": 0, "away_goals_against": 3},
+    {"source_match_id": "SOURCE-V4-011-012", "source_event_at": "2026-07-29T12:00:00+00:00", "home_points": 0, "away_points": 3, "home_goals_for": 0, "home_goals_against": 1, "away_goals_for": 1, "away_goals_against": 0},
+    {"source_match_id": "SOURCE-V4-011-013", "source_event_at": "2026-07-27T12:00:00+00:00", "home_points": 3, "away_points": 0, "home_goals_for": 2, "home_goals_against": 1, "away_goals_for": 1, "away_goals_against": 2},
+    {"source_match_id": "SOURCE-V4-011-014", "source_event_at": "2026-07-25T12:00:00+00:00", "home_points": 1, "away_points": 1, "home_goals_for": 1, "home_goals_against": 1, "away_goals_for": 1, "away_goals_against": 1},
+    {"source_match_id": "SOURCE-V4-011-015", "source_event_at": "2026-07-23T12:00:00+00:00", "home_points": 3, "away_points": 0, "home_goals_for": 4, "home_goals_against": 1, "away_goals_for": 1, "away_goals_against": 4},
+    {"source_match_id": "SOURCE-V4-011-016", "source_event_at": "2026-07-21T12:00:00+00:00", "home_points": 0, "away_points": 3, "home_goals_for": 0, "home_goals_against": 2, "away_goals_for": 2, "away_goals_against": 0},
+    {"source_match_id": "SOURCE-V4-011-017", "source_event_at": "2026-07-19T12:00:00+00:00", "home_points": 3, "away_points": 0, "home_goals_for": 1, "home_goals_against": 0, "away_goals_for": 0, "away_goals_against": 1},
+    {"source_match_id": "SOURCE-V4-011-018", "source_event_at": "2026-07-17T12:00:00+00:00", "home_points": 1, "away_points": 1, "home_goals_for": 2, "home_goals_against": 2, "away_goals_for": 2, "away_goals_against": 2},
+    {"source_match_id": "SOURCE-V4-011-019", "source_event_at": "2026-07-15T12:00:00+00:00", "home_points": 3, "away_points": 0, "home_goals_for": 2, "home_goals_against": 1, "away_goals_for": 1, "away_goals_against": 2},
+    {"source_match_id": "SOURCE-V4-011-020", "source_event_at": "2026-07-13T12:00:00+00:00", "home_points": 0, "away_points": 3, "home_goals_for": 0, "home_goals_against": 1, "away_goals_for": 1, "away_goals_against": 0}
+  ]
+}
