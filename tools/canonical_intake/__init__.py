@@ -90,6 +90,15 @@ from .external_time_normalization import (
     SourceTimeNormalizationError,
     SourceTimeNormalizationResult,
 )
+from .team_context import (
+    TeamContextIdentityLinker,
+    TeamContextValidationError,
+    TeamIdentityConflict,
+    TeamIdentityLink,
+    TeamIdentityLinkObservation,
+    TeamIdentityLinkResult,
+    TeamSide,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -161,5 +170,12 @@ __all__ = [
     "NormalizedExternalSnapshotSet",
     "SourceTimeNormalizationError",
     "SourceTimeNormalizationResult",
+    "TeamContextIdentityLinker",
+    "TeamContextValidationError",
+    "TeamIdentityConflict",
+    "TeamIdentityLink",
+    "TeamIdentityLinkObservation",
+    "TeamIdentityLinkResult",
+    "TeamSide",
     "resolve_f_drive_output_path",
 ]

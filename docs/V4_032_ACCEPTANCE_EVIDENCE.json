@@ -1,0 +1,58 @@
+{
+  "report_contract_version": "v4-032-acceptance-evidence@1.0.0",
+  "task_id": "V4-032",
+  "task_name": "Team Context Intake & Identity Linker 1.0",
+  "batch_id": "BATCH-08",
+  "status": "PASS",
+  "implementation_status": "COMPLETE",
+  "contract_version": "team-context@1.0.0",
+  "evidence": {
+    "canonical_match_id_binding": "PASS",
+    "canonical_team_id_binding": "PASS",
+    "home_away_side_consistency": "PASS",
+    "alias_source_mapping": "PASS",
+    "unresolved_alias_fail_closed": "PASS",
+    "identity_conflict_fail_closed": "PASS",
+    "display_name_not_join_key": "PASS",
+    "source_time_provenance_lineage": "PASS",
+    "mapping_hash_recomputable": "PASS",
+    "no_orphan_context": "PASS",
+    "append_only_revision_supersedes": "PASS",
+    "duplicate_observation_noop": "PASS",
+    "model_field_rejection": "PASS",
+    "v333_and_f_drive_boundary": "PASS"
+  },
+  "tests": {
+    "targeted_command": "python -m unittest tests.unit.test_v4_032_team_context_identity -v",
+    "targeted_count": 7,
+    "targeted_failures": 0,
+    "targeted_status": "PASS",
+    "repository_command": "python -m unittest discover -s tests -p 'test_*.py' -q",
+    "repository_count": 298,
+    "repository_failures": 0,
+    "repository_status": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "execution_boundary": {
+    "production_supabase_writes": "NO",
+    "supabase_reads": "NO",
+    "database_connected": false,
+    "sql_executed": false,
+    "migration_added": false,
+    "migration_applied": false,
+    "prediction_executed": false,
+    "score_engine_executed": false,
+    "shadow_executed": false,
+    "public_page_deployed": false,
+    "promotion_executed": false,
+    "v333_mutated": "NO"
+  },
+  "scope_boundary": {
+    "v4_032_only": true,
+    "v4_033_plus_implemented": false,
+    "v4_036_plus_implemented": false,
+    "batch_08_closure": false,
+    "next_state": "BATCH-08 WAVE 2"
+  },
+  "working_tree": "CLEAN after V4-032 focused commit"
+}

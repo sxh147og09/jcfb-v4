@@ -1,0 +1,36 @@
+{
+  "base": {
+    "match_id": "00000000-0000-5000-8000-000000000001",
+    "side": "HOME",
+    "team_alias": "Example Home FC",
+    "team_id": "team-home-001",
+    "team_display_name": "Example Home FC",
+    "source": "Example club context feed",
+    "source_type": "TEAM_CONTEXT_FEED",
+    "source_reference": "ref://context/20260904/001/home/identity-001",
+    "source_timestamp": "2026-09-04T08:50:00+08:00",
+    "observed_at": "2026-09-04T09:00:00+08:00",
+    "ingested_at": "2026-09-04T09:01:00+08:00",
+    "effective_at": "2026-09-04T09:00:00+08:00",
+    "cutoff_at": "2026-09-04T18:00:00+08:00",
+    "provenance_ref": "ref://context/20260904/001/home/identity-001",
+    "metadata": {"source_revision": "r1"}
+  },
+  "away": {
+    "match_id": "00000000-0000-5000-8000-000000000001",
+    "side": "AWAY",
+    "team_alias": "Example Away",
+    "team_id": "team-away-002",
+    "team_display_name": "Example Away",
+    "source": "Example club context feed",
+    "source_type": "TEAM_CONTEXT_FEED",
+    "source_reference": "ref://context/20260904/001/away/identity-001",
+    "source_timestamp": "2026-09-04T08:50:00+08:00",
+    "observed_at": "2026-09-04T09:00:00+08:00",
+    "ingested_at": "2026-09-04T09:01:00+08:00",
+    "effective_at": "2026-09-04T09:00:00+08:00",
+    "cutoff_at": "2026-09-04T18:00:00+08:00",
+    "provenance_ref": "ref://context/20260904/001/away/identity-001",
+    "metadata": {"source_revision": "r1"}
+  }
+}
