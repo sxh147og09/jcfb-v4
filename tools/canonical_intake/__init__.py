@@ -17,6 +17,15 @@ from .match_identity import (
     MatchObservation,
     resolve_f_drive_output_path,
 )
+from .time_lineage import (
+    AvailabilityTimeBasis,
+    TimeGateResult,
+    TimeGateStatus,
+    TimeLineageDecision,
+    TimeLineageInput,
+    TimeLineageStore,
+    TimeLineageValidationError,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -31,5 +40,12 @@ __all__ = [
     "IdentityIntakeResult",
     "MatchObservation",
     "FactIntakeResult",
+    "AvailabilityTimeBasis",
+    "TimeGateResult",
+    "TimeGateStatus",
+    "TimeLineageDecision",
+    "TimeLineageInput",
+    "TimeLineageStore",
+    "TimeLineageValidationError",
     "resolve_f_drive_output_path",
 ]
