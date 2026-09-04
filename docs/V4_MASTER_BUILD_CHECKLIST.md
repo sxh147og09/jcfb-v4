@@ -3,8 +3,8 @@
 ## Registry status
 
 - Registry Version: `v4-task-registry-001-100@1.0.0`
-- Recovery Status: `COMPLETE`; `V4-012` through `V4-027` are COMPLETE; V4-028 through V4-100 remain not started.
-- Live task status: `V4-027 = COMPLETE`; the V4-020 through V4-027 acceptance reports/evidence are authoritative for the rows below, whose legacy mojibake task labels are retained unchanged.
+- Recovery Status: `COMPLETE`; `V4-012` through `V4-027` are COMPLETE; BATCH-06 Closure Gate is PASS; V4-028 through V4-100 remain not started.
+- Live task status: `BATCH-06 = COMPLETE`; the V4-020 through V4-027 acceptance reports/evidence and BATCH-06 Closure Review are authoritative for the rows below, whose legacy mojibake task labels are retained unchanged.
 - Source of truth: `docs/V4_TASK_REGISTRY_001_100.md` is the authoritative task-definition registry. This checklist is the execution-status view.
 - Planning status: `V4-012–V4-100 Batch Planning = PASS`; BATCH-01 / V4-012 design-only acceptance = PASS.
 
@@ -283,4 +283,4 @@ Fresh disposable PostgreSQL evidence is complete: 20/20 smoke cases and 15/15 da
 - Classification register: `docs/V4_EXECUTION_CLASSIFICATION.md`
 - Acceptance rules: `docs/V4_BATCH_ACCEPTANCE_RULES.md`
 
-Next execution gate: **BATCH-06 Closure Review**. BATCH-04 / V4-018 through V4-019 is COMPLETE under `docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`; V4-020 through V4-027 are complete under local no-write boundaries. No public deployment or prediction execution has started.
+Next execution gate: **BATCH-07 Scope & Entry Review**. BATCH-04 / V4-018 through V4-019 is COMPLETE under `docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`; V4-020 through V4-027 and BATCH-06 Closure are complete under local no-write boundaries. No public deployment or prediction execution has started.

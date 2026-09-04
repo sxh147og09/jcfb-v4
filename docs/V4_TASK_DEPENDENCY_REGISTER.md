@@ -1,6 +1,6 @@
 # JCFB V4 Task Dependency Register 001–100 1.0
 
-Status: `PASS` for registry coverage and acyclic planning graph; `V4-012` through `V4-027 COMPLETE`; BATCH-05 Closure Gate is PASS; BATCH-06 task acceptance is complete and Closure Review is next.
+Status: `PASS` for registry coverage and acyclic planning graph; `V4-012` through `V4-027 COMPLETE`; BATCH-05 and BATCH-06 Closure Gates are PASS.
 
 Dependency Identity: `v4-task-dependency-register-001-100@1.0.0`
 Revision: `r002`

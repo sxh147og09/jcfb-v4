@@ -1,6 +1,6 @@
 # JCFB V4 Batch Execution Plan 1.0
 
-Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS` / `BATCH-04 ACCEPTANCE PASS` / `V4-020 ACCEPTANCE PASS` / `V4-021 ACCEPTANCE PASS` / `V4-022 ACCEPTANCE PASS` / `V4-023 ACCEPTANCE PASS` / `BATCH-05 CLOSURE REVIEW PASS` / `V4-024 ACCEPTANCE PASS` / `V4-025 ACCEPTANCE PASS` / `V4-026 ACCEPTANCE PASS` / `V4-027 ACCEPTANCE PASS` / `BATCH-06 TASK ACCEPTANCE COMPLETE / CLOSURE REVIEW NEXT`
+Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS` / `BATCH-04 ACCEPTANCE PASS` / `V4-020 ACCEPTANCE PASS` / `V4-021 ACCEPTANCE PASS` / `V4-022 ACCEPTANCE PASS` / `V4-023 ACCEPTANCE PASS` / `BATCH-05 CLOSURE REVIEW PASS` / `V4-024 ACCEPTANCE PASS` / `V4-025 ACCEPTANCE PASS` / `V4-026 ACCEPTANCE PASS` / `V4-027 ACCEPTANCE PASS` / `BATCH-06 CLOSURE REVIEW PASS`
 
 Plan Identity: `v4-batch-execution-plan@1.0.0`
 Plan Revision: `r003`
@@ -90,4 +90,4 @@ For each future batch: freeze the manifest; verify all source task IDs; validate
 
 ## 7. Next execution boundary
 
-Batch state: **BATCH-06 TASK ACCEPTANCE COMPLETE / CLOSURE REVIEW NEXT**. V4-024 through V4-027 are complete under their local no-write boundaries. No model run, Shadow run, public deployment, Promotion, or V3.3.3 mutation occurred.
+Batch state: **BATCH-06 COMPLETE / CLOSURE REVIEW PASS**. V4-024 through V4-027 are complete under their local no-write boundaries. No model run, Shadow run, public deployment, Promotion, or V3.3.3 mutation occurred. The next permitted activity is a separate BATCH-07 Scope & Entry Review.
