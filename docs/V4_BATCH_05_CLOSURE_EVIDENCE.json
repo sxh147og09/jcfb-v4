@@ -44,6 +44,6 @@
     "v4_024_plus_implemented": false,
     "scope_status": "PASS"
   },
-  "git_commit": "PENDING_CLOSURE_COMMIT",
-  "working_tree_after_commit": "PENDING_CLOSURE_COMMIT"
+  "git_commit": "eea18cb",
+  "working_tree_after_commit": "CLEAN after BATCH-05 Closure Review commit"
 }
