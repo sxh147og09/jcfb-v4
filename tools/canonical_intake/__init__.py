@@ -26,6 +26,13 @@ from .time_lineage import (
     TimeLineageStore,
     TimeLineageValidationError,
 )
+from .orchestrator import (
+    CanonicalIntakeOrchestrator,
+    IntakeDeliveryRecord,
+    IntakeOutcome,
+    IntakeResult,
+    OrchestratorValidationError,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -47,5 +54,10 @@ __all__ = [
     "TimeLineageInput",
     "TimeLineageStore",
     "TimeLineageValidationError",
+    "CanonicalIntakeOrchestrator",
+    "IntakeDeliveryRecord",
+    "IntakeOutcome",
+    "IntakeResult",
+    "OrchestratorValidationError",
     "resolve_f_drive_output_path",
 ]

@@ -1,6 +1,6 @@
 # JCFB V4 Task Dependency Register 001–100 1.0
 
-Status: `PASS` for registry coverage and acyclic planning graph; `V4-012` through `V4-022 COMPLETE`; V4-023 is the next execution boundary.
+Status: `PASS` for registry coverage and acyclic planning graph; `V4-012` through `V4-023 COMPLETE`; BATCH-05 Closure Review is the next execution boundary.
 
 Dependency Identity: `v4-task-dependency-register-001-100@1.0.0`
 Revision: `r002`
@@ -38,7 +38,7 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 | V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCH-05 | V4-019 | V4-021, V4-022, V4-023 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-021 | V4-021｜Canonical Fact Envelope & Availability Semantics 1.0 | BATCH-05 | V4-020 | V4-022, V4-023, V4-038, V4-050 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-022 | V4-022｜Cutoff, Timestamp & Provenance Lineage 1.0 | BATCH-05 | V4-020, V4-021 | V4-023, V4-038, V4-050, V4-076 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
-| V4-023 | V4-023｜Canonical Intake Orchestrator & Deduplication 1.0 | BATCH-05 | V4-020, V4-021, V4-022 | V4-024, V4-025, V4-028, V4-029, V4-030, V4-032 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
+| V4-023 | V4-023｜Canonical Intake Orchestrator & Deduplication 1.0 | BATCH-05 | V4-020, V4-021, V4-022 | V4-024, V4-025, V4-028, V4-029, V4-030, V4-032 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-024 | V4-024｜Official Lottery Five-Market Feed Adapter 1.0 | BATCH-06 | V4-023 | V4-026, V4-027 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-025 | V4-025｜Official Screenshot Intake & OCR Verification 1.0 | BATCH-06 | V4-023 | V4-026, V4-027 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-026 | V4-026｜Official Market Availability & Missingness Gate 1.0 | BATCH-06 | V4-024, V4-025 | V4-027 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |

@@ -1,0 +1,13 @@
+{
+  "idempotency_key": "fixture:2026-09-04:001:r1",
+  "time_lineage": {
+    "fact_object_id": "00000000-0000-5000-8000-000000000001",
+    "source_timestamp": "2026-09-04T08:58:00+08:00",
+    "source_published_at": "2026-09-04T08:55:00+08:00",
+    "observed_at": "2026-09-04T09:00:00+08:00",
+    "ingested_at": "2026-09-04T09:01:00+08:00",
+    "prediction_cutoff_at": "2026-09-04T09:00:00+08:00",
+    "kickoff_at": "2026-09-04T19:35:00+08:00",
+    "availability_time_basis": "SOURCE_PUBLISHED_AT"
+  }
+}
