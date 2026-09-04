@@ -47,5 +47,5 @@
     "batch_08_implemented": false,
     "next_state": "BATCH-06 COMPLETE / BATCH-07 SCOPE & ENTRY REVIEW ONLY"
   },
-  "final_head": "PENDING_CLOSURE_COMMIT"
+  "final_head": "56a406e"
 }

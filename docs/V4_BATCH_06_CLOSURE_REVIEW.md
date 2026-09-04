@@ -4,7 +4,7 @@ Workspace: `F:\Projects\jcfb-v4`
 
 Baseline: `main` / `7c5f023`
 
-Final HEAD: recorded in the closure evidence after the closure commit
+Final HEAD: `56a406e` (`docs(batch-06): close continuous execution`)
 
 ## Closure Decision
 
