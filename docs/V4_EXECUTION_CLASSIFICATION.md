@@ -1,12 +1,12 @@
 # JCFB V4 Execution Classification 012–100 1.0
 
-Status: `PASS` for complete classification and unique primary mapping; `V4-012–V4-017 COMPLETE`; V4-018+ execution remains not started.
+Status: `PASS` for complete classification and unique primary mapping; `V4-012–V4-019 COMPLETE`; V4-020+ execution remains not started.
 
 Classification Identity: `v4-execution-classification-012-100@1.0.0`
-Revision: `r002`
-Audit Date: `2026-09-01` (`Asia/Shanghai`)
+Revision: `r003`
+Audit Date: `2026-09-04` (`Asia/Shanghai`)
 Source of truth: `docs/V4_TASK_REGISTRY_001_100.md`
-Execution Declaration: **V4-012 DESIGN-ONLY; BATCH-03 READINESS/PACKAGE STATIC-ONLY; NO DATABASE EXECUTION**
+Execution Declaration: **BATCH-04 PRODUCTION SCHEMA APPLY AND V4 WRITE BOUNDARY COMPLETE; NO MODEL OR PUBLIC RELEASE EXECUTION**
 
 ## 1. Classification semantics
 
@@ -27,8 +27,8 @@ The classification below is a complete register, not a candidate envelope. Accep
 | V4-015 | V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCHABLE + PARALLEL | BATCH-02 | V4-013 | NO | NO | NO | COMPLETE |
 | V4-016 | V4-016｜Staging Readiness & Disposable Target Contract 1.0 | BATCHABLE + SERIAL | BATCH-03 | V4-014, V4-015 | NO | NO | NO | COMPLETE |
 | V4-017 | V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | SERIAL | BATCH-03 | V4-016 | NO | NO | NO | COMPLETE |
-| V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-04 | V4-017 | YES | NO | YES | TODO |
-| V4-019 | V4-019｜Production Database Write Activation HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-04 | V4-018 | YES | YES | YES | TODO |
+| V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-04 | V4-017 | YES | NO | YES | COMPLETE |
+| V4-019 | V4-019｜Production Database Write Activation HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-04 | V4-018 | YES | YES | YES | COMPLETE |
 | V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCHABLE + SERIAL | BATCH-05 | V4-019 | YES | NO | NO | TODO |
 | V4-021 | V4-021｜Canonical Fact Envelope & Availability Semantics 1.0 | BATCHABLE + PARALLEL | BATCH-05 | V4-020 | YES | NO | NO | TODO |
 | V4-022 | V4-022｜Cutoff, Timestamp & Provenance Lineage 1.0 | BATCHABLE + PARALLEL | BATCH-05 | V4-020, V4-021 | YES | NO | NO | TODO |
@@ -128,4 +128,4 @@ The classification below is a complete register, not a candidate envelope. Accep
 
 ## 4. Batch mapping disposition
 
-The mapping remains the authoritative classification register. V4-012 is accepted as a design-only task, V4-013 through V4-015 as BATCH-02 implementation tasks, and V4-016 through V4-017 as BATCH-03 readiness/package tasks. V4-018 through V4-100 remain TODO; BATCH-04 remains a separate HARD_GATE and no downstream batch is authorized automatically.
+The mapping remains the authoritative classification register. V4-012 is accepted as a design-only task, V4-013 through V4-015 as BATCH-02 implementation tasks, V4-016 through V4-017 as BATCH-03 readiness/package tasks, and V4-018 through V4-019 as the completed BATCH-04 Production schema/write-boundary tasks. V4-020 through V4-100 remain TODO; no downstream batch is authorized automatically.

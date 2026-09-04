@@ -461,7 +461,18 @@ def run_batch_03_cross_doc_consistency(repo_root: Path) -> Dict[str, Any]:
     require("docs/V4_BATCH_ACCEPTANCE_RULES.md", lambda value: "BATCH-03 ACCEPTANCE PASS" in value and "BATCH-04" in value, "acceptance rules advance next batch")
     require("docs/V4_TASK_DEPENDENCY_REGISTER.md", lambda value: "| V4-016 |" in value and "| V4-017 |" in value and "| COMPLETE |" in value, "dependency register status is live")
     require("docs/V4_DEPENDENCY_GRAPH_012_100.md", lambda value: "BATCH-03 ACCEPTANCE PASS" in value and "BATCH-04" in value, "dependency graph status is live")
-    require("README.md", lambda value: "V4-018 NEXT" in value and "V4-016 COMPLETE" in value and "V4-017 COMPLETE" in value, "README status is live")
+    require(
+        "README.md",
+        lambda value: (
+            "V4-016 COMPLETE" in value
+            and "V4-017 COMPLETE" in value
+            and (
+                "V4-018 NEXT" in value
+                or ("V4-018 COMPLETE" in value and "V4-019 COMPLETE" in value and "V4-020 NEXT" in value)
+            )
+        ),
+        "README preserves BATCH-03 completion and the live downstream boundary",
+    )
     require("docs/V4_STAGING_READINESS.md", lambda value: "RUNTIME_PENDING_DISPOSABLE_DB" in value and "PRODUCTION" in value, "readiness document states runtime and Production boundary")
     require("docs/V4_MIGRATION_ACCEPTANCE_PACKAGE.md", lambda value: "NO_PRODUCTION_APPLY_IN_THIS_BATCH" in value and "V4-017" in value, "acceptance document states no-apply boundary")
     require("docs/V4_BATCH_03_IMPLEMENTATION.md", lambda value: "V4-016" in value and "V4-017" in value and "BATCH-04" in value, "implementation map is live")

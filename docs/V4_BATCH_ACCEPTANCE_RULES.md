@@ -1,11 +1,11 @@
 # JCFB V4 Batch Acceptance Rules 1.0
 
-Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS`
+Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS` / `BATCH-04 ACCEPTANCE PASS`
 
 Rules Identity: `v4-batch-acceptance-rules@1.0.0`
-Revision: `r002`
-Audit Date: `2026-09-01` (`Asia/Shanghai`)
-Execution Declaration: **V4-012 DESIGN-ONLY ACCEPTED; BATCH-02 NO-WRITE HARNESS/CONTRACTS ACCEPTED; BATCH-03 READINESS/PACKAGE STATIC-ONLY ACCEPTED; NO DATABASE EXECUTION**
+Revision: `r003`
+Audit Date: `2026-09-04` (`Asia/Shanghai`)
+Execution Declaration: **BATCH-04 PRODUCTION SCHEMA APPLY AND V4 WRITE BOUNDARY ACCEPTED; NO MODEL, SHADOW, OR PUBLIC RELEASE EXECUTION**
 
 ## 1. Purpose, authority, and source of truth
 
@@ -127,6 +127,6 @@ The safe outcome is BLOCKED, RUN_INVALID, or NOT_VERIFIED with retained evidence
 
 ## 9. Checklist and current disposition
 
-V4-012 through V4-017 may be marked `[x]` only after each independent artifact, validation, documentation, and Git trace passes. V4-018 through V4-100 remain unchecked. BATCH-03 is accepted with target-dependent database evidence explicitly pending.
+V4-012 through V4-019 are marked `[x]` only after each independent artifact, validation, documentation, and Git trace passes. V4-020 through V4-100 remain unchecked. BATCH-04 is accepted by the final Production 0009 apply report.
 
-Next execution batch: **BATCH-04 — Formal Schema Apply & Production DB Write HARD_GATE**. BATCH-03 / V4-016 and V4-017 is accepted as a no-write readiness and acceptance-package batch; no database or Supabase execution occurred and approval was not granted.
+Next execution batch: **BATCH-05 — Canonical Data Intake Foundation**. BATCH-04 / V4-018 and V4-019 is accepted after explicit approval and final verification. This acceptance does not authorize BATCH-05, model execution, public deployment, or V3.3.3 mutation.

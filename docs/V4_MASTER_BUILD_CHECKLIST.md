@@ -3,7 +3,7 @@
 ## Registry status
 
 - Registry Version: `v4-task-registry-001-100@1.0.0`
-- Recovery Status: `COMPLETE` for task registration and batch planning; `V4-012` through `V4-017` are COMPLETE; V4-018 through V4-100 remain not started.
+- Recovery Status: `COMPLETE`; `V4-012` through `V4-019` are COMPLETE; V4-020 through V4-100 remain not started.
 - Source of truth: `docs/V4_TASK_REGISTRY_001_100.md` is the authoritative task-definition registry. This checklist is the execution-status view.
 - Planning status: `V4-012–V4-100 Batch Planning = PASS`; BATCH-01 / V4-012 design-only acceptance = PASS.
 
@@ -26,8 +26,8 @@
 - [x] V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0
 - [x] V4-016｜Staging Readiness & Disposable Target Contract 1.0
 - [x] V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0
-- [ ] V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0
-- [ ] V4-019｜Production Database Write Activation HARD_GATE 1.0
+- [x] V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0
+- [x] V4-019｜Production Database Write Activation HARD_GATE 1.0
 - [ ] V4-020｜Canonical Match Identity & Schedule Intake 1.0
 - [ ] V4-021｜Canonical Fact Envelope & Availability Semantics 1.0
 - [ ] V4-022｜Cutoff, Timestamp & Provenance Lineage 1.0
@@ -120,7 +120,7 @@
 4. Documentation completed
 5. Git traceability exists
 
-A batch name, registry entry, or planning PASS is not task completion. V4-012 through V4-017 are marked `[x]` only because each has an independent engineering artifact, validation evidence, documentation, and Git traceability. V4-018 through V4-100 remain unchecked.
+A batch name, registry entry, or planning PASS is not task completion. V4-012 through V4-019 are marked `[x]` only because each has an independent engineering artifact, validation evidence, documentation, and Git traceability. V4-020 through V4-100 remain unchecked.
 
 ## 1. Task Name / Primary Batch / Classification mapping
 
@@ -143,8 +143,8 @@ A batch name, registry entry, or planning PASS is not task completion. V4-012 th
 | [x] | V4-015 | V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCH-02 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [x] | V4-016 | V4-016｜Staging Readiness & Disposable Target Contract 1.0 | BATCH-03 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [x] | V4-017 | V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | BATCH-03 | SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
-| [ ] | V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | BATCH-04 | SERIAL + HARD_GATE | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
-| [ ] | V4-019 | V4-019｜Production Database Write Activation HARD_GATE 1.0 | BATCH-04 | SERIAL + HARD_GATE | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
+| [x] | V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | BATCH-04 | SERIAL + HARD_GATE | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
+| [x] | V4-019 | V4-019｜Production Database Write Activation HARD_GATE 1.0 | BATCH-04 | SERIAL + HARD_GATE | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCH-05 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-021 | V4-021｜Canonical Fact Envelope & Availability Semantics 1.0 | BATCH-05 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-022 | V4-022｜Cutoff, Timestamp & Provenance Lineage 1.0 | BATCH-05 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
@@ -259,7 +259,7 @@ Runtime preflight, migration execution, catalog capture, RLS, triggers, views, a
 |---|---|---|---|
 | V4-013 | `tools/migration_harness/manifest.py`, `tools/migration_harness/runner.py` | 0001–0009 text-only manifest resolution; deterministic plan hash; plan-only/no-write and Production hard-block tests | PASS |
 | V4-014 | `tools/migration_harness/preflight.py`, `tools/migration_harness/schema_diff.py` | PF-01–PF-18 machine checks; fail-closed missing target/runtime evidence; expected snapshot and diff classifications | PASS |
-| V4-015 | `tools/migration_harness/negative.py`; `config/migration_harness/v4_negative_case_registry.json` | 20-case smoke catalog shape; 22/22 unit refusal contracts PASS; 15 database-enforcement cases runtime-pending | PASS |
+| V4-015 | `tools/migration_harness/negative.py`; `config/migration_harness/v4_negative_case_registry.json` | 20/20 smoke and 15/15 database-enforcement runtime cases PASS on the exact BATCH-04 apply HEAD | PASS |
 
 Runtime PostgreSQL/Supabase migration execution, catalog capture, RLS, triggers, views, advisor, and 20-case smoke evidence remain `NOT_EXECUTED_REQUIRES_DISPOSABLE_DB`. Unit contract PASS does not claim database runtime PASS.
 
@@ -270,7 +270,7 @@ Runtime PostgreSQL/Supabase migration execution, catalog capture, RLS, triggers,
 | V4-016 | `tools/migration_harness/readiness.py`; readiness contract and staging target template | Three-environment state contract; target identity/isolation/reset/secrets validator; Production hard block; runtime target remains `RUNTIME_PENDING_DISPOSABLE_DB` | PASS |
 | V4-017 | `tools/migration_harness/acceptance.py`; acceptance schema and evidence index | Manifest 0001–0009; PF-01..PF-18; 20 smoke/22 negative matrix; RLS/trigger/view/security/no-future/Tier-A/history/schema-diff references; roll-forward control-flow drill; separate signoff placeholders | PASS |
 
-Runtime disposable/staging PostgreSQL evidence remains explicitly pending: 20 smoke cases and 15 database-enforcement negative cases are not counted as PASS. `NO_PRODUCTION_APPLY_IN_THIS_BATCH = TRUE`.
+Fresh disposable PostgreSQL evidence is complete: 20/20 smoke cases and 15/15 database-enforcement cases PASS on Git HEAD `e05b6be7df74927afed4161ec81ac298de6abfff`. The separate approved Production 0009 apply and final verification are recorded in `docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`.
 
 ## 4. Recovery and batch references
 
@@ -282,4 +282,4 @@ Runtime disposable/staging PostgreSQL evidence remains explicitly pending: 20 sm
 - Classification register: `docs/V4_EXECUTION_CLASSIFICATION.md`
 - Acceptance rules: `docs/V4_BATCH_ACCEPTANCE_RULES.md`
 
-Next execution batch: **BATCH-04 — Formal Schema Apply & Production DB Write HARD_GATE**. BATCH-03 / V4-016 through V4-017 are accepted for static readiness and evidence packaging with runtime database evidence explicitly pending; no Production or Supabase write occurred.
+Next execution batch: **BATCH-05 — Canonical Data Intake Foundation**. BATCH-04 / V4-018 through V4-019 is COMPLETE under `docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`; no BATCH-05 work, public deployment, or prediction execution has started.

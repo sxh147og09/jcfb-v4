@@ -129,12 +129,14 @@ Require-Text 'Recovery audit' $recoveryAudit 'NO V4-012+ TASK EXECUTED DURING TH
 Require-Text 'Recovery audit' $recoveryAudit 'V4-012 is accepted as design-only'
 Require-Text 'Batch plan' $plan '| BATCH-01 | V4-012 |'
 Require-Text 'Batch plan' $plan '| BATCH-02 | V4-013'
-if ($plan.IndexOf('Next execution batch: **BATCH-04', [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -and $plan.IndexOf('BATCH-03 / V4-016 through V4-017 is accepted', [System.StringComparison]::OrdinalIgnoreCase) -ge 0) { Add-Pass 'Batch plan records accepted BATCH-03 and points to BATCH-04' } else { Add-Failure 'Batch plan does not record accepted BATCH-03 and BATCH-04 as next' }
+$batch04Pending = $plan.IndexOf('Next execution batch: **BATCH-04', [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -and $plan.IndexOf('BATCH-03 / V4-016 through V4-017 is accepted', [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+$batch04Complete = $plan.IndexOf('Next execution batch: **BATCH-05', [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -and $plan.IndexOf('BATCH-04 / V4-018 through V4-019 is COMPLETE', [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+if ($batch04Pending -or $batch04Complete) { Add-Pass 'Batch plan preserves the live post-BATCH-03 execution boundary' } else { Add-Failure 'Batch plan does not preserve a valid BATCH-04 pending or completed boundary' }
 Require-Text 'Classification' $classification '| V4-012 | Migration Dry-Run & Validation Harness Design 1.0 | BATCHABLE + SERIAL | BATCH-01 | V4-011 | NO | NO | NO | COMPLETE |'
 Require-Text 'Master Checklist' $checklist '- [x] V4-012 Migration Dry-Run & Validation Harness Design 1.0'
 Require-Text 'Master Checklist mapping' $checklist '| [x] | V4-012 | Migration Dry-Run & Validation Harness Design 1.0 | BATCH-01 | BATCHABLE + SERIAL | RECOVERED_FROM_REPO_HISTORY |'
-Require-Text 'Master Checklist' $checklist 'Next execution batch: **BATCH-04'
-Require-Text 'Acceptance rules' (Read-RepoText 'docs/V4_BATCH_ACCEPTANCE_RULES.md') 'Next execution batch: **BATCH-04'
+Require-Text 'Master Checklist' $checklist 'Next execution batch: **BATCH-05'
+Require-Text 'Acceptance rules' (Read-RepoText 'docs/V4_BATCH_ACCEPTANCE_RULES.md') 'Next execution batch: **BATCH-05'
 
 $designTokens = @(
     'DISPOSABLE_LOCAL', 'STAGING', 'PRODUCTION', 'BLOCKED_UNTIL_EXPLICIT_REQUEST',

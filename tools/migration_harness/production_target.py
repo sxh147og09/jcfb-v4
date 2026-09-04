@@ -487,7 +487,7 @@ def run_production_target_cross_doc_consistency(repo_root: Path) -> Dict[str, An
         ),
         "docs/V4_RUNTIME_ROLE_BOUNDARY.md": ("project_ref", "BOUND_APPROVED", "PRODUCTION"),
         "docs/V4_MIGRATION_PREFLIGHT.md": (PRODUCTION_TARGET_IDENTITY_PATH, "target identity is known", "Supabase Preflight Plan: PASS", "BATCH_04_PRODUCTION_READINESS_FINAL_REVIEW_3"),
-        "README.md": ("docs/V4_PRODUCTION_TARGET_BINDING.md", "V4-018 NEXT", "Production apply approval", PREFLIGHT_PLAN_PATH),
+        "README.md": ("docs/V4_PRODUCTION_TARGET_BINDING.md", "V4-018 COMPLETE", "Production apply approval", PREFLIGHT_PLAN_PATH),
     }
     for relative, needles in requirements.items():
         path = root / relative

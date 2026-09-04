@@ -1,10 +1,10 @@
 # JCFB V4 Task Dependency Register 001–100 1.0
 
-Status: `PASS` for registry coverage and acyclic planning graph; `V4-012` through `V4-017 COMPLETE`; BATCH-04 remains the next separate HARD_GATE.
+Status: `PASS` for registry coverage and acyclic planning graph; `V4-012` through `V4-019 COMPLETE`; BATCH-05 is the next execution boundary.
 
 Dependency Identity: `v4-task-dependency-register-001-100@1.0.0`
-Revision: `r001`
-Audit Date: `2026-09-01` (`Asia/Shanghai`)
+Revision: `r002`
+Audit Date: `2026-09-04` (`Asia/Shanghai`)
 
 ## 1. Dependency source and semantics
 
@@ -33,8 +33,8 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 | V4-015 | V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCH-02 | V4-013 | V4-016 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-016 | V4-016｜Staging Readiness & Disposable Target Contract 1.0 | BATCH-03 | V4-014, V4-015 | V4-017 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-017 | V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | BATCH-03 | V4-016 | V4-018 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
-| V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | BATCH-04 | V4-017 | V4-019 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-019 | V4-019｜Production Database Write Activation HARD_GATE 1.0 | BATCH-04 | V4-018 | V4-020 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
+| V4-018 | V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0 | BATCH-04 | V4-017 | V4-019 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
+| V4-019 | V4-019｜Production Database Write Activation HARD_GATE 1.0 | BATCH-04 | V4-018 | V4-020 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
 | V4-020 | V4-020｜Canonical Match Identity & Schedule Intake 1.0 | BATCH-05 | V4-019 | V4-021, V4-022, V4-023 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-021 | V4-021｜Canonical Fact Envelope & Availability Semantics 1.0 | BATCH-05 | V4-020 | V4-022, V4-023, V4-038, V4-050 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-022 | V4-022｜Cutoff, Timestamp & Provenance Lineage 1.0 | BATCH-05 | V4-020, V4-021 | V4-023, V4-038, V4-050, V4-076 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
@@ -124,7 +124,7 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 | BATCH-01 | V4-011 | V4-012 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-02 | BATCH-01 | V4-013–V4-015 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-03 | BATCH-02 | V4-016–V4-017 | Ordinary dependency edge; child acceptance remains independent. |
-| BATCH-04 | BATCH-03 | V4-018–V4-019 | Gate-bearing; separate approval required. |
+| BATCH-04 | BATCH-03 | V4-018–V4-019 | COMPLETE under explicit approval and final Production verification. |
 | BATCH-05 | BATCH-04 | V4-020–V4-023 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-06 | BATCH-05 | V4-024–V4-027 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-07 | BATCH-05 | V4-028–V4-031 | Ordinary dependency edge; child acceptance remains independent. |

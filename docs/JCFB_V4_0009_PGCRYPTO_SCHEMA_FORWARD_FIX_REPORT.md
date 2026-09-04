@@ -58,7 +58,7 @@ commits. This preserves the frozen SQL and lets `0009` apply its forward fix;
 Validation was run after destroying the previous data directory and starting a
 new project-scoped PostgreSQL 16.15 container with no migration history.
 
-- **Run ID:** `prebatch04-20260904T033826Z-7bf0d60f620347fd925bdf1af94a17d4`
+- **Run ID:** `prebatch04-20260904T034354Z-9f2784895c3c48a6bf0ea2cbcb688dae`
 - **Target:** `DISPOSABLE_LOCAL` / `jcfb-v4-disposable-runtime`
 - **pgcrypto:** version `1.3`, installed schema `extensions`
 - **Canonical hash verification:** `9/9 PASS`
@@ -74,14 +74,13 @@ new project-scoped PostgreSQL 16.15 container with no migration history.
 
 The redacted runtime evidence is persisted under:
 
-`.runtime/reports/prebatch04/runs/prebatch04-20260904T033826Z-7bf0d60f620347fd925bdf1af94a17d4/`
+`.runtime/reports/prebatch04/runs/prebatch04-20260904T034354Z-9f2784895c3c48a6bf0ea2cbcb688dae/`
 
-The run captured Git HEAD `aa59693621db29ea815f76da1afbcbb8928ee0f3` on
-`main`, and the report pointer, JSON, Markdown, and repository HEAD were
-verified by the read-only runtime evidence review. The working tree was
-intentionally recorded as dirty because this implementation package was still
-being assembled at capture time; a post-commit evidence run is required for
-the final handoff snapshot.
+The run captured Git HEAD `e05b6be7df74927afed4161ec81ac298de6abfff` on
+`main` with `working_tree_clean=true`. The report pointer, per-run JSON and
+Markdown, and repository HEAD were verified by the read-only runtime evidence
+review. This report document was finalized after that evidence write; the
+implementation itself remains traceable to the captured commit.
 
 ## Approval boundary
 

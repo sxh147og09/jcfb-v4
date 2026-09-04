@@ -1,11 +1,11 @@
 # JCFB V4 Dependency Graph 012–100 1.0
 
-Status: `DEPENDENCY GRAPH PASS` / `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS` / `BATCH-04 HARD_GATE NEXT`
+Status: `DEPENDENCY GRAPH PASS` / `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS` / `BATCH-04 ACCEPTANCE PASS` / `BATCH-05 NEXT`
 
 Graph Identity: `v4-dependency-graph-012-100@1.0.0`
-Revision: `r002`
-Audit Date: `2026-09-01` (`Asia/Shanghai`)
-Execution Declaration: **BATCH-03 READINESS/PACKAGE STATIC-ONLY ACCEPTED; NO DATABASE OR HARNESS RUNTIME EXECUTION**
+Revision: `r003`
+Audit Date: `2026-09-04` (`Asia/Shanghai`)
+Execution Declaration: **BATCH-04 PRODUCTION SCHEMA APPLY AND V4 WRITE BOUNDARY ACCEPTED; NO MODEL, SHADOW, OR PUBLIC RELEASE EXECUTION**
 
 ## 1. Scope and evidence boundary
 
@@ -22,7 +22,7 @@ flowchart TD
   T13 --> T15["V4-015 Smoke/RLS/Trigger"]
   T14 --> T16["V4-016 Staging"]
   T15 --> T16
-  T16 --> T17["V4-017 Acceptance Package"] --> T18["V4-018 Schema Apply HARD_GATE"] --> T19["V4-019 Production DB Writes HARD_GATE"]
+  T16 --> T17["V4-017 Acceptance Package"] --> T18["V4-018 Schema Apply COMPLETE"] --> T19["V4-019 V4 Write Boundary COMPLETE"]
   T19 --> B05["BATCH-05 Canonical Intake"] --> B06["BATCH-06 Official Odds"]
   B05 --> B07["BATCH-07 External Markets"]
   B05 --> B08["BATCH-08 Team Context"] --> B09["BATCH-09 Evidence"]
@@ -129,4 +129,4 @@ The fan-out groups are parallel development opportunities only after their upstr
 - Kahn-style cycle check: all task and batch nodes removed; residual nodes `0`; dependency cycles `0`.
 - The only historical edge is V4-011 -> V4-012. All later edges are explicitly reconstructed planning edges.
 
-No graph edge authorizes execution. BATCH-01 / V4-012, BATCH-02 / V4-013 through V4-015, and BATCH-03 / V4-016 through V4-017 are accepted within their no-write scopes; the next execution batch is BATCH-04, a separate HARD_GATE. No database or harness runtime execution occurred.
+No graph edge authorizes execution. BATCH-01 through BATCH-04 are accepted within their recorded scopes; BATCH-04 crossed its Production hard gate only after explicit approval and final verification. The next execution boundary is BATCH-05, which remains unauthorized and not started.

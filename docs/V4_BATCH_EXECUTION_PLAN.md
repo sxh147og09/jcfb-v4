@@ -1,12 +1,12 @@
 # JCFB V4 Batch Execution Plan 1.0
 
-Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS`
+Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS` / `BATCH-04 ACCEPTANCE PASS`
 
 Plan Identity: `v4-batch-execution-plan@1.0.0`
-Plan Revision: `r002`
-Audit Date: `2026-09-01` (`Asia/Shanghai`)
+Plan Revision: `r003`
+Audit Date: `2026-09-04` (`Asia/Shanghai`)
 Baseline Revision: `1d418e6` (`main`); the recovery commit is the next documentation revision.
-Execution Declaration: **BATCH-01 DESIGN-ONLY; BATCH-02 NO-WRITE HARNESS; BATCH-03 READINESS/PACKAGE STATIC-ONLY; NO DATABASE EXECUTION**
+Execution Declaration: **BATCH-04 PRODUCTION SCHEMA APPLY AND V4 WRITE BOUNDARY COMPLETE; NO MODEL, SHADOW, OR PUBLIC RELEASE EXECUTION**
 
 ## 1. Decision and source of truth
 
@@ -19,7 +19,7 @@ The baseline repository and reachable Git history contained no original V4-013�
 - Exactly one primary batch exists for every task from V4-012 through V4-100.
 - A secondary parallel group may describe concurrency but never creates a second primary assignment.
 - A batch label is not a completion claim. Every child task still needs its own artifact, validation evidence, documentation, Git trace, and checklist decision.
-- V4-012 is accepted as the design-only BATCH-01 result. BATCH-02 / V4-013 through V4-015 is accepted as the no-write implementation boundary. BATCH-03 / V4-016 through V4-017 is accepted as the no-write readiness and acceptance-package boundary with runtime evidence pending. BATCH-04 remains next and is a HARD_GATE.
+- V4-012 is accepted as the design-only BATCH-01 result. BATCH-02 / V4-013 through V4-015 is accepted as the no-write implementation boundary. BATCH-03 / V4-016 through V4-017 is accepted as the readiness and acceptance-package boundary. BATCH-04 / V4-018 through V4-019 is accepted after explicit approval, exact Production apply, and final verification. BATCH-05 remains not started.
 - Supabase writes, Production/Shadow runtime, Promotion, activation, pointer switching, and release remain separately gated.
 
 ## 3. Formal batch register
@@ -29,7 +29,7 @@ The baseline repository and reachable Git history contained no original V4-013�
 | BATCH-01 | V4-012 | Migration Dry-Run & Validation Harness<br>Migration Dry-Run & Validation Harness Design 1.0 | BATCHABLE + SERIAL | V4-011 | NO | NO | NO | NO | V4-012 design; disposable target, runner, and evidence contracts | Design-only artifact complete and accepted; no harness or database write; V4-012 COMPLETE. | BATCH-02 |
 | BATCH-02 | V4-013–V4-015 | Dry-Run, Preflight & Negative Test Harness<br>V4-013｜Migration Dry-Run Harness Implementation 1.0<br>V4-014｜Migration Preflight & Schema-Diff Validator 1.0<br>V4-015｜Migration Smoke, RLS & Trigger Test Suite 1.0 | BATCHABLE + PARALLEL + SERIAL | BATCH-01 | YES inside frozen manifest | NO | NO | NO | Dry-run runner, preflight/schema diff, smoke/RLS/trigger/constraint tests | Each child has independent evidence; all failures fail closed; no apply. | BATCH-03 |
 | BATCH-03 | V4-016–V4-017 | Staging Readiness & Migration Acceptance Package<br>V4-016｜Staging Readiness & Disposable Target Contract 1.0<br>V4-017｜Migration Acceptance Package & Roll-forward Drill 1.0 | BATCHABLE + SERIAL | BATCH-02 | NO | NO | NO | NO | Disposable target contract; acceptance packet; roll-forward drill | Target and manifest are isolated and reviewable; approval is requested, not granted. | BATCH-04 |
-| BATCH-04 | V4-018–V4-019 | Formal Schema Apply & Production DB Write HARD_GATE<br>V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0<br>V4-019｜Production Database Write Activation HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-03 | NO | YES | YES only after approval | YES only after approval | Named apply event; V4 production write boundary; schema/role audit | Separate explicit approval for formal apply and production write activation; V3.3.3 untouched. | BATCH-05 |
+| BATCH-04 | V4-018–V4-019 | Formal Schema Apply & Production DB Write HARD_GATE<br>V4-018｜Formal Supabase Schema Apply HARD_GATE 1.0<br>V4-019｜Production Database Write Activation HARD_GATE 1.0 | SERIAL + HARD_GATE | BATCH-03 | NO | YES | YES only after approval | YES only after approval | Named apply event; V4 production write boundary; schema/role audit | `COMPLETE`: explicit approval, exact 0009-only resume, final verification, and V3.3.3 isolation passed. | BATCH-05 |
 | BATCH-05 | V4-020–V4-023 | Canonical Data Intake Foundation<br>V4-020｜Canonical Match Identity & Schedule Intake 1.0<br>V4-021｜Canonical Fact Envelope & Availability Semantics 1.0<br>V4-022｜Cutoff, Timestamp & Provenance Lineage 1.0<br>V4-023｜Canonical Intake Orchestrator & Deduplication 1.0 | BATCHABLE + SERIAL | BATCH-04 | Identity, envelope, and timestamp components may develop in parallel | NO | YES after BATCH-04 | NO | Canonical match identity; fact envelope; time/provenance gate; intake orchestrator | Stable identity, explicit missingness, no-future boundary, idempotency, and append-only correction pass. | BATCH-06, BATCH-07, BATCH-08 |
 | BATCH-06 | V4-024–V4-027 | Official China Sports Lottery Odds Intake<br>V4-024｜Official Lottery Five-Market Feed Adapter 1.0<br>V4-025｜Official Screenshot Intake & OCR Verification 1.0<br>V4-026｜Official Market Availability & Missingness Gate 1.0<br>V4-027｜Official Odds Timestamp & Provenance Ledger 1.0 | BATCHABLE + PARALLEL + SERIAL | BATCH-05 | YES with BATCH-07 and BATCH-08 after identity | NO | YES after BATCH-04 | NO | Five official markets; screenshot/OCR verification; availability gate; provenance ledger | Official markets remain official-only; unavailable/unreadable values are explicit; timestamps and hashes pass. | BATCH-10 |
 | BATCH-07 | V4-028–V4-031 | External Market Intake & Time Normalization<br>V4-028｜External European 1X2 Intake 1.0<br>V4-029｜External Asian Handicap Intake 1.0<br>V4-030｜External O/U Intake 1.0<br>V4-031｜External Source-Time Normalization 1.0 | BATCHABLE + PARALLEL + SERIAL | BATCH-05 | YES with BATCH-06 and BATCH-08 after identity | NO | YES after BATCH-04 | NO | European 1X2, Asian handicap, O/U, and normalized source-time snapshots | External signals never overwrite official odds; original source/time identity remains auditable. | BATCH-10 |
@@ -90,4 +90,4 @@ For each future batch: freeze the manifest; verify all source task IDs; validate
 
 ## 7. Next execution boundary
 
-Next execution batch: **BATCH-04 — Formal Schema Apply & Production DB Write HARD_GATE**. BATCH-03 / V4-016 through V4-017 is accepted only for static readiness and evidence packaging; no database, Supabase, Production, Shadow, Promotion, or V3.3.3 execution occurred.
+Next execution batch: **BATCH-05 — Canonical Data Intake Foundation**. BATCH-04 / V4-018 through V4-019 is COMPLETE under `docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`. No BATCH-05 work, model run, Shadow run, public deployment, Promotion, or V3.3.3 mutation occurred.
