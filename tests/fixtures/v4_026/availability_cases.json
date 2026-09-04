@@ -1,0 +1,13 @@
+{
+  "unavailable_market": {
+    "market": "rqspf",
+    "status": "UNAVAILABLE",
+    "reason": "OFFICIAL_MARKET_NOT_ON_SALE"
+  },
+  "unverified_market": {
+    "market": "exact_score",
+    "status": "NOT_VERIFIED",
+    "reason": "OCR_UNREADABLE"
+  },
+  "conflict_reason": "FEED_SCREENSHOT_PAYLOAD_CONFLICT"
+}

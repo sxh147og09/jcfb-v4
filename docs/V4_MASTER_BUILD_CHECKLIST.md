@@ -3,8 +3,8 @@
 ## Registry status
 
 - Registry Version: `v4-task-registry-001-100@1.0.0`
-- Recovery Status: `COMPLETE`; `V4-012` through `V4-025` are COMPLETE; V4-026 through V4-100 remain not started.
-- Live task status: `V4-025 = COMPLETE`; the V4-020 through V4-025 acceptance reports/evidence are authoritative for the rows below, whose legacy mojibake task labels are retained unchanged.
+- Recovery Status: `COMPLETE`; `V4-012` through `V4-026` are COMPLETE; V4-027 through V4-100 remain not started.
+- Live task status: `V4-026 = COMPLETE`; the V4-020 through V4-026 acceptance reports/evidence are authoritative for the rows below, whose legacy mojibake task labels are retained unchanged.
 - Source of truth: `docs/V4_TASK_REGISTRY_001_100.md` is the authoritative task-definition registry. This checklist is the execution-status view.
 - Planning status: `V4-012–V4-100 Batch Planning = PASS`; BATCH-01 / V4-012 design-only acceptance = PASS.
 
@@ -152,7 +152,7 @@ A batch name, registry entry, or planning PASS is not task completion. V4-012 th
 | [x] | V4-023 | V4-023｜Canonical Intake Orchestrator & Deduplication 1.0 | BATCH-05 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [x] | V4-024 | V4-024｜Official Lottery Five-Market Feed Adapter 1.0 | BATCH-06 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [x] | V4-025 | V4-025｜Official Screenshot Intake & OCR Verification 1.0 | BATCH-06 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
-| [ ] | V4-026 | V4-026｜Official Market Availability & Missingness Gate 1.0 | BATCH-06 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
+| [x] | V4-026 | V4-026｜Official Market Availability & Missingness Gate 1.0 | BATCH-06 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-027 | V4-027｜Official Odds Timestamp & Provenance Ledger 1.0 | BATCH-06 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-028 | V4-028｜External European 1X2 Intake 1.0 | BATCH-07 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-029 | V4-029｜External Asian Handicap Intake 1.0 | BATCH-07 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |

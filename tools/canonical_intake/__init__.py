@@ -50,6 +50,14 @@ from .official_screenshot import (
     ScreenshotVerificationState,
     ScreenshotValidationError,
 )
+from .official_availability import (
+    AvailabilityGateOutcome,
+    AvailabilityGateResult,
+    AvailabilityGateValidationError,
+    MarketAvailabilityDecision,
+    MarketGateStatus,
+    OfficialMarketAvailabilityGate,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -89,5 +97,11 @@ __all__ = [
     "ScreenshotIntakeResult",
     "ScreenshotVerificationState",
     "ScreenshotValidationError",
+    "AvailabilityGateOutcome",
+    "AvailabilityGateResult",
+    "AvailabilityGateValidationError",
+    "MarketAvailabilityDecision",
+    "MarketGateStatus",
+    "OfficialMarketAvailabilityGate",
     "resolve_f_drive_output_path",
 ]
