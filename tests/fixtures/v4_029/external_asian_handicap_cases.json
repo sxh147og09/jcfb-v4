@@ -1,0 +1,21 @@
+{
+  "base": {
+    "snapshot_kind": "CURRENT",
+    "created_at": "2026-09-04T09:21:00+08:00",
+    "source_timestamp": "2026-09-04T09:20:30+08:00",
+    "captured_at": "2026-09-04T09:20:30+08:00",
+    "observed_at": "2026-09-04T09:20:31+08:00",
+    "ingested_at": "2026-09-04T09:20:32+08:00",
+    "source": "Example Asian Provider Feed",
+    "source_type": "EXTERNAL_FEED",
+    "source_ref": "ref://external/asian/20260904/001/ah-092030",
+    "provider": "Example Asian Provider",
+    "market": "ASIAN_HANDICAP",
+    "line": -1.0,
+    "prices": {"home": 1.92, "away": 1.94},
+    "availability_status": "AVAILABLE",
+    "source_confidence": {"state": "ASSESSED", "basis": "Provider response with stable source reference"},
+    "source_is_official": false,
+    "metadata": {"fixture_revision": "external-ah-r1"}
+  }
+}

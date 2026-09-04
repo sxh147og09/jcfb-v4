@@ -67,7 +67,9 @@ from .official_ledger import (
     OfficialOddsProvenanceLedger,
 )
 from .external_market import (
+    AsianHandicapIntake,
     ExternalConflictEvidence,
+    ExternalAsianHandicapAdapter,
     ExternalEuropean1X2Adapter,
     ExternalMarket,
     ExternalMarketIntakeResult,
@@ -139,5 +141,7 @@ __all__ = [
     "ExternalMarketSnapshotStore",
     "ExternalEuropean1X2Adapter",
     "European1X2Intake",
+    "ExternalAsianHandicapAdapter",
+    "AsianHandicapIntake",
     "resolve_f_drive_output_path",
 ]

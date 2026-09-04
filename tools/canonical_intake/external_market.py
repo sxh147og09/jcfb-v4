@@ -756,6 +756,14 @@ class ExternalEuropean1X2Adapter(ExternalMarketSnapshotStore):
         super().__init__(identity_store, ExternalMarket.EUROPEAN_1X2)
 
 
-# Task-oriented alias keeps the V4-028 naming discoverable without
+# Task-oriented aliases keep the V4-028/V4-029 naming discoverable without
 # introducing a second architecture.
 European1X2Intake = ExternalEuropean1X2Adapter
+
+
+class ExternalAsianHandicapAdapter(ExternalMarketSnapshotStore):
+    def __init__(self, identity_store: CanonicalMatchIdentityStore):
+        super().__init__(identity_store, ExternalMarket.ASIAN_HANDICAP)
+
+
+AsianHandicapIntake = ExternalAsianHandicapAdapter
