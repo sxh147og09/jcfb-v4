@@ -40,6 +40,7 @@ class V4035OperationalContextTests(unittest.TestCase):
         self.assertEqual("UNKNOWN", record.fatigue.state)
         self.assertEqual("UNAVAILABLE", record.weather.state)
         self.assertEqual("NOT_VERIFIED", record.pitch.state)
+        self.assertEqual(("evidence://schedule/001",), record.schedule_pressure.basis_refs)
         for name in ("schedule_pressure", "fatigue", "travel", "weather", "pitch"):
             item = getattr(record, name)
             self.assertTrue(item.source)

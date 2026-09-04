@@ -21,7 +21,7 @@ append-only operational context boundary.
 Each of `schedule_pressure`, `fatigue`, `travel`, `weather`, and `pitch` is an
 independent `OperationalContextItem`. Every item requires source,
 source_reference, source timestamp, retrieved time, effective/as-of time,
-expiry, provenance reference, and a recomputable payload hash. `AVAILABLE`
+expiry, basis/evidence references, provenance reference, and a recomputable payload hash. `AVAILABLE`
 requires a non-empty typed payload and basis references. `UNKNOWN`,
 `UNAVAILABLE`, `NOT_VERIFIED`, `STALE`, `FUTURE_DATA`, `CONFLICTED`, and
 `BLOCKED` remain explicit; non-available states require a reason and are never

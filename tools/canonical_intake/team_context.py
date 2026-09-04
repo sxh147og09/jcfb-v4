@@ -1431,6 +1431,7 @@ class OperationalContextItem:
     state: str
     payload: Optional[Mapping[str, Any]]
     reason: Optional[str]
+    basis_refs: Tuple[str, ...]
     source: str
     source_reference: str
     source_timestamp: datetime
@@ -1489,12 +1490,13 @@ class OperationalContextItem:
         payload = _freeze(payload_raw) if payload_raw is not None else None
         payload_hash = sha256_json({"category": category, "state": state, "payload": _thaw(payload), "reason": reason, "basis_refs": list(basis_refs)})
         assert source is not None and source_reference is not None and provenance_ref is not None
-        return cls(category, state, payload, reason, source, source_reference, source_timestamp, retrieved_at, effective_at, expires_at, provenance_ref, provenance_hash, payload_hash)
+        return cls(category, state, payload, reason, tuple(item.strip() for item in basis_refs), source, source_reference, source_timestamp, retrieved_at, effective_at, expires_at, provenance_ref, provenance_hash, payload_hash)
 
     def to_dict(self) -> Dict[str, Any]:
         result: Dict[str, Any] = {
             "category": self.category,
             "state": self.state,
+            "basis_refs": list(self.basis_refs),
             "source": self.source,
             "source_reference": self.source_reference,
             "source_timestamp": _iso(self.source_timestamp),
