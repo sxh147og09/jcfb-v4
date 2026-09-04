@@ -3,7 +3,7 @@
 Next-Generation Football Prediction System
 
 Status:
-BATCH-04 PRODUCTION SCHEMA APPLY AND V4 WRITE BOUNDARY COMPLETE / BATCH-05 COMPLETE — BATCH-06 V4-026 COMPLETE
+BATCH-04 PRODUCTION SCHEMA APPLY AND V4 WRITE BOUNDARY COMPLETE / BATCH-05 COMPLETE — BATCH-06 V4-027 COMPLETE / CLOSURE REVIEW NEXT
 
 Current Build Stage:
 V4-006 COMPLETE
@@ -23,7 +23,8 @@ V4-019 COMPLETE
 BATCH-06 V4-024 COMPLETE
 BATCH-06 V4-025 COMPLETE
 BATCH-06 V4-026 COMPLETE
-BATCH-06 V4-027 NEXT
+BATCH-06 V4-027 COMPLETE
+BATCH-06 CLOSURE REVIEW NEXT
 BATCH-05 CLOSURE REVIEW PASS
 
 Legacy Production:
@@ -102,7 +103,7 @@ The architecture target is a design direction only at this bootstrap stage. Prod
 
 ## Current scope
 
-V4-001 through V4-023 are complete as local/no-write task boundaries. BATCH-04 applied the approved V4 migration chain to the bound Supabase Production project and closed with the exact `0009 ONLY` resume recorded in [`docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`](docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md). V4-020 through V4-023 were then completed as local, no-write canonical intake implementations with independent evidence in the V4-020, V4-021, V4-022, and V4-023 reports. Official migration history is 18 rows: the nine V3.3.3 rows are unchanged and the nine V4 rows are applied. No prediction, Shadow run, public deployment, canonical pointer switch, or V3.3.3 mutation occurred. BATCH-05 task acceptance is complete; Closure Review is the next gate before BATCH-06/07/08 work.
+V4-001 through V4-023 are complete as local/no-write task boundaries. BATCH-04 applied the approved V4 migration chain to the bound Supabase Production project and closed with the exact `0009 ONLY` resume recorded in [`docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md`](docs/JCFB_V4_PRODUCTION_0009_FINAL_APPLY_REPORT.md). V4-020 through V4-023 were then completed as local, no-write canonical intake implementations. V4-024 through V4-027 are complete as local, no-write official odds intake boundaries with independent acceptance evidence. Official migration history is 18 rows: the nine V3.3.3 rows are unchanged and the nine V4 rows are applied. No prediction, Shadow run, public deployment, canonical pointer switch, or V3.3.3 mutation occurred. BATCH-06 task acceptance is complete; BATCH-06 Closure Review is the next gate.
 
 ## Local storage on the project drive
 

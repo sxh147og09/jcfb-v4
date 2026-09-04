@@ -1,0 +1,27 @@
+{
+  "prematch": {
+    "prediction_cutoff_at": "2026-09-04T09:10:00+08:00",
+    "kickoff_at": "2026-09-04T11:35:00+08:00",
+    "availability_time_basis": "SOURCE_TIMESTAMP"
+  },
+  "observed_basis": {
+    "prediction_cutoff_at": "2026-09-04T09:10:00+08:00",
+    "kickoff_at": "2026-09-04T11:35:00+08:00",
+    "availability_time_basis": "OBSERVED_AT"
+  },
+  "after_cutoff": {
+    "prediction_cutoff_at": "2026-09-04T09:00:00+08:00",
+    "kickoff_at": "2026-09-04T11:35:00+08:00",
+    "availability_time_basis": "SOURCE_TIMESTAMP"
+  },
+  "postmatch": {
+    "prediction_cutoff_at": "2026-09-04T09:02:00+08:00",
+    "kickoff_at": "2026-09-04T09:03:00+08:00",
+    "availability_time_basis": "SOURCE_TIMESTAMP"
+  },
+  "reasons": {
+    "unknown_time": "UNKNOWN_TIME_BLOCKED",
+    "after_cutoff": "AFTER_DECLARED_CUTOFF",
+    "postmatch": "AVAILABLE_AT_OR_AFTER_KICKOFF"
+  }
+}
