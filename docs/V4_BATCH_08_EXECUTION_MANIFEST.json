@@ -1,0 +1,139 @@
+{
+  "manifest_contract_version": "v4-batch-execution-manifest@1.0.0",
+  "batch_id": "BATCH-08",
+  "objective": "Team Context Intake",
+  "workspace": "F:/Projects/jcfb-v4",
+  "branch": "main",
+  "baseline_head": "4f14ab7",
+  "working_tree_required": "CLEAN",
+  "execution_mode": "CONTINUOUS",
+  "approved_scope": [
+    "V4-032 Team Context Intake & Identity Linker 1.0",
+    "V4-033 Availability, Injury & Suspension Intake 1.0",
+    "V4-034 Lineup, Coach & Tactical Context Intake 1.0",
+    "V4-035 Schedule, Travel, Weather & Pitch Context Intake 1.0",
+    "BATCH-08 Closure Review"
+  ],
+  "execution_waves": [
+    {
+      "wave": 1,
+      "planned_parallel": false,
+      "tasks": ["V4-032"],
+      "dependency": ["V4-023"]
+    },
+    {
+      "wave": 2,
+      "planned_parallel": true,
+      "tasks": ["V4-033", "V4-034", "V4-035"],
+      "dependency": ["V4-032"],
+      "parallel_fallback": ["V4-033", "V4-034", "V4-035"]
+    },
+    {
+      "wave": 3,
+      "planned_parallel": false,
+      "tasks": ["BATCH-08 Closure Review"],
+      "dependency": ["V4-032", "V4-033", "V4-034", "V4-035"]
+    }
+  ],
+  "direct_dependencies": {
+    "V4-032": ["V4-023"],
+    "V4-033": ["V4-032"],
+    "V4-034": ["V4-032"],
+    "V4-035": ["V4-032"]
+  },
+  "contract_versions": {
+    "canonical_match": "canonical-match@1.0.0",
+    "canonical_fact": "canonical-fact@1.0.0",
+    "time_lineage": "time-lineage@1.0.0",
+    "canonical_intake_orchestrator": "canonical-intake-orchestrator@1.0.0",
+    "team_context": "team-context@1.0.0",
+    "evidence": "evidence@1.0.0",
+    "logical_data_model": "V4_CANONICAL_DATA_MODEL.md@1.0",
+    "persistence_boundary": "V4_PERSISTENCE_BOUNDARIES.md@1.0",
+    "append_only_policy": "V4_APPEND_ONLY_POLICY.md@1.0",
+    "time_policy": "V4_TIME_AND_INFORMATION_POLICY.md@1.0"
+  },
+  "enum_state_semantics": {
+    "fact_states": ["AVAILABLE", "UNKNOWN", "UNAVAILABLE", "CONFLICT", "STALE", "FUTURE_DATA", "BLOCKED"],
+    "context_states": ["AVAILABLE", "UNKNOWN", "NONE_CONFIRMED", "NOT_VERIFIED", "CONFLICTED", "STALE", "BLOCKED"],
+    "lineup_states": ["CONFIRMED", "PROJECTED", "UNKNOWN", "NOT_VERIFIED", "BLOCKED"],
+    "rules": [
+      "UNKNOWN is not NONE_CONFIRMED",
+      "UNKNOWN collections omit items; NONE_CONFIRMED allows items=[] only with explicit evidence",
+      "NOT_VERIFIED never becomes AVAILABLE or CONFIRMED",
+      "PROJECTED never becomes CONFIRMED",
+      "STALE remains stale and is not current",
+      "BLOCKED is not a replacement value",
+      "conflicting claims remain visible and are not silently selected",
+      "post-cutoff or post-kickoff pre-match context is fail-closed"
+    ]
+  },
+  "hash_boundaries": {
+    "context_payload": ["match_id", "team_id", "side", "as_of_at", "typed context states and values", "basis_refs", "reasons", "conflicts", "source/evidence references"],
+    "excluded_transport_fields": ["created_at", "ingested_at", "retrieved_at", "non-authoritative trace metadata"],
+    "required_hashes": ["context_hash", "payload_hash", "provenance_hash"],
+    "corrections": "append-only new revision with supersedes pointer"
+  },
+  "acceptance_criteria": [
+    "V4-032 resolves canonical match_id, canonical team_id, and HOME/AWAY side or fails closed",
+    "team aliases/source mappings remain attributable; display names are never join keys",
+    "no orphan context; identity and side mismatches are blocked",
+    "V4-033 preserves UNKNOWN, NONE_CONFIRMED, NOT_VERIFIED, STALE, FUTURE_DATA, CONFLICTED, and BLOCKED semantics",
+    "V4-034 preserves CONFIRMED, PROJECTED, UNKNOWN, NOT_VERIFIED, and BLOCKED lineup semantics and attributed context only",
+    "V4-035 retains source, source_reference, source/observed/effective/expiry times, provenance and hashes without defaults",
+    "all accepted context remains cutoff-valid and append-only",
+    "no evidence graph engine, conflict resolver, feature, intelligence, prediction, or model output is implemented",
+    "targeted tests, full repository tests, contract/boundary audits, isolation audits, evidence, and focused commits pass"
+  ],
+  "blocking_conditions": [
+    "targeted or full repository tests fail",
+    "any task DoD fails",
+    "canonical match/team/side identity cannot be determined or alias conflict requires guessing",
+    "implicit state conversion or silent default/fallback is required",
+    "source/time/effective/expiry/provenance/hash cannot be verified",
+    "post-cutoff or post-kickoff information contaminates a pre-match object",
+    "conflicting claims can continue only by silently choosing one",
+    "context_confidence is mixed with prediction or recommendation confidence",
+    "Evidence references require implementing V4-036/V4-037",
+    "frozen contract, enum, hash boundary, or major version must change",
+    "migration, Production/Supabase access, or V3.3.3 change is required",
+    "execution scope enters V4-036+ or BATCH-09"
+  ],
+  "boundary": {
+    "production_supabase_writes": false,
+    "production_supabase_reads": false,
+    "migration_added": false,
+    "migration_applied": false,
+    "prediction_score_shadow_public_promotion": false,
+    "v333_modified": false,
+    "runtime_and_output_drive": "F:"
+  },
+  "out_of_scope": [
+    "V4-036+",
+    "BATCH-09",
+    "Market Intelligence",
+    "Feature Bundle and Football Intelligence feature engines",
+    "Prediction, Score Engine, Frozen Input, Shadow/Tier A",
+    "Public Page, Promotion, Deployment",
+    "Production/Supabase reads or writes",
+    "migration add/apply",
+    "V3.3.3 modification"
+  ],
+  "frozen_contract_files": [
+    "docs/V4_DATA_CONTRACT.md",
+    "docs/V4_TEAM_CONTEXT_CONTRACT.md",
+    "docs/V4_SHARED_FACTS_CONTRACT.md",
+    "docs/V4_EVIDENCE_CONTRACT.md",
+    "docs/V4_TIME_AND_INFORMATION_POLICY.md",
+    "docs/V4_DATA_LIFECYCLE.md",
+    "docs/V4_APPEND_ONLY_POLICY.md",
+    "docs/V4_PERSISTENCE_BOUNDARIES.md",
+    "docs/V4_CANONICAL_DATA_MODEL.md",
+    "docs/V4_RUNTIME_ROLE_BOUNDARY.md",
+    "docs/V4_VERSION_IDENTITY_CONTRACT.md",
+    "docs/V4_VERSIONING_STANDARD.md",
+    "docs/V4_CONSTITUTION.md",
+    "docs/V4_ARCHITECTURE_BLUEPRINT.md"
+  ],
+  "manifest_hash": "sha256:e26014dd4b38f9f15bdc26d16087fed1b4baf81c84543f70321df84a91ff3048"
+}
