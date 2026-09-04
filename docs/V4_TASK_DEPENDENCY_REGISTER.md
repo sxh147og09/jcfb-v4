@@ -53,8 +53,8 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 | V4-035 | V4-035｜Schedule, Travel, Weather & Pitch Context Intake 1.0 | BATCH-08 | V4-032 | — | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-036 | V4-036｜Evidence Graph Claim & Evidence Model 1.0 | BATCH-09 | V4-034 | V4-037 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-037 | V4-037｜Source Quality, Expiry & Conflict Resolver 1.0 | BATCH-09 | V4-036 | V4-038, V4-049, V4-050 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-038 | V4-038｜Feature Bundle Contract & Version Registry 1.0 | BATCH-10 | V4-021, V4-022, V4-027, V4-031, V4-037 | V4-039, V4-076 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-039 | V4-039｜Feature Snapshot Hash & Reproducibility 1.0 | BATCH-10 | V4-038 | V4-040, V4-076 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
+| V4-038 | V4-038｜Feature Bundle Contract & Version Registry 1.0 | BATCH-10 | V4-021, V4-022, V4-027, V4-031, V4-037 | V4-039, V4-076 | Consumes accepted upstream contract and preserves its identity/hash; Feature Bundle v2 is upstream of Frozen Input. | TODO |
+| V4-039 | V4-039｜Feature Snapshot Hash & Reproducibility 1.0 | BATCH-10 | V4-038 | V4-040, V4-076 | Establishes `feature_snapshot_hash`; V4-076 consumes the exact bundle/hash downstream. | TODO |
 | V4-040 | V4-040｜Feature Assembly & Schema Adapter Layer 1.0 | BATCH-10 | V4-039 | V4-041, V4-042, V4-044, V4-046, V4-049 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-041 | V4-041｜Dynamic Team Rating Feature Engine 1.0 | BATCH-11 | V4-040 | V4-043, V4-052, V4-053, V4-054, V4-055, V4-056 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-042 | V4-042｜Attack, Defence & Home Advantage Model 1.0 | BATCH-11 | V4-040 | V4-043, V4-052, V4-053, V4-054, V4-055, V4-056 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
@@ -91,7 +91,7 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 | V4-073 | V4-073｜Prediction Consistency Engine 1.0 | BATCH-19 | V4-052, V4-053, V4-054, V4-055, V4-064, V4-069, V4-070 | V4-074 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-074 | V4-074｜Five-Market Orchestrator 4.0 1.0 | BATCH-20 | V4-052, V4-053, V4-054, V4-055, V4-064, V4-073 | V4-075 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-075 | V4-075｜Final Prediction Gate 4.0 1.0 | BATCH-20 | V4-074, V4-072 | V4-076 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-076 | V4-076｜Frozen Input & Immutable Lineage 4.0 1.0 | BATCH-20 | V4-022, V4-038, V4-039, V4-075 | V4-077 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
+| V4-076 | V4-076｜Frozen Input & Immutable Lineage 4.0 1.0 | BATCH-20 | V4-022, V4-038, V4-039, V4-075 | V4-077 | Downstream freeze consumes exact `feature_bundle_id` and `feature_snapshot_hash`; no reverse dependency into BATCH-10. | TODO |
 | V4-077 | V4-077｜Frozen Prediction & Revision Chain 4.0 1.0 | BATCH-20 | V4-076 | V4-078, V4-079, V4-085, V4-090 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-078 | V4-078｜Official Result Intake 1.0 | BATCH-21 | V4-077 | V4-079, V4-086 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-079 | V4-079｜Postmatch Review Engine 4.0 1.0 | BATCH-21 | V4-077, V4-078 | V4-080, V4-081, V4-082, V4-086 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |

@@ -331,6 +331,9 @@ Unique: `(evidence_bundle_id, evidence_id)` and `(evidence_bundle_id, item_order
 | `revision` | `integer` | NOT NULL | Unique `(match_id, revision)`; monotonic. |
 | `frozen_input_revision` | `text` | NOT NULL | `fi-YYYYMMDD-NNNNNN` identity alias; never reused. |
 | `canonical_match_hash` | `text` | NOT NULL | Exact match identity hash used. |
+| `feature_bundle_id` | `uuid` | NOT NULL when validated/frozen | FK to `model.feature_bundles`; exact downstream Feature Bundle identity. |
+| `feature_snapshot_hash` | `text` | NOT NULL when validated/frozen | Must equal the referenced Feature Bundle snapshot hash. |
+| `feature_bundle_contract_version` | `text` | NOT NULL when validated/frozen | Exact Feature Bundle contract identity, currently `feature-bundle@2.0.0`. |
 | `feature_schema_version` | `text` | NOT NULL | Qualified feature shape identity. |
 | `dataset_version`, `schema_version`, `migration_version` | `text` | NOT NULL | Dataset/persisted shape/storage identities. |
 | `prediction_cutoff_at`, `kickoff_at` | `timestamptz` | NOT NULL | Cutoff must precede kickoff. |
@@ -369,19 +372,19 @@ These tables are preferred to UUID arrays or a JSONB relationship list.
 | Field | Type | NULL/default | Rule |
 |---|---|---|---|
 | `feature_bundle_id` | `uuid` | PK/default | Stable feature artifact identity. |
-| `frozen_input_id` | `uuid` | NOT NULL | FK to `model.frozen_inputs`. |
-| `frozen_input_hash` | `text` | NOT NULL | Must equal parent hash. |
+| `match_id` | `uuid` | NOT NULL | FK to `core.matches`; canonical match scope for upstream lineage. |
+| `canonical_entity_refs`, upstream reference/hash manifests | `jsonb` | NOT NULL | Exact canonical fact, official/external market, team-context, and Evidence Graph identities used. |
 | `role` | `text` | NOT NULL | Explicit role; immutable. |
 | `shadow_revision`, `experiment_revision`, `experiment_id` | `text`, `text`, `uuid` | conditional | Required/not applicable by role. |
 | `feature_schema_version`, `generator_version` | `text` | NOT NULL | Exact feature shape/generator identity. |
-| `input_hash`, `feature_hash`, `payload_hash`, `provenance_hash` | `text` | NOT NULL | V4 hashes. |
+| `input_hash`, `feature_snapshot_hash`, `feature_hash`, `payload_hash`, `provenance_hash` | `text` | NOT NULL | V4 hashes; `feature_snapshot_hash` is established by V4-039. |
 | `hash_algorithm`, `hash_profile` | `text` | NOT NULL/default | Canonicalization metadata. |
 | `generated_at`, `prediction_cutoff_at`, `kickoff_at` | `timestamptz` | NOT NULL | Generated time distinct from source; cutoff < kickoff. |
 | `feature_values`, `missingness_summary`, `quality_flags` | `jsonb` | NOT NULL | Seven governed categories, typed missingness, and gate flags. |
 | `status` | `text` | NOT NULL | `CREATED`, `VALIDATED`, `BLOCKED`, `INVALID`, `SUPERSEDED`. |
 | contract/schema/created/metadata | common | required/default | Immutable once used by formal run. |
 
-Unique: `(frozen_input_id, role, generator_version, input_hash)`.
+Unique: `(match_id, role, generator_version, input_hash)`.
 
 ### 6.4 `model.engine_runs`
 

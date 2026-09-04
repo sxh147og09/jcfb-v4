@@ -170,7 +170,7 @@ The ordering is independent engine first, cross-market consistency second. Outco
 
 The Final Prediction Gate requires match identity, official odds, timestamp validity, no future data, non-blocked data/context quality, complete engine outputs, acceptable consistency, and a non-blocked risk gate. A formal prediction is created only after the gate passes.
 
-Before prediction freeze, Frozen Input records all facts, snapshots, context, features, model versions, and engine configurations used. Production, Shadow, and Experiment are comparable only when they use the same `frozen_input_hash`. Frozen Prediction then stores output references, consensus, disagreement, uncertainty, risk, model version, input hash, output hash, and freeze time as an immutable append-only record.
+Feature Bundle is assembled before prediction freeze from the exact accepted facts, snapshots, context, and Evidence references. Frozen Input then records the exact Feature Bundle (`feature_bundle_id` and `feature_snapshot_hash`) together with the approved facts, snapshots, context, model versions, and engine configurations used. Production, Shadow, and Experiment are comparable only when they use the same `frozen_input_hash`. Frozen Prediction then stores output references, consensus, disagreement, uncertainty, risk, model version, input hash, output hash, and freeze time as an immutable append-only record.
 
 ## 12. Postmatch and evaluation separation
 

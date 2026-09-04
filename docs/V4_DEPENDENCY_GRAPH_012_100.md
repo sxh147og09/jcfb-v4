@@ -77,7 +77,7 @@ flowchart TD
 | BATCH-07 | BATCH-05 | V4-028–V4-031 | External Market Intake & Time Normalization; child edges are in the task dependency register. |
 | BATCH-08 | BATCH-05 | V4-032–V4-035 | Team Context Intake; child edges are in the task dependency register. |
 | BATCH-09 | BATCH-08 | V4-036–V4-037 | Evidence Graph & Source Conflict Handling; child edges are in the task dependency register. |
-| BATCH-10 | BATCH-06, BATCH-07, BATCH-09 | V4-038–V4-040 | Feature Representation Layer; child edges are in the task dependency register. |
+| BATCH-10 | BATCH-06, BATCH-07, BATCH-09 | V4-038–V4-040 | Feature Representation Layer; Feature Bundle is upstream of downstream V4-076 Frozen Input; child edges are in the task dependency register. |
 | BATCH-11 | BATCH-10 | V4-041–V4-043 | Statistical Strength Feature Engines; child edges are in the task dependency register. |
 | BATCH-12 | BATCH-10 | V4-044–V4-045 | Football Intelligence & Context Feature Engines; child edges are in the task dependency register. |
 | BATCH-13 | BATCH-06, BATCH-07, BATCH-10 | V4-046–V4-048 | Market Intelligence Feature Engines; child edges are in the task dependency register. |

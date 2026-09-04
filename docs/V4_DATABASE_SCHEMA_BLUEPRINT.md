@@ -69,11 +69,11 @@ flowchart LR
     C --> X[market.external_market_snapshots]
     C --> T[context.team_context_snapshots]
     C --> E[context.evidence_bundles]
-    O --> FI[model.frozen_inputs]
-    X --> FI
-    T --> FI
-    E --> FI
-    FI --> FB[model.feature_bundles]
+    O --> FB[model.feature_bundles]
+    X --> FB
+    T --> FB
+    E --> FB
+    FB --> FI[model.frozen_inputs]
     FB --> ER[model.engine_runs]
     ER --> P[model.predictions]
     P --> FP[model.frozen_predictions]
@@ -102,7 +102,7 @@ The normalized child tables `context.team_context_evidence`, `context.evidence_b
 ### 6.2 Constraints requiring a trigger or controlled function
 
 - Same-match checks across redundant `match_id` columns and child joins.
-- Frozen Input selected ID/hash agreement and cutoff eligibility.
+- Frozen Input selected ID/hash agreement, exact Feature Bundle ID/snapshot hash, and cutoff eligibility.
 - `prediction.match_id = frozen_input.match_id` and every cited Engine Run has the same match and role.
 - Frozen Prediction/Prediction same-match, same-role, and snapshot-hash agreement.
 - Review Result/Frozen Prediction same-match agreement and Model Evaluation versus Match Explanation input separation.

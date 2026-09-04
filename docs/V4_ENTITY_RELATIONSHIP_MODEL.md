@@ -24,8 +24,8 @@ erDiagram
     EVIDENCE_ITEMS ||--o{ EVIDENCE_BUNDLE_ITEMS : included_as
     EVIDENCE_BUNDLES ||--o{ EVIDENCE_BUNDLE_ITEMS : contains
 
-    MATCHES ||--o{ FROZEN_INPUTS : seals
-    FROZEN_INPUTS ||--o{ FEATURE_BUNDLES : generates
+    MATCHES ||--o{ FEATURE_BUNDLES : scopes
+    FEATURE_BUNDLES ||--o{ FROZEN_INPUTS : freezes
     MODEL_VERSIONS ||--o{ ENGINE_RUNS : authorizes
     ENGINE_VERSIONS ||--o{ ENGINE_RUNS : executes
     FROZEN_INPUTS ||--o{ ENGINE_RUNS : supplies
@@ -82,8 +82,8 @@ MATCH
   -> TEAM_CONTEXT_SNAPSHOTS
   -> EVIDENCE_BUNDLE
   -> FEATURE_SCHEMA / registry identities
-  -> FROZEN_INPUT
   -> FEATURE_BUNDLE
+  -> FROZEN_INPUT
   -> ENGINE_RUNS
   -> PREDICTION
   -> FROZEN_PREDICTION
@@ -91,7 +91,7 @@ MATCH
 
 `frozen_inputs` is a many-to-one child of `matches` (`match 1:N frozen_input revisions`). A Frozen Input stores exact upstream IDs and hashes; a label such as “latest odds” is not a valid relationship.
 
-`feature_bundles N:1 frozen_inputs`. The Feature Bundle must preserve the Frozen Input hash, generator/schema identity, typed missingness states, and source references. An Engine Run must point to the exact Feature Bundle it consumed and the exact Frozen Input hash.
+`feature_bundles` is a typed representation of accepted upstream lineage and does not require a Frozen Input. `frozen_inputs N:1 feature_bundles`; each Frozen Input must preserve the exact Feature Bundle ID and `feature_snapshot_hash`, together with the other approved source references. An Engine Run must point to the exact Feature Bundle it consumed and the exact Frozen Input hash.
 
 `engine_runs N:1 frozen_inputs` and `engine_runs N:1 feature_bundles`. Each run also points to one exact `model_version` and one exact `engine_version`; `role`, `revision`, implementation/config/input/output hashes, and execution timestamps are immutable run identity evidence.
 

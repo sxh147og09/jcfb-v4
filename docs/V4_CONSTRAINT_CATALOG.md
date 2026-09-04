@@ -42,7 +42,7 @@ The two intentional sequence exceptions are `evaluation.tier_a_samples.sample_no
 | `frozen_input_match_fk` | `model.frozen_inputs.match_id` | core match | RESTRICT / RESTRICT |
 | `frozen_input_supersedes_fk` | Frozen Input predecessor | Frozen Input | RESTRICT / RESTRICT |
 | `frozen_input_selection_fks` | six normalized selection tables | exact market/context/evidence/registry parents | RESTRICT / RESTRICT |
-| `feature_bundle_input_fk` | Feature Bundle input | Frozen Input | RESTRICT / RESTRICT |
+| `frozen_input_feature_bundle_fk` | Frozen Input Feature Bundle reference | exact Feature Bundle | RESTRICT / RESTRICT |
 | `engine_run_fks` | Engine Run match/input/feature/model/engine | exact parents | RESTRICT / RESTRICT |
 | `prediction_fks` | Prediction match/input/model/predecessor | exact parents | RESTRICT / RESTRICT |
 | `prediction_engine_run_fks` | join prediction/run | exact parents | RESTRICT / RESTRICT |
@@ -74,7 +74,7 @@ Generic `entity_type + entity_id` fields in Incidents and Audit Logs are intenti
 | C-010 | Context evidence membership | `UNIQUE (team_context_id, evidence_id)` | Prevents duplicate context evidence references. |
 | C-011 | Evidence membership | unique bundle/evidence and bundle/order pairs | Prevents duplicate or ambiguous membership ordering. |
 | C-012 | Frozen Input revision | `UNIQUE (match_id, revision)` | Required immutable input revision uniqueness. `frozen_input_hash` gets a non-unique index because equal hash is required for A/B. |
-| C-013 | Feature identity | `UNIQUE (frozen_input_id, role, generator_version, input_hash)` | Prevents duplicate formal feature artifacts. |
+| C-013 | Feature identity | `UNIQUE (match_id, role, generator_version, input_hash)` | Prevents duplicate formal feature artifacts without making Frozen Input an upstream prerequisite. |
 | C-014 | Prediction logical key | `UNIQUE (match_id, model_version_id, role, stage, prediction_revision)` | Exact requested match + model + role + stage + revision uniqueness. |
 | C-015 | Prediction engine membership | unique `(prediction_id, engine_run_id, market, lineage_purpose)` plus `(prediction_id, sequence)` | Preserves normalized many-to-many lineage/order. |
 | C-016 | Frozen Prediction revision | `UNIQUE (match_id, role, model_version_id, freeze_revision)` | One immutable freeze identity per model/role revision. |
@@ -145,7 +145,8 @@ Failure is a rejected write or `BLOCKED`/`REJECTED` input. No trigger may replac
 
 For Feature Bundles, Engine Runs, and Predictions:
 
-- the exact Frozen Input exists and copied `frozen_input_hash` equals it;
+- Feature Bundle resolves exact accepted upstream lineage, canonical match identity, schema/generator, and recomputable `input_hash`/`feature_snapshot_hash`;
+- when a Frozen Input exists, its `feature_bundle_id` and `feature_snapshot_hash` equal the exact Feature Bundle used;
 - Feature Bundle parent, Engine Run, Prediction, and all normalized child refs resolve to the same `match_id`;
 - model/engine registry roles and revisions match the row role;
 - Production uses the approved active Production registry identity; Shadow/Experiment cannot use a Production label;

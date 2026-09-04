@@ -34,7 +34,7 @@ The namespace names are logical recommendations. They are not physical PostgreSQ
 2. `match_id` is the permanent cross-contract identity. `data_date + official_match_no` is a daily business key and never replaces `match_id`.
 3. Team and competition display names are labels. `team_id`, `competition_id`, and their revision/history are the stable references.
 4. Every formal derived object points to exact upstream IDs and hashes. `latest`, `current`, `default`, a filename, or insertion order is never a foreign key.
-5. Frozen Input is the central lineage node. Production and comparable Shadow use the same `frozen_input_hash`; role-specific Engine Run and Prediction identities remain separate.
+5. Feature Bundle is the typed representation node upstream of Frozen Input. Production and comparable Shadow use the same `frozen_input_hash`; role-specific Engine Run and Prediction identities remain separate.
 6. Objective Facts and Model Interpretation are separate classes. Model interpretation cannot update the canonical fact row.
 7. Audit-critical history is append-only. A correction is a new revision or correction event with a `supersedes_*_id` pointer.
 8. Production, Shadow, and Experiment are explicit role namespaces. A row cannot change role after creation.
@@ -92,8 +92,8 @@ The table below is the minimum logical model. A future physical schema may split
 | `team_context_snapshots` | `core` | `team_context_id` | `match_id`, `team_id`, side, `as_of_at`, structured context states, source/evidence refs, context hash | APPEND_ONLY formal snapshots; a correction is a new context revision |
 | `evidence_items` | `core` | `evidence_id` | atomic claim, entity refs, source/source type/reference, publication/retrieval/validity times, verification/contradiction states, `evidence_hash` | APPEND_ONLY; corrections use `supersedes_evidence_id`; rejected/conflicted evidence remains visible |
 | `evidence_bundles` | `core` | `evidence_bundle_id` | `match_id`, `prediction_cutoff_at`, bundle revision, ordered item membership, inclusion/gate state, bundle/provenance hashes | APPEND_ONLY; membership is a new bundle revision, not an edit to a used bundle |
-| `frozen_inputs` | `model` | `frozen_input_id` | `match_id`, `frozen_input_revision`, exact canonical/odds/context/evidence/feature/version refs, cutoff/kickoff, A/B group/mode, `frozen_input_hash` | APPEND_ONLY and immutable after `FROZEN`; `UNIQUE(match_id, frozen_input_revision)`; new input supersedes old input |
-| `feature_bundles` | `model` | `feature_bundle_id` | `frozen_input_id/hash`, feature schema/generator version, typed feature categories, missingness summary, cutoff/kickoff, `input_hash`, `feature_hash` | APPEND_ONLY once used by a formal run; a changed generator or value creates a new bundle |
+| `feature_bundles` | `model` | `feature_bundle_id` | canonical entity/fact, official/external market, team-context, Evidence Graph refs/hashes, feature schema/generator version, typed categories, missingness, cutoff/kickoff, `input_hash`, `feature_snapshot_hash` | APPEND_ONLY; a changed generator, lineage, or value creates a new bundle; no Frozen Input prerequisite |
+| `frozen_inputs` | `model` | `frozen_input_id` | `match_id`, `frozen_input_revision`, exact canonical/odds/context/evidence refs, `feature_bundle_id`, `feature_snapshot_hash`, version refs, cutoff/kickoff, A/B group/mode, `frozen_input_hash` | APPEND_ONLY and immutable after `FROZEN`; `UNIQUE(match_id, frozen_input_revision)`; new input supersedes old input |
 | `engine_runs` | `model` | `engine_run_id` | `match_id`, role, model/engine version IDs, role revision, Frozen Input and Feature Bundle refs, implementation/config/input/output hashes, run times, payload, leakage/gate state | APPEND_ONLY; failed/invalid runs remain; role is immutable |
 | `predictions` | `model` | `prediction_id` | `match_id`, role, exact model release, prediction revision, stage, one Frozen Input, many Engine Run refs, five-market payload, confidence/risk/recommendation, `prediction_hash` | APPEND_ONLY formal records; `UNIQUE(match_id, model_version, role, revision, stage)`; pre-kickoff replacement supersedes prior Prediction |
 | `frozen_predictions` | `model` | `frozen_prediction_id` | `match_id`, role, `prediction_id`, freeze revision, immutable embedded snapshot, prediction/frozen snapshot hashes, Frozen Input hash, supersession ref | APPEND_ONLY and immutable; freeze correction is a new revision and never an in-place update |
@@ -191,7 +191,7 @@ The future store must reject or mark `BLOCKED` any record that violates these ru
 
 1. Every snapshot, context, evidence bundle, Frozen Input, output, prediction, result, review, Tier A record, and public projection resolves to one canonical `match_id`.
 2. A Frozen Input's selected snapshot/context/evidence references resolve to exact IDs and hashes, and each source availability time is within the cutoff.
-3. A Feature Bundle references one Frozen Input; an Engine Run references the exact Frozen Input and Feature Bundle identities it used.
+3. A Feature Bundle references exact accepted upstream lineage; a Frozen Input references one exact Feature Bundle and snapshot hash; an Engine Run references the exact Frozen Input and Feature Bundle identities it used.
 4. A Prediction's `match_id` equals the Frozen Input's `match_id`; each Engine Run reference has the same match and declared role scope.
 5. A Frozen Prediction's `match_id` equals its Prediction's `match_id`; its embedded snapshot hash matches the Prediction hash it freezes.
 6. A Review's Frozen Prediction and Official Result both resolve to the same `match_id`.

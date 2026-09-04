@@ -93,7 +93,7 @@ The publication gate must prove that each typed business time was copied from th
 
 At minimum, index every FK not already covered by a leftmost unique key:
 
-`team_aliases.team_id`, `matches.competition_id`, `matches.home_team_id`, `matches.away_team_id`, official/external `match_id`, context `match_id/team_id`, evidence scope IDs, bundle/item IDs, engine predecessor/model IDs, all Frozen Input selection parent/ref IDs, feature `frozen_input_id`, Engine Run `match_id/frozen_input_id/feature_bundle_id/model_version_id/engine_version_id`, Prediction `match_id/frozen_input_id/model_version_id/supersedes_prediction_id`, prediction/run join IDs, Frozen Prediction `match_id/prediction_id/frozen_input_id/model_version_id/supersedes_frozen_prediction_id`, result/review/tier/promotion/calibration/incident/projection FKs.
+`team_aliases.team_id`, `matches.competition_id`, `matches.home_team_id`, `matches.away_team_id`, official/external `match_id`, context `match_id/team_id`, evidence scope IDs, bundle/item IDs, engine predecessor/model IDs, all Frozen Input selection parent/ref IDs, feature `match_id`/upstream lineage refs, Frozen Input `feature_bundle_id`, Engine Run `match_id/frozen_input_id/feature_bundle_id/model_version_id/engine_version_id`, Prediction `match_id/frozen_input_id/model_version_id/supersedes_prediction_id`, prediction/run join IDs, Frozen Prediction `match_id/prediction_id/frozen_input_id/model_version_id/supersedes_frozen_prediction_id`, result/review/tier/promotion/calibration/incident/projection FKs.
 
 Some are intentionally combined into the composite indexes above. The future migration must run a missing-FK-index check and remove redundant single-column indexes whose leading key is already covered.
 

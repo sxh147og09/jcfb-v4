@@ -25,8 +25,8 @@ The contract registry is:
 | Odds Snapshot | `V4_ODDS_SNAPSHOT_CONTRACT.md` | Official five-market and external market snapshots |
 | Team Context | `V4_TEAM_CONTEXT_CONTRACT.md` | Time-valid structured football context |
 | Evidence | `V4_EVIDENCE_CONTRACT.md` | Claim, provenance, verification, and contradiction lifecycle |
-| Frozen Input | `V4_FROZEN_INPUT_CONTRACT.md` | Immutable pre-match input boundary |
-| Feature Bundle | `V4_FEATURE_BUNDLE_CONTRACT.md` | Versioned, reproducible feature representation |
+| Frozen Input | `V4_FROZEN_INPUT_CONTRACT.md` | Immutable pre-match input boundary downstream of Feature Bundle |
+| Feature Bundle | `V4_FEATURE_BUNDLE_CONTRACT.md` (`feature-bundle@2.0.0`; v1 archived separately) | Versioned, reproducible feature representation from accepted upstream lineage |
 | Engine Output | `V4_ENGINE_OUTPUT_CONTRACT.md` | Common independent-engine envelope and payloads |
 | Prediction | `V4_PREDICTION_CONTRACT.md` | Independent five-market prediction and Frozen Prediction |
 | Result and Review | `V4_RESULT_REVIEW_CONTRACT.md` | Official result, model evaluation, and match explanation |
@@ -222,10 +222,10 @@ flowchart LR
     F["Canonical Facts"] --> O["Odds / Market Snapshots"]
     F --> T["Team Context"]
     F --> E["Evidence"]
-    O --> FI["Frozen Input"]
-    T --> FI
-    E --> FI
-    FI --> FB["Feature Bundle"]
+    O --> FB["Feature Bundle"]
+    T --> FB
+    E --> FB
+    FB --> FI["Frozen Input"]
     FB --> EO["Engine Outputs"]
     EO --> P["Prediction"]
     P --> FP["Frozen Prediction"]
@@ -239,8 +239,8 @@ Each layer references only stable upstream identities and hashes:
 |---|---|---|
 | Canonical Facts | Attributed source observations | Generate predictions or interpretations |
 | Odds / Context / Evidence | Canonical identity and accepted sources | Fabricate missing markets or turn claims into facts silently |
-| Frozen Input | Exact fact/snapshot/context/evidence/feature/version references | Update in place or include post-cutoff information |
-| Feature Bundle | One frozen input and versioned generator | Read unversioned raw sources in Production |
+| Frozen Input | Exact fact/snapshot/context/evidence/feature/version references, including Feature Bundle | Update in place or include post-cutoff information |
+| Feature Bundle | Accepted upstream lineage and versioned generator; upstream of Frozen Input | Read unversioned raw sources in Production or require a Frozen Input at creation |
 | Engine Output | Versioned feature/input interface | Hide role, hashes, disagreement, or errors |
 | Prediction | Independent engine outputs | Mechanically derive all five markets from SPF or equate probability to confidence |
 | Frozen Prediction | A passed Prediction and gate evidence | Update historical output |

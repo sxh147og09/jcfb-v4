@@ -164,8 +164,8 @@ A batch name, registry entry, or planning PASS is not task completion. V4-012 th
 | [ ] | V4-035 | V4-035｜Schedule, Travel, Weather & Pitch Context Intake 1.0 | BATCH-08 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-036 | V4-036｜Evidence Graph Claim & Evidence Model 1.0 | BATCH-09 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-037 | V4-037｜Source Quality, Expiry & Conflict Resolver 1.0 | BATCH-09 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
-| [ ] | V4-038 | V4-038｜Feature Bundle Contract & Version Registry 1.0 | BATCH-10 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
-| [ ] | V4-039 | V4-039｜Feature Snapshot Hash & Reproducibility 1.0 | BATCH-10 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
+| [ ] | V4-038 | V4-038｜Feature Bundle Contract & Version Registry 1.0 | BATCH-10 | BATCHABLE + SERIAL | GOVERNANCE_AMENDMENT_V4-010-ADR-001; active contract feature-bundle@2.0.0 |
+| [ ] | V4-039 | V4-039｜Feature Snapshot Hash & Reproducibility 1.0 | BATCH-10 | BATCHABLE + SERIAL | GOVERNANCE_AMENDMENT_V4-010-ADR-001; establishes feature_snapshot_hash |
 | [ ] | V4-040 | V4-040｜Feature Assembly & Schema Adapter Layer 1.0 | BATCH-10 | SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-041 | V4-041｜Dynamic Team Rating Feature Engine 1.0 | BATCH-11 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-042 | V4-042｜Attack, Defence & Home Advantage Model 1.0 | BATCH-11 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |

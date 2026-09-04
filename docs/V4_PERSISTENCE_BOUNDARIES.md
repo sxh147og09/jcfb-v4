@@ -77,14 +77,14 @@ canonical match identity
   + feature schema/generator identity
   + model/engine/config/dataset identities
   + prediction_cutoff_at and kickoff_at
-        -> Frozen Input
         -> Feature Bundle
+        -> Frozen Input
         -> Engine Run
         -> Prediction
         -> Frozen Prediction
 ```
 
-The Frozen Input is the handoff from shared facts to model-private interpretation. It is immutable after `FROZEN`, carries `frozen_input_hash`, and remains a read-only reference for both Production and comparable Shadow. A role-specific `input_hash` is permitted to differ because it includes role and component identity.
+The Feature Bundle is the handoff from accepted shared facts/evidence to typed model-private representation. Frozen Input is the downstream handoff to a formal run: it is immutable after `FROZEN`, carries `frozen_input_hash`, and retains the exact Feature Bundle identity and `feature_snapshot_hash`. A role-specific `input_hash` is permitted to differ because it includes role and component identity.
 
 No runtime path may bypass Frozen Input to read a raw screenshot, unversioned JSON, post-cutoff source, or another role's output. If exact lineage cannot be resolved, the path is `BLOCKED`.
 

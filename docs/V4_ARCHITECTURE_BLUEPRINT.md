@@ -128,7 +128,7 @@ It produces `DATA_QUALITY_SCORE`, `ODDS_QUALITY_SCORE`, `CONTEXT_QUALITY_SCORE`,
 
 Market Intelligence may include opening baseline, odds movement, velocity, price compression/expansion, cross-market confirmation/divergence, heat, overreaction, reverse movement, late movement, liquidity/availability quality, and trap-risk signals. Trap or 诱盘 analysis is never promoted to a fact about bookmaker intent.
 
-The Feature Representation Layer creates versioned bundles for statistical, football-context, market, league, tactical, score, and quality features. Each bundle is timestamped, hashable, reproducible, and represented by a `feature_snapshot_hash`.
+The Feature Representation Layer creates versioned bundles for statistical, football-context, market, league, tactical, score, and quality features from accepted upstream facts, snapshots, context, and Evidence Graph references. Each bundle is timestamped, hashable, reproducible, and represented by a `feature_snapshot_hash`; the downstream Frozen Input later freezes that exact bundle for a formal run.
 
 ## 8. Multi-engine prediction architecture
 

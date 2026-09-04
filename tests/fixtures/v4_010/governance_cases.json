@@ -1,0 +1,28 @@
+{
+  "active_contracts": {
+    "feature_bundle": "feature-bundle@2.0.0",
+    "frozen_input": "frozen-input@2.0.0"
+  },
+  "required_upstream_lineage": [
+    "canonical_entity_refs",
+    "canonical_fact_refs",
+    "official_odds_snapshot_refs",
+    "external_market_refs",
+    "team_context_refs",
+    "evidence_graph_refs",
+    "prediction_cutoff_at",
+    "kickoff_at",
+    "feature_schema_version",
+    "generator_version"
+  ],
+  "feature_quality_dimensions": [
+    "coverage",
+    "verification",
+    "freshness",
+    "completeness",
+    "conflict",
+    "provenance"
+  ],
+  "batch_10_tasks": ["V4-038", "V4-039", "V4-040"],
+  "frozen_input_task": "V4-076"
+}

@@ -44,7 +44,7 @@ Canonical Facts are a read-only cross-role boundary. Fact Intake may have a sepa
 
 ### 4.2 Frozen Input and feature bundles
 
-The shared Production Frozen Input is created once by the Freeze Gate. A comparable Shadow reads that exact identity. An Experiment may append a separately identified frozen research input, but it cannot modify or replace the Production Frozen Input. Same match identity does not make separate inputs equivalent.
+The Feature Bundle is assembled from accepted upstream lineage before the shared Production Frozen Input is created. The Freeze Gate then creates the shared Production Frozen Input with the exact `feature_bundle_id` and `feature_snapshot_hash`. A comparable Shadow reads that exact identity. An Experiment may append a separately identified frozen research input, but it cannot modify or replace the Production Frozen Input. Same match identity does not make separate inputs equivalent.
 
 Role-owned feature bundles may be created only before their formal hash/freeze boundary. Once used by a formal run, a change creates a new identity and new hashes.
 

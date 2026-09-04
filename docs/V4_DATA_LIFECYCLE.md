@@ -13,8 +13,8 @@ flowchart LR
     SI[Source Intake] --> CF[Canonical Fact]
     CF --> SS[Snapshot]
     SS --> V[Validation]
-    V --> FI[Frozen Input]
-    FI --> FB[Feature Bundle]
+    V --> FB[Feature Bundle]
+    FB --> FI[Frozen Input]
     FB --> ER[Engine Runs]
     ER --> P[Prediction]
     P --> FZ[Freeze / Frozen Prediction]
@@ -41,7 +41,7 @@ The public projection is a side output of an approved Production freeze/release 
 | Snapshot | official/external odds, Team Context, Evidence Items/Bundles | source type, availability, chronology, cutoff scope | append exact snapshot/claim; missing official market is explicit `UNAVAILABLE` |
 | Validation | validation result/audit event | schema, refs, hashes, enum, time and role checks | pass or append `BLOCKED`/`NOT_VERIFIED`; no silent defaults |
 | Frozen Input | `frozen_inputs` | exact refs/hashes, `cutoff < kickoff`, all critical availability times proven | immutable `FROZEN` input; reject or append a blocked revision |
-| Feature Bundle | `feature_bundles` | one Frozen Input, feature schema/generator identity, typed missingness | append typed feature artifact; future leakage makes it blocked |
+| Feature Bundle | `feature_bundles` | accepted upstream lineage, feature schema/generator identity, typed missingness | append typed feature artifact; future leakage makes it blocked |
 | Engine Runs | `engine_runs` | explicit role, version/hash, valid Feature/Frozen Input, run before kickoff | append `SUCCEEDED`, `FAILED`, `BLOCKED`, or `INVALID`; never fabricate output |
 | Prediction | `predictions` | independent five markets, exact engine refs, risk/uncertainty/consensus | append role-scoped Prediction; invalid inputs cannot be formal |
 | Freeze | `frozen_predictions` | Final Prediction Gate, immutability, role and hash checks | append immutable Frozen Prediction; failed gate blocks freeze |
@@ -91,7 +91,7 @@ The Freeze Gate checks:
 9. `immutable=true` after sealing;
 10. a complete audit event.
 
-Only a passed Frozen Input may generate a formal Feature Bundle/Engine Run. A later correction creates a new input/revision; it never mutates a used input.
+An accepted Feature Bundle is created before Frozen Input and may become a formal Frozen Input input only after its lineage, cutoff, and quality gates pass. A later correction creates a new bundle or input revision; it never mutates a used artifact.
 
 ## 6. Role lifecycle
 

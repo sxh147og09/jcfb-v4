@@ -1,156 +1,122 @@
-# JCFB V4 Feature Bundle Contract 1.0
+# JCFB V4 Feature Bundle Contract 2.0
 
-Status: V4-008 DATA CONTRACT DESIGN ARTIFACT
+Status: V4-010 ARCHITECTURE GOVERNANCE AMENDMENT  
+Contract version: `feature-bundle@2.0.0`  
+Supersedes: `feature-bundle@1.0.0` in `docs/V4_FEATURE_BUNDLE_CONTRACT_1.0.md`
 
-## 1. Purpose and hard boundary
+## 1. Decision and boundary
 
-Feature Bundle is the typed, versioned, reproducible representation consumed by independent V4 engines. It is generated from one accepted Frozen Input and never reads unversioned raw source directly in a formal Production or Shadow path.
+Feature Bundle is the typed, versioned, deterministic representation of accepted upstream inputs. It is created before Frozen Input and is never a consumer of Frozen Input. The governed flow is:
 
-This contract defines the shape and lineage of features, not their model weights, algorithm, or Production parameter values. A feature transformation is model-line private even when it starts from a shared objective fact.
+```text
+canonical facts / official odds / external markets / team context / Evidence Graph
+    -> Feature Bundle
+    -> downstream feature and quality layers
+    -> Frozen Input
+    -> Prediction
+```
 
-## 2. Required fields and feature categories
+The bundle may read only versioned, identity-bound, time-eligible upstream artifacts. It never reads an unversioned raw source directly in a formal Production, Shadow, or Experiment path. `frozen_input_id` and `frozen_input_hash` are not creation-stage inputs and are not required fields in this contract.
 
-| Field | Type | Requiredness | Rule |
-|---|---|---|---|
-| `object_id` / `feature_bundle_id` | UUID/UUIDv7 | REQUIRED | Stable bundle identity. |
-| `contract_version` | string | REQUIRED | `feature-bundle@MAJOR.MINOR.PATCH`. |
-| `feature_schema_version` | qualified version | REQUIRED | Exact feature shape/meaning identity. |
-| `generator_version` | qualified version/revision | REQUIRED | Exact generator implementation identity. |
-| `input_hash` | SHA-256 string | REQUIRED | Hash of the exact feature input envelope; must include the Frozen Input hash. |
-| `frozen_input_id` / `frozen_input_hash` | stable ref/hash | REQUIRED | No feature bundle is formal without a frozen source boundary. |
-| `generated_at` | timezone-aware timestamp | REQUIRED | Computation time, separate from source availability. |
-| `prediction_cutoff_at` / `kickoff_at` | timezone-aware timestamps | REQUIRED for pre-match bundle | Used by the no-future-leakage gate. |
-| `feature_values` | typed object | REQUIRED | Contains the seven governed categories below. |
-| `missingness_summary` | structured object | REQUIRED | Counts and states by category/feature; no hidden null semantics. |
-| `quality_flags` | array/object | REQUIRED | Quality and gate signals such as `PASS`, `UNKNOWN_INPUT`, `STALE_INPUT`, or `BLOCKED_INPUT`. |
-| `feature_hash` | SHA-256 string | REQUIRED | Hash of the logical feature bundle payload. |
-| `payload_hash` / `provenance_hash` / `status` / `metadata` | common fields | REQUIRED | Common lineage and state. |
+## 2. Required envelope
 
-The mandatory feature categories are:
+The following fields are required unless a field is explicitly marked as a governed empty collection. A missing required field is `BLOCKED`; no default or implicit coercion is permitted.
 
-- `statistical_features`
-- `football_context_features`
-- `market_features`
-- `league_features`
-- `tactical_features`
-- `score_features`
-- `quality_features`
-
-Each category is an object of named feature records. A feature record should declare `value`, `state`, `unit` when numeric, `source_refs`, and a short `derivation` tied to the generator version. `value` is absent when the state is `UNKNOWN`, `UNAVAILABLE`, `NOT_VERIFIED`, `BLOCKED`, or `NOT_APPLICABLE`; zero is allowed only when zero is an observed/derived value and the state is `AVAILABLE`.
-
-## 3. Feature semantics and missingness
-
-Feature Bundle preserves the distinction between:
-
-| Feature state | Meaning in a bundle |
+| Field | Rule |
 |---|---|
-| `AVAILABLE` | Derived feature has a valid typed value and accepted upstream lineage |
-| `UNKNOWN` | Upstream property is not known; do not impute silently |
-| `UNAVAILABLE` | Upstream market/context was explicitly not supplied |
-| `NOT_VERIFIED` | An upstream claim exists but did not pass verification |
-| `BLOCKED` | Gate prevents the feature from being used in the declared formal role |
-| `NOT_APPLICABLE` | Feature does not apply to this role, market, or component |
+| `object_id`, `feature_bundle_id` | Stable UUID identities; never reused. |
+| `contract_version` | Exact `feature-bundle@2.0.0`; no `latest` or silent downgrade. |
+| `feature_schema_version` | Exact registered feature shape. |
+| `generator_version` | Exact generator implementation identity. |
+| `role` | Explicit `PRODUCTION`, `SHADOW`, or `EXPERIMENT` namespace identity; never inferred. |
+| `config_version`, `config_hash` | Exact feature-affecting configuration identity; no hidden defaults. |
+| `canonical_entity_refs` | Required match reference and resolved canonical team/side references. |
+| `canonical_fact_refs` | Exact accepted fact IDs and hashes used by the bundle. |
+| `official_odds_snapshot_refs` | Exact official snapshot IDs and hashes, including explicit market availability states. |
+| `external_market_refs` | Exact external snapshot IDs and hashes; every reference retains `source_is_official=false`. |
+| `team_context_refs` | Exact team-context IDs and hashes used. |
+| `evidence_graph_refs` | Exact Evidence Graph object IDs and hashes used as basis. |
+| `input_hash` | Deterministically derived from the complete accepted upstream reference/hash set and declared temporal/config identities. |
+| `generated_at` | Envelope generation timestamp; excluded from substantive replay hash when declared volatile. |
+| `prediction_cutoff_at`, `kickoff_at` | Required time boundary; cutoff precedes kickoff. |
+| `feature_values` | The seven governed categories with typed values and explicit state. |
+| `missingness_summary` | Reconciles every feature state; no hidden omissions. |
+| `feature_quality` | Typed data-quality object defined in section 5; not prediction confidence. |
+| `quality_flags` | Explicit blockers, conflicts, stale/future states, and provenance conditions. |
+| `feature_snapshot_hash` | Required for a finalized/replayable bundle and established by V4-039. |
+| `feature_hash`, `payload_hash`, `provenance_hash` | Recomputable canonical hashes. |
+| `status`, `metadata` | Governed lifecycle state and non-secret audit metadata. |
 
-`missingness_summary` must count states separately, for example:
+## 3. Upstream lineage and identity
+
+Every bundle must resolve exactly one canonical match identity. All source references must resolve to accepted V4 records and preserve their original IDs, source role, source references, and hashes. A missing or invalid canonical match, team, side, source, source reference, or hash is `BLOCKED`; an orphan feature bundle is invalid.
+
+`display_name` is descriptive only and is never a join key. Official and external market references remain separate; an external reference cannot fill an official reference or change its market semantics. The bundle does not invent a snapshot, odds value, line, context value, evidence claim, or source.
+
+The bundle's direct input boundary is the ordered canonical set:
+
+```text
+canonical_entity_refs
+canonical_fact_refs
+official_odds_snapshot_refs
+external_market_refs
+team_context_refs
+evidence_graph_refs
+prediction_cutoff_at / kickoff_at
+feature_schema_version / generator_version
+```
+
+`input_hash` covers this set after canonical serialization, including each referenced object's exact hash and governed status. It does not include `frozen_input_id`, `frozen_input_hash`, downstream engine output, Prediction, recommendation, or model interpretation.
+
+## 4. Feature value and availability semantics
+
+Every feature record carries `value`, `state`, `unit` where applicable, `source_refs`, and `derivation_ref` where derived. `AVAILABLE` requires a non-empty correctly typed value and traceable source/basis references. `UNKNOWN`, `UNAVAILABLE`, `NOT_VERIFIED`, `BLOCKED`, and `NOT_APPLICABLE` remain explicit states; an absent value is not evidence for any other state.
+
+The following implicit conversions are forbidden:
+
+```text
+missing -> UNKNOWN
+empty payload -> UNAVAILABLE
+stale / future / conflict / blocked -> AVAILABLE
+conflict -> selected winner without approved policy
+missing -> 0 / mean / previous-match value / synthetic payload
+```
+
+Zeros are valid only when the accepted upstream evidence supports a real zero. Imputation is permitted only when a separately versioned feature contract, configuration identity, and quality flag explicitly authorize it; otherwise the state remains missing or blocked.
+
+## 5. Feature-quality semantics
+
+The bundle must not contain an unqualified bare `confidence` field. Its typed quality object is `feature_quality`, whose dimensions describe evidence and data quality only:
 
 ```json
 {
-  "total_features": 42,
-  "by_state": {"AVAILABLE": 35, "UNKNOWN": 3, "UNAVAILABLE": 2, "NOT_VERIFIED": 1, "BLOCKED": 1},
-  "by_category": {"football_context_features": {"unknown": 2, "available": 8}}
+  "coverage": "COMPLETE|PARTIAL|UNKNOWN",
+  "verification": "VERIFIED|PARTIAL|UNKNOWN",
+  "freshness": "CURRENT|STALE|UNKNOWN",
+  "completeness": "COMPLETE|PARTIAL|UNKNOWN",
+  "conflict": "NONE|PRESENT|UNKNOWN",
+  "provenance": "RESOLVED|PARTIAL|UNKNOWN"
 }
 ```
 
-The generator may use an explicitly versioned imputation/default policy only when that policy is part of the config identity, allowed by the engine contract, and recorded in `quality_flags`. Otherwise the feature remains in its original missing state and the consuming gate can return `PASS`, `NO_STRONG_RECOMMENDATION`, or `BLOCKED` according to the applicable contract.
+These dimensions must not be interpreted as win probability, model confidence, betting confidence, recommendation grade, or engine output. A numeric score is not part of this generic object. Source/evidence-specific confidence remains governed by the relevant source or Evidence contract and is not copied into a prediction-like field.
 
-## 4. Minimum legal JSON example
+## 6. Time, cutoff, and replay rules
 
-```json
-{
-  "object_id": "019a0000-0000-7000-8000-000000000501",
-  "feature_bundle_id": "019a0000-0000-7000-8000-000000000501",
-  "contract_version": "feature-bundle@1.0.0",
-  "created_at": "2026-09-01T12:40:00+08:00",
-  "source_timestamp": "2026-09-01T12:00:00+08:00",
-  "observed_at": "2026-09-01T12:40:00+08:00",
-  "ingested_at": "2026-09-01T12:40:01+08:00",
-  "source": "JCFB V4 versioned feature generator",
-  "source_type": "DERIVED_SYSTEM",
-  "source_reference": "ref://v4/feature-generator/4.0.0/r001/20260901/001",
-  "confidence": {"state": "ASSESSED", "score": 0.91, "basis": "Frozen input resolved; some context fields remain unknown"},
-  "provenance_hash": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
-  "payload_hash": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
-  "status": "AVAILABLE",
-  "metadata": {"hash_exclusions": ["created_at", "ingested_at"]},
-  "feature_schema_version": "feature-bundle@1.0.0",
-  "generator_version": "feature-generator@4.0.0#r001",
-  "frozen_input_id": "019a0000-0000-7000-8000-000000000401",
-  "frozen_input_hash": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
-  "input_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "prediction_cutoff_at": "2026-09-01T12:00:00+08:00",
-  "kickoff_at": "2026-09-01T19:35:00+08:00",
-  "generated_at": "2026-09-01T12:40:00+08:00",
-  "feature_values": {
-    "statistical_features": {
-      "home_attack_rating": {"value": 0.72, "state": "AVAILABLE", "unit": "standardized_score", "source_refs": ["dataset:pre-match-facts@1.0.0#r001"], "derivation": "Versioned rating transform"}
-    },
-    "football_context_features": {
-      "home_injury_count": {"value": 0, "state": "AVAILABLE", "unit": "players", "source_refs": ["team-context:019a0000-0000-7000-8000-000000000201"], "derivation": "NONE_CONFIRMED collection count"},
-      "away_suspension_state": {"state": "UNKNOWN", "source_refs": ["team-context:away-unknown-001"], "derivation": "No verified source"}
-    },
-    "market_features": {
-      "official_spf_home_price": {"value": 2.10, "state": "AVAILABLE", "unit": "decimal_odds", "source_refs": ["snapshot:019a0000-0000-7000-8000-000000000101"], "derivation": "Official snapshot read"}
-    },
-    "league_features": {
-      "league_sample_quality": {"value": "MEDIUM", "state": "AVAILABLE", "source_refs": ["dataset:league-profile@1.0.0#r001"], "derivation": "Declared league profile"}
-    },
-    "tactical_features": {
-      "home_pressing_intensity": {"state": "NOT_VERIFIED", "source_refs": ["evidence:tactical-001"], "derivation": "Claim not fully verified"}
-    },
-    "score_features": {
-      "expected_home_goals_input": {"value": 1.42, "state": "AVAILABLE", "unit": "goals", "source_refs": ["feature:statistical_features/home_attack_rating"], "derivation": "Versioned score input transform"}
-    },
-    "quality_features": {
-      "future_information_leakage": {"value": false, "state": "AVAILABLE", "source_refs": ["frozen-input:019a0000-0000-7000-8000-000000000401"], "derivation": "Cutoff gate passed"}
-    }
-  },
-  "missingness_summary": {
-    "total_features": 7,
-    "by_state": {"AVAILABLE": 5, "UNKNOWN": 1, "NOT_VERIFIED": 1},
-    "by_category": {"football_context_features": {"AVAILABLE": 1, "UNKNOWN": 1}, "tactical_features": {"NOT_VERIFIED": 1}}
-  },
-  "quality_flags": ["PASS", "UNKNOWN_CONTEXT_RETAINED", "NOT_VERIFIED_CONTEXT_RETAINED"],
-  "future_information_leakage": false,
-  "feature_hash": "sha256:9999999999999999999999999999999999999999999999999999999999999999"
-}
-```
+All accepted upstream objects must be eligible at `prediction_cutoff_at`; future, post-kickoff, stale, ambiguous, or unprovable time data remains explicitly represented and cannot be silently promoted. This contract carries time fields for the boundary but does not replace V4-022's complete cutoff gate.
 
-## 5. Validation rules
+Canonical serialization fixes field order, object representation, collection order, number handling, state handling, and hash algorithm/profile. Identical accepted upstream identities, hashes, schema, generator, cutoff, and feature values produce the same `input_hash` and, after V4-039, the same `feature_snapshot_hash`. A logical change produces a different hash. Volatile telemetry such as generation/ingestion time is excluded only when the hash profile explicitly declares it volatile.
 
-### Required, type, and range checks
+## 7. Lifecycle and downstream Frozen Input relationship
 
-- All required fields and all seven categories exist, even if a category has only explicit missingness records.
-- `feature_schema_version` and `generator_version` are exact registered identities; unqualified `latest`/`current` aliases are invalid.
-- Numeric features declare units and finite numeric values. Probabilities are in `[0,1]`; counts are non-negative integers; odds are positive when used.
-- Every feature has a state. A feature with `state=UNKNOWN`/`UNAVAILABLE`/`BLOCKED` has no fabricated numeric value.
-- `missingness_summary` reconciles with the feature records and preserves states separately.
+Feature Bundle observations and corrections are append-only. A correction creates a new revision with a new identity/hash and an explicit `supersedes_feature_bundle_id`; an existing bundle is never overwritten.
 
-### Reference, timestamp, and hash checks
+V4-076 consumes the accepted Feature Bundle and must freeze at least `feature_bundle_id` and `feature_snapshot_hash`, together with its other approved upstream identities. Frozen Input therefore points downstream to the exact Feature Bundle; it never becomes a prerequisite for Feature Bundle creation.
 
-- `frozen_input_hash` and `input_hash` resolve to the exact Frozen Input and feature input envelope. A same-match but different snapshot is a different input.
-- Every derived feature retains source/fact/evidence references required to reproduce the transformation.
-- For pre-match use, all referenced source availability times are at or before `prediction_cutoff_at`; `generated_at` may be later than the cutoff but must be before kickoff and must not introduce a new source.
-- `future_information_leakage=true` or an unresolved cutoff makes `status=BLOCKED` and the bundle ineligible for formal Production/Shadow use.
-- `feature_hash`, `payload_hash`, and `provenance_hash` are format-valid and recomputable.
+Feature Bundle is a representation artifact, not a Feature Engine, Market Intelligence output, Prediction, Score Engine output, Shadow/Tier A artifact, Public projection, or Promotion decision.
 
-### Role and boundary checks
+## 8. Forbidden fields and validation
 
-- Engines consume the Feature Bundle interface, not raw screenshots, free-form JSON, unversioned news, or direct external provider responses.
-- Production and Shadow bundles in an A/B pair reference the same `frozen_input_hash`; role-specific engine input identity remains in the Engine Output envelope.
-- An Experiment bundle is not a Production or Shadow feature bundle by relabeling.
+The envelope must reject fields named or semantically equivalent to `prediction`, `recommendation`, `confidence` (when unqualified), `model_confidence`, `win_probability`, `betting_confidence`, `selection`, `risk_decision`, `engine_output`, or `score_selection`. A feature may cite an upstream fact and derive a typed representation, but it cannot silently rewrite a fact or create a decision.
 
-## 6. Hash and compatibility boundary
-
-The feature hash includes the feature schema/generator identities, Frozen Input ref/hash, typed feature values/states/units/source refs, missingness summary, quality flags, cutoff/kickoff, and declared derivation identities. It excludes `created_at`, `ingested_at`, and non-authoritative trace telemetry.
-
-Adding an optional feature with an explicit missingness state is `MINOR`; changing a feature's meaning, unit, type, imputation rule, category, cutoff behavior, or hash boundary is `MAJOR`; clarification is `PATCH`. A new model-affecting generator or default policy requires a new generator/config/revision and forward evidence even when the schema remains backward-compatible.
+Validation fails closed when any required identity/hash cannot resolve, a status is inferred from payload shape, a future source enters the pre-match object, a feature schema or generator is unregistered, a hash cannot be recomputed, or the bundle would require a Frozen Input that does not yet exist.

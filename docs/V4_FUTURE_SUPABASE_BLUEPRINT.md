@@ -41,8 +41,8 @@ The following names are candidates, not created objects.
 
 | Candidate table | Purpose | Key references |
 |---|---|---|
-| `model.frozen_inputs` | immutable accepted pre-match input | `frozen_input_id` UUID PK; FK match; exact source/hash refs |
-| `model.feature_bundles` | typed features generated from one Frozen Input | `feature_bundle_id` UUID PK; FK Frozen Input |
+| `model.feature_bundles` | typed features generated from accepted upstream lineage | `feature_bundle_id` UUID PK; FK match/entity scope; exact upstream source/hash refs |
+| `model.frozen_inputs` | immutable accepted pre-match input downstream of Feature Bundle | `frozen_input_id` UUID PK; FK match and exact `feature_bundle_id`/`feature_snapshot_hash` |
 | `model.engine_runs` | role-scoped independent engine output envelope | `engine_run_id` UUID PK; FKs match/Frozen Input/Feature/versions |
 | `model.predictions` | role-scoped five-market assembled Prediction | `prediction_id` UUID PK; FK match/Frozen Input |
 | `model.prediction_engine_runs` | Prediction to many Engine Run references | composite unique `(prediction_id, engine_run_id, market, lineage_purpose)` |
@@ -88,7 +88,7 @@ Candidate relational constraints:
 1. `core.matches` has unique `(data_date, official_match_no)` and a derived/validated `match_identity_key`.
 2. Every downstream table carries a `match_id` FK where the object is match-scoped. Nested references also pass same-match checks.
 3. `core.official_odds_snapshots.source_is_official` is true; `core.external_market_snapshots.source_is_official` is false.
-4. Frozen Input refs resolve to exact snapshot/context/evidence IDs and hashes; Feature Bundle has exactly one Frozen Input.
+4. Frozen Input refs resolve to exact snapshot/context/evidence IDs and hashes plus one exact Feature Bundle ID/snapshot hash; Feature Bundle has no Frozen Input prerequisite.
 5. Prediction and Frozen Prediction match IDs agree with the referenced Frozen Input/Prediction.
 6. Review Frozen Prediction and Official Result match IDs agree.
 7. Tier A Production/Shadow members have the same match and `frozen_input_hash`, distinct explicit roles, and pre-kickoff completion.
