@@ -243,6 +243,18 @@ from .market_movement import (
     MarketMovementStore,
     MarketMovementValidationError,
 )
+from .market_risk_interpretation import (
+    ARTIFACT_KIND as MARKET_RISK_INTERPRETATION_ARTIFACT_KIND,
+    CONFIG_VERSION as MARKET_RISK_INTERPRETATION_CONFIG_VERSION,
+    CONTRACT_VERSION as MARKET_RISK_INTERPRETATION_CONTRACT_VERSION,
+    GENERATOR_VERSION as MARKET_RISK_INTERPRETATION_GENERATOR_VERSION,
+    MAPPING_REGISTRY_VERSION as MARKET_RISK_INTERPRETATION_MAPPING_REGISTRY_VERSION,
+    MarketRiskInterpretationArtifact,
+    MarketRiskInterpretationEngine,
+    MarketRiskInterpretationResult,
+    MarketRiskInterpretationStore,
+    MarketRiskInterpretationValidationError,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -444,4 +456,14 @@ __all__ = [
     "MarketMovementResult",
     "MarketMovementStore",
     "MarketMovementValidationError",
+    "MARKET_RISK_INTERPRETATION_ARTIFACT_KIND",
+    "MARKET_RISK_INTERPRETATION_CONFIG_VERSION",
+    "MARKET_RISK_INTERPRETATION_CONTRACT_VERSION",
+    "MARKET_RISK_INTERPRETATION_GENERATOR_VERSION",
+    "MARKET_RISK_INTERPRETATION_MAPPING_REGISTRY_VERSION",
+    "MarketRiskInterpretationArtifact",
+    "MarketRiskInterpretationEngine",
+    "MarketRiskInterpretationResult",
+    "MarketRiskInterpretationStore",
+    "MarketRiskInterpretationValidationError",
 ]

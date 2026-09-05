@@ -1,0 +1,22 @@
+{
+  "cutoff_at": "2026-09-04T09:40:00+08:00",
+  "kickoff_at": "2026-09-04T12:00:00+08:00",
+  "contract_version": "market-risk-interpretation@1.0.0",
+  "generator_version": "v4-048-market-risk-interpretation@1.0.0",
+  "approved_states": [
+    "NONE_OBSERVED",
+    "SIGNAL_PRESENT",
+    "MULTIPLE_SIGNALS",
+    "INSUFFICIENT_DATA",
+    "CONFLICTED",
+    "BLOCKED"
+  ],
+  "forbidden_outputs": [
+    "heat_score",
+    "pressure_score",
+    "trap_risk_score",
+    "bookmaker_intent_confirmed",
+    "certain_trap",
+    "recommendation"
+  ]
+}
