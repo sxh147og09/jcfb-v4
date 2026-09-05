@@ -1,0 +1,9 @@
+{
+  "cutoff_at": "2026-09-04T09:40:00+08:00",
+  "kickoff_at": "2026-09-04T12:00:00+08:00",
+  "contract_version": "market-movement@1.0.0",
+  "generator_version": "v4-047-market-movement@1.0.0",
+  "velocity_formula": "value_delta_divided_by_elapsed_hours",
+  "acceleration_minimum_valid_snapshots": 3,
+  "aggregation_policy": "EQUAL_ELIGIBLE_PROVIDER_CONTRIBUTION"
+}

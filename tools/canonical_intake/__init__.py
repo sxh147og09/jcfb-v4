@@ -231,6 +231,18 @@ from .market_intelligence import (
     MarketIntelligenceStore,
     MarketIntelligenceValidationError,
 )
+from .market_movement import (
+    ARTIFACT_KIND as MARKET_MOVEMENT_ARTIFACT_KIND,
+    CONFIG_VERSION as MARKET_MOVEMENT_CONFIG_VERSION,
+    CONTRACT_VERSION as MARKET_MOVEMENT_CONTRACT_VERSION,
+    GENERATOR_VERSION as MARKET_MOVEMENT_GENERATOR_VERSION,
+    MAPPING_REGISTRY_VERSION as MARKET_MOVEMENT_MAPPING_REGISTRY_VERSION,
+    MarketMovementArtifact,
+    MarketMovementEngine,
+    MarketMovementResult,
+    MarketMovementStore,
+    MarketMovementValidationError,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -422,4 +434,14 @@ __all__ = [
     "MarketIntelligenceResult",
     "MarketIntelligenceStore",
     "MarketIntelligenceValidationError",
+    "MARKET_MOVEMENT_ARTIFACT_KIND",
+    "MARKET_MOVEMENT_CONFIG_VERSION",
+    "MARKET_MOVEMENT_CONTRACT_VERSION",
+    "MARKET_MOVEMENT_GENERATOR_VERSION",
+    "MARKET_MOVEMENT_MAPPING_REGISTRY_VERSION",
+    "MarketMovementArtifact",
+    "MarketMovementEngine",
+    "MarketMovementResult",
+    "MarketMovementStore",
+    "MarketMovementValidationError",
 ]

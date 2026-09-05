@@ -1,0 +1,53 @@
+{
+  "task_id": "V4-047",
+  "task_name": "Market Movement, Velocity & Divergence Features 1.0",
+  "workspace": "F:/Projects/jcfb-v4",
+  "branch": "main",
+  "upstream_task": "V4-046",
+  "targeted_tests": {
+    "command": "python -m unittest tests.unit.test_v4_047_market_movement -v",
+    "passed": 11,
+    "total": 11,
+    "status": "PASS"
+  },
+  "full_repository_tests": {
+    "command": "python -m unittest discover -s tests -p \"test_*.py\"",
+    "passed": 442,
+    "total": 442,
+    "status": "PASS"
+  },
+  "acceptance": {
+    "accepted_v4046_input_only": "PASS",
+    "same_source_series": "PASS",
+    "line_price_separation": "PASS",
+    "market_implied_probability_normalization": "PASS",
+    "velocity_and_acceleration": "PASS",
+    "minimum_three_snapshot_acceleration": "PASS",
+    "provider_equal_eligible_aggregation": "PASS",
+    "provider_dispersion_retained": "PASS",
+    "approved_official_external_divergence": "PASS",
+    "not_comparable_relation_preserved": "PASS",
+    "cutoff_and_future_data": "PASS",
+    "non_consumable_and_missing_fail_closed": "PASS",
+    "no_synthetic_or_time_fallback": "PASS",
+    "deterministic_hash_boundary": "PASS",
+    "append_only_storage": "PASS",
+    "no_v4048_logic": "PASS",
+    "prediction_score_frozen_input_boundary": "PASS",
+    "f_drive_policy": "PASS",
+    "v3333_isolation": "PASS"
+  },
+  "validation": {
+    "data_contracts": "PASS",
+    "versioning": "85 PASS / 0 FAIL",
+    "git_diff_check": "PASS"
+  },
+  "boundaries": {
+    "production_supabase_reads_writes": "NO",
+    "migration_added_applied": "NO",
+    "v4048_implementation": "NOT ENTERED",
+    "batch_14": "NOT ENTERED"
+  },
+  "dod": "PASS",
+  "status": "COMPLETE"
+}
