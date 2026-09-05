@@ -1,0 +1,59 @@
+{
+  "batch_id": "BATCH-14",
+  "status": "COMPLETE",
+  "closure_gate": "PASS",
+  "baseline": {
+    "head": "1819263fdc3d4737ec5f4452ba0588e3de505b3b",
+    "working_tree": "CLEAN",
+    "full_tests": "464/464 PASS"
+  },
+  "current": {
+    "head": "43b403bb4fc156567c7ec808c98f95ed7a031e12",
+    "working_tree": "CLEAN",
+    "full_tests": "487/487 PASS",
+    "versioning_validation": "85 PASS / 0 FAIL",
+    "data_contract_validation": "PASS",
+    "f_drive": "F:"
+  },
+  "manifest": {
+    "file": "docs/JCFB_V4_BATCH_14_EXECUTION_MANIFEST.json",
+    "status": "FROZEN",
+    "frozen_at_head": "1819263fdc3d4737ec5f4452ba0588e3de505b3b",
+    "manifest_hash": "sha256:8adf43516c96c9de1f867e185e9f256399486c90a7440fade57e4b390969807f",
+    "recomputed_hash_match": true,
+    "scope": ["V4-049", "V4-050", "V4-051"]
+  },
+  "active_governance": {
+    "quality_gate_config": {"version": "quality-gate-config@1.0.0", "hash": "sha256:681b46abb9942f0832db86e6b5c839cd353f0a7be06cdc9fa9e6c13b135ac098"},
+    "quality_gate_matrix": {"version": "quality-gate-matrix@1.0.0", "hash": "sha256:1161ab65a85c0b1ea5a98e47271ba17de23ca5c92081c3263ce403cf382de18f"},
+    "quality_gate_reason_registry": {"version": "quality-gate-reason-registry@1.0.0", "hash": "sha256:0fc720e17d0e599291def181586ad432d265afc5603614cec2fe881e28a8c86b"}
+  },
+  "task_acceptance": {
+    "V4-049": {"status": "COMPLETE", "targeted_tests": "8/8 PASS", "implementation_hash": "sha256:f038114cdb85661f118fb6674991ffa5bbd5703f704a2afd08094ba5c2703f13"},
+    "V4-050": {"status": "COMPLETE", "targeted_tests": "8/8 PASS", "implementation_hash": "sha256:7f6e132b7e27504248b1df6dd48b30c24034a2d6f3b6e7ab71ec84119c4a4290"},
+    "V4-051": {"status": "COMPLETE", "targeted_tests": "7/7 PASS", "implementation_hash": "sha256:014e07aca3113aef1d376c455519d9d11a502fbf584dbba4f09256e397634b0b"}
+  },
+  "boundary_audits": {
+    "typed_tactical_league_semantics": "PASS",
+    "no_arbitrary_tactical_score_or_statistical_league_strength_override": "PASS",
+    "multidimensional_quality_no_scalar_or_composite": "PASS",
+    "eligibility_state_separation": "PASS",
+    "matrix_only_propagation": "PASS",
+    "cutoff_future_data_and_provenance": "PASS",
+    "deterministic_replay_and_hashes": "PASS",
+    "append_only_supersedes": "PASS",
+    "separate_dimensions_only": "PASS",
+    "no_prediction_score_abstention_or_frozen_input": "PASS",
+    "production_supabase": "NO",
+    "migration": "NO",
+    "v3_3_3_isolation": "PASS",
+    "forbidden_changed_paths_since_baseline": [],
+    "batch_15_entered": false
+  },
+  "focused_commits": [
+    "99409f0 docs(v4): freeze batch 14 execution manifest",
+    "dc9f485 feat(v4): implement tactical league profile gate",
+    "b9c923b feat(v4): implement multidimensional data quality assessment",
+    "43b403b feat(v4): implement matrix-driven provenance quality gate"
+  ]
+}

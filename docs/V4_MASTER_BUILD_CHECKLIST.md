@@ -58,9 +58,9 @@
 - [ ] V4-046｜Market Intelligence Engine 4.0 1.0
 - [ ] V4-047｜Market Movement, Velocity & Divergence Features 1.0
 - [ ] V4-048｜Market Heat & Trap-Risk Interpretation 1.0
-- [ ] V4-049｜Tactical Matchup & League Profile Features 1.0
-- [ ] V4-050｜Data Quality Engine 4.0 1.0
-- [ ] V4-051｜Provenance & Quality Gate Enforcement 1.0
+- [x] V4-049｜Tactical Matchup & League Profile Features 1.0
+- [x] V4-050｜Data Quality Engine 4.0 1.0
+- [x] V4-051｜Provenance & Quality Gate Enforcement 1.0
 - [ ] V4-052｜Outcome Engine 4.0 1.0
 - [ ] V4-053｜Handicap Engine 4.0 1.0
 - [ ] V4-054｜Goals Engine 4.0 1.0
@@ -175,9 +175,9 @@ A batch name, registry entry, or planning PASS is not task completion. V4-012 th
 | [ ] | V4-046 | V4-046｜Market Intelligence Engine 4.0 1.0 | BATCH-13 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-047 | V4-047｜Market Movement, Velocity & Divergence Features 1.0 | BATCH-13 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-048 | V4-048｜Market Heat & Trap-Risk Interpretation 1.0 | BATCH-13 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
-| [ ] | V4-049 | V4-049｜Tactical Matchup & League Profile Features 1.0 | BATCH-14 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
-| [ ] | V4-050 | V4-050｜Data Quality Engine 4.0 1.0 | BATCH-14 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
-| [ ] | V4-051 | V4-051｜Provenance & Quality Gate Enforcement 1.0 | BATCH-14 | SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
+| [x] | V4-049 | V4-049｜Tactical Matchup & League Profile Features 1.0 | BATCH-14 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
+| [x] | V4-050 | V4-050｜Data Quality Engine 4.0 1.0 | BATCH-14 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
+| [x] | V4-051 | V4-051｜Provenance & Quality Gate Enforcement 1.0 | BATCH-14 | SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-052 | V4-052｜Outcome Engine 4.0 1.0 | BATCH-15 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-053 | V4-053｜Handicap Engine 4.0 1.0 | BATCH-15 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-054 | V4-054｜Goals Engine 4.0 1.0 | BATCH-15 | BATCHABLE + PARALLEL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
