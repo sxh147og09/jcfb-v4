@@ -1,0 +1,43 @@
+{
+  "statistical_features": [
+    {"feature_id": "stat-041", "feature_type": "DYNAMIC_TEAM_RATING", "target_match_id": "REPLACE_WITH_MATCH_ID", "state": "AVAILABLE", "generator_version": "v4-041-dynamic-team-rating@1.0.0", "output_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111", "input_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222", "config_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333"},
+    {"feature_id": "stat-042", "feature_type": "ATTACK_STRENGTH", "target_match_id": "REPLACE_WITH_MATCH_ID", "state": "AVAILABLE", "generator_version": "v4-042-attack-defence-home-advantage@1.0.0", "output_hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444", "input_hash": "sha256:5555555555555555555555555555555555555555555555555555555555555555", "config_hash": "sha256:6666666666666666666666666666666666666666666666666666666666666666"},
+    {"feature_id": "stat-043", "feature_type": "OPPONENT_ADJUSTED_STRENGTH", "target_match_id": "REPLACE_WITH_MATCH_ID", "state": "AVAILABLE", "generator_version": "v4-043-opponent-form-league-strength@1.0.0", "output_hash": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "input_hash": "sha256:8888888888888888888888888888888888888888888888888888888888888888", "config_hash": "sha256:9999999999999999999999999999999999999999999999999999999999999999"}
+  ],
+  "context_observations": [
+    {
+      "feature_key": "rest_days",
+      "match_id": "REPLACE_WITH_MATCH_ID",
+      "category": "schedule",
+      "kind": "NUMERIC",
+      "state": "AVAILABLE",
+      "value": 5,
+      "unit": "days",
+      "context_state": "CONFIRMED",
+      "team_id": "team-home-001",
+      "side": "HOME",
+      "source_ref": {"id": "context-001", "hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+      "basis_refs": [{"id": "evidence-001", "hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}],
+      "source_timestamp": "2026-09-04T08:50:00+08:00",
+      "observed_at": "2026-09-04T09:00:00+08:00",
+      "effective_at": "2026-09-04T09:00:00+08:00"
+    },
+    {
+      "feature_key": "lineup_state",
+      "match_id": "REPLACE_WITH_MATCH_ID",
+      "category": "lineup",
+      "kind": "CATEGORICAL",
+      "state": "AVAILABLE",
+      "value": "PROJECTED_LINEUP",
+      "unit": "category",
+      "context_state": "PROJECTED",
+      "team_id": "team-away-002",
+      "side": "AWAY",
+      "source_ref": {"id": "context-001", "hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+      "basis_refs": [{"id": "evidence-001", "hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}],
+      "source_timestamp": "2026-09-04T08:50:00+08:00",
+      "observed_at": "2026-09-04T09:00:00+08:00",
+      "effective_at": "2026-09-04T09:00:00+08:00"
+    }
+  ]
+}

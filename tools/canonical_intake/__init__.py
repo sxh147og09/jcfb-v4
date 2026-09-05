@@ -199,6 +199,17 @@ from .football_intelligence_governance import (
     validate_approved_config,
     validate_pre_freeze_artifact,
 )
+from .football_intelligence import (
+    ARTIFACT_KIND as FOOTBALL_INTELLIGENCE_ARTIFACT_KIND,
+    GENERATOR_VERSION as FOOTBALL_INTELLIGENCE_GENERATOR_VERSION,
+    MAPPING_REGISTRY_VERSION as FOOTBALL_INTELLIGENCE_MAPPING_REGISTRY_VERSION,
+    TEAM_CONTEXT_CONTRACT_VERSION as FOOTBALL_INTELLIGENCE_TEAM_CONTEXT_CONTRACT_VERSION,
+    FootballIntelligenceArtifact,
+    FootballIntelligenceEngine,
+    FootballIntelligenceFeature,
+    FootballIntelligenceStore,
+    FootballIntelligenceValidationError,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -364,4 +375,13 @@ __all__ = [
     "load_approved_config",
     "validate_approved_config",
     "validate_pre_freeze_artifact",
+    "FOOTBALL_INTELLIGENCE_ARTIFACT_KIND",
+    "FOOTBALL_INTELLIGENCE_GENERATOR_VERSION",
+    "FOOTBALL_INTELLIGENCE_MAPPING_REGISTRY_VERSION",
+    "FOOTBALL_INTELLIGENCE_TEAM_CONTEXT_CONTRACT_VERSION",
+    "FootballIntelligenceArtifact",
+    "FootballIntelligenceEngine",
+    "FootballIntelligenceFeature",
+    "FootballIntelligenceStore",
+    "FootballIntelligenceValidationError",
 ]
