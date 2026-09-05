@@ -1,0 +1,15 @@
+{
+  "$id": "v4-training-dataset-substantive-hash-boundary@1.0.0",
+  "algorithm": "SHA-256",
+  "profile": "v4-canonical-json@1.0",
+  "stable_inputs": [
+    "archive_snapshot_identity", "archive_snapshot_hash", "cutoff_profile", "builder_version", "builder_hash",
+    "dataset_schema_version", "dataset_schema_hash", "replay_policy_version", "replay_policy_hash",
+    "generator_version", "generator_hash", "config_version", "config_hash", "mapping_version", "mapping_hash",
+    "sample_membership", "feature_refs_and_hashes", "eligibility", "label_refs_and_hashes"
+  ],
+  "volatile_exclusions": ["execution_timestamp", "logging_metadata", "host_specific_absolute_path", "host_name", "process_id", "wall_clock_duration"],
+  "hash_rule": "hash only the declared stable_inputs after canonical JSON serialization; volatile fields cannot affect substantive hash",
+  "dataset_builder_status": "NOT_IMPLEMENTED",
+  "canonical_hash": "sha256:e07a31c38bae337009d0e671c72a8750f590b6754de8389d4955ad00526e3189"
+}

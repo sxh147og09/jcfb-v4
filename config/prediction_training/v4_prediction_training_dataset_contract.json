@@ -1,0 +1,89 @@
+{
+  "$id": "prediction-training-dataset@1.1.0",
+  "base_contract": "prediction-training-dataset@1.0.0",
+  "amendment_type": "BACKWARD_COMPATIBLE_ADDITIVE_AMENDMENT",
+  "status": "ACTIVE_AMENDMENT_NOT_IMPLEMENTATION_AUTHORIZATION",
+  "schema_version": "prediction-training-dataset-schema@1.1.0",
+  "stable_identity": ["match_id", "cutoff_profile", "engine_role"],
+  "sample_unit": "match_id + cutoff_profile + engine_role",
+  "required_fields": [
+    "training_sample_id",
+    "match_id",
+    "cutoff_profile",
+    "prediction_cutoff_at",
+    "kickoff_at",
+    "feature_bundle_ref",
+    "feature_bundle_hash",
+    "feature_snapshot_hash",
+    "statistical_ref",
+    "statistical_hash",
+    "football_ref",
+    "football_hash",
+    "market_ref",
+    "market_hash",
+    "tactical_ref",
+    "tactical_hash",
+    "gate_record_ref",
+    "gate_record_hash",
+    "source_refs",
+    "evidence_refs",
+    "provenance_refs",
+    "engine_role",
+    "eligibility_state",
+    "exclusion_or_block_reason",
+    "label_ref",
+    "label_hash",
+    "builder_version",
+    "builder_hash",
+    "dataset_version",
+    "input_hash",
+    "sample_hash",
+    "provenance_hash",
+    "revision",
+    "supersedes"
+  ],
+  "field_alias_policy": {
+    "ambiguous_aliases_rejected": [
+      "sample_id",
+      "target_role",
+      "historical_feature_bundle_id",
+      "historical_feature_bundle_hash",
+      "statistical_refs_and_hashes",
+      "football_refs_and_hashes",
+      "market_refs_and_hashes",
+      "tactical_refs_and_hashes",
+      "quality_gate_state",
+      "label_ref_and_hash"
+    ],
+    "reason_code": "FIELD_ALIAS_AMBIGUOUS"
+  },
+  "time_predicate": "source_availability_at <= prediction_cutoff_at < kickoff_at",
+  "handicap_binding": {
+    "role": "HANDICAP",
+    "required_fields": [
+      "official_rqspf_snapshot_ref",
+      "official_rqspf_snapshot_hash",
+      "official_handicap_value",
+      "handicap_sign_convention",
+      "source_availability_at",
+      "prediction_cutoff_at"
+    ],
+    "sign_convention": "home_minus_away",
+    "source_class": "OFFICIAL_RQSPF_ONLY",
+    "forbidden_substitutes": ["external_asian_handicap", "closing_handicap", "latest_handicap", "default_handicap"],
+    "missing_role_effect": "HANDICAP=INELIGIBLE; OUTCOME/GOALS/HTFT remain independently evaluated"
+  },
+  "eligibility_states": ["BLOCKED", "INELIGIBLE", "PARTIALLY_ELIGIBLE", "ELIGIBLE"],
+  "label_boundary": {
+    "pre_match_features_and_post_match_labels": "SEPARATE",
+    "label_visibility": "POST_MATCH_ONLY",
+    "labels_never_enter_feature_payload": true
+  },
+  "append_only_correction": "new artifact + new hash + supersedes; predecessor retained; overwrite forbidden",
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "volatile_exclusions": ["execution_timestamp", "created_at", "logging_metadata", "host_specific_absolute_path", "host_name", "process_id"]
+  },
+  "canonical_hash": "sha256:b59ac292712779a0e9cf14bd187d1896605a272b56edb698a2b9b3f0249483f0"
+}

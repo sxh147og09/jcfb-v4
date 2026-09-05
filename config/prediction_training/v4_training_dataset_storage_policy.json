@@ -1,0 +1,21 @@
+{
+  "$id": "v4-training-dataset-storage-policy@1.0.0",
+  "status": "ACTIVE_POLICY_NO_DATASET_CONSTRUCTION",
+  "approved_root": "F:\\Projects\\jcfb-v4\\approved_data\\training_datasets\\",
+  "artifact_directories": ["artifacts/", "manifests/", "lineage_manifests/", "revisions/", "evidence/"],
+  "staging_root": "F:\\Projects\\jcfb-v4\\.runtime\\training_dataset_staging\\",
+  "staging_must_be_separate": true,
+  "forbidden_targets": ["C:\\", "F:\\Projects\\jcfb-v4\\tests\\fixtures\\", "F:\\Projects\\jcfb-v4\\src\\data\\", "F:\\Projects\\jcfb-v4\\.runtime\\training_datasets\\"],
+  "append_only": {
+    "correction": "new artifact + new hash + supersedes",
+    "overwrite": "FORBIDDEN",
+    "predecessor_retention": "REQUIRED"
+  },
+  "zero_data_boundary": {
+    "archive_match_count": 0,
+    "usable_training_sample_count": "NOT_COMPUTED",
+    "synthetic_fixtures_are_formal_training_data": false,
+    "dataset_builder_execution": "NOT_PERFORMED"
+  },
+  "canonical_hash": "sha256:cf55fbd64487fc20526b655f0fdb1c2269d2c6bee9bcad5294b3e63bbd97faeb"
+}

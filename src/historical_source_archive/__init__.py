@@ -768,6 +768,10 @@ class ArchiveRuntime:
         return {"archived_match_count": len(matches), "usable_training_sample_count": "NOT_COMPUTED"}
 
 
+from .read_interface import ArchiveReadError, GovernedArchiveReader
+from .replay_policy import REPLAY_REQUIRED, select_reconstruction_path
+
+
 __all__ = [
     "ACTIVATED_AT",
     "ArchiveRuntime",
@@ -778,7 +782,11 @@ __all__ = [
     "ELIGIBILITY_STATES",
     "PRE_MATCH_TYPES",
     "POST_MATCH_TYPES",
+    "ArchiveReadError",
+    "GovernedArchiveReader",
+    "REPLAY_REQUIRED",
     "canonical_json_bytes",
     "sha256_bytes",
     "sha256_json",
+    "select_reconstruction_path",
 ]

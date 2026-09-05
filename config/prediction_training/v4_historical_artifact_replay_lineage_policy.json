@@ -1,0 +1,34 @@
+{
+  "$id": "historical-artifact-replay-lineage-policy@1.0.0",
+  "status": "ACTIVE_POLICY_DATASET_BUILDER_NOT_IMPLEMENTED",
+  "selection_order": ["STORED_ACCEPTED_ARTIFACT", "DETERMINISTIC_HISTORICAL_REPLAY"],
+  "stored_accepted_artifact": {
+    "path_id": "STORED_ACCEPTED_ARTIFACT",
+    "required_proof": ["exact_ref", "exact_hash", "revision", "accepted_state"],
+    "generator_config_mapping": "bind_if_present; never regenerate a stored accepted artifact",
+    "latest_generator_fallback": "FORBIDDEN"
+  },
+  "deterministic_historical_replay": {
+    "path_id": "DETERMINISTIC_HISTORICAL_REPLAY",
+    "required_proof": [
+      "raw_cutoff_visible_inputs_complete",
+      "exact_generator_version",
+      "exact_generator_implementation_hash",
+      "exact_config_version",
+      "exact_config_hash",
+      "exact_mapping_version",
+      "exact_mapping_hash",
+      "source_timestamps_valid",
+      "no_post_cutoff_revision"
+    ],
+    "missing_proof_result": "INELIGIBLE_FOR_TRAINING",
+    "latest_generator_or_config": "FORBIDDEN",
+    "post_cutoff_revision": "FORBIDDEN"
+  },
+  "fallback_policy": "NO_FALLBACK_TO_LATEST_GENERATOR_CONFIG_OR_MAPPING",
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0"
+  },
+  "canonical_hash": "sha256:761d223fa8647b1ff6178c584f4f072e26bdd1271e3544d00668287cbb5d028a"
+}

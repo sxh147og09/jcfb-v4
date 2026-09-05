@@ -1,0 +1,35 @@
+{
+  "$id": "prediction-training-dataset-schema@1.1.0",
+  "title": "JCFB V4 Prediction Training Dataset Sample",
+  "type": "object",
+  "required": [
+    "training_sample_id", "match_id", "cutoff_profile", "prediction_cutoff_at", "kickoff_at",
+    "feature_bundle_ref", "feature_bundle_hash", "feature_snapshot_hash",
+    "statistical_ref", "statistical_hash", "football_ref", "football_hash", "market_ref", "market_hash", "tactical_ref", "tactical_hash",
+    "gate_record_ref", "gate_record_hash", "source_refs", "evidence_refs", "provenance_refs",
+    "engine_role", "eligibility_state", "exclusion_or_block_reason", "label_ref", "label_hash",
+    "builder_version", "builder_hash", "dataset_version", "input_hash", "sample_hash", "provenance_hash", "revision", "supersedes"
+  ],
+  "properties": {
+    "training_sample_id": {"type": "string", "minLength": 1},
+    "match_id": {"type": "string", "minLength": 1},
+    "cutoff_profile": {"type": "string", "minLength": 1},
+    "prediction_cutoff_at": {"type": "string", "format": "date-time"},
+    "kickoff_at": {"type": "string", "format": "date-time"},
+    "engine_role": {"enum": ["OUTCOME", "HANDICAP", "GOALS", "HTFT"]},
+    "eligibility_state": {"enum": ["BLOCKED", "INELIGIBLE", "PARTIALLY_ELIGIBLE", "ELIGIBLE"]},
+    "official_handicap_value": {"type": ["string", "number"]},
+    "handicap_sign_convention": {"const": "home_minus_away"},
+    "revision": {"type": "integer", "minimum": 1},
+    "supersedes": {"type": ["string", "null"]}
+  },
+  "additionalProperties": true,
+  "alias_rejection": {
+    "sample_id": "training_sample_id",
+    "target_role": "engine_role",
+    "historical_feature_bundle_id": "feature_bundle_ref",
+    "historical_feature_bundle_hash": "feature_bundle_hash",
+    "quality_gate_state": "eligibility_state"
+  },
+  "canonical_hash": "sha256:4598ff232147cd489d74fb12124086cb8786fc8ee1c20055d29de3fc56f4c94e"
+}

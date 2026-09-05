@@ -1,0 +1,30 @@
+{
+  "$id": "b15-ewp001-read-interface-amendment@1.0.0",
+  "work_package_id": "B15-EWP-001",
+  "supersedes_work_package_revision": "r002",
+  "amendment_revision": "r003",
+  "status": "COMPLETE",
+  "reopens_completed_work_package": false,
+  "execution_authorized": false,
+  "amendment_authorized": true,
+  "scope": "governed read-only approved archive interface",
+  "parent_registry_contract": "execution-work-package@1.0.0",
+  "parent_registry_revision": "r002",
+  "implementation_path": "src/historical_source_archive/read_interface.py",
+  "read_only_capabilities": [
+    "enumerate_approved_archive_records",
+    "query_by_match_id",
+    "query_by_cutoff_profile",
+    "query_by_artifact_type_or_domain",
+    "cutoff_visible_revision_selection",
+    "post_cutoff_correction_exclusion",
+    "supersedes_chain_resolution",
+    "exact_record_ref_hash_revision",
+    "pre_match_post_match_separation",
+    "deterministic_candidate_snapshot"
+  ],
+  "forbidden_capabilities": ["write", "update", "delete", "import", "dataset_build", "training", "fitting"],
+  "commit_lineage": {"required": true, "status": "COMPLETE", "commit_ids": ["2f0e3ce"]},
+  "canonicalization": {"algorithm": "SHA-256", "profile": "v4-canonical-json@1.0", "self_hash_field": "canonical_hash omitted"},
+  "canonical_hash": "sha256:6a757f37006f6ef73790c6ed915944aa2423a950ad2033bb14c6b95d3f15e980"
+}
