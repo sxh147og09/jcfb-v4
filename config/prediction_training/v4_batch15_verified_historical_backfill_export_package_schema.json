@@ -1,0 +1,20 @@
+{
+  "$id": "verified-historical-backfill-export-package@1.0.0",
+  "title": "JCFB V4 Verified Historical Backfill Export Package",
+  "status": "FROZEN_FOR_STAGING_DRY_RUN_ONLY",
+  "required_fields": ["export_package_id", "revision", "contract_version", "source_origin", "created_at", "exported_at", "file_manifest", "metadata_manifest", "manifests", "package_substantive_hash", "package_sha256"],
+  "contract_version": "verified-historical-backfill-export-package@1.0.0",
+  "source_origin": "CHATGPT_LIBRARY_EXPORT",
+  "file_manifest_rule": "one entry per original file with filename, original SHA256, metadata snapshot SHA256, and Library identity",
+  "metadata_manifest_rule": "one immutable metadata snapshot per file; snapshot hash is required",
+  "hash_boundary": {
+    "package_substantive_hash_excludes": ["created_at", "exported_at", "package_substantive_hash", "package_sha256", "nested_manifest.export_package_hash"],
+    "package_sha256_excludes": ["package_sha256"],
+    "volatile_export_timestamp_not_in_substantive_hash": true
+  },
+  "dry_run_outputs": ["VALID_FOR_INTAKE", "REVIEW_REQUIRED", "REJECTED", "DUPLICATE_NOOP_CANDIDATE", "CONFLICT"],
+  "write_policy": "MUST_NOT_WRITE_FINAL_ARCHIVE",
+  "staging_root": "F:\\Projects\\jcfb-v4\\approved_data\\historical_backfill_staging\\",
+  "final_archive_root": "F:\\Projects\\jcfb-v4\\approved_data\\historical_source_archive\\",
+  "canonical_hash": "sha256:b440949ce12527817daef81180404df849f48be5ec776951b99b795390dfd9d2"
+}

@@ -1,0 +1,50 @@
+{
+  "$id": "v4-batch15-verified-historical-backfill-intake-amendment@1.0.0",
+  "amendment_id": "B15-EWP-001-ADDENDUM-001",
+  "amends": "B15-EWP-001",
+  "amendment_revision": "r001",
+  "contract_status": "ACTIVE_GOVERNANCE_CONTRACT",
+  "implementation_status": "READY_FOR_IMPLEMENTATION",
+  "reopens_completed_work_package": false,
+  "historical_fact_preservation": {
+    "ewp001_status": "COMPLETE",
+    "original_revision_preserved": "r002",
+    "original_closure_facts_immutable": true,
+    "additive_only": true
+  },
+  "acquisition_mode": {
+    "identity": "VERIFIED_HISTORICAL_BACKFILL",
+    "entrypoint": "verified_historical_backfill_export_package_dry_run",
+    "separate_from": "PROSPECTIVE_CAPTURE",
+    "archive_write_authorized": false,
+    "training_readiness_effect": "NONE"
+  },
+  "contracts": {
+    "import_manifest": "verified-historical-backfill-import-manifest@1.0.0",
+    "export_package": "verified-historical-backfill-export-package@1.0.0",
+    "official_extraction": ["V4-025", "V4-026", "V4-027"]
+  },
+  "staging_boundary": {
+    "approved_root": "F:\\Projects\\jcfb-v4\\approved_data\\historical_backfill_staging\\",
+    "final_archive_root": "F:\\Projects\\jcfb-v4\\approved_data\\historical_source_archive\\",
+    "forbidden_roots": ["C:\\", "Desktop", "Downloads", ".runtime", "tests\\fixtures", "V3.3.3", "Supabase\\db blob"],
+    "f_drive_required": true
+  },
+  "candidate_baseline": {
+    "unique_matches": 40,
+    "official_screenshot_artifacts": 64,
+    "two_pre_match_snapshots": 24,
+    "one_pre_match_snapshot": 16,
+    "status": "VERIFIED_HISTORICAL_BACKFILL_CANDIDATE / PENDING_EXPORT_AND_INTAKE_VERIFICATION",
+    "excluded_artifacts": ["BETTING_SLIP", "GENERATED_PREDICTION_DASHBOARD", "RECOMMENDATION_ARTIFACT"]
+  },
+  "current_state_invariants": {
+    "archive_records": 0,
+    "usable_training_samples": 0,
+    "training_readiness": "BLOCKED / TRAINING_DATA_INSUFFICIENT",
+    "ewp005_execution_authorized": false
+  },
+  "next_allowed_scope": "VERIFIED HISTORICAL BACKFILL EXPORT PACKAGE & INTAKE RUNTIME AUTHORIZATION REVIEW",
+  "forbidden_scope": ["HISTORICAL_IMPORT", "ARCHIVE_WRITE", "DATASET_REBUILD", "TEMPORAL_SPLIT", "TRAINING", "MODEL_FIT", "CALIBRATION", "PREDICTION", "SHADOW", "PRODUCTION", "PUBLIC", "SUPABASE", "MIGRATION", "V3.3.3_MODIFICATION"],
+  "canonical_hash": "sha256:d8bb6e68c8bd10da529ccd97eef0231150c274f0e13f6604c0f7a140c2b01678"
+}

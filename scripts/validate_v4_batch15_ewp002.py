@@ -6,10 +6,12 @@ import json
 import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
 from src.prediction_training_contract import sha256_json, substantive_hash, validate_training_sample
 
 
-ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "config" / "prediction_training"
 TRAINING = ROOT / "approved_data" / "training_datasets"
 
@@ -40,8 +42,8 @@ def validate() -> list[str]:
     packages = registry.get("work_packages", [])
     if len(packages) != 5 or packages[1].get("status") != "COMPLETE" or packages[1].get("execution_authorized") is not True:
         failures.append("registry: EWP-002 is not COMPLETE and authorized")
-    if any(item.get("execution_authorized") is not False for item in packages[2:]):
-        failures.append("registry: EWP-003..005 authorization leaked")
+    if len(packages) != 5 or any(item.get("execution_authorized") is not True for item in packages[2:4]) or packages[4].get("execution_authorized") is not False:
+        failures.append("registry: EWP-003/EWP-004 must be authorized and EWP-005 must remain unauthorized")
 
     manifests = sorted((TRAINING / "manifests").glob("dataset-*-r001.json"))
     if len(manifests) != 1:
@@ -98,4 +100,4 @@ if __name__ == "__main__":
         sys.exit(1)
     print("V4 BATCH-15 B15-EWP-002 VALIDATION: PASS")
     print("Status: B15-EWP-002 STATUS: COMPLETE")
-    print("Boundary: EWP-003..005 remain execution_authorized=false")
+    print("Boundary: EWP-003/EWP-004 complete and authorized; EWP-005 remains execution_authorized=false")

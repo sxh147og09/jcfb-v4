@@ -50,15 +50,24 @@ def validate() -> list[str]:
         failures.append("execution manifest: registry snapshot hash format invalid")
     if manifest.get("output_artifact_schema_hash") != schema.get("canonical_hash"):
         failures.append("execution manifest: output schema hash binding mismatch")
-    if registry.get("registry_status") not in {"ACTIVE_GOVERNANCE_WITH_EWP001_EXECUTION", "ACTIVE_GOVERNANCE_WITH_EWP002_EXECUTION_COMPLETE"}:
+    if registry.get("registry_status") not in {
+        "ACTIVE_GOVERNANCE_WITH_EWP001_EXECUTION",
+        "ACTIVE_GOVERNANCE_WITH_EWP002_EXECUTION_COMPLETE",
+        "ACTIVE_GOVERNANCE_WITH_EWP004_RUNTIME_COMPLETE",
+    }:
         failures.append("registry: wrong active status")
     packages = registry.get("work_packages", [])
     if len(packages) != 5 or packages[0].get("work_package_id") != "B15-EWP-001" or packages[0].get("execution_authorized") is not True:
         failures.append("registry: EWP-001 authorization is not preserved")
-    if registry.get("registry_status") == "ACTIVE_GOVERNANCE_WITH_EWP002_EXECUTION_COMPLETE":
+    if registry.get("registry_status") in {"ACTIVE_GOVERNANCE_WITH_EWP002_EXECUTION_COMPLETE", "ACTIVE_GOVERNANCE_WITH_EWP004_RUNTIME_COMPLETE"}:
         if packages[1].get("work_package_id") != "B15-EWP-002" or packages[1].get("execution_authorized") is not True:
             failures.append("registry: EWP-002 current completion boundary is not preserved")
-        downstream = packages[2:]
+        if registry.get("registry_status") == "ACTIVE_GOVERNANCE_WITH_EWP004_RUNTIME_COMPLETE":
+            if any(item.get("execution_authorized") is not True for item in packages[2:4]):
+                failures.append("registry: EWP-003/EWP-004 current completion boundary is not preserved")
+            downstream = packages[4:]
+        else:
+            downstream = packages[2:]
     else:
         downstream = packages[1:]
     if any(item.get("execution_authorized") is not False for item in downstream):
@@ -91,5 +100,5 @@ if __name__ == "__main__":
         sys.exit(1)
     print("V4 BATCH-15 B15-EWP-001 VALIDATION: PASS")
     print("Scope: historical source archive / prospective capture only")
-    print("Authorization: EWP-001 and completed EWP-002 are preserved; EWP-003..005 unauthorized")
+    print("Authorization: EWP-001..EWP-004 complete and authorized; EWP-005 remains unauthorized")
     print("Archive: approved F-drive root / pre-post separation / append-only")

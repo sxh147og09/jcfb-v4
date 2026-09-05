@@ -1,0 +1,54 @@
+{
+  "$id": "verified-historical-backfill-import-manifest@1.0.0",
+  "title": "JCFB V4 Verified Historical Backfill Import Manifest",
+  "status": "FROZEN_FOR_EXPORT_AND_INTAKE_VERIFICATION_ONLY",
+  "acquisition_mode": "VERIFIED_HISTORICAL_BACKFILL",
+  "source_origin": "CHATGPT_LIBRARY_EXPORT",
+  "required_fields": [
+    "manifest_id", "import_batch_id", "revision", "acquisition_mode", "source_origin", "export_package_id", "export_package_hash",
+    "external_source_identity", "original_filename", "original_file_sha256", "metadata_snapshot_sha256", "source_type", "source_identity",
+    "source_reference", "chatgpt_upload_timestamp", "source_timestamp", "source_uploaded_at", "observed_at", "captured_at", "exported_at",
+    "ingested_at", "prediction_cutoff_at", "kickoff_at", "timestamp_evidence_basis", "canonical_match_identity", "intended_cutoff_profile",
+    "official_play_coverage", "extraction", "artifact_classification", "review_decision", "eligibility_decision", "revision_lineage", "artifact_substantive_hash",
+    "provenance_root", "reviewer", "reviewed_at", "package_substantive_hash", "manifest_substantive_hash"
+  ],
+  "timestamp_fields_are_distinct": true,
+  "unknown_policy": "UNKNOWN_MUST_BE_EXPLICIT_AND_FAIL_CLOSED",
+  "timestamp_evidence": {
+    "chatgpt_upload_timestamp_semantics": "ARTIFACT_EXISTED_NO_LATER_THAN_UPLOAD_TIMESTAMP",
+    "not_equivalent_to": ["BOOKMAKER_PUBLICATION_TIME", "OFFICIAL_PUBLISH_TIME", "ORIGINAL_ODDS_TIME", "CAPTURE_TIME"],
+    "upload_before_kickoff": "PROCEED_TO_EXPORT_INTAKE_VERIFICATION_REVIEW_ONLY",
+    "upload_at_or_after_kickoff": "NOT_ELIGIBLE_FOR_AS_OF_TRAINING",
+    "upload_unknown": "REVIEW_REQUIRED",
+    "kickoff_conflict": "CONFLICT",
+    "earlier_cutoff_inference": "FORBIDDEN"
+  },
+  "official_play_contract_bindings": ["V4-025", "V4-026", "V4-027"],
+  "official_markets": ["SPF", "RQSPF", "EXACT_SCORE", "TOTAL_GOALS", "HTFT"],
+  "market_states": ["AVAILABLE", "UNAVAILABLE", "NOT_VERIFIED", "BLOCKED"],
+  "engine_roles": {
+    "OUTCOME": "SPF availability is independently evaluated",
+    "HANDICAP": "exact cutoff-visible RQSPF handicap line is required",
+    "GOALS": "TOTAL_GOALS availability is independently evaluated",
+    "HTFT": "halftime and fulltime labels are both required"
+  },
+  "duplicate_policy": {
+    "duplicate_noop": ["same_original_file_sha256", "same_external_source_identity", "same_match_identity", "same_substantive_extracted_market_payload"],
+    "same_bytes_different_timestamp": "SAME_BYTES_DIFFERENT_EXTERNAL_OBSERVATION_WITH_PROVENANCE_RETAINED_NOT_TWO_MARKET_STATES",
+    "same_match_different_timestamp_or_payload": "RETAIN_DISTINCT_SNAPSHOT"
+  },
+  "conflict_policy": ["IMAGE_VS_OCR", "MANUAL_VS_OCR", "MATCH_IDENTITY", "KICKOFF", "HANDICAP", "MARKET_AVAILABILITY", "TIMESTAMP"],
+  "generated_artifact_exclusion": ["V3_PREDICTION", "V4_GENERATED_DASHBOARD", "RECOMMENDATION_CARD", "BETTING_SLIP", "PREDICTION_SUMMARY"],
+  "review_decisions": ["PROCEED_TO_EXPORT_INTAKE_VERIFICATION", "REVIEW_REQUIRED", "EXCLUDED", "CONFLICT"],
+  "archive_write": "FORBIDDEN_IN_THIS_AMENDMENT",
+  "training_sample_rule": "ACCEPTED_HISTORICAL_ARTIFACT_IS_NOT_A_TRAINING_SAMPLE",
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "encoding": "UTF-8",
+    "key_order": "LEXICOGRAPHIC_RECURSIVE",
+    "array_order": "PRESERVE_SEMANTIC_ORDER",
+    "volatile_excluded_from_manifest_substantive_hash": ["exported_at", "manifest_substantive_hash", "export_package_hash"]
+  },
+  "canonical_hash": "sha256:4169a2a7119748cec3966f34a1725dc4de92a84edd6ab3cd24553d1e1e5151f2"
+}
