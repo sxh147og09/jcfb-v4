@@ -210,6 +210,15 @@ from .football_intelligence import (
     FootballIntelligenceStore,
     FootballIntelligenceValidationError,
 )
+from .context_feature_integration import (
+    CONTRACT_VERSION as FOOTBALL_CONTEXT_INTEGRATION_CONTRACT_VERSION,
+    GENERATOR_VERSION as FOOTBALL_CONTEXT_INTEGRATION_GENERATOR_VERSION,
+    MAPPING_REGISTRY_VERSION as FOOTBALL_CONTEXT_INTEGRATION_MAPPING_REGISTRY_VERSION,
+    ContextFeatureIntegrationArtifact,
+    ContextFeatureIntegrationEngine,
+    ContextFeatureIntegrationStore,
+    ContextFeatureIntegrationValidationError,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -384,4 +393,11 @@ __all__ = [
     "FootballIntelligenceFeature",
     "FootballIntelligenceStore",
     "FootballIntelligenceValidationError",
+    "FOOTBALL_CONTEXT_INTEGRATION_CONTRACT_VERSION",
+    "FOOTBALL_CONTEXT_INTEGRATION_GENERATOR_VERSION",
+    "FOOTBALL_CONTEXT_INTEGRATION_MAPPING_REGISTRY_VERSION",
+    "ContextFeatureIntegrationArtifact",
+    "ContextFeatureIntegrationEngine",
+    "ContextFeatureIntegrationStore",
+    "ContextFeatureIntegrationValidationError",
 ]

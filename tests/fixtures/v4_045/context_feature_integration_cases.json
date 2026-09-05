@@ -1,0 +1,19 @@
+{
+  "additional_context": {
+    "feature_key": "lineup_state",
+    "match_id": "REPLACE_WITH_MATCH_ID",
+    "category": "lineup",
+    "kind": "CATEGORICAL",
+    "state": "AVAILABLE",
+    "value": "PROJECTED_LINEUP",
+    "unit": "category",
+    "context_state": "PROJECTED",
+    "team_id": "team-away-002",
+    "side": "AWAY",
+    "source_ref": {"id": "context-001", "hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    "basis_refs": [{"id": "evidence-001", "hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}],
+    "source_timestamp": "2026-09-04T08:50:00+08:00",
+    "observed_at": "2026-09-04T09:00:00+08:00",
+    "effective_at": "2026-09-04T09:00:00+08:00"
+  }
+}
