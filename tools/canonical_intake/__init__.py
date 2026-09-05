@@ -255,6 +255,16 @@ from .market_risk_interpretation import (
     MarketRiskInterpretationStore,
     MarketRiskInterpretationValidationError,
 )
+from .tactical_league_profile import (
+    ARTIFACT_KIND as TACTICAL_LEAGUE_PROFILE_ARTIFACT_KIND,
+    CONTRACT_VERSION as TACTICAL_LEAGUE_PROFILE_CONTRACT_VERSION,
+    GENERATOR_VERSION as TACTICAL_LEAGUE_PROFILE_GENERATOR_VERSION,
+    MAPPING_REGISTRY_VERSION as TACTICAL_LEAGUE_PROFILE_MAPPING_REGISTRY_VERSION,
+    TacticalLeagueProfileArtifact,
+    TacticalLeagueProfileEngine,
+    TacticalLeagueProfileStore,
+    TacticalLeagueProfileValidationError,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -466,4 +476,12 @@ __all__ = [
     "MarketRiskInterpretationResult",
     "MarketRiskInterpretationStore",
     "MarketRiskInterpretationValidationError",
+    "TACTICAL_LEAGUE_PROFILE_ARTIFACT_KIND",
+    "TACTICAL_LEAGUE_PROFILE_CONTRACT_VERSION",
+    "TACTICAL_LEAGUE_PROFILE_GENERATOR_VERSION",
+    "TACTICAL_LEAGUE_PROFILE_MAPPING_REGISTRY_VERSION",
+    "TacticalLeagueProfileArtifact",
+    "TacticalLeagueProfileEngine",
+    "TacticalLeagueProfileStore",
+    "TacticalLeagueProfileValidationError",
 ]

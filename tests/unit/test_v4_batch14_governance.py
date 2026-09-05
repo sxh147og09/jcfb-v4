@@ -148,11 +148,15 @@ class V4Batch14GovernanceTests(unittest.TestCase):
         self.assertIn("V4-049 + V4-050", self.decision)
         self.assertIn("BATCH-14 retains the approved batch-level upstream set", graph)
 
-    def test_no_batch14_implementation_or_forbidden_scope_was_added(self):
+    def test_batch14_manifest_and_implementation_scope(self):
         paths = [path.as_posix() for path in (self.root / "tools").rglob("*") if path.is_file()]
-        self.assertFalse(any(re.search(r"v4[_-]?0(49|50|51)", path, re.IGNORECASE) for path in paths))
+        self.assertTrue(any(path.endswith("tactical_league_profile.py") for path in paths))
+        manifest = json.loads((self.docs / "JCFB_V4_BATCH_14_EXECUTION_MANIFEST.json").read_text(encoding="utf-8"))
+        self.assertEqual("FROZEN", manifest["status"])
+        self.assertEqual(["V4-049", "V4-050", "V4-051"], manifest["approved_scope"])
+        self.assertTrue(manifest["boundaries"]["no_frozen_input"])
+        self.assertTrue(manifest["boundaries"]["batch_15_excluded"])
         changed = subprocess.run(["git", "diff", "--name-only", "HEAD"], cwd=self.root, check=True, capture_output=True, text=True).stdout.splitlines()
-        self.assertFalse(any(path.startswith("tools/") for path in changed))
         self.assertFalse(any(path.startswith("database/migrations/") or path.startswith("migrations/") for path in changed))
         self.assertFalse(any("v3.3.3" in path.casefold() or "v333" in path.casefold() for path in changed))
         self.assertFalse(any("supabase" in path.casefold() and not path.startswith("docs/") for path in changed))
