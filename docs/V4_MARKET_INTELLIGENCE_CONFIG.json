@@ -1,0 +1,119 @@
+{
+  "config_version": "market-intelligence-config@1.0.0",
+  "mapping_registry_version": "market-intelligence-mapping@1.0.0",
+  "contract_versions": {
+    "feature": "market-intelligence-feature@1.0.0",
+    "movement": "market-movement@1.0.0",
+    "risk_interpretation": "market-risk-interpretation@1.0.0",
+    "official_snapshot": "official-odds-snapshot@1.0.0",
+    "external_snapshot": "external-market-snapshot@1.0.0",
+    "evidence": "evidence@1.0.0",
+    "feature_bundle": "feature-bundle@2.0.0"
+  },
+  "lifecycle": {
+    "classification": "PRE_FROZEN_MARKET_FEATURE_GENERATION",
+    "formal_engine_output": "NOT_USED",
+    "frozen_input_id": "FORBIDDEN",
+    "frozen_input_hash": "FORBIDDEN",
+    "prediction": "FORBIDDEN"
+  },
+  "snapshot_selection": {
+    "eligible_label": "LATEST_ELIGIBLE",
+    "selection_scope": "canonical_match_id+market+provider_or_source+semantic_line",
+    "opening_requires_declared_identity": true,
+    "latest_requires_greatest_eligible_source_time": true,
+    "source_time_precedes_capture_time": "PRESERVE_AND_VALIDATE",
+    "ordering_fields": ["source_timestamp", "captured_at", "snapshot_hash"],
+    "post_cutoff_state": "FUTURE_DATA",
+    "unknown_or_conflicting_time_state": "BLOCKED"
+  },
+  "provider_policy": {
+    "cross_provider_eligibility": ["SOURCE_IDENTITY_VERIFIED", "TIMESTAMP_VALID", "SEMANTICALLY_COMPARABLE", "NON_STALE", "NON_BLOCKED"],
+    "aggregation_policy": "EQUAL_ELIGIBLE_PROVIDER_CONTRIBUTION",
+    "provider_importance_coefficients": [],
+    "source_quality_role": "ELIGIBILITY_AND_FEATURE_QUALITY_ONLY",
+    "weighted_bookmaker_consensus": "FORBIDDEN"
+  },
+  "movement_policy": {
+    "velocity_formula": "value_delta_divided_by_elapsed_hours",
+    "velocity_units": {
+      "price": "decimal_price_per_hour",
+      "market_implied_probability": "probability_points_per_hour",
+      "handicap_line": "line_units_per_hour",
+      "ou_line": "line_units_per_hour"
+    },
+    "non_positive_elapsed_time": "BLOCKED",
+    "acceleration_minimum_valid_snapshots": 3,
+    "acceleration_formula": "adjacent_velocity_delta_divided_by_elapsed_hours_between_velocity_points",
+    "insufficient_acceleration_series": "UNKNOWN_INSUFFICIENT_SERIES",
+    "extrapolation": "FORBIDDEN"
+  },
+  "normalization_policy": {
+    "european_1x2": {
+      "raw_implied_probability": "1_divided_by_decimal_odds",
+      "normalized_implied_probability": "raw_implied_probability_divided_by_sum_of_raw_implied_probabilities",
+      "field_name": "market_implied_probability",
+      "prediction_probability_alias": "FORBIDDEN"
+    },
+    "asian_handicap": "PRESERVE_LINE_AND_PRICE_SEPARATELY",
+    "over_under": "PRESERVE_LINE_AND_PRICE_SEPARATELY",
+    "unapproved_normalization": "BLOCKED"
+  },
+  "comparability_policy": {
+    "official_to_external": {
+      "official_spf_to_external_european_1x2": "ALLOWED_IF_SEMANTICALLY_ALIGNED",
+      "official_rqspf_to_external_asian_handicap": "NOT_COMPARABLE",
+      "official_total_goals_distribution_to_external_over_under": "NOT_COMPARABLE"
+    },
+    "not_comparable_output": "NOT_COMPARABLE_WITH_STRUCTURED_RELATIONSHIP",
+    "force_numeric_divergence": "FORBIDDEN"
+  },
+  "heat_policy": {
+    "representation": "MULTIDIMENSIONAL_ACTIVITY_OBJECT",
+    "components": ["snapshot_count", "price_change_count", "line_change_count", "total_absolute_price_movement", "total_absolute_line_movement", "movement_velocity", "provider_breadth", "direction_agreement", "observation_span", "minutes_to_kickoff"],
+    "heat_score": "FORBIDDEN_UNLESS_FUTURE_CALIBRATED_CONTRACT",
+    "manual_coefficient": "FORBIDDEN"
+  },
+  "pressure_policy": {
+    "representation": "COMPONENT_OBJECT",
+    "components": ["direction", "persistence", "breadth", "velocity", "line_change_presence", "reversal_presence"],
+    "pressure_score": "FORBIDDEN",
+    "cross_dimension_interaction": "SEPARATE_DIMENSIONS_ONLY"
+  },
+  "risk_interpretation_policy": {
+    "flags": [
+      "DIRECTION_REVERSAL",
+      "PROVIDER_DISPERSION",
+      "OFFICIAL_EXTERNAL_DIVERGENCE",
+      "SPARSE_MARKET",
+      "STALE_MARKET",
+      "CONFLICTED_MARKET"
+    ],
+    "disabled_until_explicit_threshold": ["LINE_PRICE_DISLOCATION", "RAPID_MOVEMENT", "MULTI_PROVIDER_DIRECTION_CONCENTRATION", "LATE_MOVEMENT"],
+    "interpretation_states": ["NONE_OBSERVED", "SIGNAL_PRESENT", "MULTIPLE_SIGNALS", "INSUFFICIENT_DATA", "CONFLICTED", "BLOCKED"],
+    "trap_risk_score": "FORBIDDEN",
+    "bookmaker_intent": "FORBIDDEN",
+    "certain_trap": "FORBIDDEN"
+  },
+  "quality_policy": {
+    "dimensions": ["coverage", "verification", "freshness", "completeness", "conflict", "provenance"],
+    "market_metadata": ["eligible_provider_count", "excluded_provider_count", "stale_snapshot_count", "blocked_snapshot_count", "cutoff_excluded_count"],
+    "prediction_confidence": "FORBIDDEN",
+    "betting_confidence": "FORBIDDEN",
+    "trap_certainty": "FORBIDDEN"
+  },
+  "hash_policy": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "includes": ["exact_snapshot_ids_and_hashes", "provider_source_identity", "source_timestamps", "captured_at", "prediction_cutoff_at", "kickoff_at", "market_semantic_mapping", "generator_version", "config_version_and_hash", "mapping_registry_version", "typed_values_and_states", "basis_and_source_refs", "input_hash", "payload_hash", "output_hash", "provenance_hash"],
+    "excludes": ["transport_headers", "ui_metadata", "runtime_wall_clock_metadata", "frozen_input_id", "frozen_input_hash", "prediction"]
+  },
+  "interaction_policy": {
+    "default": "SEPARATE_DIMENSIONS_ONLY",
+    "approved_rules": [],
+    "odds_movement_times_team_strength": "FORBIDDEN",
+    "trap_flag_times_injury": "FORBIDDEN",
+    "market_heat_times_football_context": "FORBIDDEN"
+  },
+  "no_default_policy": ["previous_snapshot", "other_provider", "official_for_external", "external_for_official", "zero", "average", "synthetic_line", "synthetic_price", "silent_coercion"]
+}

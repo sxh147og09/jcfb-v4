@@ -1,0 +1,26 @@
+{
+  "mapping_registry_version": "market-intelligence-mapping@1.0.0",
+  "contract_version": "market-intelligence-feature@1.0.0",
+  "status": "APPROVED_GOVERNANCE_MAPPING",
+  "mappings": [
+    {"mapping_key": "EUROPEAN_1X2_RAW_PRICE_DELTA", "market": "EUROPEAN_1X2", "value_kind": "NUMERIC_OBSERVABLE", "unit": "decimal_price", "formula": "price_t2_minus_price_t1"},
+    {"mapping_key": "EUROPEAN_1X2_MARKET_IMPLIED_PROBABILITY", "market": "EUROPEAN_1X2", "value_kind": "NUMERIC_OBSERVABLE", "unit": "probability_points", "formula": "normalized_1_divided_by_decimal_price", "prediction_probability": false},
+    {"mapping_key": "EUROPEAN_1X2_MARKET_IMPLIED_PROBABILITY_DELTA", "market": "EUROPEAN_1X2", "value_kind": "NUMERIC_OBSERVABLE", "unit": "probability_points", "formula": "market_implied_probability_t2_minus_market_implied_probability_t1", "prediction_probability": false},
+    {"mapping_key": "OPENING_TO_LATEST_DELTA", "market": "ALL_COMPARABLE_MARKETS", "value_kind": "NUMERIC_OBSERVABLE", "unit": "market_native_unit", "formula": "latest_eligible_minus_declared_opening"},
+    {"mapping_key": "ADJACENT_SNAPSHOT_DELTA", "market": "ALL_COMPARABLE_MARKETS", "value_kind": "NUMERIC_OBSERVABLE", "unit": "market_native_unit", "formula": "current_event_minus_previous_event"},
+    {"mapping_key": "PRICE_VELOCITY", "market": "ALL_COMPARABLE_MARKETS", "value_kind": "NUMERIC_OBSERVABLE", "unit": "market_native_unit_per_hour", "formula": "delta_divided_by_elapsed_hours"},
+    {"mapping_key": "IMPLIED_PROBABILITY_VELOCITY", "market": "EUROPEAN_1X2", "value_kind": "NUMERIC_OBSERVABLE", "unit": "probability_points_per_hour", "formula": "delta_divided_by_elapsed_hours"},
+    {"mapping_key": "HANDICAP_LINE_VELOCITY", "market": "ASIAN_HANDICAP", "value_kind": "NUMERIC_OBSERVABLE", "unit": "line_units_per_hour", "formula": "line_delta_divided_by_elapsed_hours"},
+    {"mapping_key": "OU_LINE_VELOCITY", "market": "OVER_UNDER", "value_kind": "NUMERIC_OBSERVABLE", "unit": "line_units_per_hour", "formula": "line_delta_divided_by_elapsed_hours"},
+    {"mapping_key": "ACCELERATION", "market": "ALL_COMPARABLE_MARKETS", "value_kind": "NUMERIC_OBSERVABLE", "unit": "market_native_unit_per_hour_squared", "formula": "adjacent_velocity_delta_divided_by_elapsed_hours", "minimum_snapshots": 3},
+    {"mapping_key": "PROVIDER_MEDIAN", "market": "ALL_COMPARABLE_MARKETS", "value_kind": "AGGREGATE_OBSERVABLE", "unit": "market_native_unit", "formula": "median_of_equal_eligible_provider_observations"},
+    {"mapping_key": "PROVIDER_IQR", "market": "ALL_COMPARABLE_MARKETS", "value_kind": "AGGREGATE_OBSERVABLE", "unit": "market_native_unit", "formula": "interquartile_range_of_equal_eligible_provider_observations"},
+    {"mapping_key": "PROVIDER_MAD", "market": "ALL_COMPARABLE_MARKETS", "value_kind": "AGGREGATE_OBSERVABLE", "unit": "market_native_unit", "formula": "median_absolute_deviation_of_equal_eligible_provider_observations"},
+    {"mapping_key": "ELIGIBLE_PROVIDER_COUNT", "market": "ALL_COMPARABLE_MARKETS", "value_kind": "COUNT_OBSERVABLE", "unit": "providers", "formula": "count_of_eligible_providers"},
+    {"mapping_key": "DIRECTION_AGREEMENT_RATE", "market": "ALL_COMPARABLE_MARKETS", "value_kind": "RATE_OBSERVABLE", "unit": "ratio", "formula": "same_direction_count_divided_by_eligible_provider_count"},
+    {"mapping_key": "HEAT_ACTIVITY_PROFILE", "market": "ALL_COMPARABLE_MARKETS", "value_kind": "MULTIDIMENSIONAL_OBSERVABLE", "unit": "typed_object", "formula": "declared_activity_components_only", "heat_score": false},
+    {"mapping_key": "PRESSURE_COMPONENT_PROFILE", "market": "ALL_COMPARABLE_MARKETS", "value_kind": "MULTIDIMENSIONAL_OBSERVABLE", "unit": "typed_object", "formula": "declared_pressure_components_only", "pressure_score": false},
+    {"mapping_key": "TRAP_RISK_EVIDENCE_PROFILE", "market": "ALL_COMPARABLE_MARKETS", "value_kind": "EVIDENCE_PROFILE", "unit": "typed_object", "formula": "approved_structural_flags_only", "trap_risk_score": false}
+  ],
+  "forbidden_mappings": ["BOOKMAKER_INTENT_CONFIRMED", "CERTAIN_TRAP", "TRAP_RISK_SCORE", "HEAT_SCORE", "PRESSURE_SCORE", "PREDICTION_PROBABILITY", "WEIGHTED_BOOKMAKER_CONSENSUS", "LINE_PRICE_SINGLE_MOVEMENT"]
+}

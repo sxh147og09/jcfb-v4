@@ -177,3 +177,18 @@ The task-level path remains `V4-040 + V4-043 -> V4-044 -> V4-045`; no task IDs
 are changed. This section records the governance amendment and its rationale.
 V4-044 and V4-045 are pre-Frozen feature generators and do not use the formal
 `engine-output@1.0.0` run envelope.
+
+## BATCH-13 market intelligence governance resolution override
+
+The approved BATCH-13 task-level execution path is
+`V4-040 + V4-027 + V4-031 -> V4-046 -> V4-047 -> V4-048`.
+V4-048 remains blocked until V4-047 is independently accepted. Any Batch Plan
+parallel-development wording applies only to internal components and cannot
+override this task dependency.
+
+V4-046 through V4-048 are pre-Frozen Market Feature Generation tasks. They are
+governed by `market-intelligence-feature@1.0.0`, `market-movement@1.0.0`,
+`market-risk-interpretation@1.0.0`, `market-intelligence-config@1.0.0`, and
+`market-intelligence-mapping@1.0.0`. These are contract/config prerequisites,
+not additional task nodes. No task implementation is authorized until the
+post-resolution BATCH-13 Entry Review passes.

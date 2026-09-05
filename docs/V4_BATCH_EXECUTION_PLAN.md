@@ -105,3 +105,19 @@ statistical, Team Context, and Evidence Graph references and do not require
 `frozen_input_id` or `frozen_input_hash`. V4-076 remains the downstream Frozen
 Input task. This governance clarification does not authorize implementation
 of V4-044 or V4-045 until the BATCH-12 Entry Gate passes.
+
+## BATCH-13 market intelligence governance resolution override
+
+The approved BATCH-13 task path is `V4-040 + V4-027 + V4-031 -> V4-046 -> V4-047 -> V4-048`.
+The Batch Plan phrase that movement and risk components may develop in parallel
+refers only to internal component preparation. It does not permit V4-048 to
+bypass the V4-047 task dependency or acceptance gate.
+
+V4-046 through V4-048 are pre-Frozen Market Feature Generation tasks. They do
+not create formal Engine Runs, require Frozen Input, or produce Prediction or
+Score Engine output. Their active governance contracts/configuration are
+`market-intelligence-feature@1.0.0`, `market-movement@1.0.0`,
+`market-risk-interpretation@1.0.0`, `market-intelligence-config@1.0.0`, and
+`market-intelligence-mapping@1.0.0`, defined in the corresponding BATCH-13
+governance documents. This override does not authorize implementation until a
+fresh BATCH-13 Scope & Entry Review passes.

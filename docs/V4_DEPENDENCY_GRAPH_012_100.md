@@ -140,3 +140,17 @@ For BATCH-11, acceptance of the task edge from BATCH-10 also requires the approv
 - The only historical edge is V4-011 -> V4-012. All later edges are explicitly reconstructed planning edges.
 
 No graph edge authorizes execution. BATCH-01 through BATCH-04 are accepted within their recorded scopes; BATCH-04 crossed its Production hard gate only after explicit approval and final verification. BATCH-05 is in progress only for the explicitly scoped V4-020 local no-write task; V4-021 through V4-023 remain separate child tasks.
+
+## BATCH-13 market intelligence governance resolution override
+
+The BATCH-13 task path is explicitly serial for acceptance:
+
+```text
+V4-040 + V4-027 + V4-031 -> V4-046 -> V4-047 -> V4-048 -> Closure
+```
+
+The Batch Plan's parallel-development phrase is limited to independent
+internal preparation. It cannot create a parallel acceptance path around the
+registered V4-047 -> V4-048 edge. V4-046 through V4-048 are pre-Frozen market
+feature artifacts governed by the five versioned BATCH-13 contracts/config
+artifacts and do not require Frozen Input or formal Engine Output.

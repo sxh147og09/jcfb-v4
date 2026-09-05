@@ -146,3 +146,17 @@ The approved BATCH-12 batch-level upstream set is `BATCH-10, BATCH-11`.
 - HARD_GATE tasks are V4-018, V4-019, V4-097, V4-098, V4-099, and V4-100. Formal Supabase schema apply, Production DB writes, Promotion Review, Production activation, canonical pointer switch, and final Production Release are all explicit.
 - Forward Shadow/Tier A infrastructure is separate from historical evaluation. Cross-version benchmarking reads V3.3.3 only and never mutates it.
 - Public/API/UI tasks follow backend, evaluation, readiness, and gate dependencies.
+
+## BATCH-13 market intelligence governance resolution override
+
+V4-046, V4-047, and V4-048 retain their task IDs, primary batch, and registered
+task dependencies. Their acceptance order is `V4-046 -> V4-047 -> V4-048`.
+Parallel-development wording in the Batch Plan applies only to internal
+preparation and does not permit task-level dependency bypass.
+
+The tasks are pre-Frozen Market Feature Generation tasks, not formal Prediction
+Engine Runs. Their active governance artifacts are
+`market-intelligence-feature@1.0.0`, `market-movement@1.0.0`,
+`market-risk-interpretation@1.0.0`, `market-intelligence-config@1.0.0`, and
+`market-intelligence-mapping@1.0.0`. Implementation remains unauthorized until
+the post-resolution BATCH-13 Scope & Entry Review passes.

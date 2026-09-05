@@ -133,3 +133,13 @@ The mapping remains the authoritative classification register. V4-012 is accepte
 ## Current Execution Status Override
 
 As of BATCH-07 Closure Review at HEAD `c03d804`, the authoritative task acceptance evidence records V4-028, V4-029, V4-030, and V4-031 as COMPLETE. Historical TODO rows remain unchanged as classification snapshots; see `docs/V4_BATCH_07_CLOSURE_EVIDENCE.json`.
+
+## BATCH-13 market intelligence governance resolution override
+
+V4-046 through V4-048 remain `BATCHABLE` feature-generation tasks, not formal
+Prediction Engine Runs. Their task acceptance order is `V4-046 -> V4-047 ->
+V4-048`; parallel-development wording is limited to internal preparation and
+cannot bypass registered dependencies. The active contract, config, and
+mapping identities are recorded in the BATCH-13 governance decision and its
+five versioned artifacts. Task implementation remains unauthorized until the
+post-resolution Scope & Entry Review passes.

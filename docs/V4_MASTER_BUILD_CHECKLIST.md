@@ -301,3 +301,17 @@ generators, not formal Prediction Engine runs. Active governance artifacts are
 `football-intelligence-config@1.0.0`. Historical checklist rows remain
 unchanged; V4-044/V4-045 implementation status remains NOT IMPLEMENTED until
 the separate BATCH-12 Scope & Entry Review passes.
+
+## BATCH-13 market intelligence governance resolution override
+
+BATCH-13 is governed as a pre-Frozen Market Feature Generation layer. The
+approved acceptance path is `V4-046 -> V4-047 -> V4-048`; Batch Plan parallel
+wording does not override the V4-047 prerequisite of V4-048. The active
+governance artifacts are `market-intelligence-feature@1.0.0`,
+`market-movement@1.0.0`, `market-risk-interpretation@1.0.0`,
+`market-intelligence-config@1.0.0`, and `market-intelligence-mapping@1.0.0`.
+They define source isolation, snapshot alignment, movement semantics,
+provider eligibility, divergence, quality, anomaly flags, hash, and lifecycle
+boundaries. Historical checklist rows remain status snapshots; BATCH-13 task
+implementation remains NOT IMPLEMENTED until the post-resolution Entry Review
+passes.
