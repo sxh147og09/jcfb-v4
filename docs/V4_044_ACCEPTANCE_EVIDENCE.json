@@ -1,0 +1,46 @@
+{
+  "task": "V4-044",
+  "status": "COMPLETE",
+  "dod": "PASS",
+  "workspace": "F:\\Projects\\jcfb-v4",
+  "branch": "main",
+  "head": "122d77b",
+  "manifest": "batch-12-execution-manifest@1.0.0",
+  "contract_version": "football-intelligence-feature@1.0.0",
+  "artifact_kind": "PRE_FREEZE_FEATURE_ARTIFACT",
+  "generator_version": "v4-044-football-intelligence@1.0.0",
+  "implementation_hash": "sha256:953be24a8370d6b529c9e49cff934361393ed90dbfa63625efb9b00a01f63bda",
+  "config_version": "football-intelligence-config@1.0.0",
+  "config_hash": "sha256:cd555f25c3a4ee1ef8e30257af5ae1bdf006ff99e6aa9607219508e9f7ebdc3c",
+  "mapping_registry_version": "football-intelligence-mapping@1.0.0",
+  "team_context_contract_version": "team-context@2.0.0",
+  "frozen_input_dependency": "FORBIDDEN",
+  "formal_engine_output_envelope": "NOT_USED",
+  "tested_semantics": [
+    "canonical match identity",
+    "canonical home/away team and side binding",
+    "exact V4-041/V4-042/V4-043 statistical lineage",
+    "Type A numeric mapping metadata",
+    "Type B categorical/projected state",
+    "Type C non-consumable state preservation",
+    "missingness without defaults",
+    "cutoff future-data fail-closed",
+    "stale expiry fail-closed",
+    "prediction-like field rejection",
+    "append-only correction and supersedes"
+  ],
+  "test_results": {
+    "targeted": "11/11 PASS",
+    "full_repository": "393/393 PASS",
+    "data_contract_validator": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "isolation": {
+    "v3_3_3": "PASS",
+    "f_drive": "PASS",
+    "production_supabase_reads_writes": "NO",
+    "migration_added_applied": "NO",
+    "prediction_score_market_frozen_scope": "NOT_ENTERED"
+  },
+  "commit": "122d77b"
+}
