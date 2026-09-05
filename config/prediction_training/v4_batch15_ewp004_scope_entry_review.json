@@ -1,0 +1,17 @@
+{
+  "$id": "b15-ewp004-scope-entry-review@1.0.0",
+  "work_package_id": "B15-EWP-004",
+  "review_revision": "r001",
+  "review_type": "READ_ONLY_SCOPE_AND_ENTRY_REVIEW",
+  "decision": "READY_FOR_SEPARATE_AUTHORIZATION_REVIEW",
+  "execution_authorized": false,
+  "implementation_executed": false,
+  "dependency": {"B15-EWP-003": "COMPLETE"},
+  "infrastructure_implementation_readiness": "READY_FOR_SEPARATE_AUTHORIZATION_REVIEW",
+  "formal_model_fit_readiness": "BLOCKED / TRAINING_DATA_INSUFFICIENT",
+  "current_dataset": {"dataset_id": "dataset-13c4b050dc50e2de3ec8a961a9c9b029", "revision": "r001", "usable_samples": 0},
+  "required_future_bindings": ["candidate_identity", "hyperparameter_config_identity", "seed_identity", "implementation_hash", "input_hash", "output_hash", "model_artifact_schema", "promotion_gate"],
+  "forbidden_in_this_review": ["EWP-004 implementation", "EWP-005", "model fitting", "model artifacts", "V4-076", "V4-052..055"],
+  "canonicalization": {"algorithm": "SHA-256", "profile": "v4-canonical-json@1.0", "self_hash_field": "canonical_hash is omitted during hash computation"},
+  "canonical_hash": "sha256:021f607ce116806aa32877884a1ec011729063e91d3987bd6e2b6558c0b235de"
+}

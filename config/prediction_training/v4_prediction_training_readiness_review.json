@@ -20,7 +20,7 @@
     "candidate_sample_count": 0,
     "usable_training_sample_count": 0,
     "reason": "ZERO_ARCHIVED_CANDIDATES",
-    "as_of_reconstruction_status": "NOT_IMPLEMENTED",
+    "as_of_reconstruction_status": "COMPLETE_FOR_EWP003_INPUT_BOUNDARY",
     "future_information_audit": "NOT_RUN_EMPTY_DATASET",
     "synthetic_fixture_influence": "FORBIDDEN"
   },
@@ -72,7 +72,7 @@
     "model_registry": "READY_AS_EMPTY_GOVERNANCE_REGISTRY",
     "formal_model_fit_allowed": false,
     "formal_engine_implementation_allowed": false,
-    "ewp003_runtime_implementation_allowed": false,
+    "ewp003_runtime_implementation_allowed": true,
     "v4_076_implementation_allowed": false
   },
   "blocking_reasons": [
@@ -98,5 +98,5 @@
     "profile": "v4-canonical-json@1.0",
     "self_hash_field": "canonical_hash is omitted during hash computation"
   },
-  "canonical_hash": "sha256:cc45dd8a6e92bb0ad162871bcab8d9751c0befd4f4e9f75d9b14bea5f6c4ecfb"
+  "canonical_hash": "sha256:ead211470ae0bfc7b5e3ceb9010f6a4c9dd8f2a6b6f17317a15ed0bb42624935"
 }

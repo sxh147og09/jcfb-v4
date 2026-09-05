@@ -13,6 +13,7 @@ class V4Batch15Ewp003ContractTests(unittest.TestCase):
         cls.root = Path(__file__).resolve().parents[2]
         cls.config = cls.root / "config" / "prediction_training"
         cls.contract = json.loads((cls.config / "v4_batch15_ewp003_temporal_split_contract.json").read_text(encoding="utf-8"))
+        cls.execution = json.loads((cls.config / "v4_batch15_ewp003_execution_manifest.json").read_text(encoding="utf-8"))
         cls.report = json.loads((cls.config / "v4_batch15_ewp003_readiness_report.json").read_text(encoding="utf-8"))
         cls.governance = json.loads((cls.config / "v4_prediction_training_governance.json").read_text(encoding="utf-8"))
         cls.registry = json.loads((cls.config / "v4_batch15_execution_work_package_registry.json").read_text(encoding="utf-8"))
@@ -23,15 +24,19 @@ class V4Batch15Ewp003ContractTests(unittest.TestCase):
         payload = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
         return "sha256:" + hashlib.sha256(payload).hexdigest()
 
-    def test_frozen_contract_and_registry_remain_unauthorized(self):
+    def test_frozen_contract_is_bound_to_authorized_runtime_manifest(self):
         self.assertEqual("B15-EWP-003", self.contract["work_package_id"])
         self.assertEqual("r002", self.contract["work_package_revision"])
         self.assertEqual("CONTRACT_FROZEN_IMPLEMENTATION_NOT_AUTHORIZED", self.contract["status"])
         self.assertFalse(self.contract["execution_authorized"])
         package = next(item for item in self.registry["work_packages"] if item["work_package_id"] == "B15-EWP-003")
         self.assertEqual("r002", package["revision"])
-        self.assertFalse(package["execution_authorized"])
-        self.assertEqual("READY_FOR_IMPLEMENTATION", package["runtime_implementation_readiness"])
+        self.assertTrue(package["execution_authorized"])
+        self.assertEqual("COMPLETE", package["status"])
+        self.assertEqual("COMPLETE", package["runtime_implementation_readiness"])
+        self.assertTrue(self.execution["execution_authorized"])
+        self.assertFalse(self.execution["downstream_execution_authorized"])
+        self.assertEqual(self.contract["canonical_hash"], self.execution["contract_hash"])
 
     def test_explicit_boundaries_and_partition_semantics_are_complete(self):
         strategy = self.contract["strategy_contract"]
@@ -86,7 +91,7 @@ class V4Batch15Ewp003ContractTests(unittest.TestCase):
         self.assertIsNone(self.report["model_accuracy"])
 
     def test_all_machine_readable_hashes_recompute(self):
-        for document in (self.contract, self.report, self.governance, self.registry):
+        for document in (self.contract, self.report, self.governance, self.registry, self.execution):
             self.assertRegex(document["canonical_hash"], r"^sha256:[0-9a-f]{64}$")
             self.assertEqual(document["canonical_hash"], self.canonical_hash(document))
 

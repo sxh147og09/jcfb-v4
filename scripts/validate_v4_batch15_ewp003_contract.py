@@ -40,12 +40,15 @@ def changed_paths() -> list[str]:
 def validate() -> list[str]:
     failures: list[str] = []
     contract = load_config("v4_batch15_ewp003_temporal_split_contract.json")
+    execution = load_config("v4_batch15_ewp003_execution_manifest.json")
     report = load_config("v4_batch15_ewp003_readiness_report.json")
     governance = load_config("v4_prediction_training_governance.json")
     readiness = load_config("v4_prediction_training_readiness_review.json")
     registry = load_config("v4_batch15_execution_work_package_registry.json")
+    acceptance = json.loads((DOCS / "JCFB_V4_BATCH_15_B15_EWP_003_ACCEPTANCE_EVIDENCE.json").read_text(encoding="utf-8"))
+    ewp004_review = load_config("v4_batch15_ewp004_scope_entry_review.json")
 
-    for name, value in (("contract", contract), ("report", report), ("governance", governance), ("readiness", readiness), ("registry", registry)):
+    for name, value in (("contract", contract), ("report", report), ("governance", governance), ("readiness", readiness), ("registry", registry), ("execution", execution), ("acceptance", acceptance), ("ewp004_review", ewp004_review)):
         if not HASH_RE.fullmatch(str(value.get("canonical_hash", ""))):
             failures.append(f"{name}: invalid canonical_hash")
         elif value["canonical_hash"] != canonical_hash(value):
@@ -98,6 +101,12 @@ def validate() -> list[str]:
     if binding.get("superseded_revision_consumption") != "REJECT" or binding.get("historical_replay", "").startswith("EXPLICIT_REPLAY_MODE_REQUIRED") is False:
         failures.append("revision binding: superseded/replay boundary is incomplete")
 
+    if execution.get("work_package_id") != "B15-EWP-003" or execution.get("execution_authorized") is not True:
+        failures.append("execution manifest: EWP-003 is not authorized")
+    if execution.get("downstream_execution_authorized") is not False or not {"B15-EWP-004", "B15-EWP-005"}.issubset(set(execution.get("forbidden_work_packages", []))):
+        failures.append("execution manifest: downstream boundary is not fail-closed")
+    if execution.get("contract_hash") != contract.get("canonical_hash"):
+        failures.append("execution manifest: frozen contract binding mismatch")
     if report.get("split_status") != "NOT_PERFORMABLE" or report.get("readiness_state") != "BLOCKED":
         failures.append("zero-data report: status is not blocked/not-performable")
     if report.get("reason_codes") != ["TRAINING_DATA_INSUFFICIENT"]:
@@ -112,6 +121,12 @@ def validate() -> list[str]:
         failures.append("zero-data report: formal split artifact was claimed")
     if report.get("model_accuracy") is not None:
         failures.append("zero-data report: model accuracy must be absent")
+    if report.get("deterministic_report_hash") != acceptance.get("current_real_dataset", {}).get("deterministic_report_hash"):
+        failures.append("acceptance: readiness report hash is not bound")
+    if acceptance.get("execution_authorized") is not True or acceptance.get("safety", {}).get("formal_model_fit_executed") is not False:
+        failures.append("acceptance: authorization or no-fit safety evidence is invalid")
+    if ewp004_review.get("execution_authorized") is not False or ewp004_review.get("implementation_executed") is not False:
+        failures.append("EWP-004 review: implementation or authorization leaked")
 
     archive_root = Path("F:/Projects/jcfb-v4/approved_data/historical_source_archive")
     training_root = Path("F:/Projects/jcfb-v4/approved_data/training_datasets")
@@ -137,14 +152,14 @@ def validate() -> list[str]:
     if readiness.get("pipeline_readiness", {}).get("formal_model_fit_allowed") is not False:
         failures.append("governance cross-reference: formal model fit was allowed")
     package = next((item for item in registry.get("work_packages", []) if item.get("work_package_id") == "B15-EWP-003"), {})
-    if package.get("revision") != "r002" or package.get("execution_authorized") is not False:
-        failures.append("registry: EWP-003 r002 remains unauthorized")
+    if package.get("revision") != "r002" or package.get("execution_authorized") is not True or package.get("status") != "COMPLETE":
+        failures.append("registry: EWP-003 r002 is not complete and authorized")
 
     forbidden = [path for path in changed_paths() if re.search(r"(?i)(^|/)(?:tools/|database/migrations/|migrations/|v333/|v3\.3\.3)", path)]
     if forbidden:
         failures.append("forbidden changed paths: " + ", ".join(forbidden))
-    if any(path.startswith("src/prediction_training/") for path in changed_paths()):
-        failures.append("runtime boundary: prediction_training runtime was modified")
+    if not (ROOT / "src/prediction_training/ewp003_runtime.py").is_file():
+        failures.append("runtime implementation: EWP-003 runtime is missing")
     if any("split" in path.casefold() and path.startswith("approved_data/") for path in changed_paths()):
         failures.append("artifact boundary: formal split output was added")
     return failures
@@ -157,6 +172,6 @@ if __name__ == "__main__":
         print("\n".join(errors))
         sys.exit(1)
     print("V4 BATCH-15 EWP-003 CONTRACT VALIDATION: PASS")
-    print("Runtime implementation: not authorized")
+    print("Runtime implementation: AUTHORIZED_AND_IMPLEMENTED")
     print("Current real dataset split readiness: BLOCKED / TRAINING_DATA_INSUFFICIENT")
     print("Formal model fit readiness: BLOCKED")
