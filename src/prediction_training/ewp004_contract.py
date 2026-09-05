@@ -36,6 +36,13 @@ def canonical_hash(value: Mapping[str, Any], *, exclude: str | Sequence[str] = "
     return HASH_PREFIX + hashlib.sha256(encoded).hexdigest()
 
 
+def canonical_value_hash(value: Any) -> str:
+    """Hash any canonical JSON value, including a scalar/ref payload."""
+
+    encoded = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+    return HASH_PREFIX + hashlib.sha256(encoded).hexdigest()
+
+
 def load_contract(path: str | Path = CONTRACT_PATH) -> dict[str, Any]:
     value = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(value, dict):
@@ -63,7 +70,13 @@ def validate_contract(contract: Mapping[str, Any]) -> list[str]:
     for field, expected in (("work_package_id", "B15-EWP-004"), ("work_package_revision", "r001"), ("contract_revision", "r001")):
         if contract.get(field) != expected:
             failures.append(f"{field} is not {expected}")
-    for field in ("execution_authorized", "implementation_executed", "formal_model_fit_authorized", "model_artifacts_generated", "parameter_artifacts_generated"):
+    if not isinstance(contract.get("execution_authorized"), bool):
+        failures.append("execution_authorized must be boolean")
+    if contract.get("execution_authorized") is not True and contract.get("implementation_executed") is not False:
+        failures.append("implementation cannot be marked executed before EWP-004 authorization")
+    if contract.get("execution_authorized") is True and contract.get("implementation_executed") is not True:
+        failures.append("authorized EWP-004 must bind completed infrastructure implementation")
+    for field in ("formal_model_fit_authorized", "model_artifacts_generated", "parameter_artifacts_generated"):
         if contract.get(field) is not False:
             failures.append(f"authorization boundary leaked through {field}")
     if contract.get("calibration_state") != "NOT_CALIBRATED":
@@ -220,6 +233,31 @@ def validate_training_config(contract: Mapping[str, Any], engine_role: str, fami
         raise Ewp004ContractError("INVALID_TRAINING_CONFIG", f"{engine_role}/{family_id}")
     if config.get("holdout_tuning") != "FORBIDDEN" or not config.get("fixed_parameters") or not config.get("search_parameters"):
         raise Ewp004ContractError("INVALID_TRAINING_CONFIG", f"{engine_role}/{family_id}")
+    if config.get("search_method") != "GRID_EXHAUSTIVE" or not isinstance(config.get("search_budget"), int) or config["search_budget"] <= 0:
+        raise Ewp004ContractError("INVALID_TRAINING_CONFIG", f"{engine_role}/{family_id}")
+    if any(value == "LIBRARY_DEFAULT" for value in config.get("fixed_parameters", {}).values()):
+        raise Ewp004ContractError("INVALID_TRAINING_CONFIG", f"{engine_role}/{family_id}")
+    combinations = 1
+    for name, spec in config.get("search_parameters", {}).items():
+        if not isinstance(spec, Mapping) or not isinstance(spec.get("values"), list) or not spec["values"]:
+            raise Ewp004ContractError("INVALID_TRAINING_CONFIG", f"{engine_role}/{family_id}/{name}")
+        if spec.get("type") not in {"float", "integer", "categorical"}:
+            raise Ewp004ContractError("INVALID_TRAINING_CONFIG", f"{engine_role}/{family_id}/{name}")
+        if spec["type"] == "float" and any(not isinstance(value, (int, float)) or isinstance(value, bool) for value in spec["values"]):
+            raise Ewp004ContractError("INVALID_TRAINING_CONFIG", f"{engine_role}/{family_id}/{name}")
+        if spec["type"] == "integer" and any(not isinstance(value, int) or isinstance(value, bool) for value in spec["values"]):
+            raise Ewp004ContractError("INVALID_TRAINING_CONFIG", f"{engine_role}/{family_id}/{name}")
+        if "range" in spec:
+            bounds = spec["range"]
+            if not isinstance(bounds, list) or len(bounds) != 2 or any(not isinstance(value, (int, float)) or isinstance(value, bool) for value in bounds) or any(value < bounds[0] or value > bounds[1] for value in spec["values"]):
+                raise Ewp004ContractError("INVALID_TRAINING_CONFIG", f"{engine_role}/{family_id}/{name}/range")
+        if "choices" in spec:
+            choices = spec["choices"]
+            if not isinstance(choices, list) or not all(value in choices for value in spec["values"]):
+                raise Ewp004ContractError("INVALID_TRAINING_CONFIG", f"{engine_role}/{family_id}/{name}/choices")
+        combinations *= len(spec["values"])
+    if combinations != config.get("search_budget"):
+        raise Ewp004ContractError("INVALID_TRAINING_CONFIG", f"{engine_role}/{family_id}/search_budget")
     return config
 
 
@@ -239,12 +277,15 @@ def validate_feature_payload(profile: Mapping[str, Any], payload: Mapping[str, A
 
 def validate_readiness_binding(binding: Mapping[str, Any], contract: Mapping[str, Any]) -> None:
     spec = contract["training_readiness_report_binding"]
-    missing = _required(binding, spec["required_fields"], "readiness")
+    normalized = dict(binding)
+    if "training_readiness_report_id" not in normalized and "readiness_report_id" in normalized:
+        normalized["training_readiness_report_id"] = normalized["readiness_report_id"]
+    missing = _required(normalized, spec["required_fields"], "readiness")
     if missing:
         raise Ewp004ContractError("READINESS_BINDING_INCOMPLETE", ",".join(missing))
-    if binding.get("readiness_state") not in spec["allowed_readiness_states"]:
-        raise Ewp004ContractError(spec["formal_fit_action_when_not_allowed"], str(binding.get("readiness_state")))
-    if any(not _hash_is_valid(binding.get(field)) for field in ("dataset_hash", "split_hash", "readiness_report_hash")):
+    if normalized.get("readiness_state") not in spec["allowed_readiness_states"]:
+        raise Ewp004ContractError(spec["formal_fit_action_when_not_allowed"], str(normalized.get("readiness_state")))
+    if any(not _hash_is_valid(normalized.get(field)) for field in ("dataset_hash", "split_hash", "readiness_report_hash")):
         raise Ewp004ContractError("READINESS_BINDING_HASH_INVALID", "dataset/split/report hash")
 
 
@@ -313,10 +354,23 @@ def validate_parameter_artifact(artifact: Mapping[str, Any], contract: Mapping[s
     if artifact.get("engine_role") not in ENGINE_ROLES:
         raise Ewp004ContractError("UNSUPPORTED_ENGINE_ROLE", str(artifact.get("engine_role")))
     validate_model_family(contract, artifact["model_family_id"], artifact["engine_role"])
+    family = next(item for item in contract["candidate_model_family_registry"]["families"] if item.get("family_id") == artifact["model_family_id"])
+    if artifact.get("model_family_version") != family.get("family_version"):
+        raise Ewp004ContractError("PARAMETER_ARTIFACT_FAMILY_VERSION_INVALID", str(artifact.get("model_family_version")))
     if any(not _hash_is_valid(artifact.get(field)) for field in ("dataset_hash", "split_hash", "readiness_report_hash", "training_config_hash", "fitting_implementation_hash", "deterministic_runtime_profile_hash", "parameter_hash")):
         raise Ewp004ContractError("PARAMETER_ARTIFACT_HASH_INVALID", "required artifact hash is invalid")
     if artifact.get("supersedes") is not None and not isinstance(artifact.get("supersedes"), str):
         raise Ewp004ContractError("PARAMETER_ARTIFACT_SUPERSESSION_INVALID", "supersedes must be an artifact id or null")
+    payload = artifact.get("parameter_payload_or_ref")
+    if not isinstance(payload, (Mapping, str)):
+        raise Ewp004ContractError("PARAMETER_ARTIFACT_PAYLOAD_INVALID", "payload_or_ref must be one canonical payload or reference")
+    if artifact.get("serialization_identity") not in {
+        contract.get("canonicalization", {}).get("profile"),
+        "canonical-json@v4-1.0",
+    }:
+        raise Ewp004ContractError("PARAMETER_ARTIFACT_SERIALIZATION_INVALID", str(artifact.get("serialization_identity")))
+    if artifact.get("parameter_hash") != canonical_value_hash(payload):
+        raise Ewp004ContractError("PARAMETER_ARTIFACT_HASH_MISMATCH", str(artifact.get("parameter_artifact_id")))
 
 
 def append_parameter_artifact(existing: Sequence[Mapping[str, Any]], artifact: Mapping[str, Any], contract: Mapping[str, Any]) -> tuple[Mapping[str, Any], ...]:
@@ -343,7 +397,7 @@ def validate_model_artifact_package(package: Mapping[str, Any], contract: Mappin
 
 __all__ = [
     "ENGINE_ROLES", "MODEL_FAMILIES", "Ewp004ContractError", "append_parameter_artifact",
-    "canonical_hash", "class_support", "classwise_recall", "load_contract",
+    "canonical_hash", "canonical_value_hash", "class_support", "classwise_recall", "load_contract",
     "multiclass_brier_score", "multiclass_log_loss", "validate_contract",
     "validate_feature_payload", "validate_model_artifact_package", "validate_model_family",
     "validate_parameter_artifact", "validate_probability_vector", "validate_readiness_binding",

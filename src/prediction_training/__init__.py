@@ -19,6 +19,7 @@ from .ewp003_runtime import (
 from .ewp004_contract import (
     Ewp004ContractError,
     append_parameter_artifact,
+    canonical_value_hash,
     class_support,
     classwise_recall,
     load_contract as load_ewp004_contract,
@@ -32,6 +33,15 @@ from .ewp004_contract import (
     validate_probability_vector,
     validate_readiness_binding,
     validate_training_config,
+)
+from .ewp004_runtime import (
+    CandidateExecutionPlan,
+    CandidateFittingAdapter,
+    Ewp004Runtime,
+    Ewp004RuntimeError,
+    FormalFitGateResult,
+    canonical_bytes,
+    sha256_value,
 )
 
 __all__ = [
@@ -49,6 +59,7 @@ __all__ = [
     "validate_league_scope",
     "Ewp004ContractError",
     "append_parameter_artifact",
+    "canonical_value_hash",
     "class_support",
     "classwise_recall",
     "load_ewp004_contract",
@@ -62,4 +73,11 @@ __all__ = [
     "validate_probability_vector",
     "validate_readiness_binding",
     "validate_training_config",
+    "CandidateExecutionPlan",
+    "CandidateFittingAdapter",
+    "Ewp004Runtime",
+    "Ewp004RuntimeError",
+    "FormalFitGateResult",
+    "canonical_bytes",
+    "sha256_value",
 ]

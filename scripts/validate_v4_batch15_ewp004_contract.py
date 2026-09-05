@@ -1,4 +1,4 @@
-"""Validate B15-EWP-004 contract remediation and authorization separation.
+"""Validate B15-EWP-004 runtime authorization and contract boundaries.
 
 The validator is read-only.  It does not import historical data, fit a model,
 create an artifact, write a registry, or change any readiness state.
@@ -42,12 +42,39 @@ def validate() -> list[str]:
     failures: list[str] = []
     contract = load("v4_batch15_ewp004_training_infrastructure_contract.json")
     failures.extend(validate_contract(contract))
+    manifest = load("v4_batch15_ewp004_execution_manifest.json")
+    if manifest.get("canonical_hash") != canonical_hash(manifest):
+        failures.append("execution manifest canonical hash mismatch")
+    if manifest.get("work_package_id") != "B15-EWP-004" or manifest.get("execution_authorized") is not True or manifest.get("implementation_executed") is not True:
+        failures.append("execution manifest is not authorized and implementation-complete")
+    if manifest.get("formal_model_fit_authorized") is not False or manifest.get("contract_hash") != contract.get("canonical_hash"):
+        failures.append("execution manifest formal-fit or contract binding leaked")
+    if manifest.get("scope_hash") != canonical_hash(manifest.get("scope", {}), exclude=()):
+        failures.append("execution manifest scope hash mismatch")
+    if manifest.get("dod_hash") != canonical_hash({"definition_of_done": manifest.get("definition_of_done", [])}, exclude=()):
+        failures.append("execution manifest DoD hash mismatch")
+    for field in ("contract_hash", "implementation_hash", "scope_hash", "candidate_model_family_registry", "engine_training_profiles", "hyperparameter_configs", "deterministic_runtime_profile", "fitting_implementation_contract", "readiness_input_binding_contract", "parameter_artifact_contract", "evaluation_metric_contract", "model_artifact_packaging_contract", "dependency_boundary", "evidence_path", "closure_path"):
+        if field not in manifest:
+            failures.append(f"execution manifest missing {field}")
+    evidence_path = ROOT / "docs" / "JCFB_V4_BATCH_15_B15_EWP_004_ACCEPTANCE_EVIDENCE.json"
+    if not evidence_path.is_file():
+        failures.append("acceptance evidence is missing")
+    else:
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        if evidence.get("canonical_hash") != canonical_hash(evidence):
+            failures.append("acceptance evidence canonical hash mismatch")
+        if evidence.get("status") != "COMPLETE" or evidence.get("formal_model_fit_authorized") is not False:
+            failures.append("acceptance evidence status or formal-fit boundary is invalid")
+    if not (ROOT / "docs" / "JCFB_V4_BATCH_15_B15_EWP_004_CLOSURE_READINESS_REVIEW.md").is_file():
+        failures.append("closure readiness review is missing")
+    if not (ROOT / "docs" / "JCFB_V4_BATCH_15_B15_EWP_005_SCOPE_ENTRY_REVIEW.md").is_file():
+        failures.append("EWP-005 scope/entry review is missing")
 
     registry = load("v4_batch15_execution_work_package_registry.json")
     ewp004 = next((item for item in registry.get("work_packages", []) if item.get("work_package_id") == "B15-EWP-004"), {})
     ewp005 = next((item for item in registry.get("work_packages", []) if item.get("work_package_id") == "B15-EWP-005"), {})
-    if ewp004.get("execution_authorized") is not False or ewp004.get("status") != "REGISTERED_NOT_EXECUTABLE":
-        failures.append("registry: EWP-004 authorization/status boundary changed")
+    if ewp004.get("execution_authorized") is not True or ewp004.get("status") != "COMPLETE":
+        failures.append("registry: EWP-004 is not runtime-complete and authorized")
     if ewp005.get("execution_authorized") is not False or ewp005.get("status") != "SEPARATE_APPROVAL_REQUIRED":
         failures.append("registry: EWP-005 authorization/status boundary changed")
     if "B15-EWP-003" not in ewp004.get("dependencies", []):
@@ -65,8 +92,8 @@ def validate() -> list[str]:
     if model_registry.get("artifacts") != [] or model_registry.get("status") != "NO_APPROVED_ARTIFACTS_PRESENT":
         failures.append("model registry is not empty/no-approved-artifacts")
 
-    if contract.get("authorization_boundary", {}).get("implementation_readiness") != "B15-EWP-004 READY FOR IMPLEMENTATION":
-        failures.append("implementation readiness decision is not READY FOR IMPLEMENTATION")
+    if contract.get("authorization_boundary", {}).get("implementation_readiness") not in {"B15-EWP-004 READY FOR IMPLEMENTATION", "B15-EWP-004 RUNTIME IMPLEMENTATION COMPLETE"}:
+        failures.append("implementation readiness decision is not complete")
     if contract.get("authorization_boundary", {}).get("current_real_dataset_fitting_readiness") != "BLOCKED / TRAINING_DATA_INSUFFICIENT":
         failures.append("current real-data fitting readiness is not the required blocked state")
     if contract.get("authorization_boundary", {}).get("formal_model_fit_authorization") != "NOT_AUTHORIZED":
@@ -83,8 +110,10 @@ def validate() -> list[str]:
     } or any(value != "RESOLVED" for value in contract["blocker_resolution"].values()):
         failures.append("the exact eight EWP-004 blockers are not all marked RESOLVED")
 
-    if (ROOT / "src/prediction_training/ewp004_runtime.py").exists() or (ROOT / "scripts/run_v4_batch15_ewp004.py").exists():
-        failures.append("EWP-004 fitting runtime entry point exists despite the no-implementation boundary")
+    if not (ROOT / "src/prediction_training/ewp004_runtime.py").exists():
+        failures.append("EWP-004 runtime implementation is missing")
+    if (ROOT / "scripts/run_v4_batch15_ewp004.py").exists():
+        failures.append("formal fitting execution script must not exist")
     forbidden = [path for path in changed_paths() if re.search(r"(?i)(^|/)(?:tools/|database/migrations/|migrations/|v333/|v3\.3\.3)", path)]
     if forbidden:
         failures.append("forbidden changed paths: " + ", ".join(forbidden))
@@ -100,8 +129,8 @@ if __name__ == "__main__":
         print("\n".join(errors))
         sys.exit(1)
     print("V4 BATCH-15 EWP-004 CONTRACT VALIDATION: PASS")
-    print("Training infrastructure contract: REMEDIATED / READY FOR IMPLEMENTATION")
-    print("EWP-004 execution authorization: false")
+    print("Training infrastructure contract: AUTHORIZED RUNTIME IMPLEMENTATION COMPLETE")
+    print("EWP-004 execution authorization: true")
     print("Current real dataset fitting readiness: BLOCKED / TRAINING_DATA_INSUFFICIENT")
     print("Formal model fit authorization: NOT_AUTHORIZED")
     print("Model/parameter artifacts: NONE_GENERATED")

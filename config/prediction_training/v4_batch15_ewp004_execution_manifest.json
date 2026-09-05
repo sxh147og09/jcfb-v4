@@ -1,0 +1,61 @@
+{
+  "$id": "b15-ewp004-execution-manifest@1.0.0",
+  "work_package_id": "B15-EWP-004",
+  "work_package_revision": "r001",
+  "parent_batch": "BATCH-15",
+  "parent_task_scope": ["V4-052", "V4-053", "V4-054", "V4-055"],
+  "status": "AUTHORIZED_RUNTIME_IMPLEMENTATION_COMPLETE_NO_FORMAL_FIT",
+  "execution_authorized": true,
+  "implementation_executed": true,
+  "formal_model_fit_authorized": false,
+  "model_artifacts_generated": false,
+  "parameter_artifacts_generated": false,
+  "calibration_state": "NOT_CALIBRATED",
+  "authorization_decision": "APPROVED_FOR_TRAINING_INFRASTRUCTURE_RUNTIME_ONLY_NO_FORMAL_FIT",
+  "authorized_at": "2026-09-05T00:00:00+08:00",
+  "contract_identity": "b15-ewp004-training-infrastructure-contract@1.0.0",
+  "contract_hash": "sha256:330ca05ce777a550fdffcc66427f33f7c9b83d43e2338c39223461b162b0d441",
+  "implementation_identity": "Ewp004Runtime",
+  "implementation_version": "training-infrastructure-runtime@1.0.0",
+  "implementation_hash": "sha256:5f87b30bff624e99deb5731e815820a5a9c8429fc38d6837b6713aceb201a076",
+  "scope": {
+    "authorized": ["training profile loading", "candidate family dispatch", "training config validation/consumption", "deterministic context controls", "readiness binding validation", "evaluation metrics", "ephemeral parameter serialization", "candidate packaging validation", "selection comparator", "promotion-state validation"],
+    "forbidden": ["formal model fitting", "real parameter/model artifact generation", "model registry insertion", "APPROVED_FOR_ENGINE", "calibration", "V4-076", "V4-052..055", "Score", "Shadow", "Production", "Public", "Supabase", "migration", "V3.3.3 modification"]
+  },
+  "scope_hash": "sha256:b480a1b52d73e76b7e0de9ab0957d8eb251c8b884cb522318fda4b315b80299e",
+  "candidate_model_family_registry": {
+    "identity": "prediction-candidate-model-families@1.1.0",
+    "revision": "r001",
+    "hash": "sha256:6d15d60dd9b8b011a133bfa2179f2abb4952d4fde3cfec836800dce4431f4b54",
+    "allowed_families": ["regularized_multinomial_logistic", "gradient_boosted_decision_tree_probabilistic"],
+    "automatic_registration": false
+  },
+  "engine_training_profiles": {
+    "OUTCOME": {"identity": "outcome-training-profile@1.1.0", "revision": "r001", "hash": "sha256:8b999000e0ee6dfa66205bf26a98d9f7d301e3d43d5d9e84c53cd36b5144f9bc"},
+    "HANDICAP": {"identity": "handicap-training-profile@1.1.0", "revision": "r001", "hash": "sha256:cbbdd6ce1f966449b60360bc2a2b2f6d16681f0d72d1530d2046f2132a58d9b6"},
+    "GOALS": {"identity": "goals-training-profile@1.1.0", "revision": "r001", "hash": "sha256:e5646ac70d8985605f55196e0f02f11df2890f0b4e431e44f8e36312c932c2a6"},
+    "HTFT": {"identity": "htft-training-profile@1.1.0", "revision": "r001", "hash": "sha256:3935c2bb894cfc74d9b73a3ee9131ea00ba76c9fb827da9e40155a571db218be"}
+  },
+  "hyperparameter_configs": {
+    "identity": "prediction-training-hyperparameters@1.1.0",
+    "revision": "r001",
+    "bindings": {
+      "OUTCOME": {"regularized_multinomial_logistic": "sha256:9f8edb48433167542ce943442e6af5cce13ded888ac2fcdc230b75d1ffcc2d8d", "gradient_boosted_decision_tree_probabilistic": "sha256:c15b1eb90e8c707ef40d3c2ff675c9d2be4c2279b4dc86d30f2f472e24429dc8"},
+      "HANDICAP": {"regularized_multinomial_logistic": "sha256:5f1175217a379ccd40b0526fa58c34bd3b0a9490d3ef0eadbff3cf2bc95de5db", "gradient_boosted_decision_tree_probabilistic": "sha256:269bc6a255eb317c7a8771fbffbd78e281ed9bd357099e4d15184faa520f9c38"},
+      "GOALS": {"regularized_multinomial_logistic": "sha256:b7b9c0865dac5234d09a513991439c3be54b0c37a4c14500a24ac68d072e24d3", "gradient_boosted_decision_tree_probabilistic": "sha256:74bbff8573926980b645436e277774d5ade97b2af309fc9efb0578d078f2c00a"},
+      "HTFT": {"regularized_multinomial_logistic": "sha256:0682f8937a95ae9252a752a332e1b32b2ca8d8904f04de5df919cdc561aad231", "gradient_boosted_decision_tree_probabilistic": "sha256:182d70c70b24b4a27687960e9c1dfd22c9f0435651c53aa5bf1c95d66514d56c"}
+    }
+  },
+  "deterministic_runtime_profile": {"identity": "fitting-runtime-profile@1.0.0", "revision": "r001", "hash": "sha256:54f199a2b091799880beb5412592796f6f33ea7869162f4dfa57cc9327a62795"},
+  "fitting_implementation_contract": {"identity": "v4-training-fitting-boundary@1.0.0", "version": "r001", "hash": "sha256:36153b1fe377dd704a0b49a3d95c7116575eb5ddbf1d5e60c1bb1c7917efa05b", "runtime": "NOT_USED_BY_EWP004"},
+  "readiness_input_binding_contract": {"identity": "training-readiness-fit-binding@1.0.0", "hash": "sha256:6752e77a0f8f3ecdf1ca7e254d5635c7eddbd86f266101a89c7122748f34dce3"},
+  "parameter_artifact_contract": {"identity": "prediction-model-parameter-artifact@1.0.0", "revision": "r001", "hash": "sha256:01f0172fa2c81f17b093cb6dd49454b541920a5503849eb192cbf5e2fb9e677b"},
+  "evaluation_metric_contract": {"identity": "prediction-model-evaluation@1.1.0", "revision": "r001", "hash": "sha256:2a95b0ca7686d66b8e365be78ffc02b941d2568b5b27e5ba48b5db98c76324f0"},
+  "model_artifact_packaging_contract": {"identity": "prediction-model-artifact@1.1.0", "revision": "r001", "hash": "sha256:b8475b3f63efe8efd9dc0af8c155754263ce2daa42ebbb8e458214a9f5d42a26"},
+  "definition_of_done": ["execution manifest PASS", "family dispatch PASS", "four independent profiles/configs PASS", "deterministic context PASS", "formal fit gate PASS", "metrics PASS", "ephemeral serialization/package validation PASS", "selection and promotion boundary PASS", "real-data fit blocked", "no formal artifacts/registry insertion", "F-drive PASS", "V3 isolation PASS", "full repository tests PASS", "git diff --check PASS"],
+  "dod_hash": "sha256:54c2a28097728462d36fcd3d4c5d03b028b9933e6816401dd4815fab50b79eab",
+  "evidence_path": "docs/JCFB_V4_BATCH_15_B15_EWP_004_ACCEPTANCE_EVIDENCE.json",
+  "closure_path": "docs/JCFB_V4_BATCH_15_B15_EWP_004_CLOSURE_READINESS_REVIEW.md",
+  "dependency_boundary": {"prerequisites": ["B15-EWP-003"], "prerequisite_status": "COMPLETE", "downstream_work_package": "B15-EWP-005", "downstream_execution_authorized": false, "formal_model_fit_authorized": false, "model_registry_insertion": false},
+  "canonical_hash": "sha256:bf00d64df62ac2655d26e0a47844d61041a5de0722083301a69659b21f96b1a7"
+}

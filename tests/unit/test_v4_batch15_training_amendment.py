@@ -60,11 +60,12 @@ class V4Batch15TrainingAmendmentTests(unittest.TestCase):
         self.assertEqual(4, len(self.registry["dependency_edges"]))
         self.assertTrue(all(edge["edge_type"] in {"MANDATORY_PREREQUISITE", "SEPARATE_FIT_APPROVAL_PREREQUISITE"} for edge in self.registry["dependency_edges"]))
 
-    def test_ewp003_is_authorized_but_formal_fit_remains_unauthorized(self):
+    def test_ewp004_is_authorized_but_formal_fit_remains_unauthorized(self):
         self.assertTrue(self.registry["work_packages"][0]["execution_authorized"])
         self.assertTrue(self.registry["work_packages"][1]["execution_authorized"])
         self.assertTrue(self.registry["work_packages"][2]["execution_authorized"])
-        self.assertTrue(all(item["execution_authorized"] is False for item in self.registry["work_packages"][3:]))
+        self.assertTrue(self.registry["work_packages"][3]["execution_authorized"])
+        self.assertFalse(self.registry["work_packages"][4]["execution_authorized"])
         self.assertEqual("SEPARATE_APPROVAL_REQUIRED", self.registry["work_packages"][-1]["status"])
         self.assertFalse(self.registry["entity_rules"]["may_authorize_formal_model_fit"])
 
@@ -78,6 +79,9 @@ class V4Batch15TrainingAmendmentTests(unittest.TestCase):
                 self.assertTrue(item["commit_lineage"]["commit_ids"])
                 self.assertNotEqual("NOT_GENERATED", item["artifact_hash"])
             elif item["work_package_id"] == "B15-EWP-003":
+                self.assertTrue(item["commit_lineage"]["commit_ids"])
+                self.assertEqual("NOT_GENERATED", item["artifact_hash"])
+            elif item["work_package_id"] == "B15-EWP-004":
                 self.assertTrue(item["commit_lineage"]["commit_ids"])
                 self.assertEqual("NOT_GENERATED", item["artifact_hash"])
             else:

@@ -66,10 +66,10 @@ def validate() -> list[str]:
         failures.append("registry: wrong identity")
     if registry.get("contract_version") != "execution-work-package@1.0.0":
         failures.append("registry: wrong contract version")
-    if registry.get("registry_status") != "ACTIVE_GOVERNANCE_WITH_EWP003_EXECUTION_COMPLETE":
-        failures.append("registry: must record EWP-003 completion")
-    if registry.get("registry_owner_decision") != "APPROVED_EWP003_TEMPORAL_SPLIT_AND_READINESS_RUNTIME_ONLY":
-        failures.append("registry: EWP-003 owner approval missing")
+    if registry.get("registry_status") != "ACTIVE_GOVERNANCE_WITH_EWP004_RUNTIME_COMPLETE":
+        failures.append("registry: must record EWP-004 runtime completion")
+    if registry.get("registry_owner_decision") != "APPROVED_EWP004_TRAINING_INFRASTRUCTURE_RUNTIME_ONLY_NO_FORMAL_FIT":
+        failures.append("registry: EWP-004 owner approval missing")
     boundary = registry.get("task_namespace_boundary", {})
     if boundary.get("reserved_namespace") != "V4-001..V4-100":
         failures.append("namespace: authoritative V4 task namespace is not frozen")
@@ -116,7 +116,7 @@ def validate() -> list[str]:
             failures.append(f"work package {index + 1}: missing BATCH-15 binding")
         if not package.get("parent_task_scope"):
             failures.append(f"work package {index + 1}: missing parent task scope")
-        expected_authorized = index in (0, 1, 2)
+        expected_authorized = index in (0, 1, 2, 3)
         if package.get("execution_authorized") is not expected_authorized:
             failures.append(f"work package {index + 1}: authorization boundary mismatch")
         if package.get("dependencies") != expected_deps[index]:
@@ -144,9 +144,9 @@ def validate() -> list[str]:
         failures.append("archive: direct V3 runtime reference must be forbidden")
 
     active_execution = registry.get("active_execution", {})
-    if active_execution.get("work_package_id") != "B15-EWP-003":
-        failures.append("active execution: only B15-EWP-003 may be active")
-    if set(active_execution.get("forbidden_downstream_work_packages", [])) != {"B15-EWP-004", "B15-EWP-005"}:
+    if active_execution.get("work_package_id") != "B15-EWP-004":
+        failures.append("active execution: only B15-EWP-004 may be active")
+    if set(active_execution.get("forbidden_downstream_work_packages", [])) != {"B15-EWP-005"}:
         failures.append("active execution: downstream authorization boundary is incomplete")
     if not (DOCS / "JCFB_V4_BATCH_15_B15_EWP_001_ACCEPTANCE_EVIDENCE.json").is_file():
         failures.append("missing EWP-001 acceptance evidence")
@@ -196,6 +196,6 @@ if __name__ == "__main__":
         sys.exit(1)
     print("V4 BATCH-15 TRAINING AMENDMENT VALIDATION: PASS")
     print("Execution entity: EXECUTION_WORK_PACKAGE / execution-work-package@1.0.0")
-    print("Registry: EWP-001..EWP-003 complete / downstream EWP-004..005 unauthorized")
+    print("Registry: EWP-001..EWP-004 complete / downstream EWP-005 separately unauthorized")
     print("Historical archive: runtime complete / prospective capture approved / verified backfill NOT_FOUND")
-    print("Safety boundary: EWP-003 split/readiness only; no fitting, migration, Supabase, or V3.3.3 change")
+    print("Safety boundary: EWP-004 infrastructure runtime only; no fitting, migration, Supabase, or V3.3.3 change")

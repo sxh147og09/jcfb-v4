@@ -1,16 +1,16 @@
 {
   "$id": "v4-batch-prerequisite-workpackages@1.0.0",
   "contract_version": "execution-work-package@1.0.0",
-  "registry_status": "ACTIVE_GOVERNANCE_WITH_EWP003_EXECUTION_COMPLETE",
-  "registry_owner_decision": "APPROVED_EWP003_TEMPORAL_SPLIT_AND_READINESS_RUNTIME_ONLY",
+  "registry_status": "ACTIVE_GOVERNANCE_WITH_EWP004_RUNTIME_COMPLETE",
+  "registry_owner_decision": "APPROVED_EWP004_TRAINING_INFRASTRUCTURE_RUNTIME_ONLY_NO_FORMAL_FIT",
   "approved_at": "2026-09-05T00:00:00+08:00",
   "primary_batch": "BATCH-15",
   "active_execution": {
-    "work_package_id": "B15-EWP-003",
-    "authorization_decision": "APPROVED_FOR_TEMPORAL_SPLIT_AND_TRAINING_READINESS_RUNTIME_ONLY",
+    "work_package_id": "B15-EWP-004",
+    "authorization_decision": "APPROVED_FOR_TRAINING_INFRASTRUCTURE_RUNTIME_ONLY_NO_FORMAL_FIT",
     "authorized_at": "2026-09-05T00:00:00+08:00",
-    "activation_boundary": "TEMPORAL_SPLIT_AND_TRAINING_READINESS_RUNTIME_ONLY",
-    "forbidden_downstream_work_packages": ["B15-EWP-004", "B15-EWP-005"]
+    "activation_boundary": "TRAINING_INFRASTRUCTURE_RUNTIME_ONLY_NO_FORMAL_FIT",
+    "forbidden_downstream_work_packages": ["B15-EWP-005"]
   },
   "authoritative_task_registry": "v4-task-registry-001-100@1.0.0",
   "task_namespace_boundary": {
@@ -135,21 +135,21 @@
       "entity_type": "EXECUTION_WORK_PACKAGE",
       "parent_batch": "BATCH-15",
       "parent_task_scope": ["V4-052", "V4-053", "V4-054", "V4-055"],
-      "status": "REGISTERED_NOT_EXECUTABLE",
-      "execution_authorized": false,
+      "status": "COMPLETE",
+      "execution_authorized": true,
       "dependencies": ["B15-EWP-003"],
       "owner_role": "REGISTRY_OWNER",
-      "scope": "Govern candidate fitting, deterministic configuration, parameter artifacts, metrics, and model packaging; do not fit in this amendment.",
+      "scope": "Implement the governed candidate-family dispatch, four-engine training profile/config consumption, deterministic runtime controls, formal-fit gate, metrics, ephemeral serialization/packaging validation, selection comparator, and promotion-state boundary; do not perform formal fitting.",
       "definition_of_done": [
-        "dataset and temporal split prerequisites are accepted",
-        "candidate/config/seed identities and deterministic replay rules are frozen",
-        "parameter and model artifact schemas are validated",
-        "four-engine role isolation and promotion boundary are tested",
-        "formal fitting remains separately authorized"
+        "EWP-004 execution manifest and authorization are frozen",
+        "candidate family dispatch and eight independent training configs validate fail-closed",
+        "four-engine profiles, deterministic context, readiness bindings, metrics, serialization, and packaging validate",
+        "synthetic integration outputs remain ephemeral and isolated",
+        "formal fitting, artifacts, registry insertion, calibration, and promotion remain blocked"
       ],
-      "evidence_manifest": ["implementation-manifest", "config-hash", "determinism-audit", "artifact-schema-audit", "role-isolation-audit"],
-      "commit_lineage": {"required": true, "status": "NOT_STARTED", "commit_ids": []},
-      "output_artifacts": ["training-infrastructure-contract", "candidate-fit-manifest", "model-artifact-package"],
+      "evidence_manifest": ["b15-ewp004-execution-manifest", "config-hash", "determinism-audit", "artifact-schema-audit", "role-isolation-audit", "metric-runtime-audit", "formal-fit-gate-audit"],
+      "commit_lineage": {"required": true, "status": "COMPLETE", "commit_ids": ["B15-EWP-004-IMPLEMENTATION"]},
+      "output_artifacts": ["training-infrastructure-contract", "b15-ewp004-execution-manifest", "b15-ewp004-acceptance-evidence", "b15-ewp004-closure-readiness-review"],
       "artifact_hash": "NOT_GENERATED"
     },
     {
@@ -192,5 +192,5 @@
     "array_order": "PRESERVE_SEMANTIC_ORDER",
     "self_hash_field": "canonical_hash is omitted during hash computation"
   },
-  "canonical_hash": "sha256:a51f37c06a45076d8eedeb3a47f586b2e8f2f36efecbdbab193797a5d7da26c4"
+  "canonical_hash": "sha256:2e8cc439675702173266398e632c6efbec3a283f769ac20db5432a9dece225e9"
 }

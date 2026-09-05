@@ -10,6 +10,7 @@ from src.prediction_training.ewp004_contract import (
     ENGINE_ROLES,
     Ewp004ContractError,
     append_parameter_artifact,
+    canonical_value_hash,
     class_support,
     classwise_recall,
     load_contract,
@@ -31,10 +32,10 @@ class V4Batch15Ewp004ContractTests(unittest.TestCase):
         cls.root = Path(__file__).resolve().parents[2]
         cls.contract = load_contract()
 
-    def test_contract_is_remediated_without_execution_authorization(self):
+    def test_contract_is_authorized_for_runtime_without_formal_fit_authorization(self):
         self.assertEqual([], __import__("src.prediction_training.ewp004_contract", fromlist=["validate_contract"]).validate_contract(self.contract))
-        self.assertFalse(self.contract["execution_authorized"])
-        self.assertFalse(self.contract["implementation_executed"])
+        self.assertTrue(self.contract["execution_authorized"])
+        self.assertTrue(self.contract["implementation_executed"])
         self.assertFalse(self.contract["formal_model_fit_authorized"])
         self.assertEqual("NOT_CALIBRATED", self.contract["calibration_state"])
 
@@ -130,7 +131,7 @@ class V4Batch15Ewp004ContractTests(unittest.TestCase):
             "training_config_id": "outcome-regularized-multinomial-logistic-config@1.0.0", "training_config_revision": "r001", "training_config_hash": valid,
             "fitting_implementation_id": "v4-training-fitting-boundary@1.0.0", "fitting_implementation_version": "r001", "fitting_implementation_hash": valid,
             "deterministic_runtime_profile_id": "fitting-runtime-profile@1.0.0", "deterministic_runtime_profile_revision": "r001", "deterministic_runtime_profile_hash": valid,
-            "random_seed": 20260905, "parameter_payload_or_ref": {"coef": [0.1, 0.2]}, "parameter_hash": valid,
+            "random_seed": 20260905, "parameter_payload_or_ref": {"coef": [0.1, 0.2]}, "parameter_hash": canonical_value_hash({"coef": [0.1, 0.2]}),
             "serialization_identity": "canonical-json@v4-1.0", "created_at": "2026-09-05T00:00:00+08:00", "revision": revision, "supersedes": supersedes,
         }
 
@@ -152,11 +153,11 @@ class V4Batch15Ewp004ContractTests(unittest.TestCase):
         with self.assertRaisesRegex(Ewp004ContractError, "BLOCKED_MODEL_ARTIFACT_PACKAGING_BINDING_INCOMPLETE"):
             validate_model_artifact_package(package, self.contract)
 
-    def test_static_validator_and_no_fit_entrypoint(self):
+    def test_static_validator_and_runtime_boundary(self):
         result = subprocess.run(["python", str(self.root / "scripts/validate_v4_batch15_ewp004_contract.py")], cwd=self.root, check=False, capture_output=True, text=True)
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
-        self.assertIn("EWP-004 execution authorization: false", result.stdout)
-        self.assertFalse((self.root / "src/prediction_training/ewp004_runtime.py").exists())
+        self.assertIn("EWP-004 execution authorization: true", result.stdout)
+        self.assertTrue((self.root / "src/prediction_training/ewp004_runtime.py").exists())
         self.assertFalse((self.root / "scripts/run_v4_batch15_ewp004.py").exists())
 
 
