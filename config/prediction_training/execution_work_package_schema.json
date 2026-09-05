@@ -1,0 +1,50 @@
+{
+  "$id": "execution-work-package@1.0.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "JCFB V4 Execution Work Package",
+  "type": "object",
+  "required": [
+    "work_package_key",
+    "work_package_id",
+    "revision",
+    "entity_type",
+    "parent_batch",
+    "parent_task_scope",
+    "status",
+    "execution_authorized",
+    "dependencies",
+    "definition_of_done",
+    "evidence_manifest",
+    "commit_lineage",
+    "output_artifacts",
+    "artifact_hash",
+    "canonical_hash"
+  ],
+  "properties": {
+    "work_package_key": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "work_package_id": {"type": "string", "pattern": "^B[0-9]{2}-EWP-[0-9]{3}$"},
+    "revision": {"type": "string", "pattern": "^r[0-9]{3}$"},
+    "entity_type": {"const": "EXECUTION_WORK_PACKAGE"},
+    "parent_batch": {"type": "string", "pattern": "^BATCH-[0-9]{2}$"},
+    "parent_task_scope": {"type": "array", "items": {"type": "string", "pattern": "^V4-[0-9]{3}$"}, "minItems": 1},
+    "status": {"type": "string"},
+    "execution_authorized": {"const": false},
+    "dependencies": {"type": "array", "items": {"type": "string", "pattern": "^B[0-9]{2}-EWP-[0-9]{3}$"}},
+    "definition_of_done": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "evidence_manifest": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "commit_lineage": {"type": "object"},
+    "output_artifacts": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "artifact_hash": {"type": "string"},
+    "canonical_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "additionalProperties": true,
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "encoding": "UTF-8",
+    "key_order": "LEXICOGRAPHIC_RECURSIVE",
+    "array_order": "PRESERVE_SEMANTIC_ORDER",
+    "self_hash_field": "canonical_hash is omitted during hash computation"
+  },
+  "canonical_hash": "sha256:b4f6e05b448999138ec3a19b179d28ff258015f56c37acd51ceecc21661f9fa1"
+}

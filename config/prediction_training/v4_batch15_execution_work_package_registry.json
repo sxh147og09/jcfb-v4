@@ -1,0 +1,181 @@
+{
+  "$id": "v4-batch-prerequisite-workpackages@1.0.0",
+  "contract_version": "execution-work-package@1.0.0",
+  "registry_status": "ACTIVE_GOVERNANCE_ONLY",
+  "registry_owner_decision": "APPROVED",
+  "approved_at": "2026-09-05T00:00:00+08:00",
+  "primary_batch": "BATCH-15",
+  "authoritative_task_registry": "v4-task-registry-001-100@1.0.0",
+  "task_namespace_boundary": {
+    "reserved_namespace": "V4-001..V4-100",
+    "work_package_namespace": "B##-EWP-###",
+    "collision_action": "REJECT",
+    "task_ids_created": [],
+    "existing_task_ids_modified": [],
+    "existing_task_dag_modified": false
+  },
+  "entity_rules": {
+    "entity_type": "EXECUTION_WORK_PACKAGE",
+    "is_v4_task": false,
+    "may_be_parented_to": ["BATCH-15", "V4-076", "V4-052", "V4-053", "V4-054", "V4-055"],
+    "must_bind_parent_batch": true,
+    "must_bind_parent_task_scope": true,
+    "work_package_complete_does_not_complete_parent_task": true,
+    "may_replace_task_registry_task": false,
+    "may_authorize_formal_model_fit": false,
+    "may_authorize_v4_076": false,
+    "may_authorize_downstream_engines": false,
+    "may_authorize_production_shadow_public": false,
+    "may_authorize_supabase_or_migrations": false,
+    "may_modify_v3_3_3": false
+  },
+  "identity_rule": {
+    "key_format": "lowercase-kebab-case",
+    "id_format": "BATCH_PREFIX + EWP + zero-padded registry sequence",
+    "formula": "B<parent_batch_number>-EWP-<sequence_3_digits>",
+    "revision_format": "r<revision_3_digits>",
+    "free_form_runtime_identity": false
+  },
+  "work_packages": [
+    {
+      "sequence": 1,
+      "work_package_key": "historical-data-bootstrap-archive",
+      "work_package_id": "B15-EWP-001",
+      "revision": "r001",
+      "entity_type": "EXECUTION_WORK_PACKAGE",
+      "parent_batch": "BATCH-15",
+      "parent_task_scope": ["V4-076", "V4-052", "V4-053", "V4-054", "V4-055"],
+      "status": "REGISTERED_NOT_EXECUTABLE",
+      "execution_authorized": false,
+      "dependencies": [],
+      "owner_role": "REGISTRY_OWNER",
+      "scope": "Govern historical source archive contract, source audit, prospective capture boundary, and raw-fact provenance without importing data.",
+      "definition_of_done": [
+        "historical-source-archive@1.0.0 is active",
+        "source locations and acquisition modes are governed",
+        "verified backfill eligibility and rejection rules are frozen",
+        "prospective append-only archive and label separation policy are approved",
+        "source audit evidence records NOT_FOUND or UNKNOWN without invented counts"
+      ],
+      "evidence_manifest": ["archive-contract", "source-audit-report", "acquisition-policy", "backfill-policy", "storage-policy"],
+      "commit_lineage": {"required": true, "status": "NOT_STARTED", "commit_ids": []},
+      "output_artifacts": ["historical-source-archive-contract", "historical-source-audit", "prospective-archive-policy"],
+      "artifact_hash": "NOT_GENERATED"
+    },
+    {
+      "sequence": 2,
+      "work_package_key": "historical-as-of-dataset-builder",
+      "work_package_id": "B15-EWP-002",
+      "revision": "r001",
+      "entity_type": "EXECUTION_WORK_PACKAGE",
+      "parent_batch": "BATCH-15",
+      "parent_task_scope": ["V4-076", "V4-052", "V4-053", "V4-054", "V4-055"],
+      "status": "REGISTERED_NOT_EXECUTABLE",
+      "execution_authorized": false,
+      "dependencies": ["B15-EWP-001"],
+      "owner_role": "REGISTRY_OWNER",
+      "scope": "Build an as-of dataset only from eligible source records with cutoff-visible Feature Bundle, Gate Record, labels, lineage, and hashes.",
+      "definition_of_done": [
+        "dataset builder implementation has an approved work-package execution authorization",
+        "every sample proves feature availability_at <= prediction_cutoff_at < kickoff_at",
+        "labels are physically or logically separate from features",
+        "same-match deduplication, leakage, eligibility, and hash replay audits pass",
+        "unavailable source populations remain UNKNOWN or NOT_AVAILABLE"
+      ],
+      "evidence_manifest": ["dataset-manifest", "sample-lineage-manifest", "eligibility-audit", "leakage-audit", "dataset-hash"],
+      "commit_lineage": {"required": true, "status": "NOT_STARTED", "commit_ids": []},
+      "output_artifacts": ["historical-as-of-dataset", "dataset-lineage-manifest"],
+      "artifact_hash": "NOT_GENERATED"
+    },
+    {
+      "sequence": 3,
+      "work_package_key": "temporal-split-readiness",
+      "work_package_id": "B15-EWP-003",
+      "revision": "r001",
+      "entity_type": "EXECUTION_WORK_PACKAGE",
+      "parent_batch": "BATCH-15",
+      "parent_task_scope": ["V4-076", "V4-052", "V4-053", "V4-054", "V4-055"],
+      "status": "REGISTERED_NOT_EXECUTABLE",
+      "execution_authorized": false,
+      "dependencies": ["B15-EWP-002"],
+      "owner_role": "REGISTRY_OWNER",
+      "scope": "Define temporal train, validation, holdout, and readiness evidence without random splitting or same-match leakage.",
+      "definition_of_done": [
+        "dataset artifact and manifest are present and hash-matched",
+        "temporal split boundaries and walk-forward policy are frozen",
+        "all cutoff variants of one match remain in one partition",
+        "holdout non-use in fitting, selection, and early stopping is proven",
+        "split artifact has deterministic canonical hash"
+      ],
+      "evidence_manifest": ["temporal-split-manifest", "boundary-audit", "same-match-audit", "holdout-isolation-audit", "split-hash"],
+      "commit_lineage": {"required": true, "status": "NOT_STARTED", "commit_ids": []},
+      "output_artifacts": ["temporal-split-artifact", "training-readiness-report"],
+      "artifact_hash": "NOT_GENERATED"
+    },
+    {
+      "sequence": 4,
+      "work_package_key": "training-fitting-infrastructure",
+      "work_package_id": "B15-EWP-004",
+      "revision": "r001",
+      "entity_type": "EXECUTION_WORK_PACKAGE",
+      "parent_batch": "BATCH-15",
+      "parent_task_scope": ["V4-052", "V4-053", "V4-054", "V4-055"],
+      "status": "REGISTERED_NOT_EXECUTABLE",
+      "execution_authorized": false,
+      "dependencies": ["B15-EWP-003"],
+      "owner_role": "REGISTRY_OWNER",
+      "scope": "Govern candidate fitting, deterministic configuration, parameter artifacts, metrics, and model packaging; do not fit in this amendment.",
+      "definition_of_done": [
+        "dataset and temporal split prerequisites are accepted",
+        "candidate/config/seed identities and deterministic replay rules are frozen",
+        "parameter and model artifact schemas are validated",
+        "four-engine role isolation and promotion boundary are tested",
+        "formal fitting remains separately authorized"
+      ],
+      "evidence_manifest": ["implementation-manifest", "config-hash", "determinism-audit", "artifact-schema-audit", "role-isolation-audit"],
+      "commit_lineage": {"required": true, "status": "NOT_STARTED", "commit_ids": []},
+      "output_artifacts": ["training-infrastructure-contract", "candidate-fit-manifest", "model-artifact-package"],
+      "artifact_hash": "NOT_GENERATED"
+    },
+    {
+      "sequence": 5,
+      "work_package_key": "formal-model-fit-validation",
+      "work_package_id": "B15-EWP-005",
+      "revision": "r001",
+      "entity_type": "EXECUTION_WORK_PACKAGE",
+      "parent_batch": "BATCH-15",
+      "parent_task_scope": ["V4-052", "V4-053", "V4-054", "V4-055"],
+      "status": "SEPARATE_APPROVAL_REQUIRED",
+      "execution_authorized": false,
+      "dependencies": ["B15-EWP-004"],
+      "owner_role": "REGISTRY_OWNER",
+      "scope": "Later, separately approve formal Outcome, Handicap, Goals, and HTFT fitting and validation after readiness passes.",
+      "definition_of_done": [
+        "a new explicit fitting authorization decision exists",
+        "usable counts and class distributions come from real dataset artifacts",
+        "candidate selection and out-of-time validation evidence pass",
+        "each model artifact is independently hashed and reviewed",
+        "no artifact is approved for an engine without a formal promotion gate"
+      ],
+      "evidence_manifest": ["fit-authorization", "fit-run-manifest", "out-of-time-evaluation", "model-artifact-hashes", "promotion-gate"],
+      "commit_lineage": {"required": true, "status": "NOT_STARTED", "commit_ids": []},
+      "output_artifacts": ["formal-fit-report", "validation-report", "candidate-model-artifacts"],
+      "artifact_hash": "NOT_GENERATED"
+    }
+  ],
+  "dependency_edges": [
+    {"from": "B15-EWP-001", "to": "B15-EWP-002", "edge_type": "MANDATORY_PREREQUISITE"},
+    {"from": "B15-EWP-002", "to": "B15-EWP-003", "edge_type": "MANDATORY_PREREQUISITE"},
+    {"from": "B15-EWP-003", "to": "B15-EWP-004", "edge_type": "MANDATORY_PREREQUISITE"},
+    {"from": "B15-EWP-004", "to": "B15-EWP-005", "edge_type": "SEPARATE_FIT_APPROVAL_PREREQUISITE"}
+  ],
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "encoding": "UTF-8",
+    "key_order": "LEXICOGRAPHIC_RECURSIVE",
+    "array_order": "PRESERVE_SEMANTIC_ORDER",
+    "self_hash_field": "canonical_hash is omitted during hash computation"
+  },
+  "canonical_hash": "sha256:6c0006267baabc70f7691ee2b81a186b60d05f97a440cd57e8aea7ce2b67a2eb"
+}

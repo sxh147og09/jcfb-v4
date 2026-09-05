@@ -1,0 +1,59 @@
+{
+  "$id": "historical-source-archive@1.0.0",
+  "contract_status": "ACTIVE_GOVERNANCE_CONTRACT",
+  "owner": "REGISTRY_OWNER",
+  "primary_batch": "BATCH-15",
+  "acquisition_modes": ["PROSPECTIVE_CAPTURE", "VERIFIED_HISTORICAL_BACKFILL"],
+  "record_required_fields": [
+    "source",
+    "source_reference",
+    "source_timestamp",
+    "observed_at",
+    "captured_at",
+    "ingested_at",
+    "original_payload_or_file_hash",
+    "match_identity",
+    "market_or_context_type",
+    "revision_identity",
+    "provenance",
+    "availability_at"
+  ],
+  "availability_rule": "source_timestamp or defensible observed_at must prove availability_at <= prediction_cutoff_at",
+  "verified_backfill_requirements": [
+    "historical source is identified and independently referenceable",
+    "historical time is verifiable and not inferred from final state",
+    "original payload/image/file hash is preserved when available",
+    "match identity and revision chain are deterministic",
+    "record is not a V3.3.3 generated artifact"
+  ],
+  "eligibility_states": [
+    "ELIGIBLE_FOR_AS_OF_TRAINING",
+    "NOT_ELIGIBLE_FOR_AS_OF_TRAINING",
+    "UNKNOWN",
+    "BLOCKED"
+  ],
+  "unverifiable_time_action": "REJECT_AS_NOT_ELIGIBLE_FOR_AS_OF_TRAINING",
+  "prospective_capture": {
+    "status": "APPROVED_FOR_FUTURE_CAPTURE_GOVERNANCE",
+    "append_only": true,
+    "source_timestamp_required": true,
+    "pre_match_archive_separate_from_post_match_labels": true
+  },
+  "raw_fact_reingestion": {
+    "decision": "CONDITIONALLY_APPROVED",
+    "allowed_only_for": ["official_raw_odds", "external_raw_market_snapshot", "official_match_result", "official_halftime_result", "verified_lineup_or_source_record"],
+    "requires_reingestion": true,
+    "requires_provenance_and_hash": true,
+    "direct_v3_runtime_reference": "FORBIDDEN"
+  },
+  "storage_policy_ref": "docs/JCFB_V4_F_DRIVE_HISTORICAL_ARCHIVE_STORAGE_POLICY.md",
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "encoding": "UTF-8",
+    "key_order": "LEXICOGRAPHIC_RECURSIVE",
+    "array_order": "PRESERVE_SEMANTIC_ORDER",
+    "self_hash_field": "canonical_hash is omitted during hash computation"
+  },
+  "canonical_hash": "sha256:f33268ba6109bd8fa9ac785226fee90b38acf95af2c7a6717dbeb16f3a1eab2d"
+}
