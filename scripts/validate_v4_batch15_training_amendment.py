@@ -66,10 +66,10 @@ def validate() -> list[str]:
         failures.append("registry: wrong identity")
     if registry.get("contract_version") != "execution-work-package@1.0.0":
         failures.append("registry: wrong contract version")
-    if registry.get("registry_status") != "ACTIVE_GOVERNANCE_ONLY":
-        failures.append("registry: must be active governance only")
-    if registry.get("registry_owner_decision") != "APPROVED":
-        failures.append("registry: owner approval missing")
+    if registry.get("registry_status") != "ACTIVE_GOVERNANCE_WITH_EWP001_EXECUTION":
+        failures.append("registry: must record EWP-001-only execution activation")
+    if registry.get("registry_owner_decision") != "APPROVED_EWP001_EXECUTION_ONLY":
+        failures.append("registry: EWP-001-only owner approval missing")
     boundary = registry.get("task_namespace_boundary", {})
     if boundary.get("reserved_namespace") != "V4-001..V4-100":
         failures.append("namespace: authoritative V4 task namespace is not frozen")
@@ -116,8 +116,9 @@ def validate() -> list[str]:
             failures.append(f"work package {index + 1}: missing BATCH-15 binding")
         if not package.get("parent_task_scope"):
             failures.append(f"work package {index + 1}: missing parent task scope")
-        if package.get("execution_authorized") is not False:
-            failures.append(f"work package {index + 1}: implementation authorization must be false")
+        expected_authorized = index == 0
+        if package.get("execution_authorized") is not expected_authorized:
+            failures.append(f"work package {index + 1}: authorization boundary mismatch")
         if package.get("dependencies") != expected_deps[index]:
             failures.append(f"work package {index + 1}: dependency chain mismatch")
         for field in ("definition_of_done", "evidence_manifest", "commit_lineage", "output_artifacts", "artifact_hash"):
@@ -141,6 +142,16 @@ def validate() -> list[str]:
         failures.append("archive: prospective capture must be append-only")
     if archive.get("raw_fact_reingestion", {}).get("direct_v3_runtime_reference") != "FORBIDDEN":
         failures.append("archive: direct V3 runtime reference must be forbidden")
+
+    active_execution = registry.get("active_execution", {})
+    if active_execution.get("work_package_id") != "B15-EWP-001":
+        failures.append("active execution: only B15-EWP-001 may be authorized")
+    if set(active_execution.get("forbidden_downstream_work_packages", [])) != {"B15-EWP-002", "B15-EWP-003", "B15-EWP-004", "B15-EWP-005"}:
+        failures.append("active execution: downstream authorization boundary is incomplete")
+    if not (DOCS / "JCFB_V4_BATCH_15_B15_EWP_001_ACCEPTANCE_EVIDENCE.json").is_file():
+        failures.append("missing EWP-001 acceptance evidence")
+    if not (CONFIG / "v4_batch15_ewp001_execution_manifest.json").is_file():
+        failures.append("missing EWP-001 execution manifest")
 
     required_docs = (
         "JCFB_V4_BATCH_15_MODEL_TRAINING_ARCHITECTURE_AMENDMENT_APPROVAL_DECISION.md",
@@ -181,6 +192,6 @@ if __name__ == "__main__":
         sys.exit(1)
     print("V4 BATCH-15 TRAINING AMENDMENT VALIDATION: PASS")
     print("Execution entity: EXECUTION_WORK_PACKAGE / execution-work-package@1.0.0")
-    print("Registry: APPROVED / ACTIVE_GOVERNANCE_ONLY / five deterministic B15-EWP identities")
-    print("Historical archive: ACTIVE / prospective capture approved / verified backfill NOT_FOUND")
-    print("Safety boundary: no import, dataset build, fitting, runtime, migration, Supabase, or V3.3.3 change")
+    print("Registry: EWP-001 authorized only / downstream B15-EWP-002..005 unauthorized")
+    print("Historical archive: runtime complete / prospective capture approved / verified backfill NOT_FOUND")
+    print("Safety boundary: no historical import, dataset build, fitting, migration, Supabase, or V3.3.3 change")

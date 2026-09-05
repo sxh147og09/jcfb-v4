@@ -31,12 +31,14 @@ parent V4 task.
 
 ## Activation boundary
 
-The amendment activates governance contracts, deterministic identities,
+The amendment activated governance contracts, deterministic identities,
 dependency declarations, status rules, evidence rules, and approved storage
-boundaries. It does not authorize implementation or execution of any of the
-five registered work packages. All registry entries keep
-`execution_authorized=false`; formal model fit has an additional
-`SEPARATE_APPROVAL_REQUIRED` status.
+boundaries. A later explicit authorization now permits **B15-EWP-001 only** to
+implement the approved archive runtime and prospective capture boundary. The
+remaining four registry entries keep `execution_authorized=false`; formal
+model fit has an additional `SEPARATE_APPROVAL_REQUIRED` status. The original
+activation state was `ACTIVE_GOVERNANCE_ONLY` before the EWP-001 authorization
+decision.
 
 The prospective capture mode is approved as a future append-only acquisition
 mode. It does not turn an empty archive into a dataset and does not permit
@@ -46,7 +48,8 @@ historical reconstruction from present-day revisions.
 
 | Review item | Decision |
 |---|---|
-| Work Package mechanism | `ACTIVE_GOVERNANCE_ONLY` |
+| Work Package mechanism | `ACTIVE_GOVERNANCE_WITH_EWP001_EXECUTION` |
+| Authorized implementation | `B15-EWP-001` only; archive/prospective capture scope |
 | Historical Source Archive contract | `READY` as a governance contract |
 | Approved source storage location | `F:\Projects\jcfb-v4\approved_data\historical_source_archive\` |
 | Verified historical backfill source | `NOT_FOUND` |
@@ -84,6 +87,10 @@ still `PREDICTION_TRAINING_READINESS_BLOCKED`.
 No dataset construction, import, model fitting, V4-076, V4-052 through
 V4-055, Score, Calibration, Shadow, Production, Public, Supabase, migration,
 or V3.3.3 operation is authorized by this decision.
+
+The separate EWP-001 authorization is recorded in
+`docs/JCFB_V4_BATCH_15_B15_EWP_001_AUTHORIZATION_DECISION.md`. It does not
+authorize any item in the preceding sentence.
 
 ## Evidence and cross-references
 

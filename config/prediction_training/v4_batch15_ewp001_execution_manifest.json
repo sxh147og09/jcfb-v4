@@ -1,0 +1,39 @@
+{
+  "$id": "b15-ewp001-execution-manifest@1.0.0",
+  "work_package_id": "B15-EWP-001",
+  "work_package_revision": "r002",
+  "parent_batch": "BATCH-15",
+  "parent_task_scope": ["V4-076", "V4-052", "V4-053", "V4-054", "V4-055"],
+  "status": "COMPLETE",
+  "execution_authorized": true,
+  "authorization_decision": "APPROVED_FOR_HISTORICAL_SOURCE_ARCHIVE_AND_PROSPECTIVE_CAPTURE_ONLY",
+  "authorized_at": "2026-09-05T00:00:00+08:00",
+  "activation_rule": "prospective capture begins at authorization time; pre-activation observations are not prospective",
+  "contract_identity": "historical-source-archive@1.0.0",
+  "contract_hash": "sha256:f33268ba6109bd8fa9ac785226fee90b38acf95af2c7a6717dbeb16f3a1eab2d",
+  "registry_identity": "v4-batch-prerequisite-workpackages@1.0.0",
+  "registry_hash": "sha256:a9af8a91b5bdebb9f40f7f3117660d9af0dfd136d5066e0cc70414070f542daa",
+  "output_artifact_schema": "b15-ewp001-archive-record@1.0.0",
+  "output_artifact_schema_hash": "sha256:75003c7fbb154db3ab4476744e8ee19d18e1202e2624c909414c75ca398e31b7",
+  "approved_archive_root": "F:\\Projects\\jcfb-v4\\approved_data\\historical_source_archive\\",
+  "layout": ["pre_match/", "post_match/", "manifests/", "provenance/", "revisions/"],
+  "evidence_path": "docs/JCFB_V4_BATCH_15_B15_EWP_001_ACCEPTANCE_EVIDENCE.json",
+  "closure_path": "docs/JCFB_V4_BATCH_15_B15_EWP_001_CLOSURE_READINESS_REVIEW.md",
+  "implementation_paths": ["src/historical_source_archive/__init__.py", "tests/unit/test_v4_batch15_ewp001_archive.py"],
+  "definition_of_done": ["append-only", "pre-post separation", "timestamp separation", "official screenshot provenance root", "provider-separated external snapshots", "deterministic manifest/hash", "provenance replay", "backfill rejection", "F-drive", "no dataset/training/downstream leakage"],
+  "dependency_boundary": {
+    "prerequisites": [],
+    "authorized_scope": ["Historical Source Archive", "Prospective Capture"],
+    "downstream_unauthorized": ["B15-EWP-002", "B15-EWP-003", "B15-EWP-004", "B15-EWP-005"],
+    "forbidden": ["historical dataset construction", "temporal split", "model fitting", "V4-076", "V4-052..055", "Score", "Calibration", "Shadow", "Production", "Public", "Supabase", "migration", "V3.3.3"]
+  },
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "encoding": "UTF-8",
+    "key_order": "LEXICOGRAPHIC_RECURSIVE",
+    "array_order": "PRESERVE_SEMANTIC_ORDER",
+    "self_hash_field": "canonical_hash is omitted during hash computation"
+  },
+  "canonical_hash": "sha256:7a106a3fd51d81fa30706939305ee641f716114241d0c68c4daf9ea1366663c7"
+}

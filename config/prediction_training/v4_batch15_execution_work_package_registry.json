@@ -1,10 +1,17 @@
 {
   "$id": "v4-batch-prerequisite-workpackages@1.0.0",
   "contract_version": "execution-work-package@1.0.0",
-  "registry_status": "ACTIVE_GOVERNANCE_ONLY",
-  "registry_owner_decision": "APPROVED",
+  "registry_status": "ACTIVE_GOVERNANCE_WITH_EWP001_EXECUTION",
+  "registry_owner_decision": "APPROVED_EWP001_EXECUTION_ONLY",
   "approved_at": "2026-09-05T00:00:00+08:00",
   "primary_batch": "BATCH-15",
+  "active_execution": {
+    "work_package_id": "B15-EWP-001",
+    "authorization_decision": "APPROVED_FOR_HISTORICAL_SOURCE_ARCHIVE_AND_PROSPECTIVE_CAPTURE_ONLY",
+    "authorized_at": "2026-09-05T00:00:00+08:00",
+    "activation_boundary": "PROSPECTIVE_CAPTURE_FROM_AUTHORIZATION_TIME",
+    "forbidden_downstream_work_packages": ["B15-EWP-002", "B15-EWP-003", "B15-EWP-004", "B15-EWP-005"]
+  },
   "authoritative_task_registry": "v4-task-registry-001-100@1.0.0",
   "task_namespace_boundary": {
     "reserved_namespace": "V4-001..V4-100",
@@ -41,26 +48,27 @@
       "sequence": 1,
       "work_package_key": "historical-data-bootstrap-archive",
       "work_package_id": "B15-EWP-001",
-      "revision": "r001",
+      "revision": "r002",
       "entity_type": "EXECUTION_WORK_PACKAGE",
       "parent_batch": "BATCH-15",
       "parent_task_scope": ["V4-076", "V4-052", "V4-053", "V4-054", "V4-055"],
-      "status": "REGISTERED_NOT_EXECUTABLE",
-      "execution_authorized": false,
+      "status": "COMPLETE",
+      "execution_authorized": true,
       "dependencies": [],
       "owner_role": "REGISTRY_OWNER",
-      "scope": "Govern historical source archive contract, source audit, prospective capture boundary, and raw-fact provenance without importing data.",
+      "scope": "Implement the approved F-drive historical source archive and append-only prospective capture runtime without importing historical data or constructing a dataset.",
       "definition_of_done": [
-        "historical-source-archive@1.0.0 is active",
-        "source locations and acquisition modes are governed",
-        "verified backfill eligibility and rejection rules are frozen",
-        "prospective append-only archive and label separation policy are approved",
-        "source audit evidence records NOT_FOUND or UNKNOWN without invented counts"
+        "execution manifest and authorization are frozen",
+        "approved F-drive archive root and pre/post separation are implemented",
+        "prospective append-only capture, correction, and provenance replay pass",
+        "official screenshot and provider-separated external snapshot paths pass",
+        "verified historical backfill interface rejects unverifiable candidates and performs no import",
+        "dataset construction, temporal split, fitting, V4-076, and downstream engine work remain absent"
       ],
-      "evidence_manifest": ["archive-contract", "source-audit-report", "acquisition-policy", "backfill-policy", "storage-policy"],
-      "commit_lineage": {"required": true, "status": "NOT_STARTED", "commit_ids": []},
-      "output_artifacts": ["historical-source-archive-contract", "historical-source-audit", "prospective-archive-policy"],
-      "artifact_hash": "NOT_GENERATED"
+      "evidence_manifest": ["ewp001-execution-manifest", "archive-runtime-implementation", "archive-runtime-tests", "acceptance-evidence", "closure-readiness-review"],
+      "commit_lineage": {"required": true, "status": "COMPLETE", "commit_ids": ["be88c74a53e8f97982e7e40985b6ee66fcd8942e"]},
+      "output_artifacts": ["ewp001-execution-manifest", "approved-historical-source-archive-runtime", "b15-ewp001-acceptance-evidence", "historical-archive-capture-readiness-review"],
+      "artifact_hash": "sha256:2ddb71688b3be2e6d3d2f18e73765669ef12f509ddb8136f04bab1552c0decba"
     },
     {
       "sequence": 2,
@@ -177,5 +185,5 @@
     "array_order": "PRESERVE_SEMANTIC_ORDER",
     "self_hash_field": "canonical_hash is omitted during hash computation"
   },
-  "canonical_hash": "sha256:6c0006267baabc70f7691ee2b81a186b60d05f97a440cd57e8aea7ce2b67a2eb"
+  "canonical_hash": "sha256:a9af8a91b5bdebb9f40f7f3117660d9af0dfd136d5066e0cc70414070f542daa"
 }

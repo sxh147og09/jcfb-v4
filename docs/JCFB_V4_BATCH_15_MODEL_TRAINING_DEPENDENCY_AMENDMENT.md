@@ -15,7 +15,7 @@ the V4-001 through V4-100 namespace remain unchanged by this amendment.
 
 | Work package | Parent scope | Dependency | Current state |
 |---|---|---|---|
-| `B15-EWP-001` | BATCH-15; V4-076, V4-052..055 | none | `REGISTERED_NOT_EXECUTABLE` |
+| `B15-EWP-001` | BATCH-15; V4-076, V4-052..055 | none | `COMPLETE; EWP-001 execution authorized only` |
 | `B15-EWP-002` | BATCH-15; V4-076, V4-052..055 | `B15-EWP-001` | `REGISTERED_NOT_EXECUTABLE` |
 | `B15-EWP-003` | BATCH-15; V4-076, V4-052..055 | `B15-EWP-002` | `REGISTERED_NOT_EXECUTABLE` |
 | `B15-EWP-004` | BATCH-15; V4-052..055 | `B15-EWP-003` | `REGISTERED_NOT_EXECUTABLE` |
@@ -30,3 +30,9 @@ Each transition requires the work-package identity/revision, decision actor,
 timestamp, dependency evidence, DoD evidence manifest, output artifact
 hashes, and Git commit lineage. The registry self-hash is computed with
 `v4-canonical-json@1.0` and excludes only its own `canonical_hash` field.
+
+The EWP-001 authorization and closure evidence are recorded in
+`docs/JCFB_V4_BATCH_15_B15_EWP_001_AUTHORIZATION_DECISION.md`,
+`docs/JCFB_V4_BATCH_15_B15_EWP_001_ACCEPTANCE_EVIDENCE.json`, and
+`docs/JCFB_V4_BATCH_15_B15_EWP_001_CLOSURE_READINESS_REVIEW.md`. EWP-002 through
+EWP-005 remain unauthorized.

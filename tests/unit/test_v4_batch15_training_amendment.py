@@ -61,18 +61,23 @@ class V4Batch15TrainingAmendmentTests(unittest.TestCase):
         self.assertTrue(all(edge["edge_type"] in {"MANDATORY_PREREQUISITE", "SEPARATE_FIT_APPROVAL_PREREQUISITE"} for edge in self.registry["dependency_edges"]))
 
     def test_implementation_and_formal_fit_remain_unauthorized(self):
-        self.assertTrue(all(item["execution_authorized"] is False for item in self.registry["work_packages"]))
+        self.assertTrue(self.registry["work_packages"][0]["execution_authorized"])
+        self.assertTrue(all(item["execution_authorized"] is False for item in self.registry["work_packages"][1:]))
         self.assertEqual("SEPARATE_APPROVAL_REQUIRED", self.registry["work_packages"][-1]["status"])
         self.assertFalse(self.registry["entity_rules"]["may_authorize_formal_model_fit"])
 
     def test_work_packages_require_status_dod_evidence_manifest_and_lineage(self):
         for item in self.registry["work_packages"]:
-            self.assertIn(item["status"], {"REGISTERED_NOT_EXECUTABLE", "SEPARATE_APPROVAL_REQUIRED"})
+            self.assertIn(item["status"], {"REGISTERED_NOT_EXECUTABLE", "SEPARATE_APPROVAL_REQUIRED", "COMPLETE"})
             self.assertTrue(item["definition_of_done"])
             self.assertTrue(item["evidence_manifest"])
             self.assertTrue(item["commit_lineage"]["required"])
-            self.assertEqual([], item["commit_lineage"]["commit_ids"])
-            self.assertEqual("NOT_GENERATED", item["artifact_hash"])
+            if item["work_package_id"] == "B15-EWP-001":
+                self.assertTrue(item["commit_lineage"]["commit_ids"])
+                self.assertNotEqual("NOT_GENERATED", item["artifact_hash"])
+            else:
+                self.assertEqual([], item["commit_lineage"]["commit_ids"])
+                self.assertEqual("NOT_GENERATED", item["artifact_hash"])
 
     def test_archive_has_both_acquisition_modes(self):
         self.assertEqual({"PROSPECTIVE_CAPTURE", "VERIFIED_HISTORICAL_BACKFILL"}, set(self.archive["acquisition_modes"]))

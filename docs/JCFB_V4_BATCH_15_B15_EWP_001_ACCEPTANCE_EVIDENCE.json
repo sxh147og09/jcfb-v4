@@ -1,0 +1,64 @@
+{
+  "$id": "b15-ewp001-acceptance-evidence@1.0.0",
+  "work_package_id": "B15-EWP-001",
+  "work_package_revision": "r002",
+  "status": "COMPLETE",
+  "decision": "B15-EWP-001 STATUS: COMPLETE",
+  "authorization": {
+    "execution_authorized": true,
+    "scope": "Historical Source Archive / Prospective Capture only",
+    "downstream_execution_authorized": false,
+    "downstream_work_packages": ["B15-EWP-002", "B15-EWP-003", "B15-EWP-004", "B15-EWP-005"]
+  },
+  "baseline": {
+    "head": "be88c74a53e8f97982e7e40985b6ee66fcd8942e",
+    "working_tree_before_implementation": "CLEAN",
+    "full_repository_tests_before_implementation": "520/520 PASS"
+  },
+  "artifacts": {
+    "execution_manifest": "config/prediction_training/v4_batch15_ewp001_execution_manifest.json",
+    "archive_record_schema": "config/prediction_training/v4_batch15_ewp001_archive_record_schema.json",
+    "runtime": "src/historical_source_archive/__init__.py",
+    "focused_tests": "tests/unit/test_v4_batch15_ewp001_archive.py",
+    "closure_review": "docs/JCFB_V4_BATCH_15_B15_EWP_001_CLOSURE_READINESS_REVIEW.md"
+  },
+  "checks": {
+    "execution_manifest_frozen": "PASS",
+    "approved_archive_root_f_drive": "PASS",
+    "pre_post_match_separation": "PASS",
+    "original_artifact_hash_preservation": "PASS",
+    "source_capture_ingestion_timestamps_separate": "PASS",
+    "append_only": "PASS",
+    "revision_supersedes": "PASS",
+    "official_external_isolation": "PASS",
+    "no_synthetic_history": "PASS",
+    "unverifiable_historical_rejected": "PASS",
+    "provenance_replay": "PASS",
+    "deterministic_manifest_hash": "PASS",
+    "no_dataset_builder_leakage": "PASS",
+    "no_model_training_leakage": "PASS",
+    "no_v4_076_leakage": "PASS",
+    "v3_3_3_isolation": "PASS",
+    "no_database_supabase_migration": "PASS",
+    "focused_tests": "10/10 PASS",
+    "full_repository_tests": "531/531 PASS",
+    "git_diff_check": "PASS",
+    "ewp001_validator": "PASS"
+  },
+  "archive_counts": {
+    "archived_match_count": 0,
+    "usable_training_sample_count": "NOT_COMPUTED",
+    "verified_historical_backfill": "NOT_FOUND"
+  },
+  "hashes": {
+    "runtime_implementation_hash": "sha256:2ddb71688b3be2e6d3d2f18e73765669ef12f509ddb8136f04bab1552c0decba",
+    "execution_manifest_hash": "sha256:7a106a3fd51d81fa30706939305ee641f716114241d0c68c4daf9ea1366663c7",
+    "archive_record_schema_hash": "sha256:75003c7fbb154db3ab4476744e8ee19d18e1202e2624c909414c75ca398e31b7"
+  },
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "self_hash_field": "canonical_hash is omitted during hash computation"
+  },
+  "canonical_hash": "sha256:45675478848354ad0db771937f7a8738f733083f346e291bc783db0b7e82a2d2"
+}
