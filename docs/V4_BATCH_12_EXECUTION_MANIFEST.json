@@ -1,0 +1,94 @@
+{
+  "manifest_version": "batch-12-execution-manifest@1.0.0",
+  "status": "FROZEN",
+  "baseline_head": "2b5f3a6",
+  "approved_scope": ["V4-044", "V4-045"],
+  "execution_waves": [
+    {"wave": 1, "tasks": ["V4-044"], "mode": "SERIAL"},
+    {"wave": 2, "tasks": ["V4-045"], "mode": "SERIAL"},
+    {"wave": 3, "tasks": ["BATCH-12-CLOSURE-REVIEW"], "mode": "SERIAL"}
+  ],
+  "direct_dependencies": {
+    "V4-044": ["V4-040", "V4-041", "V4-042", "V4-043", "feature-bundle@2.0.0", "team-context@2.0.0", "evidence@1.0.0"],
+    "V4-045": ["V4-044", "feature-bundle@2.0.0", "team-context@2.0.0", "evidence@1.0.0", "historical-statistical-input@1.0.0"]
+  },
+  "contract_versions": {
+    "feature_bundle": "feature-bundle@2.0.0",
+    "football_intelligence_feature": "football-intelligence-feature@1.0.0",
+    "football_context_integration": "football-context-integration@1.0.0",
+    "v4_044_generator": "v4-044-football-intelligence@1.0.0",
+    "v4_045_generator": "v4-045-context-integration@1.0.0",
+    "team_context": "team-context@2.0.0",
+    "evidence": "evidence@1.0.0",
+    "feature_schema": "feature-schema@1.0.0",
+    "historical_input": "historical-statistical-input@1.0.0"
+  },
+  "config": {
+    "config_version": "football-intelligence-config@1.0.0",
+    "config_hash": "sha256:cd555f25c3a4ee1ef8e30257af5ae1bdf006ff99e6aa9607219508e9f7ebdc3c",
+    "mapping_registry_version": "football-intelligence-mapping@1.0.0",
+    "approved_model_effect_coefficients": [],
+    "interaction_policy": "SEPARATE_DIMENSIONS_ONLY"
+  },
+  "lifecycle": {
+    "classification": "PRE_FROZEN_FEATURE_GENERATORS",
+    "formal_engine_output_envelope": "NOT_USED",
+    "frozen_input_id": "FORBIDDEN",
+    "frozen_input_hash": "FORBIDDEN",
+    "v4_076_implementation": "FORBIDDEN"
+  },
+  "team_context_semantics": {
+    "active_contract": "team-context@2.0.0",
+    "canonical_quality_field": "context_confidence",
+    "bare_confidence": "FORBIDDEN",
+    "projected_is_confirmed": false,
+    "unknown_is_none": false
+  },
+  "feature_classification": {
+    "type_a": "APPROVED_DETERMINISTIC_NUMERIC_OBSERVABLES",
+    "type_b": "STRUCTURED_CATEGORICAL_OR_STATE",
+    "type_c": "NON_CONSUMABLE_STATES",
+    "non_consumable_states": ["BLOCKED", "CONFLICTED", "FUTURE_DATA", "NOT_VERIFIED", "STALE", "UNAVAILABLE", "UNKNOWN"],
+    "missing_behavior": "PRESERVE_STATE",
+    "unapproved_coefficients": "FORBIDDEN"
+  },
+  "hash_boundary": {
+    "algorithm": "SHA-256 over V4 canonical JSON",
+    "includes": ["feature_bundle_id_and_feature_snapshot_hash", "BATCH-11 refs and hashes", "Team Context refs and hashes", "Evidence refs and hashes", "prediction_cutoff_at", "kickoff_at", "generator/config/mapping identity", "typed feature values and states"],
+    "excludes": ["frozen_input_id", "frozen_input_hash", "prediction", "recommendation", "runtime transport metadata"]
+  },
+  "append_only_boundary": "correction creates a new artifact identity, revision, hash, and explicit supersedes pointer",
+  "no_future_data_boundary": "prediction_cutoff_at < kickoff_at; post-cutoff/post-kickoff input is rejected or remains non-consumable",
+  "downstream_exclusions": ["V4-046+", "BATCH-13", "Market Intelligence", "Prediction", "Score Engine", "Frozen Input", "Shadow/Tier A", "Public Page", "Promotion", "Deployment", "Production/Supabase", "migration"],
+  "no_write_boundary": {
+    "production_supabase_read": false,
+    "production_supabase_write": false,
+    "migration_add": false,
+    "migration_apply": false,
+    "v3_3_3_modification": false
+  },
+  "acceptance_criteria": [
+    "V4-044 independently validates canonical identity and upstream exact refs/hashes",
+    "V4-044 emits only typed pre-Frozen feature artifacts",
+    "V4-045 consumes accepted V4-044 output and preserves all governed state semantics",
+    "Type A mappings are deterministic and config-bound",
+    "Type B values remain categorical/state without arbitrary numeric effect",
+    "Type C values are never numericized or silently replaced",
+    "BATCH-11 feature values are immutable by reference",
+    "Team Context projected/confirmed and context_confidence semantics remain separate",
+    "cutoff, future-data, provenance, deterministic hash, and replay checks pass",
+    "append-only correction/supersedes behavior passes",
+    "no Prediction, Score Engine, Market Intelligence, Frozen Input, Production, migration, or V3.3.3 scope is crossed"
+  ],
+  "pause_conditions": [
+    "targeted or full tests fail",
+    "task DoD fails",
+    "canonical identity or exact upstream hash cannot be proven",
+    "UNKNOWN/UNAVAILABLE/NOT_VERIFIED/CONFLICTED/STALE/FUTURE_DATA/BLOCKED requires implicit coercion",
+    "PROJECTED requires numeric discount or confirmation",
+    "conflicting claims require silent source selection",
+    "post-cutoff or post-kickoff information cannot fail closed",
+    "contract, enum, config, mapping, hash boundary, or major version must change",
+    "V4-076, Prediction, Score Engine, Market Intelligence, Production/Supabase, migration, or V3.3.3 is required"
+  ]
+}
