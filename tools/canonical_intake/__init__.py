@@ -219,6 +219,18 @@ from .context_feature_integration import (
     ContextFeatureIntegrationStore,
     ContextFeatureIntegrationValidationError,
 )
+from .market_intelligence import (
+    ARTIFACT_KIND as MARKET_INTELLIGENCE_ARTIFACT_KIND,
+    CONFIG_VERSION as MARKET_INTELLIGENCE_CONFIG_VERSION,
+    CONTRACT_VERSION as MARKET_INTELLIGENCE_FEATURE_CONTRACT_VERSION,
+    GENERATOR_VERSION as MARKET_INTELLIGENCE_GENERATOR_VERSION,
+    MAPPING_REGISTRY_VERSION as MARKET_INTELLIGENCE_MAPPING_REGISTRY_VERSION,
+    MarketIntelligenceArtifact,
+    MarketIntelligenceEngine,
+    MarketIntelligenceResult,
+    MarketIntelligenceStore,
+    MarketIntelligenceValidationError,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -400,4 +412,14 @@ __all__ = [
     "ContextFeatureIntegrationEngine",
     "ContextFeatureIntegrationStore",
     "ContextFeatureIntegrationValidationError",
+    "MARKET_INTELLIGENCE_ARTIFACT_KIND",
+    "MARKET_INTELLIGENCE_CONFIG_VERSION",
+    "MARKET_INTELLIGENCE_FEATURE_CONTRACT_VERSION",
+    "MARKET_INTELLIGENCE_GENERATOR_VERSION",
+    "MARKET_INTELLIGENCE_MAPPING_REGISTRY_VERSION",
+    "MarketIntelligenceArtifact",
+    "MarketIntelligenceEngine",
+    "MarketIntelligenceResult",
+    "MarketIntelligenceStore",
+    "MarketIntelligenceValidationError",
 ]

@@ -1,0 +1,18 @@
+{
+  "cutoff_at": "2026-09-04T09:40:00+08:00",
+  "kickoff_at": "2026-09-04T12:00:00+08:00",
+  "approved_contract": "market-intelligence-feature@1.0.0",
+  "approved_generator": "v4-046-market-intelligence@1.0.0",
+  "latest_selection": "LATEST_ELIGIBLE",
+  "forbidden_fallbacks": [
+    "previous_snapshot",
+    "other_provider",
+    "official_for_external",
+    "external_for_official",
+    "zero",
+    "average",
+    "synthetic_line",
+    "synthetic_price",
+    "silent_coercion"
+  ]
+}
