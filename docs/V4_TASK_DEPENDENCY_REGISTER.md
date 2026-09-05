@@ -1,6 +1,6 @@
 # JCFB V4 Task Dependency Register 001–100 1.0
 
-Status: `PASS` for registry coverage and amended acyclic planning graph; `V4-012` through `V4-027 COMPLETE`; BATCH-14 is `COMPLETE / Closure Gate PASS`; BATCH-15 entry remains BLOCKED.
+Status: `PASS` for registry coverage and amended acyclic planning graph; `V4-012` through `V4-048 COMPLETE` by acceptance/closure evidence; BATCH-14 is `COMPLETE / Closure Gate PASS`; BATCH-15 entry remains BLOCKED.
 
 Dependency Identity: `v4-task-dependency-register-001-100@1.0.0`
 Revision: `r003`
@@ -211,3 +211,13 @@ V4-076 + V4-075 -> V4-077
 V4-076 is assigned to BATCH-15 for execution ordering; BATCH-20 retains
 V4-074, V4-075, and V4-077. This amendment removes the former V4-076 ->
 V4-075 edge and preserves an acyclic graph.
+
+## V4-038 through V4-048 acceptance/status reconciliation
+
+The live status of V4-038 through V4-048 is `COMPLETE`. Their task-level
+dependency rows above remain historical snapshots with `TODO` values; the
+live status is reconciled by this override and the upstream acceptance report.
+Each task has an implementation artifact, acceptance evidence, targeted tests,
+focused Git traceability, and a corresponding BATCH-10, BATCH-11, BATCH-12,
+or BATCH-13 closure record. No dependency edge is changed by this status-only
+reconciliation, and no Prediction Engine implementation is implied.

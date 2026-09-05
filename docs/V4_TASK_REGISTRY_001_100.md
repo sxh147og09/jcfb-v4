@@ -1,9 +1,9 @@
 # JCFB V4 Task Registry 001–100 1.0
 
 Registry Identity: `v4-task-registry-001-100@1.0.0`
-Registry Revision: `r003`
-Audit Date: `2026-09-04` (`Asia/Shanghai`)
-Status: `COMPLETE` for registry construction; `V4-012` through `V4-027` are COMPLETE; BATCH-14 / V4-049 through V4-051 are COMPLETE by closure evidence; BATCH-15 entry remains BLOCKED.
+Registry Revision: `r004`
+Audit Date: `2026-09-05` (`Asia/Shanghai`)
+Status: `COMPLETE` for registry construction; `V4-012` through `V4-048` are COMPLETE by task acceptance and batch closure evidence; BATCH-14 / V4-049 through V4-051 are COMPLETE by closure evidence; BATCH-15 entry remains BLOCKED.
 
 Source of truth: **This registry is the authoritative definition source for V4 task names, scope, provenance, dependencies, deliverables, acceptance, classification, and primary batch.** `docs/V4_MASTER_BUILD_CHECKLIST.md` is an execution-status view and must not invent or silently rename a task.
 
@@ -175,3 +175,18 @@ V4-055 each add V4-076 to their upstream set. V4-077 additionally depends on
 V4-075. The status consistency validator and
 `docs/V4_BATCH_15_GOVERNANCE_EVIDENCE.json` are authoritative for these live
 amendments.
+
+## V4-038 through V4-048 upstream acceptance reconciliation
+
+The authoritative live acceptance state for V4-038 through V4-048 is
+`COMPLETE`, backed by the task-level acceptance evidence, implementation
+reports, targeted tests, focused commits, and BATCH-10 through BATCH-13
+closure evidence. The historical TODO rows in the registry table remain
+unchanged as snapshots; this live override is the canonical status source.
+
+The reconciliation found no upstream runtime implementation gap. V4-038
+through V4-048 are pre-Frozen feature generators and feature artifacts; they
+do not constitute formal Prediction Engine Runs or approved Prediction Model
+Artifacts. See
+`docs/JCFB_V4_BATCH_15_UPSTREAM_ACCEPTANCE_MODEL_ARTIFACT_READINESS_REPORT.md`
+for the complete acceptance matrix and evidence paths.

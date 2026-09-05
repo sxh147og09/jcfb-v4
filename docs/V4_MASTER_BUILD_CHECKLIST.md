@@ -4,7 +4,7 @@
 
 - Registry Version: `v4-task-registry-001-100@1.0.0`
 - Recovery Status: `COMPLETE`; `V4-012` through `V4-027` are COMPLETE; BATCH-06 Closure Gate is PASS; V4-028 through V4-100 remain not started.
-- Live task status: `BATCH-06 = COMPLETE`; the V4-020 through V4-027 acceptance reports/evidence and BATCH-06 Closure Review are authoritative for the rows below, whose legacy mojibake task labels are retained unchanged.
+- Live task status: `BATCH-06 = COMPLETE`; V4-038 through V4-048 are COMPLETE by task acceptance and BATCH-10 through BATCH-13 Closure Reviews; BATCH-14 = COMPLETE / Closure Gate PASS; BATCH-15 remains BLOCKED. Historical checklist rows are retained as status snapshots.
 - Source of truth: `docs/V4_TASK_REGISTRY_001_100.md` is the authoritative task-definition registry. This checklist is the execution-status view.
 - Planning status: `V4-012–V4-100 Batch Planning = PASS`; BATCH-01 / V4-012 design-only acceptance = PASS.
 
@@ -327,3 +327,12 @@ upstreams are V4-022, V4-038, V4-039, V4-049, V4-050, and V4-051; each of
 V4-052 through V4-055 depends on V4-076. BATCH-20 retains V4-074, V4-075,
 and V4-077. The status consistency validator treats this override and the
 machine evidence as authoritative over historical snapshot rows.
+
+## V4-038 through V4-048 live acceptance/status override
+
+The live checklist status for V4-038 through V4-048 is `COMPLETE`, backed by
+their implementation reports, acceptance evidence, targeted tests, focused
+commits, and the BATCH-10 through BATCH-13 closure evidence. The unchecked
+rows above are retained as historical checklist snapshots. These accepted
+tasks are pre-Frozen feature generators and do not authorize Prediction Engine
+implementation or model execution.

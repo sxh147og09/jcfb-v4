@@ -1,6 +1,6 @@
 # JCFB V4 Batch Execution Plan 1.0
 
-Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS` / `BATCH-04 ACCEPTANCE PASS` / `BATCH-05 CLOSURE REVIEW PASS` / `BATCH-06 CLOSURE REVIEW PASS` / `BATCH-14 COMPLETE / CLOSURE GATE PASS` / `BATCH-15 ENTRY BLOCKED`
+Status: `BATCH-01 ACCEPTANCE PASS` / `BATCH-02 ACCEPTANCE PASS` / `BATCH-03 ACCEPTANCE PASS` / `BATCH-04 ACCEPTANCE PASS` / `BATCH-05 CLOSURE REVIEW PASS` / `BATCH-06 CLOSURE REVIEW PASS` / `BATCH-10 COMPLETE / CLOSURE GATE PASS` / `BATCH-11 COMPLETE / CLOSURE GATE PASS` / `BATCH-12 COMPLETE / CLOSURE GATE PASS` / `BATCH-13 COMPLETE / CLOSURE GATE PASS` / `BATCH-14 COMPLETE / CLOSURE GATE PASS` / `BATCH-15 ENTRY BLOCKED`
 
 Plan Identity: `v4-batch-execution-plan@1.0.0`
 Plan Revision: `r004`
@@ -154,3 +154,13 @@ retains V4-074 Five-Market Orchestrator, V4-075 Final Prediction Gate, and
 V4-077 Frozen Prediction / revision chain. The former `V4-076 -> V4-075`
 dependency is removed; V4-075 validates the already-frozen input and V4-077
 depends on both V4-076 and V4-075.
+
+## V4-038 through V4-048 acceptance/status reconciliation
+
+BATCH-10, BATCH-11, BATCH-12, and BATCH-13 closure evidence records all
+V4-038 through V4-048 tasks as `COMPLETE`. Their implementation reports,
+targeted tests, runtime generators, and focused commits are accepted. The
+remaining TODO wording in historical task-table snapshots is superseded by
+the live acceptance overrides in the Task Registry, Dependency Register,
+Execution Classification, and Master Build Checklist. This reconciliation
+does not authorize V4-076 or V4-052 through V4-055 implementation.

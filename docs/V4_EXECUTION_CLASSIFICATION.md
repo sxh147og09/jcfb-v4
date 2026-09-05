@@ -155,3 +155,12 @@ is the pre-prediction Frozen Input wave. BATCH-15 execution is `V4-076 ->
 V4-052/V4-053/V4-054/V4-055`; BATCH-20 retains downstream V4-074, V4-075, and
 V4-077. The amended graph is acyclic and the status consistency validator is
 the live cross-document check.
+
+## V4-038 through V4-048 live acceptance/status override
+
+V4-038 through V4-048 are `COMPLETE` by their implementation reports,
+acceptance evidence, targeted tests, focused commits, and BATCH-10 through
+BATCH-13 closure evidence. The TODO values in the classification table are
+historical snapshots only. These tasks are accepted pre-Frozen feature
+generators and remain distinct from Prediction Model Artifacts and formal
+Prediction Engine Runs.
