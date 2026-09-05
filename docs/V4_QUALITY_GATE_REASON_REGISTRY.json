@@ -1,0 +1,35 @@
+{
+  "registry_version": "quality-gate-reason-registry@1.0.0",
+  "status": "APPROVED_GOVERNANCE_REGISTRY",
+  "reasons": [
+    {"code": "CANONICAL_IDENTITY_MISSING", "class": "HARD_BLOCKER", "scope": "CANDIDATE_SET"},
+    {"code": "CANONICAL_IDENTITY_UNRESOLVED", "class": "HARD_BLOCKER", "scope": "CANDIDATE_SET"},
+    {"code": "CANONICAL_IDENTITY_MISMATCH", "class": "HARD_BLOCKER", "scope": "CANDIDATE_SET"},
+    {"code": "UNSUPPORTED_CONTRACT_VERSION", "class": "HARD_BLOCKER", "scope": "AFFECTED_LINEAGE"},
+    {"code": "REQUIRED_HASH_MISSING", "class": "HARD_BLOCKER", "scope": "AFFECTED_LINEAGE"},
+    {"code": "HASH_VERIFICATION_FAILED", "class": "HARD_BLOCKER", "scope": "AFFECTED_LINEAGE"},
+    {"code": "PROVENANCE_LINEAGE_MISSING", "class": "HARD_BLOCKER", "scope": "AFFECTED_LINEAGE"},
+    {"code": "SOURCE_TIMESTAMP_UNKNOWN", "class": "HARD_BLOCKER", "scope": "AFFECTED_DOMAIN"},
+    {"code": "TIMEZONE_AMBIGUOUS", "class": "HARD_BLOCKER", "scope": "AFFECTED_DOMAIN"},
+    {"code": "FUTURE_DATA", "class": "HARD_BLOCKER", "scope": "AFFECTED_DOMAIN"},
+    {"code": "POST_CUTOFF_DATA", "class": "HARD_BLOCKER", "scope": "AFFECTED_DOMAIN"},
+    {"code": "POST_MATCH_DATA", "class": "HARD_BLOCKER", "scope": "AFFECTED_DOMAIN"},
+    {"code": "UNRESOLVED_INTEGRITY_CONFLICT", "class": "HARD_BLOCKER", "scope": "AFFECTED_LINEAGE"},
+    {"code": "REVISION_HASH_CONFLICT", "class": "HARD_BLOCKER", "scope": "AFFECTED_LINEAGE"},
+    {"code": "REQUIRED_EVIDENCE_REJECTED", "class": "HARD_BLOCKER", "scope": "AFFECTED_DOMAIN"},
+    {"code": "UPSTREAM_BLOCKED", "class": "HARD_BLOCKER", "scope": "MATRIX_RULE"},
+    {"code": "DETERMINISTIC_REPLAY_FAILED", "class": "HARD_BLOCKER", "scope": "AFFECTED_LINEAGE"},
+    {"code": "OPTIONAL_FEATURE_UNKNOWN", "class": "NON_HARD", "scope": "FEATURE"},
+    {"code": "OPTIONAL_FEATURE_UNAVAILABLE", "class": "NON_HARD", "scope": "FEATURE"},
+    {"code": "FEATURE_NOT_VERIFIED", "class": "NON_HARD", "scope": "FEATURE"},
+    {"code": "STALE_REQUIRES_UPSTREAM_POLICY", "class": "NON_HARD", "scope": "UPSTREAM_POLICY"},
+    {"code": "UNRESOLVED_FEATURE_CONFLICT", "class": "NON_HARD", "scope": "FEATURE"}
+  ],
+  "code_policy": {
+    "format": "UPPER_SNAKE_CASE",
+    "stable": true,
+    "reason_detail_required": true,
+    "unknown_code": "BLOCKED"
+  },
+  "canonical_hash": "sha256:0fc720e17d0e599291def181586ad432d265afc5603614cec2fe881e28a8c86b"
+}

@@ -58,9 +58,9 @@ The classification below is a complete register, not a candidate envelope. Accep
 | V4-046 | V4-046｜Market Intelligence Engine 4.0 1.0 | BATCHABLE + SERIAL | BATCH-13 | V4-040, V4-027, V4-031 | YES | NO | NO | TODO |
 | V4-047 | V4-047｜Market Movement, Velocity & Divergence Features 1.0 | BATCHABLE + PARALLEL | BATCH-13 | V4-046 | YES | NO | NO | TODO |
 | V4-048 | V4-048｜Market Heat & Trap-Risk Interpretation 1.0 | BATCHABLE + PARALLEL | BATCH-13 | V4-046, V4-047 | YES | NO | NO | TODO |
-| V4-049 | V4-049｜Tactical Matchup & League Profile Features 1.0 | BATCHABLE + PARALLEL | BATCH-14 | V4-040, V4-045, V4-037 | YES | NO | NO | TODO |
-| V4-050 | V4-050｜Data Quality Engine 4.0 1.0 | BATCHABLE + SERIAL | BATCH-14 | V4-021, V4-022, V4-027, V4-031, V4-037 | YES | NO | NO | TODO |
-| V4-051 | V4-051｜Provenance & Quality Gate Enforcement 1.0 | SERIAL | BATCH-14 | V4-049, V4-050 | YES | NO | NO | TODO |
+| V4-049 | V4-049｜Tactical Matchup & League Profile Features 1.0 | BATCHABLE + PARALLEL | BATCH-14 | V4-040, V4-045, V4-037 | YES | NO | NO | TODO; governed by tactical-league-profile-feature@1.0.0 |
+| V4-050 | V4-050｜Data Quality Engine 4.0 1.0 | BATCHABLE + SERIAL | BATCH-14 | V4-021, V4-022, V4-027, V4-031, V4-037 | YES | NO | NO | TODO; governed by data-quality-assessment@1.0.0 |
+| V4-051 | V4-051｜Provenance & Quality Gate Enforcement 1.0 | SERIAL | BATCH-14 | V4-049, V4-050 | YES | NO | NO | TODO; governed by provenance-quality-gate@1.0.0 and quality-gate-matrix@1.0.0 |
 | V4-052 | V4-052｜Outcome Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | YES | NO | NO | TODO |
 | V4-053 | V4-053｜Handicap Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | YES | NO | NO | TODO |
 | V4-054 | V4-054｜Goals Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | YES | NO | NO | TODO |

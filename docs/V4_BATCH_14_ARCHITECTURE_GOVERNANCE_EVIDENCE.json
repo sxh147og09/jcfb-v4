@@ -1,0 +1,54 @@
+{
+  "batch_id": "BATCH-14",
+  "decision": "Tactical, Quality & Provenance Architecture Governance Resolution",
+  "workspace": "F:/Projects/jcfb-v4",
+  "branch": "main",
+  "baseline_head": "515d1b141fc3dba54dd3cc6e57e5101e018d047f",
+  "implementation_scope": "GOVERNANCE_ONLY",
+  "tasks_implemented": [],
+  "active_artifacts": {
+    "tactical_feature": {"version": "tactical-league-profile-feature@1.0.0", "path": "docs/V4_TACTICAL_LEAGUE_PROFILE_FEATURE_CONTRACT.md"},
+    "quality_assessment": {"version": "data-quality-assessment@1.0.0", "path": "docs/V4_DATA_QUALITY_ASSESSMENT_CONTRACT.md"},
+    "quality_gate": {"version": "provenance-quality-gate@1.0.0", "path": "docs/V4_PROVENANCE_QUALITY_GATE_CONTRACT.md"},
+    "eligibility": {"version": "feature-eligibility@1.0.0", "path": "docs/V4_FEATURE_ELIGIBILITY_CONTRACT.md"},
+    "quality_config": {"version": "quality-gate-config@1.0.0", "path": "docs/V4_QUALITY_GATE_CONFIG.json", "canonical_hash": "sha256:681b46abb9942f0832db86e6b5c839cd353f0a7be06cdc9fa9e6c13b135ac098"},
+    "quality_matrix": {"version": "quality-gate-matrix@1.0.0", "path": "docs/V4_QUALITY_GATE_MATRIX.json", "canonical_hash": "sha256:1161ab65a85c0b1ea5a98e47271ba17de23ca5c92081c3263ce403cf382de18f"},
+    "reason_registry": {"version": "quality-gate-reason-registry@1.0.0", "path": "docs/V4_QUALITY_GATE_REASON_REGISTRY.json", "canonical_hash": "sha256:0fc720e17d0e599291def181586ad432d265afc5603614cec2fe881e28a8c86b"}
+  },
+  "dependency_decision": {
+    "batch_upstream": ["BATCH-09", "BATCH-10", "BATCH-12"],
+    "v4_049": ["V4-040", "V4-045", "V4-037"],
+    "v4_050": ["V4-021", "V4-022", "V4-027", "V4-031", "V4-037"],
+    "v4_051": ["V4-049", "V4-050"],
+    "batch_11_direct_dependency_added": false,
+    "batch_13_direct_dependency_added": false,
+    "cycle_audit": "PASS"
+  },
+  "semantic_boundaries": {
+    "quality_representation": "TYPED_MULTIDIMENSIONAL_ASSESSMENT",
+    "global_numeric_thresholds": "NOT_APPROVED",
+    "cross_domain_interaction": "SEPARATE_DIMENSIONS_ONLY",
+    "frozen_input_final_eligibility": "NOT_EMITTED",
+    "prediction_abstention": "NOT_EMITTED",
+    "prediction": "FORBIDDEN",
+    "score_engine": "FORBIDDEN"
+  },
+  "verification": {
+    "targeted_governance_tests": "14/14 PASS",
+    "compatibility_governance_tests": "43/43 PASS",
+    "full_repository_tests": "464/464 PASS",
+    "versioning_validation": "85 PASS / 0 FAIL",
+    "data_contract_validation": "PASS; 13 contract files",
+    "git_diff_check": "PASS",
+    "contract_consistency": "PASS",
+    "canonical_hash_replay": "PASS",
+    "hard_non_hard_matrix": "PASS",
+    "eligibility_state_separation": "PASS",
+    "dependency_consistency": "PASS",
+    "v3_3_3_isolation": "PASS",
+    "f_drive_policy": "PASS",
+    "production_supabase_reads_writes": "NO",
+    "migration_added_applied": "NO",
+    "batch14_implementation": "NOT_ENTERED"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "contract_versions": {
+    "tactical": "tactical-league-profile-feature@1.0.0",
+    "assessment": "data-quality-assessment@1.0.0",
+    "gate": "provenance-quality-gate@1.0.0",
+    "eligibility": "feature-eligibility@1.0.0",
+    "config": "quality-gate-config@1.0.0",
+    "matrix": "quality-gate-matrix@1.0.0",
+    "reason_registry": "quality-gate-reason-registry@1.0.0"
+  },
+  "quality_dimensions": [
+    "identity",
+    "availability",
+    "coverage",
+    "verification",
+    "freshness",
+    "completeness",
+    "conflict",
+    "provenance",
+    "timestamp_validity",
+    "cutoff_eligibility",
+    "duplication_integrity",
+    "future_data_risk"
+  ],
+  "eligibility_states": ["ELIGIBLE", "PARTIALLY_ELIGIBLE", "INELIGIBLE", "BLOCKED"],
+  "levels": ["FEATURE", "DOMAIN", "CANDIDATE_SET"],
+  "hard_reasons": [
+    "CANONICAL_IDENTITY_MISSING",
+    "REQUIRED_HASH_MISSING",
+    "SOURCE_TIMESTAMP_UNKNOWN",
+    "FUTURE_DATA",
+    "UNRESOLVED_INTEGRITY_CONFLICT",
+    "DETERMINISTIC_REPLAY_FAILED"
+  ],
+  "non_hard_examples": ["OPTIONAL_FEATURE_UNKNOWN", "OPTIONAL_FEATURE_UNAVAILABLE", "FEATURE_NOT_VERIFIED"]
+}

@@ -107,7 +107,9 @@ The formal field-level rules are defined in `V4_SHARED_FACTS_CONTRACT.md`.
 
 ## 6. Data quality and evidence
 
-`Data Quality Engine 4.0` runs before the feature layer. It evaluates:
+`Data Quality Engine 4.0` runs before formal prediction input preparation. Its
+BATCH-14 governance contract produces a typed multidimensional assessment and
+does not create a scalar prediction-like score. It evaluates:
 
 - identity completeness
 - odds completeness and official-odds gate
@@ -118,7 +120,13 @@ The formal field-level rules are defined in `V4_SHARED_FACTS_CONTRACT.md`.
 - conflicting sources and missing context
 - future-information risk
 
-It produces `DATA_QUALITY_SCORE`, `ODDS_QUALITY_SCORE`, `CONTEXT_QUALITY_SCORE`, `SOURCE_CONFIDENCE`, and `BLOCKERS[]`. Any critical blocker rejects a Production Prediction and is retained in the audit record.
+It produces typed `data_quality_assessment`, `odds_quality_assessment`,
+`context_quality_assessment`, `source_quality_assessment`, and `BLOCKERS[]`.
+The historical score labels are compatibility names only; no global numeric
+threshold or cross-domain weight is approved. Any critical blocker is retained
+with lineage and blocks the affected downstream path under the versioned
+Quality Gate Matrix. Final Frozen Input eligibility remains a later V4-076
+decision.
 
 `Evidence Graph 1.0` gives each intelligence claim a lifecycle: `claim`, `source`, `published_at`, `retrieved_at`, `valid_from`, `expires_at`, `confidence`, `contradiction_state`, and `evidence_hash`. Expired, contradictory, or unsupported claims remain visible and cannot be silently treated as valid context.
 

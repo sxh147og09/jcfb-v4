@@ -119,6 +119,16 @@ BATCH-27, BATCH-28, BATCH-29, BATCH-30
 
 The fan-out groups are parallel development opportunities only after their upstream contracts are accepted. Fan-in tasks remain blocked until every required upstream edge is PASS.
 
+### BATCH-14 governance boundary
+
+BATCH-14 retains the approved batch-level upstream set `BATCH-09, BATCH-10,
+BATCH-12`. BATCH-11 and BATCH-13 are not added as direct dependencies. Their
+independent feature artifacts remain separately referenceable by downstream
+consumers. BATCH-14 uses `SEPARATE_DIMENSIONS_ONLY` and does not create a
+cross-domain composite feature or score. Quality and eligibility decisions are
+defined by the versioned BATCH-14 contracts and matrix, with final Frozen Input
+remaining downstream at V4-076.
+
 For BATCH-11, acceptance of the task edge from BATCH-10 also requires the approved `historical-statistical-input@1.0.0` contract and `statistical-strength-config@1.0.0`. These contract prerequisites do not add a graph node or change the BATCH-10 -> BATCH-11 -> later-batch topology.
 
 ## 5. Hard-gate cut points

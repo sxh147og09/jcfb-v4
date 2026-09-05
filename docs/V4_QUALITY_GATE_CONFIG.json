@@ -1,0 +1,101 @@
+{
+  "config_version": "quality-gate-config@1.0.0",
+  "batch_id": "BATCH-14",
+  "lifecycle": "PRE_PREDICTION_PRE_FREEZE",
+  "contract_versions": {
+    "tactical_feature": "tactical-league-profile-feature@1.0.0",
+    "quality_assessment": "data-quality-assessment@1.0.0",
+    "quality_gate": "provenance-quality-gate@1.0.0",
+    "eligibility": "feature-eligibility@1.0.0",
+    "matrix": "quality-gate-matrix@1.0.0",
+    "reason_registry": "quality-gate-reason-registry@1.0.0",
+    "feature_bundle": "feature-bundle@2.0.0",
+    "evidence": "evidence@1.0.0",
+    "football_feature": "football-intelligence-feature@1.0.0",
+    "market_feature": "market-intelligence-feature@1.0.0"
+  },
+  "quality_dimensions": [
+    "identity",
+    "availability",
+    "coverage",
+    "verification",
+    "freshness",
+    "completeness",
+    "conflict",
+    "provenance",
+    "timestamp_validity",
+    "cutoff_eligibility",
+    "duplication_integrity",
+    "future_data_risk"
+  ],
+  "assessment_fields": [
+    "data_quality_assessment",
+    "odds_quality_assessment",
+    "context_quality_assessment",
+    "source_quality_assessment",
+    "blockers",
+    "warnings"
+  ],
+  "score_policy": {
+    "representation": "TYPED_MULTIDIMENSIONAL_ASSESSMENT",
+    "scalar_numeric_quality_score": "FORBIDDEN",
+    "prediction_confidence": "FORBIDDEN",
+    "betting_confidence": "FORBIDDEN",
+    "cross_domain_weighting": "FORBIDDEN",
+    "feature_importance": "FORBIDDEN",
+    "global_numeric_thresholds": "NOT_DEFINED_IN_V1"
+  },
+  "interaction_policy": {
+    "default": "SEPARATE_DIMENSIONS_ONLY",
+    "approved_rules": [],
+    "statistical_football_market_aggregation": "FORBIDDEN",
+    "derived_interaction_requires_new_contract": true
+  },
+  "eligibility_policy": {
+    "levels": ["FEATURE", "DOMAIN", "CANDIDATE_SET"],
+    "states": ["ELIGIBLE", "PARTIALLY_ELIGIBLE", "INELIGIBLE", "BLOCKED"],
+    "frozen_input_final_decision": "FORBIDDEN",
+    "optional_unknown_can_remain_partial": true,
+    "hard_blocker_propagation": "MATRIX_DEFINED"
+  },
+  "time_policy": {
+    "required_relation": "input_availability_at <= prediction_cutoff_at < kickoff_at",
+    "unknown_or_conflicting_time": "BLOCKED",
+    "future_data": "BLOCKED",
+    "post_cutoff_correction": "DO_NOT_REPLACE_CUTOFF_VISIBLE_REVISION"
+  },
+  "hash_policy": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "canonical_hash_excludes": ["canonical_hash"],
+    "includes": [
+      "exact_upstream_ids_revisions_and_hashes",
+      "typed_states",
+      "cutoff_and_kickoff",
+      "contract_versions",
+      "config_version_and_hash",
+      "gating_matrix_version_and_hash",
+      "reason_registry_version_and_hash",
+      "generator_or_implementation_version",
+      "assessment_and_gate_payload"
+    ]
+  },
+  "lifecycle_policy": {
+    "append_only": true,
+    "correction": "NEW_ID_NEW_HASH_EXPLICIT_SUPERSEDES",
+    "prior_record": "IMMUTABLE_AND_RETAINED"
+  },
+  "production_boundary": {
+    "production_runtime": "NOT_AUTHORIZED",
+    "shadow_runtime": "NOT_AUTHORIZED",
+    "supabase_read": "NOT_AUTHORIZED",
+    "supabase_write": "NOT_AUTHORIZED",
+    "migration_add": "NOT_AUTHORIZED",
+    "migration_apply": "NOT_AUTHORIZED",
+    "prediction": "FORBIDDEN",
+    "score_engine": "FORBIDDEN",
+    "frozen_input_implementation": "FORBIDDEN",
+    "v333_modification": "FORBIDDEN"
+  },
+  "canonical_hash": "sha256:681b46abb9942f0832db86e6b5c839cd353f0a7be06cdc9fa9e6c13b135ac098"
+}

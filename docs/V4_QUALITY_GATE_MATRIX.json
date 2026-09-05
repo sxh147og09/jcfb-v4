@@ -1,0 +1,61 @@
+{
+  "matrix_version": "quality-gate-matrix@1.0.0",
+  "batch_id": "BATCH-14",
+  "status": "APPROVED_GOVERNANCE_MATRIX",
+  "threshold_policy": "NO_GLOBAL_NUMERIC_THRESHOLDS",
+  "default_interaction_policy": "SEPARATE_DIMENSIONS_ONLY",
+  "hard_blockers": [
+    {"reason_code": "CANONICAL_IDENTITY_MISSING", "propagation": "CANDIDATE_SET"},
+    {"reason_code": "CANONICAL_IDENTITY_UNRESOLVED", "propagation": "CANDIDATE_SET"},
+    {"reason_code": "CANONICAL_IDENTITY_MISMATCH", "propagation": "CANDIDATE_SET"},
+    {"reason_code": "UNSUPPORTED_CONTRACT_VERSION", "propagation": "AFFECTED_LINEAGE"},
+    {"reason_code": "REQUIRED_HASH_MISSING", "propagation": "AFFECTED_LINEAGE"},
+    {"reason_code": "HASH_VERIFICATION_FAILED", "propagation": "AFFECTED_LINEAGE"},
+    {"reason_code": "PROVENANCE_LINEAGE_MISSING", "propagation": "AFFECTED_LINEAGE"},
+    {"reason_code": "SOURCE_TIMESTAMP_UNKNOWN", "propagation": "AFFECTED_DOMAIN"},
+    {"reason_code": "TIMEZONE_AMBIGUOUS", "propagation": "AFFECTED_DOMAIN"},
+    {"reason_code": "FUTURE_DATA", "propagation": "AFFECTED_DOMAIN"},
+    {"reason_code": "POST_CUTOFF_DATA", "propagation": "AFFECTED_DOMAIN"},
+    {"reason_code": "POST_MATCH_DATA", "propagation": "AFFECTED_DOMAIN"},
+    {"reason_code": "UNRESOLVED_INTEGRITY_CONFLICT", "propagation": "AFFECTED_LINEAGE"},
+    {"reason_code": "REVISION_HASH_CONFLICT", "propagation": "AFFECTED_LINEAGE"},
+    {"reason_code": "REQUIRED_EVIDENCE_REJECTED", "propagation": "AFFECTED_DOMAIN"},
+    {"reason_code": "UPSTREAM_BLOCKED", "propagation": "MATRIX_RULE"},
+    {"reason_code": "DETERMINISTIC_REPLAY_FAILED", "propagation": "AFFECTED_LINEAGE"}
+  ],
+  "non_hard_states": {
+    "UNKNOWN": {"feature_state": "INELIGIBLE", "domain_propagation": "ONLY_IF_REQUIRED", "candidate_propagation": "PARTIALLY_ELIGIBLE"},
+    "UNAVAILABLE": {"feature_state": "INELIGIBLE", "domain_propagation": "ONLY_IF_REQUIRED", "candidate_propagation": "PARTIALLY_ELIGIBLE"},
+    "NOT_VERIFIED": {"feature_state": "INELIGIBLE", "domain_propagation": "ONLY_IF_REQUIRED", "candidate_propagation": "PARTIALLY_ELIGIBLE"},
+    "STALE": {"feature_state": "UPSTREAM_POLICY_REQUIRED", "domain_propagation": "UPSTREAM_POLICY_REQUIRED", "candidate_propagation": "UPSTREAM_POLICY_REQUIRED"},
+    "CONFLICTED": {"feature_state": "INELIGIBLE_UNRESOLVED", "domain_propagation": "ONLY_IF_REQUIRED", "candidate_propagation": "PARTIALLY_ELIGIBLE"},
+    "BLOCKED": {"feature_state": "BLOCKED", "domain_propagation": "MATRIX_DEFINED", "candidate_propagation": "MATRIX_DEFINED"}
+  },
+  "propagation_rules": [
+    {"when": "OPTIONAL_FEATURE_UNKNOWN", "feature": "INELIGIBLE", "candidate_set": "PARTIALLY_ELIGIBLE"},
+    {"when": "ONE_PROVIDER_UNAVAILABLE", "provider": "EXCLUDED", "market": "NOT_AUTOMATICALLY_BLOCKED"},
+    {"when": "REQUIRED_OFFICIAL_MARKET_FUTURE_DATA", "domain": "BLOCKED"},
+    {"when": "CANONICAL_IDENTITY_CONFLICT", "candidate_set": "BLOCKED"},
+    {"when": "HASH_INTEGRITY_FAILURE", "affected_lineage": "BLOCKED"},
+    {"when": "UNRESOLVED_CONFLICT", "selection": "FORBIDDEN"}
+  ],
+  "decision_semantics": {
+    "ELIGIBLE": "ALL_REQUIRED_SCOPE_INPUTS_PASS_CONTRACT",
+    "PARTIALLY_ELIGIBLE": "NO_HARD_BLOCKER_OPTIONAL_INPUTS_NON_CONSUMABLE",
+    "INELIGIBLE": "VALID_AUDITABLE_INPUTS_FAIL_DECLARED_REQUIRED_FEATURE_PROFILE",
+    "BLOCKED": "IDENTITY_TIME_PROVENANCE_INTEGRITY_OR_FUTURE_DATA_HARD_FAILURE"
+  },
+  "forbidden": [
+    "composite_quality_score",
+    "cross_domain_weight",
+    "missingness_penalty",
+    "conflict_penalty",
+    "provenance_score",
+    "prediction_confidence",
+    "betting_confidence",
+    "frozen_input_final_eligibility",
+    "silent_winner_selection",
+    "default_zero_or_mean"
+  ],
+  "canonical_hash": "sha256:1161ab65a85c0b1ea5a98e47271ba17de23ca5c92081c3263ce403cf382de18f"
+}

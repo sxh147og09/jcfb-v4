@@ -82,15 +82,22 @@ The gate must reject:
 
 ## 6. Data Quality Engine 4.0 outputs
 
-The quality layer publishes:
+The BATCH-14 quality layer publishes typed multidimensional assessment
+objects, not scalar quality or confidence values:
 
-- `DATA_QUALITY_SCORE`
-- `ODDS_QUALITY_SCORE`
-- `CONTEXT_QUALITY_SCORE`
-- `SOURCE_CONFIDENCE`
-- `BLOCKERS[]`
+- `data_quality_assessment`
+- `odds_quality_assessment`
+- `context_quality_assessment`
+- `source_quality_assessment`
+- `blockers[]` and `warnings[]`
 
-Recommended blocker states are `UNKNOWN`, `UNAVAILABLE`, `CONFLICT`, `STALE`, `FUTURE_DATA`, `INVALID_IDENTITY`, and `BLOCKED`. Any critical blocker prevents Production Prediction and remains visible in the audit trail. Missing official markets are explicitly marked unavailable; they are never fabricated.
+The historical `DATA_QUALITY_SCORE`, `ODDS_QUALITY_SCORE`,
+`CONTEXT_QUALITY_SCORE`, and `SOURCE_CONFIDENCE` labels are compatibility
+names governed by `data-quality-assessment@1.0.0`; they must not be numericized
+or interpreted as prediction confidence. Blocker propagation is defined by
+`quality-gate-matrix@1.0.0` and retains `UNKNOWN`, `UNAVAILABLE`, `NOT_VERIFIED`,
+`CONFLICTED`, `STALE`, `FUTURE_DATA`, and `BLOCKED` distinctly. Missing
+official markets are explicitly marked unavailable; they are never fabricated.
 
 ## 7. Provenance and snapshot lineage
 
