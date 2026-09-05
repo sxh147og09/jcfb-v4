@@ -164,3 +164,12 @@ remaining TODO wording in historical task-table snapshots is superseded by
 the live acceptance overrides in the Task Registry, Dependency Register,
 Execution Classification, and Master Build Checklist. This reconciliation
 does not authorize V4-076 or V4-052 through V4-055 implementation.
+
+## BATCH-15 training readiness gate
+
+Before Wave 0 or Wave 1 implementation, BATCH-15 must pass the separate
+prediction training readiness review. The gate covers the historical as-of
+dataset, four independent labels/profiles, temporal split, leakage audit,
+sample eligibility, candidate selection, and approved model artifacts. It is
+a prerequisite phase, not a new task ID. Current result:
+`PREDICTION_TRAINING_READINESS_BLOCKED`.

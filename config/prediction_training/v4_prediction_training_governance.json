@@ -1,0 +1,305 @@
+{
+  "artifact": "jcfb-v4-prediction-training-governance@1.0.0",
+  "schema_version": "prediction-training-governance@1.0.0",
+  "status": "GOVERNANCE_RESOLVED_READINESS_BLOCKED",
+  "decision": "PREDICTION_MODEL_TRAINING_GOVERNANCE_RESOLVED",
+  "scope": "BATCH-15 prerequisite before V4-052/V4-053/V4-054/V4-055 implementation",
+  "task_identity": {
+    "training_governance_owner": "BATCH-15",
+    "training_fitting_phase": "MANDATORY_READINESS_PHASE_BEFORE_V4-052..055",
+    "new_task_ids_created": false,
+    "registry_amendment": "MODEL_TRAINING_TASK_REGISTRY_AMENDMENT_REQUIRED_IF_EXECUTION_IDENTITY_IS_REQUIRED",
+    "execution_authorized": false
+  },
+  "architecture": [
+    "Historical As-Of Feature Reconstruction",
+    "Training Dataset Artifact",
+    "Temporal Train/Validation/Test Split",
+    "Candidate Model Fitting",
+    "Out-of-Time Evaluation",
+    "Approved Model Artifact",
+    "Model Registry",
+    "V4-076 Frozen Input",
+    "V4-052/053/054/055 Formal Engine Run"
+  ],
+  "boundary_rules": {
+    "training_pipeline_is_prediction_engine": false,
+    "engine_role": "CONSUME_APPROVED_MODEL_ARTIFACT_AND_EXACT_FROZEN_INPUT_FOR_INFERENCE",
+    "formal_training_execution_this_phase": false,
+    "automatic_production_promotion": false,
+    "v3_3_3_reuse": false,
+    "manual_fusion_weights": false,
+    "quality_score_as_numeric_feature": false,
+    "silent_imputation": false
+  },
+  "training_dataset_contract": {
+    "version": "prediction-training-dataset@1.0.0",
+    "sample_unit": "match_id + prediction_cutoff_at + cutoff_profile + target_role",
+    "as_of_semantics": "Only values and revisions observable and available at prediction_cutoff_at may enter the feature payload",
+    "required_fields": [
+      "sample_id",
+      "match_id",
+      "target_role",
+      "prediction_cutoff_at",
+      "kickoff_at",
+      "historical_feature_bundle_id",
+      "historical_feature_bundle_hash",
+      "statistical_refs_and_hashes",
+      "football_refs_and_hashes",
+      "market_refs_and_hashes",
+      "tactical_refs_and_hashes",
+      "quality_gate_state",
+      "source_availability_timestamps",
+      "revision_identity",
+      "label_ref_and_hash",
+      "dataset_version",
+      "schema_version"
+    ],
+    "required_time_relation": "feature_availability_at <= prediction_cutoff_at < kickoff_at",
+    "current_repository_artifact": "NOT_AVAILABLE",
+    "today_final_revision_reconstruction": "FORBIDDEN",
+    "append_only_correction": "NEW_DATASET_ID_NEW_HASH_EXPLICIT_SUPERSEDES"
+  },
+  "label_contract": {
+    "version": "prediction-training-labels@1.0.0",
+    "feature_label_separation": "LABELS_ARE_POST_MATCH_TARGETS_ONLY_AND_MUST_NOT_BE_IN_FEATURE_PAYLOAD",
+    "targets": {
+      "OUTCOME": {
+        "classes": ["H", "D", "A"],
+        "source": "official_final_match_result",
+        "derivation": "home_score versus away_score"
+      },
+      "HANDICAP": {
+        "classes": ["H", "D", "A"],
+        "required_refs": ["official_rqspf_handicap_ref", "exact_handicap_value_at_prediction_cutoff"],
+        "sign_convention": "home_minus_away",
+        "derivation": "home_score + exact_official_handicap versus away_score",
+        "replacement_policy": "A post-cutoff or different-time handicap may not replace the cutoff-bound value"
+      },
+      "GOALS": {
+        "classes": ["0", "1", "2", "3", "4", "5", "6", "7+"],
+        "source": "official_final_match_result",
+        "derivation": "final_home_score + final_away_score with 7+ tail"
+      },
+      "HTFT": {
+        "classes": ["H/H", "H/D", "H/A", "D/H", "D/D", "D/A", "A/H", "A/D", "A/A"],
+        "source": "official_halftime_and_fulltime_result",
+        "derivation": "official_half_time_state plus official_full_time_state"
+      }
+    }
+  },
+  "leakage_prevention_contract": {
+    "version": "prediction-training-leakage@1.0.0",
+    "hard_predicate": "feature_availability_at <= sample_prediction_cutoff_at < kickoff_at",
+    "forbidden_feature_inputs": [
+      "final_score",
+      "halftime_result",
+      "cutoff_after_red_card",
+      "cutoff_after_confirmed_starting_lineup",
+      "cutoff_after_odds",
+      "final_closing_odds_unless_cutoff_includes_them",
+      "post_match_statistics",
+      "future_team_match",
+      "future_league_table_state",
+      "later_revision_not_visible_at_cutoff"
+    ],
+    "label_feature_storage": "PHYSICALLY_OR_LOGICALLY_SEPARATE",
+    "unknown_or_conflicting_timestamp": "BLOCKED",
+    "future_data": "BLOCKED"
+  },
+  "temporal_split_contract": {
+    "version": "prediction-training-temporal-split@1.0.0",
+    "allowed_strategies": ["TIME_ORDERED_TRAIN_VALIDATION_HOLDOUT", "WALK_FORWARD_ROLLING_ORIGIN"],
+    "random_split": "FORBIDDEN",
+    "ordering_key": "prediction_cutoff_at_then_sample_id",
+    "strict_relations": [
+      "max(train.prediction_cutoff_at) < min(validation.prediction_cutoff_at)",
+      "max(validation.prediction_cutoff_at) < min(holdout.prediction_cutoff_at)",
+      "holdout_is_not_used_for_fitting_selection_or_early_stopping"
+    ],
+    "same_match_multi_cutoff": "All cutoff variants remain in one temporal partition",
+    "split_boundaries_in_hash": true
+  },
+  "sample_eligibility_contract": {
+    "version": "prediction-training-sample-eligibility@1.0.0",
+    "states": ["BLOCKED", "INELIGIBLE", "PARTIALLY_ELIGIBLE", "ELIGIBLE"],
+    "rules": {
+      "BLOCKED": "Never enters training",
+      "INELIGIBLE": "Never enters the corresponding engine training set",
+      "PARTIALLY_ELIGIBLE": "May enter only when all engine-required features exist and missing values are approved optional states",
+      "ELIGIBLE": "May enter after target-specific required feature and time predicates pass"
+    },
+    "missing_value_policy": "NO_SILENT_IMPUTATION",
+    "quality_policy": "BATCH-14 quality is eligibility/blocker/warning input only, not a scalar model feature",
+    "required_feature_missing": "BLOCKED_OR_INELIGIBLE_BY_DECLARED_ENGINE_RULE"
+  },
+  "deduplication_contract": {
+    "version": "prediction-training-deduplication@1.0.0",
+    "unique_key": ["match_id", "cutoff_profile", "target_role"],
+    "duplicate_policy": "REJECT_DUPLICATE_WITHIN_ENGINE_SPLIT",
+    "multi_cutoff_design": "NOT_APPROVED_IN_V1",
+    "cross_split_same_match": "FORBIDDEN"
+  },
+  "minimum_sample_readiness_rule": {
+    "version": "prediction-training-readiness-rule@1.0.0",
+    "no_total_sample_shortcut": true,
+    "class_coverage": "Every declared class must be represented in train, validation, and holdout; each class requires >=5 train, >=3 validation, >=3 holdout observations",
+    "temporal_coverage": "At least 3 ordered train periods plus later validation and holdout periods; boundaries must be non-overlapping",
+    "league_coverage": "Every declared league scope must be represented in each partition, or the artifact must declare a single-league scope and make no cross-league claim",
+    "feature_availability": "100% of required features available at cutoff; optional missingness remains typed and explicit",
+    "statistical_stability": "Declared time-window class-rate and required-feature-availability diagnostics must report PASS; UNKNOWN or UNSTABLE blocks",
+    "insufficient_data_result": "TRAINING_DATA_INSUFFICIENT",
+    "current_result": "TRAINING_PIPELINE_NOT_READY_DATASET_NOT_AVAILABLE"
+  },
+  "candidate_model_family_registry": {
+    "version": "prediction-candidate-model-families@1.0.0",
+    "approved_candidate_families": [
+      {
+        "family_id": "regularized_multinomial_logistic",
+        "output": "probability_distribution",
+        "deterministic": true,
+        "engines": ["OUTCOME", "HANDICAP", "GOALS", "HTFT"]
+      },
+      {
+        "family_id": "gradient_boosted_decision_tree_probabilistic",
+        "output": "probability_distribution",
+        "deterministic": true,
+        "engines": ["OUTCOME", "HANDICAP", "GOALS", "HTFT"]
+      }
+    ],
+    "unregistered_complex_black_box": "FORBIDDEN",
+    "production_model_selected": false,
+    "engine_specific_selection": true
+  },
+  "hyperparameter_governance": {
+    "version": "prediction-training-hyperparameters@1.0.0",
+    "search_must_be_predeclared": true,
+    "search_budget": "fixed_per_engine_and_family_in_revisioned_config",
+    "early_stopping": "only_on_training/validation, never holdout",
+    "random_seed": "required_and_recorded",
+    "post_holdout_tuning": "FORBIDDEN",
+    "failed_search_expansion": "requires_governance_revision_before_execution",
+    "config_hash_required": true
+  },
+  "model_selection_protocol": {
+    "version": "prediction-model-selection@1.0.0",
+    "selection_unit": "independent_engine_target",
+    "primary_metric": "mean_out_of_time_log_loss",
+    "secondary_metrics": ["mean_out_of_time_brier_score", "classwise_recall_with_support"],
+    "tie_break": "lower_brier_then_lower_log_loss_variance_then_lower_complexity_then_lexicographic_family_id",
+    "holdout_use": "ONE_FINAL_INDEPENDENT_EVALUATION_ONLY",
+    "calibration_claim": "NOT_CALIBRATED_IN_BATCH-15; V4-082 OWNS CALIBRATION",
+    "manual_override": "FORBIDDEN"
+  },
+  "evaluation_contract": {
+    "version": "prediction-model-evaluation@1.0.0",
+    "required_metrics": ["log_loss", "brier_score", "classwise_recall", "class_support", "probability_normalization_validity"],
+    "optional_metrics": ["multiclass_calibration_diagnostics", "ranked_probability_score"],
+    "evaluation_scope": "out_of_time_validation_and_one_final_holdout",
+    "probability_sum_tolerance": "declared_by_engine_output_contract",
+    "calibration_status": "NOT_CALIBRATED"
+  },
+  "baseline_governance": {
+    "allowed": ["empirical_class_frequency", "declared_league_season_prior"],
+    "lifecycle": "EVALUATION_BASELINE_ONLY",
+    "registry_admission": "FORBIDDEN",
+    "bookmaker_implied_probability": "FORBIDDEN_AS_V4_MODEL_BASELINE_ARTIFACT"
+  },
+  "feature_consumption": {
+    "fusion_mode": "DECLARED_MODEL_FUSION_ONLY",
+    "upstream_dimensions": ["STATISTICAL", "FOOTBALL", "MARKET", "TACTICAL"],
+    "manual_dimension_weights": "FORBIDDEN",
+    "quality_to_coefficient": "FORBIDDEN",
+    "manifest_declares_exact_features": true
+  },
+  "engine_training_profiles": {
+    "OUTCOME": {
+      "profile_version": "outcome-training-profile@1.0.0",
+      "target_contract": "H/D/A",
+      "feature_profile": "outcome-declared-feature-profile@1.0.0",
+      "required_feature_domains": ["STATISTICAL", "FOOTBALL", "MARKET", "TACTICAL"],
+      "candidate_families": ["regularized_multinomial_logistic", "gradient_boosted_decision_tree_probabilistic"],
+      "class_order": ["H", "D", "A"],
+      "missing_handling": "EXPLICIT_APPROVED_OPTIONAL_ONLY",
+      "artifact_role": "OUTCOME"
+    },
+    "HANDICAP": {
+      "profile_version": "handicap-training-profile@1.0.0",
+      "target_contract": "H/D/A",
+      "feature_profile": "handicap-declared-feature-profile@1.0.0",
+      "required_feature_domains": ["STATISTICAL", "FOOTBALL", "MARKET", "TACTICAL"],
+      "required_context": ["official_rqspf_handicap_ref", "exact_handicap_value_at_prediction_cutoff", "home_minus_away_sign_convention"],
+      "candidate_families": ["regularized_multinomial_logistic", "gradient_boosted_decision_tree_probabilistic"],
+      "class_order": ["H", "D", "A"],
+      "missing_handling": "EXPLICIT_APPROVED_OPTIONAL_ONLY",
+      "artifact_role": "HANDICAP"
+    },
+    "GOALS": {
+      "profile_version": "goals-training-profile@1.0.0",
+      "target_contract": "0,1,2,3,4,5,6,7+",
+      "feature_profile": "goals-declared-feature-profile@1.0.0",
+      "required_feature_domains": ["STATISTICAL", "FOOTBALL", "MARKET", "TACTICAL"],
+      "candidate_families": ["regularized_multinomial_logistic", "gradient_boosted_decision_tree_probabilistic"],
+      "class_order": ["0", "1", "2", "3", "4", "5", "6", "7+"],
+      "missing_handling": "EXPLICIT_APPROVED_OPTIONAL_ONLY",
+      "artifact_role": "GOALS"
+    },
+    "HTFT": {
+      "profile_version": "htft-training-profile@1.0.0",
+      "target_contract": "nine official halftime/fulltime states",
+      "feature_profile": "htft-declared-feature-profile@1.0.0",
+      "required_feature_domains": ["STATISTICAL", "FOOTBALL", "MARKET", "TACTICAL"],
+      "candidate_families": ["regularized_multinomial_logistic", "gradient_boosted_decision_tree_probabilistic"],
+      "class_order": ["H/H", "H/D", "H/A", "D/H", "D/D", "D/A", "A/H", "A/D", "A/A"],
+      "missing_handling": "EXPLICIT_APPROVED_OPTIONAL_ONLY",
+      "artifact_role": "HTFT"
+    }
+  },
+  "deterministic_training_hash_profile": {
+    "version": "deterministic-training@1.0.0",
+    "algorithm": "SHA-256",
+    "hash_profile": "v4-canonical-json@1.0",
+    "stable_inputs": ["dataset_id_and_hash", "split_id_and_hash", "feature_order", "label_order", "training_config_and_hash", "algorithm_library_version", "seed", "thread_determinism_settings", "fitting_implementation_hash"],
+    "volatile_exclusions": ["created_at", "host_name", "process_id", "wall_clock_duration", "log_correlation_id"],
+    "replay_requirement": "same environment and same stable inputs produce same logical parameters and artifact hash, otherwise BLOCKED"
+  },
+  "model_artifact_contract": {
+    "version": "prediction-model-artifact@1.0.0",
+    "required_fields": ["model_artifact_id", "role", "model_name", "model_version", "algorithm_family_and_version", "parameter_artifact_id", "parameter_hash", "feature_profile_version_and_hash", "training_dataset_id_and_hash", "training_split_id_and_hash", "training_cutoff", "fitting_implementation_hash", "training_config_version_and_hash", "random_seed", "selection_metric_and_results", "validation_metrics", "holdout_metrics", "calibration_state", "created_at", "artifact_hash", "revision", "supersedes_model_artifact_id"],
+    "append_only": true,
+    "missing_required_identity": "BLOCKED",
+    "artifact_roles": ["OUTCOME", "HANDICAP", "GOALS", "HTFT"]
+  },
+  "promotion_state_contract": {
+    "version": "prediction-model-promotion@1.0.0",
+    "states": ["CANDIDATE", "VALIDATED", "APPROVED_FOR_ENGINE", "REJECTED"],
+    "promotion_rules": {
+      "CANDIDATE_TO_VALIDATED": "out_of_time_evidence_and_schema/hash checks pass",
+      "VALIDATED_TO_APPROVED_FOR_ENGINE": "explicit human promotion gate with four role-specific evidence",
+      "APPROVED_FOR_ENGINE_TO_REGISTRY": "append-only registry insert only",
+      "automatic_promotion": false
+    },
+    "v4_076_binding_requires": "four APPROVED_FOR_ENGINE artifacts with exact identity/revision/hash"
+  },
+  "frozen_input_model_binding_amendment": {
+    "version": "frozen-input-model-binding@1.0.0",
+    "v4_076_freezes": ["approved_model_artifact_identity_revision_hash_per_engine", "engine_config_identity_hash_per_engine", "exact_feature_bundle_identity_hash", "gate_record_identity_hash", "prediction_cutoff_at", "kickoff_at"],
+    "v4_076_does_not_freeze": "training dataset as a substitute for inference input",
+    "implementation_entry": "only after all four model registry roles are APPROVED_FOR_ENGINE",
+    "current_state": "NOT_IMPLEMENTED"
+  },
+  "v3_isolation_statement": {
+    "version": "v4-v3333-isolation@1.0.0",
+    "forbidden_inputs": ["V3.3.3 coefficients", "V3.3.3 trained artifacts", "V3.3.3 prediction outputs", "Frozen Predictions", "V3.3.3 calibration history"],
+    "benchmark_exception": "requires separate approval and cannot initialize or train V4",
+    "repository_modification": "FORBIDDEN"
+  },
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "encoding": "UTF-8",
+    "serialization": "JSON sorted keys, compact separators, no whitespace normalization beyond JSON serialization",
+    "self_hash_field": "canonical_hash is omitted during hash computation"
+  },
+  "canonical_hash": "sha256:b694e1ca901b6f129fef9d9b27ebb8d9affe57b6cf3d2dcbc6f8e1ed3c0f1363"
+}

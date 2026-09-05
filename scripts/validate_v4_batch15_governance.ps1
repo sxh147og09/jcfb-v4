@@ -34,9 +34,27 @@ $requiredDocs = @(
     'docs/V4_PROBABILITY_SEMANTICS_CONTRACT.md',
     'docs/V4_PREDICTION_MODEL_ARTIFACT_REGISTRY_CONTRACT.md',
     'docs/V4_DETERMINISTIC_REPLAY_HASH_PROFILE.md',
-    'docs/V4_BATCH_15_ENTRY_REVIEW.md'
+    'docs/V4_BATCH_15_ENTRY_REVIEW.md',
+    'docs/JCFB_V4_BATCH_15_PREDICTION_MODEL_TRAINING_GOVERNANCE_DECISION.md',
+    'docs/V4_BATCH_15_MODEL_TRAINING_TASK_REGISTRY_AMENDMENT.md',
+    'docs/V4_BATCH_15_ENGINE_TRAINING_PROFILES.md',
+    'docs/V4_BATCH_15_PREDICTION_TRAINING_READINESS_REVIEW.md'
 )
 foreach ($relativePath in $requiredDocs) { $null = Read-RepoFile $relativePath }
+
+$trainingConfigPaths = @(
+    'config/prediction_training/v4_prediction_training_governance.json',
+    'config/prediction_training/v4_prediction_model_registry.json',
+    'config/prediction_training/v4_prediction_training_readiness_review.json'
+)
+foreach ($relativePath in $trainingConfigPaths) { $null = Read-RepoFile $relativePath }
+
+$trainingGovernance = $null
+$modelRegistry = $null
+$readinessReview = $null
+try { $trainingGovernance = Get-Content -LiteralPath (Join-Path $repoRoot $trainingConfigPaths[0]) -Raw -Encoding utf8 | ConvertFrom-Json } catch { Add-Failure "INVALID_JSON: $($trainingConfigPaths[0])" }
+try { $modelRegistry = Get-Content -LiteralPath (Join-Path $repoRoot $trainingConfigPaths[1]) -Raw -Encoding utf8 | ConvertFrom-Json } catch { Add-Failure "INVALID_JSON: $($trainingConfigPaths[1])" }
+try { $readinessReview = Get-Content -LiteralPath (Join-Path $repoRoot $trainingConfigPaths[2]) -Raw -Encoding utf8 | ConvertFrom-Json } catch { Add-Failure "INVALID_JSON: $($trainingConfigPaths[2])" }
 
 $frozen = Read-RepoFile 'docs/V4_FROZEN_INPUT_CONTRACT.md'
 $decision = Read-RepoFile 'docs/JCFB_V4_BATCH_15_PREDICTION_ARCHITECTURE_GOVERNANCE_DECISION.md'
@@ -79,6 +97,40 @@ if ($null -ne $evidence) {
     if ($evidence.tasks.'V4-076'.depends_on -contains 'V4-075') { Add-Failure 'EVIDENCE_REVERSE_EDGE: V4-076 depends on V4-075' }
     foreach ($task in @('V4-052','V4-053','V4-054','V4-055')) {
         if (-not ($evidence.tasks.$task.depends_on -contains 'V4-076')) { Add-Failure "ENGINE_MISSING_FROZEN_INPUT_DEPENDENCY: $task" }
+    }
+}
+
+if ($null -ne $trainingGovernance) {
+    if ($trainingGovernance.decision -ne 'PREDICTION_MODEL_TRAINING_GOVERNANCE_RESOLVED') { Add-Failure 'TRAINING_GOVERNANCE_NOT_RESOLVED' }
+    if ($trainingGovernance.task_identity.new_task_ids_created -ne $false) { Add-Failure 'TRAINING_CREATED_UNAPPROVED_TASK_ID' }
+    if ($trainingGovernance.task_identity.execution_authorized -ne $false) { Add-Failure 'TRAINING_EXECUTION_SHOULD_BE_PAUSED' }
+    if ($trainingGovernance.training_dataset_contract.version -ne 'prediction-training-dataset@1.0.0') { Add-Failure 'TRAINING_DATASET_CONTRACT_VERSION_INVALID' }
+    if ($trainingGovernance.temporal_split_contract.random_split -ne 'FORBIDDEN') { Add-Failure 'RANDOM_SPLIT_NOT_FORBIDDEN' }
+    if ($trainingGovernance.boundary_rules.manual_fusion_weights -ne $false) { Add-Failure 'MANUAL_FUSION_WEIGHTS_NOT_FORBIDDEN' }
+    if ($trainingGovernance.boundary_rules.quality_score_as_numeric_feature -ne $false) { Add-Failure 'QUALITY_SCORE_FEATURE_NOT_FORBIDDEN' }
+    if ($trainingGovernance.boundary_rules.silent_imputation -ne $false) { Add-Failure 'SILENT_IMPUTATION_NOT_FORBIDDEN' }
+    if ($trainingGovernance.canonicalization.algorithm -ne 'SHA-256' -or $trainingGovernance.canonicalization.profile -ne 'v4-canonical-json@1.0' -or $trainingGovernance.canonical_hash -notmatch '^sha256:[0-9a-f]{64}$') { Add-Failure 'TRAINING_GOVERNANCE_CANONICAL_HASH_INVALID' }
+    foreach ($role in @('OUTCOME','HANDICAP','GOALS','HTFT')) {
+        if ($null -eq $trainingGovernance.engine_training_profiles.$role) { Add-Failure "ENGINE_TRAINING_PROFILE_MISSING: $role" }
+    }
+}
+if ($null -ne $modelRegistry) {
+    if ($modelRegistry.status -ne 'NO_APPROVED_ARTIFACTS_PRESENT') { Add-Failure 'MODEL_REGISTRY_STATUS_INVALID' }
+    if ($modelRegistry.artifacts.Count -ne 0) { Add-Failure 'MODEL_REGISTRY_MUST_BE_EMPTY_BEFORE_FIT' }
+    if ($modelRegistry.canonical_hash -notmatch '^sha256:[0-9a-f]{64}$') { Add-Failure 'MODEL_REGISTRY_CANONICAL_HASH_INVALID' }
+    foreach ($role in @('OUTCOME','HANDICAP','GOALS','HTFT')) {
+        if ($modelRegistry.role_readiness.$role -ne 'NO_TRAINING_PIPELINE') { Add-Failure "MODEL_ROLE_READINESS_INVALID: $role" }
+    }
+}
+if ($null -ne $readinessReview) {
+    if ($readinessReview.decision -ne 'PREDICTION_TRAINING_READINESS_BLOCKED') { Add-Failure 'TRAINING_READINESS_MUST_BE_BLOCKED' }
+    if ($readinessReview.pipeline_readiness.formal_model_fit_allowed -ne $false) { Add-Failure 'FORMAL_MODEL_FIT_MUST_BE_BLOCKED' }
+    if ($readinessReview.pipeline_readiness.formal_engine_implementation_allowed -ne $false) { Add-Failure 'FORMAL_ENGINE_IMPLEMENTATION_MUST_BE_BLOCKED' }
+    if ($readinessReview.historical_as_of_dataset.constructible_now -ne $false) { Add-Failure 'DATASET_MUST_NOT_BE_CLAIMED_CONSTRUCTIBLE' }
+    if ($readinessReview.canonical_hash -notmatch '^sha256:[0-9a-f]{64}$') { Add-Failure 'READINESS_CANONICAL_HASH_INVALID' }
+    foreach ($role in @('OUTCOME','HANDICAP','GOALS','HTFT')) {
+        if ($readinessReview.engine_readiness.$role.status -ne 'BLOCKED') { Add-Failure "ENGINE_READINESS_NOT_BLOCKED: $role" }
+        if ($readinessReview.engine_readiness.$role.usable_sample_count -ne 'UNKNOWN') { Add-Failure "ENGINE_SAMPLE_COUNT_MUST_BE_UNKNOWN: $role" }
     }
 }
 

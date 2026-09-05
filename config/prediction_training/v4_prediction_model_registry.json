@@ -1,0 +1,32 @@
+{
+  "artifact": "jcfb-v4-prediction-model-registry@1.0.0",
+  "schema_version": "prediction-model-registry@1.0.0",
+  "status": "NO_APPROVED_ARTIFACTS_PRESENT",
+  "registry_policy": {
+    "append_only": true,
+    "automatic_promotion": false,
+    "approved_state_required_for_engine": true,
+    "v3_3_3_isolation": true,
+    "canonical_hash_profile": "v4-canonical-json@1.0"
+  },
+  "required_roles": ["OUTCOME", "HANDICAP", "GOALS", "HTFT"],
+  "artifacts": [],
+  "role_readiness": {
+    "OUTCOME": "NO_TRAINING_PIPELINE",
+    "HANDICAP": "NO_TRAINING_PIPELINE",
+    "GOALS": "NO_TRAINING_PIPELINE",
+    "HTFT": "NO_TRAINING_PIPELINE"
+  },
+  "admission_blockers": [
+    "PREDICTION_MODEL_ARTIFACT_NOT_APPROVED",
+    "TRAINING_PIPELINE_NOT_IMPLEMENTED",
+    "TRAINING_DATASET_NOT_AVAILABLE",
+    "FROZEN_INPUT_NOT_IMPLEMENTED"
+  ],
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "self_hash_field": "canonical_hash is omitted during hash computation"
+  },
+  "canonical_hash": "sha256:ff95d673fb40946bf3587f98ad3c31f0f0e0b16ba1f08a7a259e54d953d584b9"
+}

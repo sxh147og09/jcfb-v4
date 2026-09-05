@@ -190,3 +190,13 @@ do not constitute formal Prediction Engine Runs or approved Prediction Model
 Artifacts. See
 `docs/JCFB_V4_BATCH_15_UPSTREAM_ACCEPTANCE_MODEL_ARTIFACT_READINESS_REPORT.md`
 for the complete acceptance matrix and evidence paths.
+
+## BATCH-15 prediction training prerequisite amendment
+
+Historical as-of dataset construction, temporal splitting, candidate fitting,
+and out-of-time evaluation are mandatory BATCH-15 readiness phases before
+V4-052 through V4-055. They are not additional V4 task IDs. The current
+registry has no formal training execution identity, so the disposition is
+`MODEL_TRAINING_TASK_REGISTRY_AMENDMENT_REQUIRED`; actual fitting is paused
+until that identity question is resolved through governance. No `V4-101`,
+`V4-052A`, or equivalent task may be invented.

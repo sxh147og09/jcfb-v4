@@ -19,7 +19,31 @@
     "V4-075": {"primary_batch": "BATCH-20", "status": "TODO", "depends_on": ["V4-074", "V4-072", "V4-076"]},
     "V4-077": {"primary_batch": "BATCH-20", "status": "TODO", "depends_on": ["V4-076", "V4-075"]}
   },
-  "contracts": ["prediction-input@1.0.0", "gate-to-prediction@1.0.0", "prediction-fusion@1.0.0", "engine-feature-profile@1.0.0", "prediction-probability@1.0.0", "prediction-model-artifact@1.0.0", "deterministic-replay@1.0.0"],
-  "blockers": ["PREDICTION_MODEL_ARTIFACT_NOT_APPROVED", "UPSTREAM_IMPLEMENTATION_NOT_ACCEPTED", "FROZEN_INPUT_NOT_IMPLEMENTED"],
-  "safety": {"prediction_implementation": "NO", "score": "NO", "risk_abstention": "NO", "production_supabase": "NO", "migration": "NO", "v3333_modification": "NO"}
+  "contracts": ["prediction-input@1.0.0", "gate-to-prediction@1.0.0", "prediction-fusion@1.0.0", "engine-feature-profile@1.0.0", "prediction-probability@1.0.0", "prediction-model-artifact@1.0.0", "deterministic-replay@1.0.0", "prediction-training-dataset@1.0.0", "prediction-training-labels@1.0.0", "prediction-training-temporal-split@1.0.0", "prediction-training-leakage@1.0.0", "prediction-training-sample-eligibility@1.0.0", "prediction-candidate-model-families@1.0.0", "prediction-training-hyperparameters@1.0.0", "prediction-model-selection@1.0.0", "prediction-model-evaluation@1.0.0", "prediction-model-promotion@1.0.0", "deterministic-training@1.0.0", "frozen-input-model-binding@1.0.0", "v4-v3333-isolation@1.0.0"],
+  "training_governance": {
+    "decision": "PREDICTION_MODEL_TRAINING_GOVERNANCE_RESOLVED",
+    "source": "config/prediction_training/v4_prediction_training_governance.json",
+    "canonical_hash_status": "PASS",
+    "canonical_hash": "sha256:b694e1ca901b6f129fef9d9b27ebb8d9affe57b6cf3d2dcbc6f8e1ed3c0f1363",
+    "task_identity": "MODEL_TRAINING_TASK_REGISTRY_AMENDMENT_REQUIRED",
+    "formal_training_executed": false
+  },
+  "training_readiness": {
+    "decision": "PREDICTION_TRAINING_READINESS_BLOCKED",
+    "source": "config/prediction_training/v4_prediction_training_readiness_review.json",
+    "canonical_hash": "sha256:b7d8fd17071708ae48ba29eeff1bcab1ba8bdfc1711f3cfbe0c2fc4d2de989f2",
+    "dataset_constructible_now": false,
+    "pipeline_ready": false,
+    "engine_sample_counts": "UNKNOWN",
+    "engine_class_distributions": "UNKNOWN"
+  },
+  "model_registry": {
+    "source": "config/prediction_training/v4_prediction_model_registry.json",
+    "canonical_hash": "sha256:ff95d673fb40946bf3587f98ad3c31f0f0e0b16ba1f08a7a259e54d953d584b9",
+    "artifacts": 0,
+    "approved_artifacts": 0
+  },
+  "blockers": ["PREDICTION_MODEL_ARTIFACT_NOT_APPROVED", "TRAINING_PIPELINE_NOT_IMPLEMENTED", "TRAINING_DATASET_NOT_AVAILABLE", "FROZEN_INPUT_NOT_IMPLEMENTED"],
+  "resolved_findings": ["UPSTREAM_IMPLEMENTATION_NOT_ACCEPTED", "PREDICTION_MODEL_TRAINING_GOVERNANCE_GAP"],
+  "safety": {"prediction_implementation": "NO", "score": "NO", "risk_abstention": "NO", "production_supabase": "NO", "migration": "NO", "v3333_modification": "NO", "formal_training": "NO"}
 }

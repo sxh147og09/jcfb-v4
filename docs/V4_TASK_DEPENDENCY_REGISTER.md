@@ -221,3 +221,12 @@ Each task has an implementation artifact, acceptance evidence, targeted tests,
 focused Git traceability, and a corresponding BATCH-10, BATCH-11, BATCH-12,
 or BATCH-13 closure record. No dependency edge is changed by this status-only
 reconciliation, and no Prediction Engine implementation is implied.
+
+## BATCH-15 training governance prerequisite (no new task node)
+
+Training dataset reconstruction, fitting, and out-of-time evaluation are
+mandatory prerequisite phases of BATCH-15. This register intentionally adds
+no training task ID; the current execution identity is
+`MODEL_TRAINING_TASK_REGISTRY_AMENDMENT_REQUIRED` until the registry owner
+resolves it. That disposition blocks actual fitting but does not add an edge
+or alter the 100-node V4 task DAG.

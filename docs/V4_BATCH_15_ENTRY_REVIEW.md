@@ -12,6 +12,11 @@ Decision: **BATCH-15 NOT READY FOR CONTINUOUS EXECUTION**
   evidence as `COMPLETE`; BATCH-14 is `COMPLETE / Closure Gate PASS`.
 - Prediction input, gate interface, fusion, four engine profiles, model
   artifact, probability, and deterministic replay contracts are versioned.
+- Prediction model training governance is resolved: the as-of dataset,
+  labels, leakage boundary, temporal split, eligibility, candidate families,
+  selection, evaluation, artifact lifecycle, promotion, deterministic
+  training, and V4-076 binding rules are frozen in the BATCH-15 governance
+  registry. `PREDICTION_MODEL_TRAINING_GOVERNANCE_GAP` is resolved.
 - BATCH-20 retains V4-074/V4-075/V4-077 downstream responsibilities.
 
 ## Remaining blockers
@@ -19,8 +24,13 @@ Decision: **BATCH-15 NOT READY FOR CONTINUOUS EXECUTION**
 | Code | Result | Evidence |
 |---|---|---|
 | `PREDICTION_MODEL_ARTIFACT_NOT_APPROVED` | BLOCKED | No four-engine approved trained/parameterized artifact exists. |
-| `UPSTREAM_IMPLEMENTATION_NOT_ACCEPTED` | BLOCKED | V4-038 through V4-048 remain TODO; executable exact upstream bundles are absent. |
+| `TRAINING_PIPELINE_NOT_IMPLEMENTED` | BLOCKED | No repository training/fitting runtime exists. |
+| `TRAINING_DATASET_NOT_AVAILABLE` | BLOCKED | No canonical historical as-of dataset artifact exists; sample counts and coverage are `UNKNOWN`. |
 | `FROZEN_INPUT_NOT_IMPLEMENTED` | BLOCKED | V4-076 is ordered correctly but implementation is not authorized in this review. |
+
+`UPSTREAM_IMPLEMENTATION_NOT_ACCEPTED` is **RESOLVED** by the live
+V4-038..V4-048 acceptance reconciliation. It is retained only as historical
+evidence, not as a current blocker.
 
 The review therefore does not authorize V4-052/V4-053/V4-054/V4-055
 implementation, BATCH-16, Score, Simulation, Consensus, Risk/Abstention,

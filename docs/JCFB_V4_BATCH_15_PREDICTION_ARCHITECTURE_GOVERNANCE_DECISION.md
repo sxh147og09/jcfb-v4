@@ -100,19 +100,30 @@ remains **BLOCKED** by:
 
 - `PREDICTION_MODEL_ARTIFACT_NOT_APPROVED`: no four-engine approved model
   artifact/parameter registry exists;
-- `UPSTREAM_IMPLEMENTATION_NOT_ACCEPTED`: V4-038 through V4-048 remain
-  TODO, so no executable Feature Bundle/domain artifacts exist;
+- `TRAINING_PIPELINE_NOT_IMPLEMENTED` and `TRAINING_DATASET_NOT_AVAILABLE`:
+  no legal historical as-of fitting inputs or training runtime exists;
 - `FROZEN_INPUT_NOT_IMPLEMENTED`: V4-076 is correctly ordered but remains
   unimplemented;
 - `BATCH_14_STATUS_SOURCE_DRIFT`: resolved in this governance change and
   covered by the status consistency validator.
 
-The first three are genuine implementation-entry blockers, not reasons to
-invent fixtures as formal inputs. The required result is
+`UPSTREAM_IMPLEMENTATION_NOT_ACCEPTED` is resolved as status drift by the
+live V4-038..V4-048 acceptance reconciliation. The remaining blockers are
+genuine implementation-entry blockers, not reasons to invent fixtures as
+formal inputs. The required result is
 `BATCH-15 ENTRY REVIEW = BLOCKED`, not `BATCH-15 READY FOR CONTINUOUS
 EXECUTION`.
 
-## 7. Impact audit
+## 7. Training governance resolution
+
+The separate BATCH-15 training governance decision resolves
+`PREDICTION_MODEL_TRAINING_GOVERNANCE_GAP` without claiming that a training
+pipeline or model exists. The current blockers are now the absence of the
+pipeline and dataset, the absence of four approved model artifacts, and the
+unimplemented V4-076. The upstream acceptance blocker is resolved as status
+drift by the live V4-038..V4-048 reconciliation.
+
+## 8. Impact audit
 
 - Production/Supabase: no access, read, write, deployment, or credential use.
 - Migration: none added or applied.

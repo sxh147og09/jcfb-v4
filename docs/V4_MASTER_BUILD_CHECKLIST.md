@@ -336,3 +336,10 @@ commits, and the BATCH-10 through BATCH-13 closure evidence. The unchecked
 rows above are retained as historical checklist snapshots. These accepted
 tasks are pre-Frozen feature generators and do not authorize Prediction Engine
 implementation or model execution.
+
+## BATCH-15 prediction training governance resolution
+
+`PREDICTION_MODEL_TRAINING_GOVERNANCE_RESOLVED` is recorded, with the
+corresponding readiness review still `PREDICTION_TRAINING_READINESS_BLOCKED`.
+No formal fit, approved model artifact, V4-076 implementation, or V4-052
+through V4-055 implementation may be marked complete from governance alone.

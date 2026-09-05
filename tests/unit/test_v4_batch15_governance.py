@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import subprocess
 import unittest
+from datetime import datetime
 from pathlib import Path
 
 
@@ -17,6 +19,15 @@ class V4Batch15GovernanceTests(unittest.TestCase):
         cls.decision = (cls.docs / "JCFB_V4_BATCH_15_PREDICTION_ARCHITECTURE_GOVERNANCE_DECISION.md").read_text(encoding="utf-8")
         cls.ordering = (cls.docs / "V4_BATCH_15_FROZEN_INPUT_ORDERING_AMENDMENT.md").read_text(encoding="utf-8")
         cls.review = (cls.docs / "V4_BATCH_15_ENTRY_REVIEW.md").read_text(encoding="utf-8")
+        cls.training_config = json.loads((cls.root / "config/prediction_training/v4_prediction_training_governance.json").read_text(encoding="utf-8"))
+        cls.model_registry = json.loads((cls.root / "config/prediction_training/v4_prediction_model_registry.json").read_text(encoding="utf-8"))
+        cls.readiness = json.loads((cls.root / "config/prediction_training/v4_prediction_training_readiness_review.json").read_text(encoding="utf-8"))
+
+    @staticmethod
+    def canonical_hash(document):
+        payload = {key: value for key, value in document.items() if key != "canonical_hash"}
+        encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        return "sha256:" + hashlib.sha256(encoded).hexdigest()
 
     def test_ordering_is_frozen_input_before_prediction(self):
         self.assertIn("-> V4-076 Frozen Input", self.ordering)
@@ -130,6 +141,121 @@ class V4Batch15GovernanceTests(unittest.TestCase):
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertIn("V4 BATCH-15 GOVERNANCE VALIDATION: PASS", result.stdout)
+
+    def test_training_governance_hashes_and_resolution(self):
+        for document in (self.training_config, self.model_registry, self.readiness):
+            self.assertRegex(document["canonical_hash"], r"^sha256:[0-9a-f]{64}$")
+            self.assertEqual(document["canonical_hash"], self.canonical_hash(document))
+        self.assertEqual("PREDICTION_MODEL_TRAINING_GOVERNANCE_RESOLVED", self.training_config["decision"])
+        self.assertFalse(self.training_config["task_identity"]["new_task_ids_created"])
+        self.assertFalse(self.training_config["task_identity"]["execution_authorized"])
+
+    def test_training_dataset_labels_and_leakage_are_explicit(self):
+        dataset = self.training_config["training_dataset_contract"]
+        labels = self.training_config["label_contract"]["targets"]
+        leakage = self.training_config["leakage_prevention_contract"]
+        self.assertEqual("prediction-training-dataset@1.0.0", dataset["version"])
+        self.assertIn("prediction_cutoff_at", dataset["required_fields"])
+        self.assertIn("historical_feature_bundle_hash", dataset["required_fields"])
+        self.assertEqual("feature_availability_at <= prediction_cutoff_at < kickoff_at", dataset["required_time_relation"])
+        self.assertEqual(["H", "D", "A"], labels["OUTCOME"]["classes"])
+        self.assertEqual(["0", "1", "2", "3", "4", "5", "6", "7+"], labels["GOALS"]["classes"])
+        self.assertEqual(9, len(labels["HTFT"]["classes"]))
+        self.assertIn("exact_handicap_value_at_prediction_cutoff", labels["HANDICAP"]["required_refs"])
+        self.assertIn("final_score", leakage["forbidden_feature_inputs"])
+        self.assertIn("future_league_table_state", leakage["forbidden_feature_inputs"])
+        self.assertEqual("PHYSICALLY_OR_LOGICALLY_SEPARATE", leakage["label_feature_storage"])
+
+    def test_temporal_selection_and_determinism_are_governed(self):
+        split = self.training_config["temporal_split_contract"]
+        selection = self.training_config["model_selection_protocol"]
+        deterministic = self.training_config["deterministic_training_hash_profile"]
+        self.assertEqual("FORBIDDEN", split["random_split"])
+        self.assertTrue(split["split_boundaries_in_hash"])
+        self.assertIn("holdout_is_not_used_for_fitting_selection_or_early_stopping", split["strict_relations"])
+        self.assertEqual("mean_out_of_time_log_loss", selection["primary_metric"])
+        self.assertEqual("ONE_FINAL_INDEPENDENT_EVALUATION_ONLY", selection["holdout_use"])
+        self.assertIn("seed", deterministic["stable_inputs"])
+        self.assertIn("thread_determinism_settings", deterministic["stable_inputs"])
+        self.assertIn("host_name", deterministic["volatile_exclusions"])
+
+    def test_four_engine_profiles_and_empty_registry(self):
+        profiles = self.training_config["engine_training_profiles"]
+        expected = {
+            "OUTCOME": ["H", "D", "A"],
+            "HANDICAP": ["H", "D", "A"],
+            "GOALS": ["0", "1", "2", "3", "4", "5", "6", "7+"],
+            "HTFT": ["H/H", "H/D", "H/A", "D/H", "D/D", "D/A", "A/H", "A/D", "A/A"],
+        }
+        self.assertEqual(set(expected), set(profiles))
+        for role, classes in expected.items():
+            self.assertEqual(classes, profiles[role]["class_order"])
+            self.assertEqual(role, profiles[role]["artifact_role"])
+        self.assertEqual([], self.model_registry["artifacts"])
+        self.assertEqual({role: "NO_TRAINING_PIPELINE" for role in expected}, self.model_registry["role_readiness"])
+
+    def test_readiness_is_fail_closed_and_no_counts_are_invented(self):
+        self.assertEqual("PREDICTION_TRAINING_READINESS_BLOCKED", self.readiness["decision"])
+        self.assertFalse(self.readiness["historical_as_of_dataset"]["constructible_now"])
+        self.assertFalse(self.readiness["pipeline_readiness"]["formal_model_fit_allowed"])
+        self.assertFalse(self.readiness["pipeline_readiness"]["formal_engine_implementation_allowed"])
+        for role in ("OUTCOME", "HANDICAP", "GOALS", "HTFT"):
+            report = self.readiness["engine_readiness"][role]
+            self.assertEqual("BLOCKED", report["status"])
+            self.assertEqual("UNKNOWN", report["usable_sample_count"])
+            self.assertEqual("UNKNOWN", report["class_distribution"])
+            self.assertEqual("UNKNOWN", report["temporal_coverage"])
+            self.assertEqual("UNKNOWN", report["league_coverage"])
+            self.assertEqual("UNKNOWN", report["required_feature_coverage"])
+
+    def test_no_manual_weights_quality_feature_or_v3_reuse(self):
+        boundaries = self.training_config["boundary_rules"]
+        self.assertFalse(boundaries["manual_fusion_weights"])
+        self.assertFalse(boundaries["quality_score_as_numeric_feature"])
+        self.assertFalse(boundaries["v3_3_3_reuse"])
+        self.assertEqual("FORBIDDEN", self.training_config["feature_consumption"]["manual_dimension_weights"])
+        self.assertEqual("FORBIDDEN", self.training_config["v3_isolation_statement"]["repository_modification"])
+
+    def test_as_of_cutoff_and_label_feature_separation_semantics(self):
+        cutoff = datetime.fromisoformat("2026-01-10T12:00:00+08:00")
+        kickoff = datetime.fromisoformat("2026-01-10T20:00:00+08:00")
+        available = datetime.fromisoformat("2026-01-10T11:59:00+08:00")
+        late_revision = datetime.fromisoformat("2026-01-10T12:01:00+08:00")
+        self.assertTrue(available <= cutoff < kickoff)
+        self.assertFalse(late_revision <= cutoff < kickoff)
+        self.assertEqual(
+            "LABELS_ARE_POST_MATCH_TARGETS_ONLY_AND_MUST_NOT_BE_IN_FEATURE_PAYLOAD",
+            self.training_config["label_contract"]["feature_label_separation"],
+        )
+        self.assertIn("official_final_match_result", self.training_config["label_contract"]["targets"]["OUTCOME"]["source"])
+
+    def test_same_match_cannot_cross_temporal_partitions(self):
+        split = self.training_config["temporal_split_contract"]
+        self.assertEqual("All cutoff variants remain in one temporal partition", split["same_match_multi_cutoff"])
+        samples = {
+            "train": {"match-1"},
+            "validation": {"match-2"},
+            "holdout": {"match-3"},
+        }
+        partitions = list(samples.values())
+        for index, partition in enumerate(partitions):
+            for later in partitions[index + 1 :]:
+                self.assertTrue(partition.isdisjoint(later))
+        self.assertEqual(
+            ["match_id", "cutoff_profile", "target_role"],
+            self.training_config["deduplication_contract"]["unique_key"],
+        )
+
+    def test_artifact_schema_promotion_and_frozen_binding(self):
+        artifact = self.training_config["model_artifact_contract"]
+        promotion = self.training_config["promotion_state_contract"]
+        binding = self.training_config["frozen_input_model_binding_amendment"]
+        for field in ("model_artifact_id", "role", "parameter_hash", "training_dataset_id_and_hash", "training_split_id_and_hash", "fitting_implementation_hash", "training_config_version_and_hash", "validation_metrics", "holdout_metrics", "artifact_hash", "revision"):
+            self.assertIn(field, artifact["required_fields"])
+        self.assertEqual(["CANDIDATE", "VALIDATED", "APPROVED_FOR_ENGINE", "REJECTED"], promotion["states"])
+        self.assertFalse(promotion["promotion_rules"]["automatic_promotion"])
+        self.assertIn("approved_model_artifact_identity_revision_hash_per_engine", binding["v4_076_freezes"])
+        self.assertEqual("NOT_IMPLEMENTED", binding["current_state"])
 
 
 if __name__ == "__main__":
