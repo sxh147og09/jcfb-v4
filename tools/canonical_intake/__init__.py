@@ -274,6 +274,16 @@ from .data_quality_assessment import (
     DataQualityAssessmentStore,
     DataQualityAssessmentValidationError,
 )
+from .provenance_quality_gate import (
+    ARTIFACT_KIND as PROVENANCE_QUALITY_GATE_ARTIFACT_KIND,
+    CONTRACT_VERSION as PROVENANCE_QUALITY_GATE_CONTRACT_VERSION,
+    GENERATOR_VERSION as PROVENANCE_QUALITY_GATE_GENERATOR_VERSION,
+    ProvenanceQualityGateArtifact,
+    ProvenanceQualityGateEngine,
+    ProvenanceQualityGateRecord,
+    ProvenanceQualityGateStore,
+    ProvenanceQualityGateValidationError,
+)
 
 __all__ = [
     "AvailabilityStatus",
@@ -500,4 +510,12 @@ __all__ = [
     "DataQualityAssessmentEngine",
     "DataQualityAssessmentStore",
     "DataQualityAssessmentValidationError",
+    "PROVENANCE_QUALITY_GATE_ARTIFACT_KIND",
+    "PROVENANCE_QUALITY_GATE_CONTRACT_VERSION",
+    "PROVENANCE_QUALITY_GATE_GENERATOR_VERSION",
+    "ProvenanceQualityGateArtifact",
+    "ProvenanceQualityGateEngine",
+    "ProvenanceQualityGateRecord",
+    "ProvenanceQualityGateStore",
+    "ProvenanceQualityGateValidationError",
 ]
