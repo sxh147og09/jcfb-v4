@@ -16,6 +16,23 @@ from .ewp003_runtime import (
     TrainingReadinessEvaluator,
     validate_league_scope,
 )
+from .ewp004_contract import (
+    Ewp004ContractError,
+    append_parameter_artifact,
+    class_support,
+    classwise_recall,
+    load_contract as load_ewp004_contract,
+    multiclass_brier_score,
+    multiclass_log_loss,
+    validate_contract as validate_ewp004_contract,
+    validate_feature_payload,
+    validate_model_artifact_package,
+    validate_model_family,
+    validate_parameter_artifact,
+    validate_probability_vector,
+    validate_readiness_binding,
+    validate_training_config,
+)
 
 __all__ = [
     "BUILD_STATUS",
@@ -30,4 +47,19 @@ __all__ = [
     "TemporalSplitBuilder",
     "TrainingReadinessEvaluator",
     "validate_league_scope",
+    "Ewp004ContractError",
+    "append_parameter_artifact",
+    "class_support",
+    "classwise_recall",
+    "load_ewp004_contract",
+    "multiclass_brier_score",
+    "multiclass_log_loss",
+    "validate_ewp004_contract",
+    "validate_feature_payload",
+    "validate_model_artifact_package",
+    "validate_model_family",
+    "validate_parameter_artifact",
+    "validate_probability_vector",
+    "validate_readiness_binding",
+    "validate_training_config",
 ]

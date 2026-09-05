@@ -1,0 +1,409 @@
+{
+  "$id": "b15-ewp004-training-infrastructure-contract@1.0.0",
+  "work_package_id": "B15-EWP-004",
+  "work_package_revision": "r001",
+  "contract_revision": "r001",
+  "status": "CONTRACT_REMEDIATION_COMPLETE_IMPLEMENTATION_NOT_AUTHORIZED",
+  "execution_authorized": false,
+  "implementation_executed": false,
+  "formal_model_fit_authorized": false,
+  "model_artifacts_generated": false,
+  "parameter_artifacts_generated": false,
+  "calibration_state": "NOT_CALIBRATED",
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "encoding": "UTF-8",
+    "key_order": "LEXICOGRAPHIC_RECURSIVE",
+    "array_order": "PRESERVE_SEMANTIC_ORDER",
+    "self_hash_field": "canonical_hash is omitted during hash computation",
+    "volatile_exclusions": ["created_at", "host_name", "process_id", "wall_clock_duration", "log_correlation_id"]
+  },
+  "candidate_model_family_registry": {
+    "registry_identity": "prediction-candidate-model-families@1.1.0",
+    "registry_revision": "r001",
+    "registry_hash": "sha256:6d15d60dd9b8b011a133bfa2179f2abb4952d4fde3cfec836800dce4431f4b54",
+    "registry_status": "ACTIVE_GOVERNANCE_ONLY_NO_FIT",
+    "unknown_family_action": "REJECT_UNSUPPORTED_MODEL_FAMILY",
+    "automatic_family_admission": false,
+    "families": [
+      {
+        "family_id": "regularized_multinomial_logistic",
+        "family_version": "regularized-multinomial-logistic@1.0.0",
+        "supported_engine_roles": ["OUTCOME", "HANDICAP", "GOALS", "HTFT"],
+        "probability_output_contract": {
+          "identity": "prediction-probability@1.0.0",
+          "kind": "multiclass_probability_distribution",
+          "class_order_source": "ENGINE_TRAINING_PROFILE",
+          "finite_values_required": true,
+          "range": "0 <= p <= 1",
+          "normalization": "sum(p) = 1 +/- 1e-6"
+        },
+        "deterministic_requirements": {
+          "requires_seed": true,
+          "requires_fixed_feature_order": true,
+          "requires_fixed_label_order": true,
+          "requires_single_declared_thread_count": true,
+          "replay_mismatch_action": "BLOCKED_DETERMINISTIC_REPLAY_MISMATCH"
+        },
+        "runtime_library_identity": {
+          "runtime_profile": "fitting-runtime-profile@1.0.0",
+          "library": "scikit-learn",
+          "library_version": "1.5.2",
+          "estimator_identity": "sklearn.linear_model.LogisticRegression",
+          "solver": "lbfgs",
+          "library_defaults": "FORBIDDEN_UNDECLARED"
+        },
+        "parameter_serialization_identity": {
+          "format": "canonical-json",
+          "profile": "v4-canonical-json@1.0",
+          "numeric_precision": "IEEE-754-binary64-preserved-before-serialization",
+          "ordering": "LEXICOGRAPHIC_RECURSIVE",
+          "hash_algorithm": "SHA-256"
+        },
+        "missing_value_compatibility": {
+          "silent_imputation": "FORBIDDEN",
+          "required_feature_missing": "REJECT_REQUIRED_FEATURE_MISSING",
+          "optional_states": ["NOT_AVAILABLE", "UNKNOWN", "EXPLICIT_NULL"],
+          "model_input_policy": "OPTIONAL_STATE_MUST_BE_EXPLICITLY_ENCODED_BY_PROFILE"
+        },
+        "unsupported_family_rejection": {
+          "error_code": "UNSUPPORTED_MODEL_FAMILY",
+          "fail_closed": true,
+          "no_library_fallback": true,
+          "no_dynamic_registration": true
+        }
+      },
+      {
+        "family_id": "gradient_boosted_decision_tree_probabilistic",
+        "family_version": "gradient-boosted-decision-tree-probabilistic@1.0.0",
+        "supported_engine_roles": ["OUTCOME", "HANDICAP", "GOALS", "HTFT"],
+        "probability_output_contract": {
+          "identity": "prediction-probability@1.0.0",
+          "kind": "multiclass_probability_distribution",
+          "class_order_source": "ENGINE_TRAINING_PROFILE",
+          "finite_values_required": true,
+          "range": "0 <= p <= 1",
+          "normalization": "sum(p) = 1 +/- 1e-6"
+        },
+        "deterministic_requirements": {
+          "requires_seed": true,
+          "requires_fixed_feature_order": true,
+          "requires_fixed_label_order": true,
+          "requires_single_declared_thread_count": true,
+          "replay_mismatch_action": "BLOCKED_DETERMINISTIC_REPLAY_MISMATCH"
+        },
+        "runtime_library_identity": {
+          "runtime_profile": "fitting-runtime-profile@1.0.0",
+          "library": "scikit-learn",
+          "library_version": "1.5.2",
+          "estimator_identity": "sklearn.ensemble.HistGradientBoostingClassifier",
+          "probability_method": "native_predict_proba",
+          "library_defaults": "FORBIDDEN_UNDECLARED"
+        },
+        "parameter_serialization_identity": {
+          "format": "canonical-json",
+          "profile": "v4-canonical-json@1.0",
+          "numeric_precision": "IEEE-754-binary64-preserved-before-serialization",
+          "ordering": "LEXICOGRAPHIC_RECURSIVE",
+          "hash_algorithm": "SHA-256"
+        },
+        "missing_value_compatibility": {
+          "silent_imputation": "FORBIDDEN",
+          "required_feature_missing": "REJECT_REQUIRED_FEATURE_MISSING",
+          "optional_states": ["NOT_AVAILABLE", "UNKNOWN", "EXPLICIT_NULL"],
+          "model_input_policy": "OPTIONAL_STATE_MUST_BE_EXPLICITLY_ENCODED_BY_PROFILE"
+        },
+        "unsupported_family_rejection": {
+          "error_code": "UNSUPPORTED_MODEL_FAMILY",
+          "fail_closed": true,
+          "no_library_fallback": true,
+          "no_dynamic_registration": true
+        }
+      }
+    ]
+  },
+  "engine_training_profiles": {
+    "OUTCOME": {
+      "profile_identity": "outcome-training-profile@1.1.0",
+      "profile_revision": "r001",
+      "profile_hash": "sha256:8b999000e0ee6dfa66205bf26a98d9f7d301e3d43d5d9e84c53cd36b5144f9bc",
+      "engine_role": "OUTCOME",
+      "target_contract_identity": "prediction-training-labels@1.0.0/OUTCOME",
+      "target_contract_hash": "sha256:20537a8d4f9a8ba4208aba1986b6f1dc5c0d0e196b992887fbe7823207a8045d",
+      "feature_profile_identity": "outcome-declared-feature-profile@1.1.0",
+      "feature_profile_hash": "sha256:b26b051ef52b7dfbf8efddf2a9fe9434789a03c5d8a721ce7eae1cafe1ac8c78",
+      "allowed_model_families": ["regularized_multinomial_logistic", "gradient_boosted_decision_tree_probabilistic"],
+      "required_features": [
+        {"feature_id": "statistical_strength_home", "type": "number", "domain": "STATISTICAL", "missing": "REJECT"},
+        {"feature_id": "statistical_strength_away", "type": "number", "domain": "STATISTICAL", "missing": "REJECT"},
+        {"feature_id": "football_form_home", "type": "number", "domain": "FOOTBALL", "missing": "REJECT"},
+        {"feature_id": "football_form_away", "type": "number", "domain": "FOOTBALL", "missing": "REJECT"},
+        {"feature_id": "market_official_1x2_home", "type": "number", "domain": "MARKET", "missing": "REJECT"},
+        {"feature_id": "market_official_1x2_draw", "type": "number", "domain": "MARKET", "missing": "REJECT"},
+        {"feature_id": "market_official_1x2_away", "type": "number", "domain": "MARKET", "missing": "REJECT"},
+        {"feature_id": "tactical_league_strength_home", "type": "number", "domain": "TACTICAL", "missing": "REJECT"},
+        {"feature_id": "tactical_league_strength_away", "type": "number", "domain": "TACTICAL", "missing": "REJECT"}
+      ],
+      "optional_features": [{"feature_id": "external_market_snapshot", "type": "number", "domain": "MARKET", "allowed_missing_states": ["NOT_AVAILABLE", "UNKNOWN", "EXPLICIT_NULL"]}],
+      "typed_missing_state_handling": "NO_SILENT_IMPUTATION; OPTIONAL_STATES_PERSIST_IN_FEATURE_ENVELOPE",
+      "output_class_schema": {"classes": ["H", "D", "A"], "order": ["H", "D", "A"], "probability_vector_length": 3},
+      "primary_selection_metric": "mean_out_of_time_log_loss",
+      "evaluation_metrics": ["multiclass_log_loss", "multiclass_brier_score", "classwise_recall", "class_support", "probability_normalization_validity"],
+      "calibration_state_expectation": "NOT_CALIBRATED"
+    },
+    "HANDICAP": {
+      "profile_identity": "handicap-training-profile@1.1.0",
+      "profile_revision": "r001",
+      "profile_hash": "sha256:cbbdd6ce1f966449b60360bc2a2b2f6d16681f0d72d1530d2046f2132a58d9b6",
+      "engine_role": "HANDICAP",
+      "target_contract_identity": "prediction-training-labels@1.0.0/HANDICAP",
+      "target_contract_hash": "sha256:d6ccd2bf0a4a6a8172323396f2ae1e50cbac3739a235dece86295a585002e939",
+      "feature_profile_identity": "handicap-declared-feature-profile@1.1.0",
+      "feature_profile_hash": "sha256:ddd17d51a7c4a71743a37d11992e5c86e04c000ebdc5820ff715cd519dd860cc",
+      "allowed_model_families": ["regularized_multinomial_logistic", "gradient_boosted_decision_tree_probabilistic"],
+      "required_features": [
+        {"feature_id": "statistical_strength_home", "type": "number", "domain": "STATISTICAL", "missing": "REJECT"},
+        {"feature_id": "statistical_strength_away", "type": "number", "domain": "STATISTICAL", "missing": "REJECT"},
+        {"feature_id": "football_form_home", "type": "number", "domain": "FOOTBALL", "missing": "REJECT"},
+        {"feature_id": "football_form_away", "type": "number", "domain": "FOOTBALL", "missing": "REJECT"},
+        {"feature_id": "official_rqspf_handicap_value_at_cutoff", "type": "number", "domain": "MARKET", "missing": "REJECT"},
+        {"feature_id": "market_handicap_home", "type": "number", "domain": "MARKET", "missing": "REJECT"},
+        {"feature_id": "market_handicap_draw", "type": "number", "domain": "MARKET", "missing": "REJECT"},
+        {"feature_id": "market_handicap_away", "type": "number", "domain": "MARKET", "missing": "REJECT"},
+        {"feature_id": "tactical_league_strength_home", "type": "number", "domain": "TACTICAL", "missing": "REJECT"},
+        {"feature_id": "tactical_league_strength_away", "type": "number", "domain": "TACTICAL", "missing": "REJECT"}
+      ],
+      "optional_features": [{"feature_id": "external_handicap_snapshot", "type": "number", "domain": "MARKET", "allowed_missing_states": ["NOT_AVAILABLE", "UNKNOWN", "EXPLICIT_NULL"]}],
+      "typed_missing_state_handling": "NO_SILENT_IMPUTATION; OPTIONAL_STATES_PERSIST_IN_FEATURE_ENVELOPE",
+      "output_class_schema": {"classes": ["H", "D", "A"], "order": ["H", "D", "A"], "probability_vector_length": 3},
+      "primary_selection_metric": "mean_out_of_time_log_loss",
+      "evaluation_metrics": ["multiclass_log_loss", "multiclass_brier_score", "classwise_recall", "class_support", "probability_normalization_validity"],
+      "calibration_state_expectation": "NOT_CALIBRATED"
+    },
+    "GOALS": {
+      "profile_identity": "goals-training-profile@1.1.0",
+      "profile_revision": "r001",
+      "profile_hash": "sha256:e5646ac70d8985605f55196e0f02f11df2890f0b4e431e44f8e36312c932c2a6",
+      "engine_role": "GOALS",
+      "target_contract_identity": "prediction-training-labels@1.0.0/GOALS",
+      "target_contract_hash": "sha256:2b100776f2c7ddb640b16d3fafaface9fcf0aee00023ee995af181ca62067822",
+      "feature_profile_identity": "goals-declared-feature-profile@1.1.0",
+      "feature_profile_hash": "sha256:095fc3807659f74a5737ac32685dce971b9a3969617c386f4c5fb95f2fca157a",
+      "allowed_model_families": ["regularized_multinomial_logistic", "gradient_boosted_decision_tree_probabilistic"],
+      "required_features": [
+        {"feature_id": "statistical_goals_rate_home", "type": "number", "domain": "STATISTICAL", "missing": "REJECT"},
+        {"feature_id": "statistical_goals_rate_away", "type": "number", "domain": "STATISTICAL", "missing": "REJECT"},
+        {"feature_id": "football_goals_form_home", "type": "number", "domain": "FOOTBALL", "missing": "REJECT"},
+        {"feature_id": "football_goals_form_away", "type": "number", "domain": "FOOTBALL", "missing": "REJECT"},
+        {"feature_id": "market_over_under_line_at_cutoff", "type": "number", "domain": "MARKET", "missing": "REJECT"},
+        {"feature_id": "market_over_under_over", "type": "number", "domain": "MARKET", "missing": "REJECT"},
+        {"feature_id": "market_over_under_under", "type": "number", "domain": "MARKET", "missing": "REJECT"},
+        {"feature_id": "tactical_league_goal_profile", "type": "number", "domain": "TACTICAL", "missing": "REJECT"}
+      ],
+      "optional_features": [{"feature_id": "external_over_under_snapshot", "type": "number", "domain": "MARKET", "allowed_missing_states": ["NOT_AVAILABLE", "UNKNOWN", "EXPLICIT_NULL"]}],
+      "typed_missing_state_handling": "NO_SILENT_IMPUTATION; OPTIONAL_STATES_PERSIST_IN_FEATURE_ENVELOPE",
+      "output_class_schema": {"classes": ["0", "1", "2", "3", "4", "5", "6", "7+"], "order": ["0", "1", "2", "3", "4", "5", "6", "7+"], "probability_vector_length": 8},
+      "primary_selection_metric": "mean_out_of_time_log_loss",
+      "evaluation_metrics": ["multiclass_log_loss", "multiclass_brier_score", "classwise_recall", "class_support", "probability_normalization_validity"],
+      "calibration_state_expectation": "NOT_CALIBRATED"
+    },
+    "HTFT": {
+      "profile_identity": "htft-training-profile@1.1.0",
+      "profile_revision": "r001",
+      "profile_hash": "sha256:3935c2bb894cfc74d9b73a3ee9131ea00ba76c9fb827da9e40155a571db218be",
+      "engine_role": "HTFT",
+      "target_contract_identity": "prediction-training-labels@1.0.0/HTFT",
+      "target_contract_hash": "sha256:db0cf9544b95b586d3f2d72d72638b437184deae598133a07630eec8dee1ff6c",
+      "feature_profile_identity": "htft-declared-feature-profile@1.1.0",
+      "feature_profile_hash": "sha256:eb191b17de494f998b93e666a7e43a9615e9c2476e10ddfb67279558cec9f786",
+      "allowed_model_families": ["regularized_multinomial_logistic", "gradient_boosted_decision_tree_probabilistic"],
+      "required_features": [
+        {"feature_id": "statistical_strength_home", "type": "number", "domain": "STATISTICAL", "missing": "REJECT"},
+        {"feature_id": "statistical_strength_away", "type": "number", "domain": "STATISTICAL", "missing": "REJECT"},
+        {"feature_id": "football_first_half_form_home", "type": "number", "domain": "FOOTBALL", "missing": "REJECT"},
+        {"feature_id": "football_first_half_form_away", "type": "number", "domain": "FOOTBALL", "missing": "REJECT"},
+        {"feature_id": "market_official_1x2_home", "type": "number", "domain": "MARKET", "missing": "REJECT"},
+        {"feature_id": "market_official_1x2_draw", "type": "number", "domain": "MARKET", "missing": "REJECT"},
+        {"feature_id": "market_official_1x2_away", "type": "number", "domain": "MARKET", "missing": "REJECT"},
+        {"feature_id": "tactical_league_strength_home", "type": "number", "domain": "TACTICAL", "missing": "REJECT"},
+        {"feature_id": "tactical_league_strength_away", "type": "number", "domain": "TACTICAL", "missing": "REJECT"}
+      ],
+      "optional_features": [{"feature_id": "lineup_context_snapshot", "type": "number", "domain": "FOOTBALL", "allowed_missing_states": ["NOT_AVAILABLE", "UNKNOWN", "EXPLICIT_NULL"]}],
+      "typed_missing_state_handling": "NO_SILENT_IMPUTATION; OPTIONAL_STATES_PERSIST_IN_FEATURE_ENVELOPE",
+      "output_class_schema": {"classes": ["H/H", "H/D", "H/A", "D/H", "D/D", "D/A", "A/H", "A/D", "A/A"], "order": ["H/H", "H/D", "H/A", "D/H", "D/D", "D/A", "A/H", "A/D", "A/A"], "probability_vector_length": 9},
+      "primary_selection_metric": "mean_out_of_time_log_loss",
+      "evaluation_metrics": ["multiclass_log_loss", "multiclass_brier_score", "classwise_recall", "class_support", "probability_normalization_validity"],
+      "calibration_state_expectation": "NOT_CALIBRATED"
+    }
+  },
+  "training_config_contract": {
+    "identity": "prediction-training-hyperparameters@1.1.0",
+    "revision": "r001",
+    "binding_key": "engine_role + model_family_id",
+    "all_parameters_must_be_explicit": true,
+    "library_default_fallback": "REJECT_TRAINING_CONFIG_NOT_DECLARED",
+    "invalid_config_action": "REJECT_INVALID_TRAINING_CONFIG",
+    "configs": {
+      "OUTCOME": {
+        "regularized_multinomial_logistic": {"config_id": "outcome-regularized-multinomial-logistic-config@1.0.0", "config_revision": "r001", "fixed_parameters": {"solver": "lbfgs", "penalty": "l2", "multi_class": "multinomial", "max_iter": 1000, "tol": 0.00000001, "fit_intercept": true, "class_weight": null}, "search_parameters": {"C": {"type": "float", "values": [0.01, 0.1, 1.0, 10.0]}}, "search_method": "GRID_EXHAUSTIVE", "search_budget": 4, "tie_break": "lower_primary_metric_then_lower_brier_then_lower_complexity_then_lexical_config_id", "early_stopping": "NOT_APPLICABLE", "seed_binding": "deterministic-runtime-profile.seed", "holdout_tuning": "FORBIDDEN", "config_hash": "sha256:9f8edb48433167542ce943442e6af5cce13ded888ac2fcdc230b75d1ffcc2d8d"},
+        "gradient_boosted_decision_tree_probabilistic": {"config_id": "outcome-gradient-boosted-decision-tree-probabilistic-config@1.0.0", "config_revision": "r001", "fixed_parameters": {"learning_rate": 0.05, "max_iter": 200, "max_leaf_nodes": 15, "max_depth": 4, "min_samples_leaf": 10, "l2_regularization": 0.0, "early_stopping": true, "validation_fraction": 0.2, "n_iter_no_change": 20, "tol": 0.00000001, "random_state": "BOUND_SEED", "max_bins": 255}, "search_parameters": {"learning_rate": {"type": "float", "values": [0.01, 0.05, 0.1]}, "max_depth": {"type": "integer", "values": [2, 4]}, "min_samples_leaf": {"type": "integer", "values": [10, 20]}}, "search_method": "GRID_EXHAUSTIVE", "search_budget": 12, "tie_break": "lower_primary_metric_then_lower_brier_then_lower_complexity_then_lexical_config_id", "early_stopping": "TRAINING_VALIDATION_ONLY; HOLDOUT_FORBIDDEN", "seed_binding": "deterministic-runtime-profile.seed", "holdout_tuning": "FORBIDDEN", "config_hash": "sha256:c15b1eb90e8c707ef40d3c2ff675c9d2be4c2279b4dc86d30f2f472e24429dc8"}
+      },
+      "HANDICAP": {
+        "regularized_multinomial_logistic": {"config_id": "handicap-regularized-multinomial-logistic-config@1.0.0", "config_revision": "r001", "fixed_parameters": {"solver": "lbfgs", "penalty": "l2", "multi_class": "multinomial", "max_iter": 1000, "tol": 0.00000001, "fit_intercept": true, "class_weight": null}, "search_parameters": {"C": {"type": "float", "values": [0.01, 0.1, 1.0, 10.0]}}, "search_method": "GRID_EXHAUSTIVE", "search_budget": 4, "tie_break": "lower_primary_metric_then_lower_brier_then_lower_complexity_then_lexical_config_id", "early_stopping": "NOT_APPLICABLE", "seed_binding": "deterministic-runtime-profile.seed", "holdout_tuning": "FORBIDDEN", "config_hash": "sha256:5f1175217a379ccd40b0526fa58c34bd3b0a9490d3ef0eadbff3cf2bc95de5db"},
+        "gradient_boosted_decision_tree_probabilistic": {"config_id": "handicap-gradient-boosted-decision-tree-probabilistic-config@1.0.0", "config_revision": "r001", "fixed_parameters": {"learning_rate": 0.05, "max_iter": 200, "max_leaf_nodes": 15, "max_depth": 4, "min_samples_leaf": 10, "l2_regularization": 0.0, "early_stopping": true, "validation_fraction": 0.2, "n_iter_no_change": 20, "tol": 0.00000001, "random_state": "BOUND_SEED", "max_bins": 255}, "search_parameters": {"learning_rate": {"type": "float", "values": [0.01, 0.05, 0.1]}, "max_depth": {"type": "integer", "values": [2, 4]}, "min_samples_leaf": {"type": "integer", "values": [10, 20]}}, "search_method": "GRID_EXHAUSTIVE", "search_budget": 12, "tie_break": "lower_primary_metric_then_lower_brier_then_lower_complexity_then_lexical_config_id", "early_stopping": "TRAINING_VALIDATION_ONLY; HOLDOUT_FORBIDDEN", "seed_binding": "deterministic-runtime-profile.seed", "holdout_tuning": "FORBIDDEN", "config_hash": "sha256:269bc6a255eb317c7a8771fbffbd78e281ed9bd357099e4d15184faa520f9c38"}
+      },
+      "GOALS": {
+        "regularized_multinomial_logistic": {"config_id": "goals-regularized-multinomial-logistic-config@1.0.0", "config_revision": "r001", "fixed_parameters": {"solver": "lbfgs", "penalty": "l2", "multi_class": "multinomial", "max_iter": 1000, "tol": 0.00000001, "fit_intercept": true, "class_weight": null}, "search_parameters": {"C": {"type": "float", "values": [0.01, 0.1, 1.0, 10.0]}}, "search_method": "GRID_EXHAUSTIVE", "search_budget": 4, "tie_break": "lower_primary_metric_then_lower_brier_then_lower_complexity_then_lexical_config_id", "early_stopping": "NOT_APPLICABLE", "seed_binding": "deterministic-runtime-profile.seed", "holdout_tuning": "FORBIDDEN", "config_hash": "sha256:b7b9c0865dac5234d09a513991439c3be54b0c37a4c14500a24ac68d072e24d3"},
+        "gradient_boosted_decision_tree_probabilistic": {"config_id": "goals-gradient-boosted-decision-tree-probabilistic-config@1.0.0", "config_revision": "r001", "fixed_parameters": {"learning_rate": 0.05, "max_iter": 200, "max_leaf_nodes": 15, "max_depth": 4, "min_samples_leaf": 10, "l2_regularization": 0.0, "early_stopping": true, "validation_fraction": 0.2, "n_iter_no_change": 20, "tol": 0.00000001, "random_state": "BOUND_SEED", "max_bins": 255}, "search_parameters": {"learning_rate": {"type": "float", "values": [0.01, 0.05, 0.1]}, "max_depth": {"type": "integer", "values": [2, 4]}, "min_samples_leaf": {"type": "integer", "values": [10, 20]}}, "search_method": "GRID_EXHAUSTIVE", "search_budget": 12, "tie_break": "lower_primary_metric_then_lower_brier_then_lower_complexity_then_lexical_config_id", "early_stopping": "TRAINING_VALIDATION_ONLY; HOLDOUT_FORBIDDEN", "seed_binding": "deterministic-runtime-profile.seed", "holdout_tuning": "FORBIDDEN", "config_hash": "sha256:74bbff8573926980b645436e277774d5ade97b2af309fc9efb0578d078f2c00a"}
+      },
+      "HTFT": {
+        "regularized_multinomial_logistic": {"config_id": "htft-regularized-multinomial-logistic-config@1.0.0", "config_revision": "r001", "fixed_parameters": {"solver": "lbfgs", "penalty": "l2", "multi_class": "multinomial", "max_iter": 1000, "tol": 0.00000001, "fit_intercept": true, "class_weight": null}, "search_parameters": {"C": {"type": "float", "values": [0.01, 0.1, 1.0, 10.0]}}, "search_method": "GRID_EXHAUSTIVE", "search_budget": 4, "tie_break": "lower_primary_metric_then_lower_brier_then_lower_complexity_then_lexical_config_id", "early_stopping": "NOT_APPLICABLE", "seed_binding": "deterministic-runtime-profile.seed", "holdout_tuning": "FORBIDDEN", "config_hash": "sha256:0682f8937a95ae9252a752a332e1b32b2ca8d8904f04de5df919cdc561aad231"},
+        "gradient_boosted_decision_tree_probabilistic": {"config_id": "htft-gradient-boosted-decision-tree-probabilistic-config@1.0.0", "config_revision": "r001", "fixed_parameters": {"learning_rate": 0.05, "max_iter": 200, "max_leaf_nodes": 15, "max_depth": 4, "min_samples_leaf": 10, "l2_regularization": 0.0, "early_stopping": true, "validation_fraction": 0.2, "n_iter_no_change": 20, "tol": 0.00000001, "random_state": "BOUND_SEED", "max_bins": 255}, "search_parameters": {"learning_rate": {"type": "float", "values": [0.01, 0.05, 0.1]}, "max_depth": {"type": "integer", "values": [2, 4]}, "min_samples_leaf": {"type": "integer", "values": [10, 20]}}, "search_method": "GRID_EXHAUSTIVE", "search_budget": 12, "tie_break": "lower_primary_metric_then_lower_brier_then_lower_complexity_then_lexical_config_id", "early_stopping": "TRAINING_VALIDATION_ONLY; HOLDOUT_FORBIDDEN", "seed_binding": "deterministic-runtime-profile.seed", "holdout_tuning": "FORBIDDEN", "config_hash": "sha256:182d70c70b24b4a27687960e9c1dfd22c9f0435651c53aa5bf1c95d66514d56c"}
+      }
+    }
+  },
+  "deterministic_runtime_profile": {
+    "identity": "fitting-runtime-profile@1.0.0",
+    "revision": "r001",
+    "python_runtime": "Python 3.12.8",
+    "algorithm_libraries": [{"name": "scikit-learn", "version": "1.5.2"}, {"name": "numpy", "version": "2.1.3"}],
+    "dependency_identity": "requirements-v4-training@1.0.0",
+    "thread_count": 1,
+    "deterministic_mode": true,
+    "random_seed": 20260905,
+    "feature_order": "profile.required_features order, then profile.optional_features order; no implicit sorting",
+    "label_order": "profile.output_class_schema.order",
+    "sample_order": ["prediction_cutoff_at", "match_id", "sample_id"],
+    "float_precision": "IEEE-754-binary64",
+    "parameter_serialization_format": "canonical-json@v4-1.0",
+    "canonical_serialization_policy": "UTF-8, lexicographic recursive keys, semantic array order, compact separators",
+    "stable_input_hashes": ["dataset_id", "dataset_revision", "dataset_hash", "split_artifact_hash", "engine_training_profile_hash", "training_config_hash", "fitting_implementation_hash", "random_seed", "thread_count", "feature_order", "label_order", "sample_order", "float_precision"],
+    "volatile_exclusions": ["created_at", "host_name", "process_id", "wall_clock_duration", "log_correlation_id"],
+    "replay_mismatch_action": "BLOCKED_DETERMINISTIC_REPLAY_MISMATCH",
+    "runtime_profile_hash": "sha256:54f199a2b091799880beb5412592796f6f33ea7869162f4dfa57cc9327a62795"
+  },
+  "fitting_implementation_identity": {
+    "implementation_id": "v4-training-fitting-boundary@1.0.0",
+    "implementation_version": "r001",
+    "status": "IDENTITY_FROZEN_NO_RUNTIME",
+    "source_code_hash_policy": "sha256-of-authorized-fitting-source-tree-before-fit",
+    "source_code_hash": "NOT_GENERATED_IMPLEMENTATION_NOT_AUTHORIZED",
+    "supported_model_families": ["regularized_multinomial_logistic", "gradient_boosted_decision_tree_probabilistic"],
+    "supported_engine_roles": ["OUTCOME", "HANDICAP", "GOALS", "HTFT"],
+    "input_contract_versions": ["prediction-training-dataset@1.1.0", "temporal-split-artifact@1.0.0", "training-readiness-report@1.0.0", "engine-training-profile@1.1.0"],
+    "output_contract_versions": ["prediction-model-parameter-artifact@1.0.0", "prediction-model-artifact@1.1.0", "prediction-model-evaluation@1.1.0"],
+    "implementation_hash": "sha256:36153b1fe377dd704a0b49a3d95c7116575eb5ddbf1d5e60c1bb1c7917efa05b",
+    "unsupported_input_action": "REJECT_INPUT_CONTRACT_MISMATCH"
+  },
+  "training_readiness_report_binding": {
+    "identity": "training-readiness-fit-binding@1.0.0",
+    "required_fields": ["dataset_id", "dataset_revision", "dataset_hash", "split_artifact_id", "split_revision", "split_hash", "training_readiness_report_id", "readiness_report_revision", "readiness_report_hash"],
+    "allowed_readiness_states": ["READY"],
+    "blocked_states": ["BLOCKED", "UNKNOWN", "NOT_PERFORMABLE"],
+    "blocked_reason_codes": ["TRAINING_DATA_INSUFFICIENT", "LEAGUE_SCOPE_NOT_DECLARED", "READINESS_DIAGNOSTIC_UNKNOWN", "STATISTICAL_STABILITY_UNSTABLE"],
+    "current_state": "BLOCKED",
+    "current_reason": "TRAINING_DATA_INSUFFICIENT",
+    "formal_fit_action_when_not_allowed": "REJECT_FORMAL_FIT_READINESS_NOT_ACTIVE",
+    "split_readiness_cross_binding": "dataset_id/revision/hash and split id/revision/hash must match the active readiness report"
+  },
+  "parameter_artifact_contract": {
+    "identity": "prediction-model-parameter-artifact@1.0.0",
+    "revision": "r001",
+    "required_fields": ["parameter_artifact_id", "engine_role", "model_family_id", "model_family_version", "dataset_id", "dataset_revision", "dataset_hash", "split_artifact_id", "split_revision", "split_hash", "readiness_report_id", "readiness_report_revision", "readiness_report_hash", "training_config_id", "training_config_revision", "training_config_hash", "fitting_implementation_id", "fitting_implementation_version", "fitting_implementation_hash", "deterministic_runtime_profile_id", "deterministic_runtime_profile_revision", "deterministic_runtime_profile_hash", "random_seed", "parameter_payload_or_ref", "parameter_hash", "serialization_identity", "created_at", "revision", "supersedes"],
+    "append_only": true,
+    "overwrite_policy": "REJECT_PARAMETER_ARTIFACT_OVERWRITE",
+    "same_identity_revision_policy": "REJECT_UNLESS_NEW_REVISION_AND_EXPLICIT_SUPERSEDES",
+    "payload_policy": "payload_or_ref_exactly_one; payload is canonicalized before parameter_hash",
+    "created_at_policy": "audit_metadata_only; excluded from parameter_hash",
+    "missing_required_binding": "BLOCKED_PARAMETER_ARTIFACT_BINDING_INCOMPLETE"
+  },
+  "evaluation_metric_contract": {
+    "identity": "prediction-model-evaluation@1.1.0",
+    "revision": "r001",
+    "implementation_identity": "v4-evaluation-metrics@1.0.0",
+    "implementation_library_identity": "Python standard math + repository pure functions; no library default semantics",
+    "full_precision_policy": "calculate and persist metric at binary64 full precision; display rounding is presentation-only",
+    "log_loss": {"name": "multiclass_log_loss", "formula": "L = -(1/N) * sum_i log(max(p_i,y_i, epsilon))", "epsilon": 1e-15, "clipping_policy": "lower-bound true-class probability at epsilon only; do not renormalize", "invalid_probability_behavior": "REJECT_INVALID_PROBABILITY_VECTOR"},
+    "brier_score": {"name": "multiclass_brier_score", "formula": "B = (1/N) * sum_i sum_k (p_i,k - 1[y_i=k])^2", "normalization": "mean_over_samples_sum_over_declared_classes", "invalid_probability_behavior": "REJECT_INVALID_PROBABILITY_VECTOR"},
+    "classwise_recall": {"formula": "recall_k = TP_k / (TP_k + FN_k)", "tp_definition": "predicted class equals k and observed class equals k", "fn_definition": "observed class equals k and predicted class differs from k", "zero_support_behavior": "NULL_AND_EXCLUDED_FROM_MACRO", "macro_policy": "mean of non-null declared classes only"},
+    "class_support": {"formula": "support_k = count(observed class equals k)", "count_semantics": "count of evaluation rows with a valid declared observed class; one row counts once"},
+    "probability_normalization": {"range": "0 <= p <= 1", "sum_tolerance": 0.000001, "sum_rule": "abs(sum(p) - 1) <= 1e-6", "non_finite_behavior": "REJECT_INVALID_PROBABILITY_VECTOR"},
+    "persistence": {"metric_hash_input": "full-precision numeric values + metric contract identity/hash + class order", "display_rounding": "separate_non_hashing_representation", "calibration_state": "NOT_CALIBRATED"}
+  },
+  "model_selection_protocol": {
+    "identity": "prediction-model-selection@1.0.0",
+    "selection_unit": "independent_engine_target",
+    "primary_metric": "mean_out_of_time_log_loss",
+    "secondary_metrics": ["mean_out_of_time_brier_score", "classwise_recall_with_support"],
+    "tie_break": ["lower_brier", "lower_log_loss_variance", "lower_complexity", "lexical_family_id"],
+    "holdout_use": "ONE_FINAL_INDEPENDENT_EVALUATION_ONLY",
+    "holdout_tuning": "FORBIDDEN",
+    "manual_override": "FORBIDDEN",
+    "calibration_state": "NOT_CALIBRATED",
+    "configuration_binding": "each engine_role + family_id must bind one explicit config_id/config_hash before candidate evaluation",
+    "bound_config_bindings": {
+      "OUTCOME": {
+        "regularized_multinomial_logistic": {"config_id": "outcome-regularized-multinomial-logistic-config@1.0.0", "config_hash": "sha256:9f8edb48433167542ce943442e6af5cce13ded888ac2fcdc230b75d1ffcc2d8d"},
+        "gradient_boosted_decision_tree_probabilistic": {"config_id": "outcome-gradient-boosted-decision-tree-probabilistic-config@1.0.0", "config_hash": "sha256:c15b1eb90e8c707ef40d3c2ff675c9d2be4c2279b4dc86d30f2f472e24429dc8"}
+      },
+      "HANDICAP": {
+        "regularized_multinomial_logistic": {"config_id": "handicap-regularized-multinomial-logistic-config@1.0.0", "config_hash": "sha256:5f1175217a379ccd40b0526fa58c34bd3b0a9490d3ef0eadbff3cf2bc95de5db"},
+        "gradient_boosted_decision_tree_probabilistic": {"config_id": "handicap-gradient-boosted-decision-tree-probabilistic-config@1.0.0", "config_hash": "sha256:269bc6a255eb317c7a8771fbffbd78e281ed9bd357099e4d15184faa520f9c38"}
+      },
+      "GOALS": {
+        "regularized_multinomial_logistic": {"config_id": "goals-regularized-multinomial-logistic-config@1.0.0", "config_hash": "sha256:b7b9c0865dac5234d09a513991439c3be54b0c37a4c14500a24ac68d072e24d3"},
+        "gradient_boosted_decision_tree_probabilistic": {"config_id": "goals-gradient-boosted-decision-tree-probabilistic-config@1.0.0", "config_hash": "sha256:74bbff8573926980b645436e277774d5ade97b2af309fc9efb0578d078f2c00a"}
+      },
+      "HTFT": {
+        "regularized_multinomial_logistic": {"config_id": "htft-regularized-multinomial-logistic-config@1.0.0", "config_hash": "sha256:0682f8937a95ae9252a752a332e1b32b2ca8d8904f04de5df919cdc561aad231"},
+        "gradient_boosted_decision_tree_probabilistic": {"config_id": "htft-gradient-boosted-decision-tree-probabilistic-config@1.0.0", "config_hash": "sha256:182d70c70b24b4a27687960e9c1dfd22c9f0435651c53aa5bf1c95d66514d56c"}
+      }
+    },
+    "selection_action_when_config_missing": "REJECT_TRAINING_CONFIG_NOT_DECLARED"
+  },
+  "model_artifact_packaging_contract": {
+    "identity": "prediction-model-artifact@1.1.0",
+    "revision": "r001",
+    "required_bindings": ["parameter_artifact_id", "parameter_artifact_hash", "training_readiness_report_id", "training_readiness_report_hash", "split_artifact_id", "split_artifact_hash", "dataset_id", "dataset_revision", "dataset_hash", "engine_training_profile_id", "engine_training_profile_hash", "model_family_id", "model_family_version", "model_family_registry_hash", "training_config_id", "training_config_hash", "deterministic_runtime_profile_id", "deterministic_runtime_profile_hash", "fitting_implementation_id", "fitting_implementation_hash"],
+    "required_status_before_packaging": "READY_READINESS_REPORT_AND_CANDIDATE_PARAMETER_ARTIFACT",
+    "missing_binding_action": "BLOCKED_MODEL_ARTIFACT_PACKAGING_BINDING_INCOMPLETE",
+    "append_only": true,
+    "promotion_is_separate": true,
+    "calibration_state": "NOT_CALIBRATED"
+  },
+  "promotion_boundary": {
+    "states": ["CANDIDATE", "VALIDATED", "APPROVED_FOR_ENGINE", "REJECTED"],
+    "transitions": ["CANDIDATE -> VALIDATED", "VALIDATED -> APPROVED_FOR_ENGINE", "VALIDATED -> REJECTED"],
+    "human_gate_required": true,
+    "automatic_promotion": false,
+    "ewp004_auto_promotion": false,
+    "ewp005_completion_auto_production": false,
+    "registry_insertion_requires": ["explicit_human_promotion_gate", "complete_model_artifact_bindings", "out_of_time_evidence"],
+    "production_activation": "separate_future_promotion_and_release_gate"
+  },
+  "synthetic_boundary": {
+    "allowed": ["family_dispatch", "config_validation", "metric_calculation", "deterministic_controls", "parameter_serialization", "packaging_validation", "unsupported_family_or_config_rejection"],
+    "forbidden": ["formal_model_fit", "formal_parameter_artifact_generation", "formal_model_artifact_generation", "model_registry_insertion", "APPROVED_FOR_ENGINE", "real_fitting_readiness_change", "real_model_effect_claim"],
+    "fixture_label": "SYNTHETIC_CONTRACT_FIXTURE_ONLY"
+  },
+  "authorization_boundary": {
+    "implementation_readiness": "B15-EWP-004 READY FOR IMPLEMENTATION",
+    "execution_authorized": false,
+    "current_real_dataset_fitting_readiness": "BLOCKED / TRAINING_DATA_INSUFFICIENT",
+    "formal_model_fit_authorization": "NOT_AUTHORIZED",
+    "forbidden_work_packages": ["B15-EWP-004 execution", "B15-EWP-005", "V4-076", "V4-052", "V4-053", "V4-054", "V4-055"],
+    "forbidden_side_effects": ["model fitting", "parameter/model artifact generation", "model registry insertion", "Score", "Calibration", "Shadow", "Production", "Public", "Supabase", "migration", "V3.3.3 modification"]
+  },
+  "blocker_resolution": {
+    "CANDIDATE_MODEL_FAMILY_REGISTRY_NOT_EXECUTABLE": "RESOLVED",
+    "FOUR_ENGINE_TRAINING_PROFILES_INCOMPLETE": "RESOLVED",
+    "TRAINING_CONFIG_NOT_DECLARED": "RESOLVED",
+    "DETERMINISTIC_FITTING_BOUNDARY_NOT_FROZEN": "RESOLVED",
+    "FITTING_IMPLEMENTATION_IDENTITY_NOT_FROZEN": "RESOLVED",
+    "TRAINING_READINESS_REPORT_BINDING_NOT_DECLARED": "RESOLVED",
+    "PARAMETER_ARTIFACT_CONTRACT_NOT_FROZEN": "RESOLVED",
+    "EVALUATION_METRIC_SEMANTICS_NOT_FROZEN": "RESOLVED"
+  },
+  "canonical_hash": "sha256:e53cb5d680c512c5332c7fe770ed9c826180417530b76f23e9ffa53113ddd2c3"
+}
