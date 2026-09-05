@@ -1,0 +1,102 @@
+{
+  "manifest_version": "batch-14-execution-manifest@1.0.0",
+  "batch_id": "BATCH-14",
+  "status": "FROZEN",
+  "manifest_hash": "sha256:8adf43516c96c9de1f867e185e9f256399486c90a7440fade57e4b390969807f",
+  "frozen_at_head": "1819263fdc3d4737ec5f4452ba0588e3de505b3b",
+  "workspace": "F:/Projects/jcfb-v4",
+  "approved_scope": ["V4-049", "V4-050", "V4-051"],
+  "execution_waves": [
+    {"wave": 1, "tasks": ["V4-049", "V4-050"], "mode": "PARALLEL_IF_NO_OVERLAP_ELSE_SERIAL"},
+    {"wave": 2, "tasks": ["V4-051"], "mode": "SERIAL_AFTER_WAVE_1_PASS"},
+    {"wave": 3, "tasks": ["BATCH-14-CLOSURE-REVIEW"], "mode": "SERIAL_AFTER_WAVE_2_PASS"}
+  ],
+  "direct_dependencies": {
+    "BATCH-14": ["BATCH-09", "BATCH-10", "BATCH-12"],
+    "V4-049": ["V4-040", "V4-045", "V4-037"],
+    "V4-050": ["V4-021", "V4-022", "V4-027", "V4-031", "V4-037"],
+    "V4-051": ["V4-049", "V4-050"]
+  },
+  "contract_identities": {
+    "tactical_league_profile": {
+      "version": "tactical-league-profile-feature@1.0.0",
+      "file": "docs/V4_TACTICAL_LEAGUE_PROFILE_FEATURE_CONTRACT.md",
+      "hash": "sha256:d7b35e074697eaab032fc535e37bffa93c1fc5ee4d3db0e2656fd5ebfa8c9b39"
+    },
+    "data_quality_assessment": {
+      "version": "data-quality-assessment@1.0.0",
+      "file": "docs/V4_DATA_QUALITY_ASSESSMENT_CONTRACT.md",
+      "hash": "sha256:561081e278e4c31efc340983f165f11cd015d963966e9887b03324467d79a588"
+    },
+    "provenance_quality_gate": {
+      "version": "provenance-quality-gate@1.0.0",
+      "file": "docs/V4_PROVENANCE_QUALITY_GATE_CONTRACT.md",
+      "hash": "sha256:8a242400786d8b0ffaadbf5f6e666546856a4bb7b0049d80de5ee6d37a8ad5cb"
+    },
+    "feature_eligibility": {
+      "version": "feature-eligibility@1.0.0",
+      "file": "docs/V4_FEATURE_ELIGIBILITY_CONTRACT.md",
+      "hash": "sha256:02dae84f4061c3dc6bbfd0acee05cb0ca8c21426dc04462fb492c8a1ee108938"
+    }
+  },
+  "governance_identities": {
+    "quality_gate_config": {"version": "quality-gate-config@1.0.0", "file": "docs/V4_QUALITY_GATE_CONFIG.json", "hash": "sha256:681b46abb9942f0832db86e6b5c839cd353f0a7be06cdc9fa9e6c13b135ac098"},
+    "quality_gate_matrix": {"version": "quality-gate-matrix@1.0.0", "file": "docs/V4_QUALITY_GATE_MATRIX.json", "hash": "sha256:1161ab65a85c0b1ea5a98e47271ba17de23ca5c92081c3263ce403cf382de18f"},
+    "quality_gate_reason_registry": {"version": "quality-gate-reason-registry@1.0.0", "file": "docs/V4_QUALITY_GATE_REASON_REGISTRY.json", "hash": "sha256:0fc720e17d0e599291def181586ad432d265afc5603614cec2fe881e28a8c86b"}
+  },
+  "eligibility": {
+    "levels": ["FEATURE", "DOMAIN", "CANDIDATE_SET"],
+    "states": ["ELIGIBLE", "PARTIALLY_ELIGIBLE", "INELIGIBLE", "BLOCKED"],
+    "non_hard_states": ["UNKNOWN", "UNAVAILABLE", "NOT_VERIFIED", "STALE", "CONFLICTED", "BLOCKED"],
+    "unknown_blocked_distinction": true,
+    "propagation": "QUALITY_GATE_MATRIX_ONLY"
+  },
+  "quality_dimensions": [
+    "identity", "availability", "coverage", "verification", "freshness", "completeness",
+    "conflict", "provenance", "timestamp_validity", "cutoff_eligibility",
+    "duplication_integrity", "future_data_risk"
+  ],
+  "hash_policy": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "deterministic_replay": true,
+    "includes": ["exact upstream IDs/revisions/hashes", "typed states and values", "cutoff/kickoff", "contract/config/matrix/reason identities", "generator/implementation identity", "complete decision payload"],
+    "excludes": ["volatile transport metadata", "frozen_input_id", "frozen_input_hash", "prediction", "score", "recommendation"]
+  },
+  "lifecycle": {
+    "pre_freeze_only": true,
+    "append_only": true,
+    "correction": "NEW_ID_NEW_HASH_EXPLICIT_SUPERSEDES",
+    "prior_record": "IMMUTABLE_AND_RETAINED",
+    "cutoff_relation": "input_availability_at <= prediction_cutoff_at < kickoff_at",
+    "future_or_post_cutoff": "FAIL_CLOSED"
+  },
+  "boundaries": {
+    "interaction_policy": "SEPARATE_DIMENSIONS_ONLY",
+    "no_composite_quality_score": true,
+    "no_cross_domain_weight": true,
+    "no_prediction_or_score_engine": true,
+    "no_abstention_or_betting_recommendation": true,
+    "no_frozen_input": true,
+    "batch_15_excluded": true,
+    "production_or_supabase": "NOT_AUTHORIZED",
+    "migration": "NOT_AUTHORIZED",
+    "v3_3_3": "STRICT_ISOLATION",
+    "f_drive_only": true
+  },
+  "pause_conditions": [
+    "tests_or_DoD_fail",
+    "contract_or_boundary_conflict",
+    "unapproved_threshold_weight_penalty_or_composite_score_required",
+    "UNKNOWN_and_BLOCKED_semantics_cannot_remain_distinct",
+    "propagation_would_leave_quality_gate_matrix",
+    "arbitrary_tactical_score_or_statistical_league_strength_reimplementation_required",
+    "cutoff_future_data_or_hash_cannot_fail_closed",
+    "cross_domain_aggregation_required",
+    "BATCH-15_Frozen_Input_Prediction_Score_Production_Supabase_migration_or_V3_coupling_required"
+  ],
+  "excluded_scope": [
+    "BATCH-15", "Prediction", "Score Engine", "Prediction Abstention", "Frozen Input",
+    "betting recommendation", "Production", "Supabase", "migration", "V3.3.3", "BATCH-11 output mutation", "BATCH-12 output mutation", "BATCH-13 output mutation"
+  ]
+}
