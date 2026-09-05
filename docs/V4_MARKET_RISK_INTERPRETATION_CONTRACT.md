@@ -1,6 +1,6 @@
 # JCFB V4 Market Risk Interpretation Contract 1.0
 
-Status: **BATCH-13 GOVERNANCE RESOLUTION — APPROVED FOR V4-048**  
+Status: **BATCH-13 GOVERNANCE RESOLUTION — APPROVED FOR V4-048**
 Contract version: `market-risk-interpretation@1.0.0`
 
 ## 1. Purpose and boundary

@@ -1,6 +1,6 @@
 # JCFB V4 Market Intelligence Feature Contract 1.0
 
-Status: **BATCH-13 GOVERNANCE RESOLUTION — APPROVED FOR ENTRY REVIEW**  
+Status: **BATCH-13 GOVERNANCE RESOLUTION — APPROVED FOR ENTRY REVIEW**
 Contract version: `market-intelligence-feature@1.0.0`
 
 ## 1. Scope and lifecycle

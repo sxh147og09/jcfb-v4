@@ -1,6 +1,6 @@
 # JCFB V4 Market Movement Contract 1.0
 
-Status: **BATCH-13 GOVERNANCE RESOLUTION — APPROVED FOR V4-047**  
+Status: **BATCH-13 GOVERNANCE RESOLUTION — APPROVED FOR V4-047**
 Contract version: `market-movement@1.0.0`
 
 ## 1. Alignment boundary

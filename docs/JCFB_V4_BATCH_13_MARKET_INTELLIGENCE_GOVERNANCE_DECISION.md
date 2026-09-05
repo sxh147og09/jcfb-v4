@@ -1,8 +1,10 @@
 # JCFB V4 BATCH-13 MARKET INTELLIGENCE ARCHITECTURE & FEATURE SEMANTICS GOVERNANCE DECISION
 
-Decision status: **APPROVED GOVERNANCE RESOLUTION**  
-Scope: BATCH-13 Entry Review blocker resolution only  
-Baseline: `9407350`  
+Decision status: **APPROVED GOVERNANCE RESOLUTION**
+
+Scope: BATCH-13 Entry Review blocker resolution only
+
+Baseline: `9407350`
 Workspace: `F:\Projects\jcfb-v4`
 
 ## 1. Decision
@@ -99,6 +101,7 @@ The resolution is accepted only after contract consistency tests, dependency con
 
 After those gates pass, BATCH-13 Scope & Entry Review must be rerun. Only a PASS result may authorize V4-046/V4-047/V4-048 implementation.
 
-**Resolution output:** `BATCH-13 MARKET INTELLIGENCE BLOCKERS RESOLVED`  
-**Next gate:** Re-run `BATCH-13 Scope & Entry Review`  
+**Resolution output:** `BATCH-13 MARKET INTELLIGENCE BLOCKERS RESOLVED`
+
+**Next gate:** Re-run `BATCH-13 Scope & Entry Review`
 **Implementation status:** V4-046/V4-047/V4-048 remain **NOT IMPLEMENTED**
