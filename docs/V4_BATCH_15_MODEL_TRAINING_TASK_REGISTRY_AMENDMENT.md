@@ -22,3 +22,17 @@ invent `V4-101`, `V4-052A`, or an equivalent node.
 This amendment does not authorize V4-052/V4-053/V4-054/V4-055, V4-076,
 Score, Risk/Abstention, Shadow, Production, Public, Supabase, migrations, or
 any V3.3.3 change.
+
+## 2026-09-05 registry-owner assessment
+
+The current governance framework does not define a batch-local prerequisite or
+work-package identity outside the `v4-task-registry-001-100@1.0.0` task rows.
+The BATCH-15 plan and dependency register explicitly describe training as a
+prerequisite phase and prohibit adding a task node. Therefore this amendment
+cannot grant an execution identity by itself, and the disposition remains
+`MODEL_TRAINING_TASK_REGISTRY_AMENDMENT_REQUIRED`.
+
+A formal architecture amendment proposal has been recorded in
+`docs/JCFB_V4_BATCH_15_MODEL_TRAINING_ARCHITECTURE_AMENDMENT_PROPOSAL.md`.
+It is a proposal only: no batch-local identity is active, and no runtime work
+package or training implementation is authorized.
