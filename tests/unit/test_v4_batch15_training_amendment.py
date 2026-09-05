@@ -62,7 +62,8 @@ class V4Batch15TrainingAmendmentTests(unittest.TestCase):
 
     def test_implementation_and_formal_fit_remain_unauthorized(self):
         self.assertTrue(self.registry["work_packages"][0]["execution_authorized"])
-        self.assertTrue(all(item["execution_authorized"] is False for item in self.registry["work_packages"][1:]))
+        self.assertTrue(self.registry["work_packages"][1]["execution_authorized"])
+        self.assertTrue(all(item["execution_authorized"] is False for item in self.registry["work_packages"][2:]))
         self.assertEqual("SEPARATE_APPROVAL_REQUIRED", self.registry["work_packages"][-1]["status"])
         self.assertFalse(self.registry["entity_rules"]["may_authorize_formal_model_fit"])
 
@@ -72,7 +73,7 @@ class V4Batch15TrainingAmendmentTests(unittest.TestCase):
             self.assertTrue(item["definition_of_done"])
             self.assertTrue(item["evidence_manifest"])
             self.assertTrue(item["commit_lineage"]["required"])
-            if item["work_package_id"] == "B15-EWP-001":
+            if item["work_package_id"] in {"B15-EWP-001", "B15-EWP-002"}:
                 self.assertTrue(item["commit_lineage"]["commit_ids"])
                 self.assertNotEqual("NOT_GENERATED", item["artifact_hash"])
             else:

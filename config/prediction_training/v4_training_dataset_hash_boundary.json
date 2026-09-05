@@ -10,6 +10,6 @@
   ],
   "volatile_exclusions": ["execution_timestamp", "logging_metadata", "host_specific_absolute_path", "host_name", "process_id", "wall_clock_duration"],
   "hash_rule": "hash only the declared stable_inputs after canonical JSON serialization; volatile fields cannot affect substantive hash",
-  "dataset_builder_status": "NOT_IMPLEMENTED",
-  "canonical_hash": "sha256:e07a31c38bae337009d0e671c72a8750f590b6754de8389d4955ad00526e3189"
+  "dataset_builder_status": "IMPLEMENTED",
+  "canonical_hash": "sha256:6147f113bb8ad0b9f1881ac53c5fc219f812f60ccc72480420a73752ecb8c3c9"
 }

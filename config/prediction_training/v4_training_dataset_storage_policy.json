@@ -1,6 +1,6 @@
 {
   "$id": "v4-training-dataset-storage-policy@1.0.0",
-  "status": "ACTIVE_POLICY_NO_DATASET_CONSTRUCTION",
+  "status": "ACTIVE_POLICY_DATASET_CONSTRUCTION",
   "approved_root": "F:\\Projects\\jcfb-v4\\approved_data\\training_datasets\\",
   "artifact_directories": ["artifacts/", "manifests/", "lineage_manifests/", "revisions/", "evidence/"],
   "staging_root": "F:\\Projects\\jcfb-v4\\.runtime\\training_dataset_staging\\",
@@ -13,9 +13,10 @@
   },
   "zero_data_boundary": {
     "archive_match_count": 0,
-    "usable_training_sample_count": "NOT_COMPUTED",
+    "usable_training_sample_count": 0,
+    "reason": "ZERO_ARCHIVED_CANDIDATES",
     "synthetic_fixtures_are_formal_training_data": false,
-    "dataset_builder_execution": "NOT_PERFORMED"
+    "dataset_builder_execution": "COMPLETE_ZERO_CANDIDATE_BUILD"
   },
-  "canonical_hash": "sha256:cf55fbd64487fc20526b655f0fdb1c2269d2c6bee9bcad5294b3e63bbd97faeb"
+  "canonical_hash": "sha256:69e6d1dcff26a32def3e82a358f0e70b5abf219ee49221fed9f4d8ba3601d1be"
 }

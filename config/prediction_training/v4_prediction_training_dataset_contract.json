@@ -2,7 +2,7 @@
   "$id": "prediction-training-dataset@1.1.0",
   "base_contract": "prediction-training-dataset@1.0.0",
   "amendment_type": "BACKWARD_COMPATIBLE_ADDITIVE_AMENDMENT",
-  "status": "ACTIVE_AMENDMENT_NOT_IMPLEMENTATION_AUTHORIZATION",
+  "status": "ACTIVE_IMPLEMENTATION_CONTRACT",
   "schema_version": "prediction-training-dataset-schema@1.1.0",
   "stable_identity": ["match_id", "cutoff_profile", "engine_role"],
   "sample_unit": "match_id + cutoff_profile + engine_role",
@@ -85,5 +85,5 @@
     "profile": "v4-canonical-json@1.0",
     "volatile_exclusions": ["execution_timestamp", "created_at", "logging_metadata", "host_specific_absolute_path", "host_name", "process_id"]
   },
-  "canonical_hash": "sha256:b59ac292712779a0e9cf14bd187d1896605a272b56edb698a2b9b3f0249483f0"
+  "canonical_hash": "sha256:3f3ea387b7af6b021ec55528d056624293b2462af13072f2ad412bff98a2c9ae"
 }

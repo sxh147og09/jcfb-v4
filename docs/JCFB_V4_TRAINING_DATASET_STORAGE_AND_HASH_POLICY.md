@@ -19,7 +19,8 @@ references/hashes, eligibility, and label references/hashes. Execution times,
 logging metadata, host-specific absolute paths, host name, process ID, and
 duration are volatile and excluded.
 
-The current archive has zero matches. Therefore
-`usable_training_sample_count = NOT_COMPUTED` remains unchanged until a
-Dataset Builder is actually authorized and executed. Synthetic contract tests
-are never formal training artifacts.
+The first authorized Dataset Builder run found zero archived matches and
+produced a formal zero-candidate dataset. Therefore
+`usable_training_sample_count = 0` with reason `ZERO_ARCHIVED_CANDIDATES`.
+This is a computed archive result, not a claim that training data is
+sufficient. Synthetic contract tests are never formal training artifacts.

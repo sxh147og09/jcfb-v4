@@ -1,16 +1,16 @@
 {
   "$id": "v4-batch-prerequisite-workpackages@1.0.0",
   "contract_version": "execution-work-package@1.0.0",
-  "registry_status": "ACTIVE_GOVERNANCE_WITH_EWP001_EXECUTION",
-  "registry_owner_decision": "APPROVED_EWP001_EXECUTION_ONLY",
+  "registry_status": "ACTIVE_GOVERNANCE_WITH_EWP002_EXECUTION_COMPLETE",
+  "registry_owner_decision": "APPROVED_EWP002_HISTORICAL_AS_OF_DATASET_BUILDER_ONLY",
   "approved_at": "2026-09-05T00:00:00+08:00",
   "primary_batch": "BATCH-15",
   "active_execution": {
-    "work_package_id": "B15-EWP-001",
-    "authorization_decision": "APPROVED_FOR_HISTORICAL_SOURCE_ARCHIVE_AND_PROSPECTIVE_CAPTURE_ONLY",
+    "work_package_id": "B15-EWP-002",
+    "authorization_decision": "APPROVED_FOR_HISTORICAL_AS_OF_DATASET_BUILDER_ONLY",
     "authorized_at": "2026-09-05T00:00:00+08:00",
-    "activation_boundary": "PROSPECTIVE_CAPTURE_FROM_AUTHORIZATION_TIME",
-    "forbidden_downstream_work_packages": ["B15-EWP-002", "B15-EWP-003", "B15-EWP-004", "B15-EWP-005"]
+    "activation_boundary": "HISTORICAL_AS_OF_DATASET_BUILD_ONLY",
+    "forbidden_downstream_work_packages": ["B15-EWP-003", "B15-EWP-004", "B15-EWP-005"]
   },
   "authoritative_task_registry": "v4-task-registry-001-100@1.0.0",
   "task_namespace_boundary": {
@@ -74,12 +74,12 @@
       "sequence": 2,
       "work_package_key": "historical-as-of-dataset-builder",
       "work_package_id": "B15-EWP-002",
-      "revision": "r001",
+      "revision": "r002",
       "entity_type": "EXECUTION_WORK_PACKAGE",
       "parent_batch": "BATCH-15",
       "parent_task_scope": ["V4-076", "V4-052", "V4-053", "V4-054", "V4-055"],
-      "status": "REGISTERED_NOT_EXECUTABLE",
-      "execution_authorized": false,
+      "status": "COMPLETE",
+      "execution_authorized": true,
       "dependencies": ["B15-EWP-001"],
       "owner_role": "REGISTRY_OWNER",
       "scope": "Build an as-of dataset only from eligible source records with cutoff-visible Feature Bundle, Gate Record, labels, lineage, and hashes.",
@@ -91,9 +91,9 @@
         "unavailable source populations remain UNKNOWN or NOT_AVAILABLE"
       ],
       "evidence_manifest": ["dataset-manifest", "sample-lineage-manifest", "eligibility-audit", "leakage-audit", "dataset-hash"],
-      "commit_lineage": {"required": true, "status": "NOT_STARTED", "commit_ids": []},
-      "output_artifacts": ["historical-as-of-dataset", "dataset-lineage-manifest"],
-      "artifact_hash": "NOT_GENERATED"
+      "commit_lineage": {"required": true, "status": "COMPLETE", "commit_ids": ["B15-EWP-002-IMPLEMENTATION"]},
+      "output_artifacts": ["ewp002-execution-manifest", "historical-as-of-dataset", "dataset-manifest", "dataset-lineage-manifest", "acceptance-evidence", "closure-readiness-review"],
+      "artifact_hash": "sha256:5da31e18e1aa6bc494386b841b400ff4a137885b67badeb55e030b2d7780d933"
     },
     {
       "sequence": 3,
@@ -185,5 +185,5 @@
     "array_order": "PRESERVE_SEMANTIC_ORDER",
     "self_hash_field": "canonical_hash is omitted during hash computation"
   },
-  "canonical_hash": "sha256:a9af8a91b5bdebb9f40f7f3117660d9af0dfd136d5066e0cc70414070f542daa"
+  "canonical_hash": "sha256:32a83434b5b2ef03630449cda81c474d3e4a51cd44398884e1bb3c43eb878c60"
 }

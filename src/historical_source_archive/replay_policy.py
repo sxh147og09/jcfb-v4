@@ -57,7 +57,11 @@ def select_reconstruction_path(artifact: Mapping[str, Any], replay_context: Mapp
     if replay_context.get("used_latest_generator") is True or replay_context.get("used_latest_config") is True:
         reasons.append("LATEST_GENERATOR_OR_CONFIG_FORBIDDEN")
     for key in REPLAY_REQUIRED:
-        if replay_context.get(key) is not True:
+        supplied = replay_context.get(key)
+        version_proof = key in {"exact_generator_version", "exact_config_version", "exact_mapping_version"}
+        if supplied is True:
+            continue
+        if not isinstance(supplied, str) or not supplied.strip() or not version_proof:
             reasons.append(f"REPLAY_PROOF_MISSING:{key}")
     for key in ("exact_generator_implementation_hash", "exact_config_hash", "exact_mapping_hash"):
         if replay_context.get(key) is not True:
@@ -73,7 +77,9 @@ def select_reconstruction_path(artifact: Mapping[str, Any], replay_context: Mapp
         "path": "DETERMINISTIC_HISTORICAL_REPLAY",
         "status": "ELIGIBLE_FOR_AS_OF_TRAINING",
         "replay_performed": True,
-        "replay_lineage_hash": sha256_json({key: replay_context.get(key) for key in REPLAY_REQUIRED}),
+        "replay_lineage_hash": sha256_json({
+            key: replay_context.get(f"{key}_value", replay_context.get(key)) for key in REPLAY_REQUIRED
+        }),
         "reasons": reasons,
     }
 

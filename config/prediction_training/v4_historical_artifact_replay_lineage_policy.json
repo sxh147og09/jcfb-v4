@@ -1,6 +1,6 @@
 {
   "$id": "historical-artifact-replay-lineage-policy@1.0.0",
-  "status": "ACTIVE_POLICY_DATASET_BUILDER_NOT_IMPLEMENTED",
+  "status": "ACTIVE_POLICY_DATASET_BUILDER_IMPLEMENTED",
   "selection_order": ["STORED_ACCEPTED_ARTIFACT", "DETERMINISTIC_HISTORICAL_REPLAY"],
   "stored_accepted_artifact": {
     "path_id": "STORED_ACCEPTED_ARTIFACT",
@@ -30,5 +30,5 @@
     "algorithm": "SHA-256",
     "profile": "v4-canonical-json@1.0"
   },
-  "canonical_hash": "sha256:761d223fa8647b1ff6178c584f4f072e26bdd1271e3544d00668287cbb5d028a"
+  "canonical_hash": "sha256:9b185922fc72c748fa74e442e2c207c2d9fb4a6a554c33e8d64bf2f73999d560"
 }
