@@ -11,7 +11,7 @@ The machine-readable evidence is [V4_BATCH_14_CONTINUOUS_EXECUTION_EVIDENCE.json
 
 - Baseline: BATCH-13 COMPLETE; BATCH-14 Architecture Governance RESOLVED/PASS; Scope & Entry Review Re-run PASS.
 - Frozen baseline HEAD: `1819263fdc3d4737ec5f4452ba0588e3de505b3b`.
-- Current HEAD: `43b403bb4fc156567c7ec808c98f95ed7a031e12`.
+- Current HEAD before this final evidence refresh: `15d29de9175635a9a611c798a40a735e674bccf7`.
 - Approved scope completed: V4-049, V4-050, V4-051.
 - BATCH-15 was not entered.
 - Working tree: **CLEAN**.
