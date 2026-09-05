@@ -39,7 +39,7 @@ class V4010ArchitectureGovernanceTests(unittest.TestCase):
     def test_frozen_input_consumes_exact_feature_snapshot(self):
         for field in ("feature_bundle_id", "feature_snapshot_hash", "feature_bundle_contract_version"):
             self.assertIn(f"`{field}`", self.frozen)
-        self.assertIn("downstream freeze artifact", self.frozen)
+        self.assertIn("pre-prediction freeze artifact", self.frozen)
         self.assertIn("feature_snapshot_hash", self.frozen)
 
     def test_feature_quality_has_only_data_quality_dimensions(self):
@@ -55,7 +55,13 @@ class V4010ArchitectureGovernanceTests(unittest.TestCase):
         for task in self.fixture["batch_10_tasks"]:
             self.assertIn(f"| {task} |", register)
         self.assertIn("V4-076", register)
-        self.assertIn("V4-038, V4-039, V4-075", register)
+        evidence = (self.docs / "V4_BATCH_15_GOVERNANCE_EVIDENCE.json").read_text(encoding="utf-8")
+        self.assertIn("V4-022", evidence)
+        self.assertIn("V4-038", evidence)
+        self.assertIn("V4-039", evidence)
+        self.assertIn("V4-049", evidence)
+        self.assertIn("V4-050", evidence)
+        self.assertIn("V4-051", evidence)
         self.assertIn("Feature Bundle is upstream", graph)
         self.assertIn("V4-076 Frozen Input", graph)
         self.assertNotIn("V4-076 -> V4-038", self.adr)

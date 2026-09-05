@@ -1,9 +1,9 @@
 # JCFB V4 Task Dependency Register 001–100 1.0
 
-Status: `PASS` for registry coverage and acyclic planning graph; `V4-012` through `V4-027 COMPLETE`; BATCH-05 and BATCH-06 Closure Gates are PASS.
+Status: `PASS` for registry coverage and amended acyclic planning graph; `V4-012` through `V4-027 COMPLETE`; BATCH-14 is `COMPLETE / Closure Gate PASS`; BATCH-15 entry remains BLOCKED.
 
 Dependency Identity: `v4-task-dependency-register-001-100@1.0.0`
-Revision: `r002`
+Revision: `r003`
 Audit Date: `2026-09-04` (`Asia/Shanghai`)
 
 ## 1. Dependency source and semantics
@@ -64,13 +64,13 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 | V4-046 | V4-046｜Market Intelligence Engine 4.0 1.0 | BATCH-13 | V4-040, V4-027, V4-031 | V4-047, V4-048, V4-052, V4-053, V4-054, V4-055 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-047 | V4-047｜Market Movement, Velocity & Divergence Features 1.0 | BATCH-13 | V4-046 | V4-048, V4-052, V4-053, V4-054, V4-055 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-048 | V4-048｜Market Heat & Trap-Risk Interpretation 1.0 | BATCH-13 | V4-046, V4-047 | V4-052, V4-053, V4-054, V4-055 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-049 | V4-049｜Tactical Matchup & League Profile Features 1.0 | BATCH-14 | V4-040, V4-045, V4-037 | V4-051, V4-052, V4-053, V4-054, V4-055 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-050 | V4-050｜Data Quality Engine 4.0 1.0 | BATCH-14 | V4-021, V4-022, V4-027, V4-031, V4-037 | V4-051, V4-052, V4-053, V4-054, V4-055 | Consumes accepted upstream contract and preserves its identity/hash; emits typed assessment objects rather than scalar prediction-like scores. | TODO |
-| V4-051 | V4-051｜Provenance & Quality Gate Enforcement 1.0 | BATCH-14 | V4-049, V4-050 | V4-052, V4-053, V4-054, V4-055, V4-072 | Consumes accepted upstream contract and preserves its identity/hash; emits a pre-Freeze gate record under the approved matrix. | TODO |
-| V4-052 | V4-052｜Outcome Engine 4.0 1.0 | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | V4-056, V4-065, V4-068, V4-069, V4-073, V4-074 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-053 | V4-053｜Handicap Engine 4.0 1.0 | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | V4-069, V4-073, V4-074 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-054 | V4-054｜Goals Engine 4.0 1.0 | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | V4-056, V4-069, V4-073, V4-074 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-055 | V4-055｜HTFT Engine 4.0 1.0 | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | V4-069, V4-073, V4-074 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
+| V4-049 | V4-049｜Tactical Matchup & League Profile Features 1.0 | BATCH-14 | V4-040, V4-045, V4-037 | V4-051, V4-052, V4-053, V4-054, V4-055, V4-076 | Consumes accepted upstream contract and preserves its identity/hash. | COMPLETE |
+| V4-050 | V4-050｜Data Quality Engine 4.0 1.0 | BATCH-14 | V4-021, V4-022, V4-027, V4-031, V4-037 | V4-051, V4-052, V4-053, V4-054, V4-055, V4-076 | Consumes accepted upstream contract and preserves its identity/hash; emits typed assessment objects rather than scalar prediction-like scores. | COMPLETE |
+| V4-051 | V4-051｜Provenance & Quality Gate Enforcement 1.0 | BATCH-14 | V4-049, V4-050 | V4-052, V4-053, V4-054, V4-055, V4-072, V4-076 | Consumes accepted upstream contract and preserves its identity/hash; emits a pre-Freeze gate record under the approved matrix. | COMPLETE |
+| V4-052 | V4-052｜Outcome Engine 4.0 1.0 | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051, V4-076 | V4-056, V4-065, V4-068, V4-069, V4-073, V4-074 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
+| V4-053 | V4-053｜Handicap Engine 4.0 1.0 | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051, V4-076 | V4-069, V4-073, V4-074 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
+| V4-054 | V4-054｜Goals Engine 4.0 1.0 | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051, V4-076 | V4-056, V4-069, V4-073, V4-074 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
+| V4-055 | V4-055｜HTFT Engine 4.0 1.0 | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051, V4-076 | V4-069, V4-073, V4-074 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-056 | V4-056｜Dynamic Lambda Engine 4.0 1.0 | BATCH-16 | V4-041, V4-042, V4-043, V4-052, V4-054 | V4-057, V4-058, V4-059, V4-065 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-057 | V4-057｜Score Distribution Candidate Ensemble 4.0 | BATCH-16 | V4-056 | V4-058, V4-059, V4-062 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-058 | V4-058｜Score Variance, Correlation, BTTS & Clean Sheet Layer 4.0 | BATCH-16 | V4-056, V4-057 | V4-059 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
@@ -90,9 +90,9 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 | V4-072 | V4-072｜Risk & Abstention Engine 4.0 1.0 | BATCH-19 | V4-069, V4-070, V4-071, V4-068, V4-051 | V4-075 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-073 | V4-073｜Prediction Consistency Engine 1.0 | BATCH-19 | V4-052, V4-053, V4-054, V4-055, V4-064, V4-069, V4-070 | V4-074 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-074 | V4-074｜Five-Market Orchestrator 4.0 1.0 | BATCH-20 | V4-052, V4-053, V4-054, V4-055, V4-064, V4-073 | V4-075 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-075 | V4-075｜Final Prediction Gate 4.0 1.0 | BATCH-20 | V4-074, V4-072 | V4-076 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
-| V4-076 | V4-076｜Frozen Input & Immutable Lineage 4.0 1.0 | BATCH-20 | V4-022, V4-038, V4-039, V4-075 | V4-077 | Downstream freeze consumes exact `feature_bundle_id` and `feature_snapshot_hash`; no reverse dependency into BATCH-10. | TODO |
-| V4-077 | V4-077｜Frozen Prediction & Revision Chain 4.0 1.0 | BATCH-20 | V4-076 | V4-078, V4-079, V4-085, V4-090 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
+| V4-075 | V4-075｜Final Prediction Gate 4.0 1.0 | BATCH-20 | V4-074, V4-072, V4-076 | V4-077 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
+| V4-076 | V4-076｜Frozen Input & Immutable Lineage 4.0 1.0 | BATCH-15 | V4-022, V4-038, V4-039, V4-049, V4-050, V4-051 | V4-052, V4-053, V4-054, V4-055, V4-075, V4-077 | Pre-prediction freeze consumes exact Feature Bundle, gate record, and snapshot identities; no dependency on Prediction or Final Gate. | TODO |
+| V4-077 | V4-077｜Frozen Prediction & Revision Chain 4.0 1.0 | BATCH-20 | V4-076, V4-075 | V4-078, V4-079, V4-085, V4-090 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-078 | V4-078｜Official Result Intake 1.0 | BATCH-21 | V4-077 | V4-079, V4-086 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-079 | V4-079｜Postmatch Review Engine 4.0 1.0 | BATCH-21 | V4-077, V4-078 | V4-080, V4-081, V4-082, V4-086 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
 | V4-080 | V4-080｜Model Evaluation & Match Explanation Separation 1.0 | BATCH-21 | V4-079 | V4-081 | Consumes accepted upstream contract and preserves its identity/hash. | TODO |
@@ -135,12 +135,12 @@ The verified historical edge is V4-011 -> V4-012. Edges from V4-013 onward are r
 | BATCH-12 | BATCH-10, BATCH-11 | V4-044–V4-045 | Governance-amended upstream set; child acceptance remains independent. |
 | BATCH-13 | BATCH-06, BATCH-07, BATCH-10 | V4-046–V4-048 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-14 | BATCH-09, BATCH-10, BATCH-12 | V4-049–V4-051 | Ordinary dependency edge; child acceptance remains independent. |
-| BATCH-15 | BATCH-11, BATCH-12, BATCH-13, BATCH-14 | V4-052–V4-055 | Ordinary dependency edge; child acceptance remains independent. |
+| BATCH-15 | BATCH-11, BATCH-12, BATCH-13, BATCH-14 | V4-076, V4-052–V4-055 | Pre-prediction freeze wave precedes independent engines; child acceptance remains independent. |
 | BATCH-16 | BATCH-11, BATCH-15 | V4-056–V4-059 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-17 | BATCH-16 | V4-060–V4-064 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-18 | BATCH-15, BATCH-16, BATCH-17 | V4-065–V4-068 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-19 | BATCH-15, BATCH-17, BATCH-18 | V4-069–V4-073 | Ordinary dependency edge; child acceptance remains independent. |
-| BATCH-20 | BATCH-19 | V4-074–V4-077 | Ordinary dependency edge; child acceptance remains independent. |
+| BATCH-20 | BATCH-15, BATCH-19 | V4-074, V4-075, V4-077 | Downstream orchestration/final gate/frozen prediction; child acceptance remains independent. |
 | BATCH-21 | BATCH-20 | V4-078–V4-081 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-22 | BATCH-21 | V4-082–V4-084 | Ordinary dependency edge; child acceptance remains independent. |
 | BATCH-23 | BATCH-20, BATCH-22 | V4-085–V4-087 | Ordinary dependency edge; child acceptance remains independent. |
@@ -192,3 +192,22 @@ governed by `market-intelligence-feature@1.0.0`, `market-movement@1.0.0`,
 `market-intelligence-mapping@1.0.0`. These are contract/config prerequisites,
 not additional task nodes. No task implementation is authorized until the
 post-resolution BATCH-13 Entry Review passes.
+
+## BATCH-14 and BATCH-15 dependency/status amendment
+
+The live status is `V4-049=COMPLETE`, `V4-050=COMPLETE`, `V4-051=COMPLETE`,
+with BATCH-14 `COMPLETE / Closure Gate PASS`, sourced from
+`docs/V4_BATCH_14_CONTINUOUS_EXECUTION_EVIDENCE.json`. Historical TODO rows
+are retained as snapshots only.
+
+The amended live edges are:
+
+```text
+V4-022 + V4-038 + V4-039 + V4-049 + V4-050 + V4-051 -> V4-076
+V4-076 -> V4-052, V4-053, V4-054, V4-055
+V4-076 + V4-075 -> V4-077
+```
+
+V4-076 is assigned to BATCH-15 for execution ordering; BATCH-20 retains
+V4-074, V4-075, and V4-077. This amendment removes the former V4-076 ->
+V4-075 edge and preserves an acyclic graph.

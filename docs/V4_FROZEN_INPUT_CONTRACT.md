@@ -6,7 +6,10 @@ Supersedes: `frozen-input@1.0.0` in `docs/V4_FROZEN_INPUT_CONTRACT_1.0.md`
 
 ## 1. Decision and boundary
 
-Frozen Input is the immutable downstream freeze artifact for a formal pre-match run. It consumes accepted canonical facts, source snapshots, context, Evidence, and the exact Feature Bundle; it is not an upstream prerequisite of Feature Bundle creation.
+Frozen Input is the immutable pre-prediction freeze artifact for a formal
+pre-match run. It consumes accepted canonical facts, source snapshots, context,
+Evidence, the exact Feature Bundle, and the accepted BATCH-14 gate record; it
+is not an upstream prerequisite of Feature Bundle creation.
 
 ```text
 canonical facts / official odds / external markets / team context / Evidence Graph
@@ -39,7 +42,10 @@ After `FROZEN`, the record and its referenced Feature Bundle are immutable. A co
 
 All selected inputs must be eligible by `prediction_cutoff_at`, with cutoff before kickoff. This contract does not weaken V4-022. Production, Shadow, and Experiment records retain their role and may be compared only under the approved same-frozen-input rules.
 
-Frozen Input is not implemented by this amendment; V4-076 remains the approved implementation task in BATCH-20.
+Frozen Input is not implemented by this amendment. V4-076 remains the sole
+approved implementation task, but its execution position is amended to the
+BATCH-15 pre-prediction freeze wave. The task ID is retained and no duplicate
+or temporary Frozen Input is permitted.
 
 ```json
 {

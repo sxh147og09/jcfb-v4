@@ -172,6 +172,6 @@ V4-045 Context Integration. Those tasks produce pre-Frozen artifacts under
 Feature Bundle, statistical feature, Team Context, and Evidence Graph
 references. A pre-Frozen artifact does not require or contain
 `frozen_input_id`/`frozen_input_hash` and must not be presented as a formal
-Prediction, Score, Risk, Consensus, or other Engine Run. V4-076 remains the
-downstream task that creates the Frozen Input boundary and may later be
-consumed by formal Engine Runs.
+Prediction, Score, Risk, Consensus, or other Engine Run. V4-076 is the sole
+task that creates the pre-prediction Frozen Input boundary and is consumed by
+formal Engine Runs after the freeze.

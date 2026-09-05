@@ -202,7 +202,7 @@ A batch name, registry entry, or planning PASS is not task completion. V4-012 th
 | [ ] | V4-073 | V4-073｜Prediction Consistency Engine 1.0 | BATCH-19 | SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-074 | V4-074｜Five-Market Orchestrator 4.0 1.0 | BATCH-20 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-075 | V4-075｜Final Prediction Gate 4.0 1.0 | BATCH-20 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
-| [ ] | V4-076 | V4-076｜Frozen Input & Immutable Lineage 4.0 1.0 | BATCH-20 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
+| [ ] | V4-076 | V4-076｜Frozen Input & Immutable Lineage 4.0 1.0 | BATCH-15 | BATCHABLE + SERIAL | GOVERNANCE_AMENDMENT_V4-015-ORD-001; implementation remains TODO |
 | [ ] | V4-077 | V4-077｜Frozen Prediction & Revision Chain 4.0 1.0 | BATCH-20 | SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-078 | V4-078｜Official Result Intake 1.0 | BATCH-21 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
 | [ ] | V4-079 | V4-079｜Postmatch Review Engine 4.0 1.0 | BATCH-21 | BATCHABLE + SERIAL | RECONSTRUCTED_FROM_APPROVED_ARCHITECTURE |
@@ -315,3 +315,15 @@ provider eligibility, divergence, quality, anomaly flags, hash, and lifecycle
 boundaries. Historical checklist rows remain status snapshots; BATCH-13 task
 implementation remains NOT IMPLEMENTED until the post-resolution Entry Review
 passes.
+
+## BATCH-14 and BATCH-15 live status/order override
+
+The live authoritative status is BATCH-14 `COMPLETE / Closure Gate PASS`, with
+V4-049, V4-050, and V4-051 `COMPLETE`, backed by
+`docs/V4_BATCH_14_CONTINUOUS_EXECUTION_EVIDENCE.json` and the three
+implementation reports. V4-052 through V4-055 remain TODO. V4-076 remains
+TODO but is ordered in the BATCH-15 pre-prediction freeze wave. Its live
+upstreams are V4-022, V4-038, V4-039, V4-049, V4-050, and V4-051; each of
+V4-052 through V4-055 depends on V4-076. BATCH-20 retains V4-074, V4-075,
+and V4-077. The status consistency validator treats this override and the
+machine evidence as authoritative over historical snapshot rows.

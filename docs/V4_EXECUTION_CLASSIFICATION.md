@@ -3,7 +3,7 @@
 Status: `PASS` for complete classification and unique primary mapping; `V4-012–V4-019 COMPLETE`; V4-020+ execution remains not started.
 
 Classification Identity: `v4-execution-classification-012-100@1.0.0`
-Revision: `r003`
+Revision: `r004`
 Audit Date: `2026-09-04` (`Asia/Shanghai`)
 Source of truth: `docs/V4_TASK_REGISTRY_001_100.md`
 Execution Declaration: **BATCH-04 PRODUCTION SCHEMA APPLY AND V4 WRITE BOUNDARY COMPLETE; NO MODEL OR PUBLIC RELEASE EXECUTION**
@@ -58,9 +58,9 @@ The classification below is a complete register, not a candidate envelope. Accep
 | V4-046 | V4-046｜Market Intelligence Engine 4.0 1.0 | BATCHABLE + SERIAL | BATCH-13 | V4-040, V4-027, V4-031 | YES | NO | NO | TODO |
 | V4-047 | V4-047｜Market Movement, Velocity & Divergence Features 1.0 | BATCHABLE + PARALLEL | BATCH-13 | V4-046 | YES | NO | NO | TODO |
 | V4-048 | V4-048｜Market Heat & Trap-Risk Interpretation 1.0 | BATCHABLE + PARALLEL | BATCH-13 | V4-046, V4-047 | YES | NO | NO | TODO |
-| V4-049 | V4-049｜Tactical Matchup & League Profile Features 1.0 | BATCHABLE + PARALLEL | BATCH-14 | V4-040, V4-045, V4-037 | YES | NO | NO | TODO; governed by tactical-league-profile-feature@1.0.0 |
-| V4-050 | V4-050｜Data Quality Engine 4.0 1.0 | BATCHABLE + SERIAL | BATCH-14 | V4-021, V4-022, V4-027, V4-031, V4-037 | YES | NO | NO | TODO; governed by data-quality-assessment@1.0.0 |
-| V4-051 | V4-051｜Provenance & Quality Gate Enforcement 1.0 | SERIAL | BATCH-14 | V4-049, V4-050 | YES | NO | NO | TODO; governed by provenance-quality-gate@1.0.0 and quality-gate-matrix@1.0.0 |
+| V4-049 | V4-049｜Tactical Matchup & League Profile Features 1.0 | BATCHABLE + PARALLEL | BATCH-14 | V4-040, V4-045, V4-037 | YES | NO | NO | COMPLETE; governed by tactical-league-profile-feature@1.0.0 |
+| V4-050 | V4-050｜Data Quality Engine 4.0 1.0 | BATCHABLE + SERIAL | BATCH-14 | V4-021, V4-022, V4-027, V4-031, V4-037 | YES | NO | NO | COMPLETE; governed by data-quality-assessment@1.0.0 |
+| V4-051 | V4-051｜Provenance & Quality Gate Enforcement 1.0 | SERIAL | BATCH-14 | V4-049, V4-050 | YES | NO | NO | COMPLETE; governed by provenance-quality-gate@1.0.0 and quality-gate-matrix@1.0.0 |
 | V4-052 | V4-052｜Outcome Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | YES | NO | NO | TODO |
 | V4-053 | V4-053｜Handicap Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | YES | NO | NO | TODO |
 | V4-054 | V4-054｜Goals Engine 4.0 1.0 | BATCHABLE + PARALLEL | BATCH-15 | V4-041, V4-042, V4-043, V4-044, V4-045, V4-046, V4-047, V4-048, V4-049, V4-050, V4-051 | YES | NO | NO | TODO |
@@ -85,7 +85,7 @@ The classification below is a complete register, not a candidate envelope. Accep
 | V4-073 | V4-073｜Prediction Consistency Engine 1.0 | SERIAL | BATCH-19 | V4-052, V4-053, V4-054, V4-055, V4-064, V4-069, V4-070 | YES | NO | NO | TODO |
 | V4-074 | V4-074｜Five-Market Orchestrator 4.0 1.0 | BATCHABLE + SERIAL | BATCH-20 | V4-052, V4-053, V4-054, V4-055, V4-064, V4-073 | YES | NO | NO | TODO |
 | V4-075 | V4-075｜Final Prediction Gate 4.0 1.0 | BATCHABLE + SERIAL | BATCH-20 | V4-074, V4-072 | YES | NO | NO | TODO |
-| V4-076 | V4-076｜Frozen Input & Immutable Lineage 4.0 1.0 | BATCHABLE + SERIAL | BATCH-20 | V4-022, V4-038, V4-039, V4-075 | YES | NO | NO | TODO |
+| V4-076 | V4-076｜Frozen Input & Immutable Lineage 4.0 1.0 | BATCHABLE + SERIAL | BATCH-15 | V4-022, V4-038, V4-039, V4-049, V4-050, V4-051 | YES | NO | NO | TODO |
 | V4-077 | V4-077｜Frozen Prediction & Revision Chain 4.0 1.0 | SERIAL | BATCH-20 | V4-076 | YES | NO | NO | TODO |
 | V4-078 | V4-078｜Official Result Intake 1.0 | BATCHABLE + SERIAL | BATCH-21 | V4-077 | YES | NO | NO | TODO |
 | V4-079 | V4-079｜Postmatch Review Engine 4.0 1.0 | BATCHABLE + SERIAL | BATCH-21 | V4-077, V4-078 | YES | NO | NO | TODO |
@@ -143,3 +143,15 @@ cannot bypass registered dependencies. The active contract, config, and
 mapping identities are recorded in the BATCH-13 governance decision and its
 five versioned artifacts. Task implementation remains unauthorized until the
 post-resolution Scope & Entry Review passes.
+
+## BATCH-14 and BATCH-15 live classification/status override
+
+BATCH-14 is `COMPLETE / Closure Gate PASS`; V4-049, V4-050, and V4-051 are
+`COMPLETE` by the existing closure evidence. Historical table rows remain
+classification snapshots.
+
+V4-076 keeps `BATCHABLE + SERIAL` but its primary batch is BATCH-15 because it
+is the pre-prediction Frozen Input wave. BATCH-15 execution is `V4-076 ->
+V4-052/V4-053/V4-054/V4-055`; BATCH-20 retains downstream V4-074, V4-075, and
+V4-077. The amended graph is acyclic and the status consistency validator is
+the live cross-document check.

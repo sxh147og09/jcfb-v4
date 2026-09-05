@@ -83,12 +83,12 @@ flowchart TD
 | BATCH-12 | BATCH-10, BATCH-11 | V4-044–V4-045 | Governance-amended upstream set; Football Intelligence & Context Feature Engines; child edges are in the task dependency register. |
 | BATCH-13 | BATCH-06, BATCH-07, BATCH-10 | V4-046–V4-048 | Market Intelligence Feature Engines; child edges are in the task dependency register. |
 | BATCH-14 | BATCH-09, BATCH-10, BATCH-12 | V4-049–V4-051 | Tactical, Quality & Provenance Gates; child edges are in the task dependency register. |
-| BATCH-15 | BATCH-11, BATCH-12, BATCH-13, BATCH-14 | V4-052–V4-055 | Core Prediction Engines: Outcome / Handicap / Goals / HTFT; child edges are in the task dependency register. |
+| BATCH-15 | BATCH-11, BATCH-12, BATCH-13, BATCH-14 | V4-076, V4-052–V4-055 | Pre-prediction Frozen Input followed by Core Prediction Engines; child edges are in the task dependency register. |
 | BATCH-16 | BATCH-11, BATCH-15 | V4-056–V4-059 | Score Engine Part A: Lambda / Distribution / Variance; child edges are in the task dependency register. |
 | BATCH-17 | BATCH-16 | V4-060–V4-064 | Score Engine Part B: Matrix / Candidates / Selector / Diversity; child edges are in the task dependency register. |
 | BATCH-18 | BATCH-15, BATCH-16, BATCH-17 | V4-065–V4-068 | Match Simulation / Match Script / Upset; child edges are in the task dependency register. |
 | BATCH-19 | BATCH-15, BATCH-17, BATCH-18 | V4-069–V4-073 | Consensus / Disagreement / Uncertainty / Risk / Consistency; child edges are in the task dependency register. |
-| BATCH-20 | BATCH-19 | V4-074–V4-077 | Five-Market Orchestrator / Final Gate / Frozen Lineage; child edges are in the task dependency register. |
+| BATCH-20 | BATCH-15, BATCH-19 | V4-074, V4-075, V4-077 | Five-Market Orchestrator / Final Gate / Frozen Prediction Lineage; child edges are in the task dependency register. |
 | BATCH-21 | BATCH-20 | V4-078–V4-081 | Official Result / Postmatch Review / Error Attribution; child edges are in the task dependency register. |
 | BATCH-22 | BATCH-21 | V4-082–V4-084 | Calibration / League Profiles / Regression Evaluation; child edges are in the task dependency register. |
 | BATCH-23 | BATCH-20, BATCH-22 | V4-085–V4-087 | Forward Shadow Pair / Tier A Collection Infrastructure; child edges are in the task dependency register. |
@@ -164,3 +164,21 @@ internal preparation. It cannot create a parallel acceptance path around the
 registered V4-047 -> V4-048 edge. V4-046 through V4-048 are pre-Frozen market
 feature artifacts governed by the five versioned BATCH-13 contracts/config
 artifacts and do not require Frozen Input or formal Engine Output.
+
+## BATCH-15 Frozen Input ordering amendment
+
+The live status source records BATCH-14 as `COMPLETE / Closure Gate PASS`
+with V4-049, V4-050, and V4-051 accepted by the existing closure evidence.
+
+The live graph inserts V4-076 before the four BATCH-15 prediction engines:
+
+```text
+BATCH-14 -> V4-076 -> {V4-052, V4-053, V4-054, V4-055}
+{V4-052, V4-053, V4-054, V4-055} -> V4-074 -> V4-075 -> V4-077
+```
+
+V4-076 has only pre-prediction prerequisites (`V4-022`, `V4-038`, `V4-039`,
+`V4-049`, `V4-050`, `V4-051`). It does not depend on Prediction or Final Gate.
+Its task ID is retained while its primary batch is BATCH-15. The live graph
+has 89/89 task nodes, zero orphan references, and zero cycles under this
+amendment.
