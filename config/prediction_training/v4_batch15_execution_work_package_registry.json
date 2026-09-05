@@ -99,7 +99,7 @@
       "sequence": 3,
       "work_package_key": "temporal-split-readiness",
       "work_package_id": "B15-EWP-003",
-      "revision": "r001",
+      "revision": "r002",
       "entity_type": "EXECUTION_WORK_PACKAGE",
       "parent_batch": "BATCH-15",
       "parent_task_scope": ["V4-076", "V4-052", "V4-053", "V4-054", "V4-055"],
@@ -107,18 +107,25 @@
       "execution_authorized": false,
       "dependencies": ["B15-EWP-002"],
       "owner_role": "REGISTRY_OWNER",
-      "scope": "Define temporal train, validation, holdout, and readiness evidence without random splitting or same-match leakage.",
+      "scope": "Freeze the executable temporal split, walk-forward, readiness, league scope, revision binding, leakage, and deterministic artifact contracts without implementing or authorizing the runtime.",
       "definition_of_done": [
-        "dataset artifact and manifest are present and hash-matched",
-        "temporal split boundaries and walk-forward policy are frozen",
-        "all cutoff variants of one match remain in one partition",
-        "holdout non-use in fitting, selection, and early stopping is proven",
-        "split artifact has deterministic canonical hash"
+        "versioned explicit temporal boundary configuration is frozen and requires train_end, validation_start, validation_end, holdout_start, and holdout_end",
+        "walk-forward expanding/sliding parameter schema is frozen with no runtime defaults and SPLIT_CONFIG_NOT_DECLARED fail-closed behavior",
+        "same-match grouping, deterministic identical-timestamp tie-break, strict leakage relations, and partition inclusivity are machine-readable",
+        "frozen class minimums, structural stability diagnostics, 100 percent required-feature availability, and small-sample fail-closed states are executable",
+        "machine-readable league scope and dataset revision binding reject inference, mixed revisions, and implicit superseded consumption",
+        "zero-data readiness output contract and split/readiness artifact schemas have deterministic substantive hash boundaries",
+        "re-entry review separately reports implementation readiness, real-dataset split readiness, and formal model-fit readiness"
       ],
-      "evidence_manifest": ["temporal-split-manifest", "boundary-audit", "same-match-audit", "holdout-isolation-audit", "split-hash"],
+      "evidence_manifest": ["b15-ewp003-temporal-split-and-readiness-contract", "b15-ewp003-blocked-readiness-report", "scope-entry-reentry-review", "contract-validator", "focused-tests"],
       "commit_lineage": {"required": true, "status": "NOT_STARTED", "commit_ids": []},
       "output_artifacts": ["temporal-split-artifact", "training-readiness-report"],
-      "artifact_hash": "NOT_GENERATED"
+      "artifact_hash": "NOT_GENERATED",
+      "contract_identity": "b15-ewp003-temporal-split-and-readiness-contract@1.0.0",
+      "contract_hash": "sha256:1958ae6a27a64f6e03829503a5c8399f207da46eac5993cff2f2eabef51245f8",
+      "current_real_dataset_readiness": "BLOCKED / TRAINING_DATA_INSUFFICIENT",
+      "runtime_implementation_readiness": "READY_FOR_IMPLEMENTATION",
+      "formal_model_fit_readiness": "BLOCKED"
     },
     {
       "sequence": 4,
@@ -185,5 +192,5 @@
     "array_order": "PRESERVE_SEMANTIC_ORDER",
     "self_hash_field": "canonical_hash is omitted during hash computation"
   },
-  "canonical_hash": "sha256:32a83434b5b2ef03630449cda81c474d3e4a51cd44398884e1bb3c43eb878c60"
+  "canonical_hash": "sha256:74dc589d07f3826acd3a12023a0404ba7f9db12a1454e0bb2fd0e0e560dabccc"
 }

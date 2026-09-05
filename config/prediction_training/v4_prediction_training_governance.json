@@ -8,7 +8,8 @@
     "training_governance_owner": "BATCH-15",
     "training_fitting_phase": "MANDATORY_READINESS_PHASE_BEFORE_V4-052..055",
     "new_task_ids_created": false,
-    "registry_amendment": "MODEL_TRAINING_TASK_REGISTRY_AMENDMENT_REQUIRED_IF_EXECUTION_IDENTITY_IS_REQUIRED",
+    "registry_amendment": "MODEL_TRAINING_EXECUTION_IDENTITY_RESOLVED_BY_EXECUTION_WORK_PACKAGE_REGISTRY",
+    "execution_identity": "v4-batch-prerequisite-workpackages@1.0.0",
     "execution_authorized": false
   },
   "architecture": [
@@ -56,7 +57,16 @@
       "schema_version"
     ],
     "required_time_relation": "feature_availability_at <= prediction_cutoff_at < kickoff_at",
-    "current_repository_artifact": "NOT_AVAILABLE",
+    "current_repository_artifact": {
+      "dataset_id": "dataset-13c4b050dc50e2de3ec8a961a9c9b029",
+      "dataset_revision": "r001",
+      "dataset_manifest_hash": "sha256:417cf5108ba30142f4cbfa244b53b07f85bbe77ce1aa7de0c0ad2c99ab93bf23",
+      "dataset_substantive_hash": "sha256:5da31e18e1aa6bc494386b841b400ff4a137885b67badeb55e030b2d7780d933",
+      "status": "AVAILABLE_EMPTY",
+      "candidate_samples": 0,
+      "usable_samples": 0,
+      "reason": "ZERO_ARCHIVED_CANDIDATES"
+    },
     "today_final_revision_reconstruction": "FORBIDDEN",
     "append_only_correction": "NEW_DATASET_ID_NEW_HASH_EXPLICIT_SUPERSEDES"
   },
@@ -108,17 +118,56 @@
     "future_data": "BLOCKED"
   },
   "temporal_split_contract": {
-    "version": "prediction-training-temporal-split@1.0.0",
-    "allowed_strategies": ["TIME_ORDERED_TRAIN_VALIDATION_HOLDOUT", "WALK_FORWARD_ROLLING_ORIGIN"],
+    "version": "prediction-training-temporal-split@1.1.0",
+    "contract_identity": "b15-ewp003-temporal-split-and-readiness-contract@1.0.0",
+    "contract_hash": "sha256:1958ae6a27a64f6e03829503a5c8399f207da46eac5993cff2f2eabef51245f8",
+    "work_package_revision": "B15-EWP-003/r002",
+    "allowed_strategies": ["EXPLICIT_TEMPORAL_BOUNDARIES", "WALK_FORWARD_ROLLING_ORIGIN"],
+    "default_strategy": null,
+    "strategy_selection": "EXPLICIT_CONFIG_REQUIRED",
     "random_split": "FORBIDDEN",
-    "ordering_key": "prediction_cutoff_at_then_sample_id",
+    "ordering_key": ["prediction_cutoff_at", "match_id_group_key", "sample_id_within_group"],
+    "identical_timestamp_tie_break": ["match_id_group_key", "sample_id_within_group"],
+    "minimum_chronological_separation": "REQUIRED_POSITIVE_DURATION_IN_CONFIG; NO_DEFAULT",
+    "partition_inclusivity_exclusivity": {
+      "train": "(-infinity, train_end]",
+      "validation": "[validation_start, validation_end]",
+      "holdout": "[holdout_start, holdout_end]"
+    },
+    "explicit_temporal_boundaries": ["train_end", "validation_start", "validation_end", "holdout_start", "holdout_end"],
+    "boundary_config_required": true,
     "strict_relations": [
       "max(train.prediction_cutoff_at) < min(validation.prediction_cutoff_at)",
       "max(validation.prediction_cutoff_at) < min(holdout.prediction_cutoff_at)",
+      "train_end + minimum_chronological_separation <= validation_start",
+      "validation_end + minimum_chronological_separation <= holdout_start",
       "holdout_is_not_used_for_fitting_selection_or_early_stopping"
     ],
     "same_match_multi_cutoff": "All cutoff variants remain in one temporal partition",
-    "split_boundaries_in_hash": true
+    "grouping_root": "match_id",
+    "group_assignment_unit": "match_id",
+    "ratio_boundary_policy": "FORBIDDEN_UNLESS_DETERMINISTIC_TIME_BOUNDARY_DERIVATION_IS_DECLARED",
+    "split_boundaries_in_hash": true,
+    "walk_forward": {
+      "required_parameters": ["mode", "initial_train_period", "origin_step", "validation_horizon", "holdout_horizon", "minimum_folds", "incomplete_final_fold_policy", "same_match_grouping_policy", "fold_level_minimum_readiness_policy"],
+      "mode_values": ["expanding", "sliding"],
+      "sliding_window_width": "REQUIRED_WHEN_MODE_IS_SLIDING",
+      "missing_parameter_result": "SPLIT_CONFIG_NOT_DECLARED",
+      "numeric_defaults": "NONE",
+      "incomplete_final_fold_policy_values": ["REJECT", "DROP_INCOMPLETE_FINAL_FOLD"]
+    }
+  },
+  "league_scope_contract": {
+    "version": "prediction-training-league-scope@1.0.0",
+    "canonical_source": "DATASET_MANIFEST",
+    "scope_required": true,
+    "scope_not_declared_result": "LEAGUE_SCOPE_NOT_DECLARED",
+    "scope_types": ["SINGLE_LEAGUE", "DECLARED_MULTI_LEAGUE"],
+    "single_league_required_fields": ["league_id", "scope_declaration_hash"],
+    "declared_multi_league_required_fields": ["league_ids", "partition_coverage_requirements", "fold_coverage_requirements", "scope_declaration_hash"],
+    "cross_league_generalization_claim": "FORBIDDEN_UNLESS_SEPARATELY_APPROVED",
+    "sample_content_inference": "FORBIDDEN",
+    "source_conflict_action": "REJECT_UNTIL_CANONICAL_SOURCE_IS_RECONCILED"
   },
   "sample_eligibility_contract": {
     "version": "prediction-training-sample-eligibility@1.0.0",
@@ -141,15 +190,60 @@
     "cross_split_same_match": "FORBIDDEN"
   },
   "minimum_sample_readiness_rule": {
-    "version": "prediction-training-readiness-rule@1.0.0",
+    "version": "prediction-training-readiness-rule@1.1.0",
     "no_total_sample_shortcut": true,
-    "class_coverage": "Every declared class must be represented in train, validation, and holdout; each class requires >=5 train, >=3 validation, >=3 holdout observations",
+    "class_minimums": {"train": 5, "validation": 3, "holdout": 3},
+    "class_coverage": "Every declared class must be represented in train, validation, and holdout; each class requires the frozen partition minimum",
     "temporal_coverage": "At least 3 ordered train periods plus later validation and holdout periods; boundaries must be non-overlapping",
     "league_coverage": "Every declared league scope must be represented in each partition, or the artifact must declare a single-league scope and make no cross-league claim",
-    "feature_availability": "100% of required features available at cutoff; optional missingness remains typed and explicit",
-    "statistical_stability": "Declared time-window class-rate and required-feature-availability diagnostics must report PASS; UNKNOWN or UNSTABLE blocks",
+    "feature_availability": {
+      "formula": "samples_with_all_declared_required_features_available_at_cutoff / eligible_samples_in_window",
+      "required_value": 1.0,
+      "optional_missingness": "TYPED_AND_EXPLICIT"
+    },
+    "diagnostic_windows": {"source": ["each_required_temporal_partition", "each_required_walk_forward_fold"], "definition": "declared partition or fold membership after match grouping"},
+    "class_rate_formula": "class_support_in_window / eligible_samples_in_window; undefined denominator is UNKNOWN",
+    "statistical_stability": {
+      "status_values": ["PASS", "UNSTABLE", "UNKNOWN"],
+      "rule": "STRUCTURAL_ONLY_UNTIL_NUMERIC_THRESHOLD_APPROVED",
+      "structural_pass": ["every declared class represented in every required window", "required feature availability equals 100%", "no window has undefined class support"],
+      "numeric_threshold": "NOT_APPROVED; IF_REQUIRED_REMAINS_AN_INDEPENDENT_BLOCKER",
+      "unknown_or_unstable": "BLOCKS"
+    },
+    "small_sample_behavior": "FAIL_CLOSED_TO_UNKNOWN_OR_TRAINING_DATA_INSUFFICIENT; NEVER_INVENT_THRESHOLD",
     "insufficient_data_result": "TRAINING_DATA_INSUFFICIENT",
-    "current_result": "TRAINING_PIPELINE_NOT_READY_DATASET_NOT_AVAILABLE"
+    "current_result": "TRAINING_DATA_INSUFFICIENT",
+    "current_dataset_status": "AVAILABLE_EMPTY"
+  },
+  "dataset_revision_binding": {
+    "version": "prediction-training-dataset-revision-binding@1.0.0",
+    "required_identity": ["dataset_id", "dataset_revision", "dataset_manifest_hash", "dataset_substantive_hash"],
+    "single_revision_per_split": true,
+    "superseded_revision_consumption": "REJECT",
+    "active_revision_policy": "ONLY_ACTIVE_DATASET_REVISION_MAY_BE_CONSUMED",
+    "historical_replay": "EXPLICIT_REPLAY_MODE_REQUIRED_WITH_EXACT_IDENTITY; NEVER_IMPLICIT",
+    "mixed_revision_action": "REJECT_SPLIT",
+    "superseded_and_active_coexistence": "MUST_NOT_BE_SILENTLY_CONSUMED_TOGETHER"
+  },
+  "training_readiness_report_contract": {
+    "version": "training-readiness-report@1.0.0",
+    "required_fields": ["dataset_identity_and_hashes", "split_strategy_and_config_identity_hash", "split_status", "readiness_state", "reason_codes", "per_engine_counts", "per_class_support_by_partition", "temporal_coverage", "league_coverage", "required_feature_coverage", "statistical_stability_diagnostic_state", "same_match_leakage_check", "future_leakage_check", "deterministic_report_hash"],
+    "zero_data_contract": {
+      "split_status": "NOT_PERFORMABLE",
+      "readiness_state": "BLOCKED",
+      "reason_code": "TRAINING_DATA_INSUFFICIENT",
+      "total_samples": 0,
+      "per_engine_samples": 0,
+      "split_artifact_generated": false
+    },
+    "model_accuracy": "FORBIDDEN_BEFORE_MODEL_FIT"
+  },
+  "temporal_split_artifact_contract": {
+    "version": "temporal-split-artifact@1.0.0",
+    "required_fields": ["split_artifact_id", "dataset_id", "dataset_revision", "dataset_manifest_hash", "dataset_substantive_hash", "strategy", "config_version", "config_hash", "train_match_refs", "train_sample_refs", "validation_match_refs", "validation_sample_refs", "holdout_match_refs", "holdout_sample_refs", "folds", "boundaries", "grouping_identity", "ordering_identity", "artifact_hash", "revision", "supersedes"],
+    "zero_or_insufficient_data": "DO_NOT_CREATE_FORMAL_SPLIT_ARTIFACT; EMIT_BLOCKED_READINESS_REPORT_ONLY",
+    "substantive_hash_inputs": ["exact_dataset_identity_and_hashes", "strategy", "boundaries", "walk_forward_parameters", "league_scope", "grouping_rules", "readiness_rule_version_and_hash", "sample_membership_by_partition"],
+    "volatile_exclusions": ["execution_timestamp", "absolute_path", "logging_metadata", "host_name", "process_id"]
   },
   "candidate_model_family_registry": {
     "version": "prediction-candidate-model-families@1.0.0",
@@ -301,5 +395,5 @@
     "serialization": "JSON sorted keys, compact separators, no whitespace normalization beyond JSON serialization",
     "self_hash_field": "canonical_hash is omitted during hash computation"
   },
-  "canonical_hash": "sha256:b694e1ca901b6f129fef9d9b27ebb8d9affe57b6cf3d2dcbc6f8e1ed3c0f1363"
+  "canonical_hash": "sha256:8b4a9b8f4a39733b0090f718e1a965b7cc2d975352d82aa989e08b35df2f7dde"
 }

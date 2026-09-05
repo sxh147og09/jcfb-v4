@@ -226,3 +226,14 @@ Production/Shadow, Public, Supabase, migration, or V3.3.3 scope.
 | V3 isolation statement | `v4-v3333-isolation@1.0.0` |
 
 All machine-readable governance/registry sources use canonical SHA-256 hashes.
+
+## Current r002 cross-reference
+
+The execution identity is now resolved by
+`v4-batch-prerequisite-workpackages@1.0.0`. B15-EWP-001 and B15-EWP-002 are
+`COMPLETE`; B15-EWP-003 contract revision `r002` is
+`READY FOR IMPLEMENTATION` while `execution_authorized=false` remains frozen.
+The current real dataset is available but empty (`candidate=0`, `usable=0`,
+`ZERO_ARCHIVED_CANDIDATES`), so EWP-003 split readiness and formal model fit
+remain `BLOCKED`. The pre-activation identity wording above is retained as
+decision history; it is not the current registry status.

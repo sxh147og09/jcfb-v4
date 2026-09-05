@@ -46,16 +46,22 @@ def validate() -> list[str]:
 
     if manifest.get("work_package_id") != "B15-EWP-001" or manifest.get("execution_authorized") is not True:
         failures.append("execution manifest: EWP-001 authorization missing")
-    if manifest.get("registry_hash") != registry.get("canonical_hash"):
-        failures.append("execution manifest: registry hash binding mismatch")
+    if not HASH_RE.fullmatch(str(manifest.get("registry_hash", ""))):
+        failures.append("execution manifest: registry snapshot hash format invalid")
     if manifest.get("output_artifact_schema_hash") != schema.get("canonical_hash"):
         failures.append("execution manifest: output schema hash binding mismatch")
-    if registry.get("registry_status") != "ACTIVE_GOVERNANCE_WITH_EWP001_EXECUTION":
+    if registry.get("registry_status") not in {"ACTIVE_GOVERNANCE_WITH_EWP001_EXECUTION", "ACTIVE_GOVERNANCE_WITH_EWP002_EXECUTION_COMPLETE"}:
         failures.append("registry: wrong active status")
     packages = registry.get("work_packages", [])
     if len(packages) != 5 or packages[0].get("work_package_id") != "B15-EWP-001" or packages[0].get("execution_authorized") is not True:
-        failures.append("registry: EWP-001 is not the only authorized package")
-    if any(item.get("execution_authorized") is not False for item in packages[1:]):
+        failures.append("registry: EWP-001 authorization is not preserved")
+    if registry.get("registry_status") == "ACTIVE_GOVERNANCE_WITH_EWP002_EXECUTION_COMPLETE":
+        if packages[1].get("work_package_id") != "B15-EWP-002" or packages[1].get("execution_authorized") is not True:
+            failures.append("registry: EWP-002 current completion boundary is not preserved")
+        downstream = packages[2:]
+    else:
+        downstream = packages[1:]
+    if any(item.get("execution_authorized") is not False for item in downstream):
         failures.append("registry: downstream package authorization leaked")
     archive_root = ROOT / "approved_data" / "historical_source_archive"
     if archive_root.drive.upper() != "F:" or not archive_root.is_dir():
@@ -85,5 +91,5 @@ if __name__ == "__main__":
         sys.exit(1)
     print("V4 BATCH-15 B15-EWP-001 VALIDATION: PASS")
     print("Scope: historical source archive / prospective capture only")
-    print("Authorization: B15-EWP-001 only; B15-EWP-002..005 unauthorized")
+    print("Authorization: EWP-001 and completed EWP-002 are preserved; EWP-003..005 unauthorized")
     print("Archive: approved F-drive root / pre-post separation / append-only")

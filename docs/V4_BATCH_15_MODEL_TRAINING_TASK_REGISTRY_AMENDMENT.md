@@ -1,4 +1,9 @@
-# V4 BATCH-15 Model Training Task Registry Amendment
+# Historical amendment record: V4 BATCH-15 Model Training Task Registry Amendment
+
+The pre-activation assessment below is retained as historical evidence. The
+current execution identity is resolved by the active
+`v4-batch-prerequisite-workpackages@1.0.0` registry; current EWP-003 status is
+recorded in the `r002` remediation/re-entry review.
 
 Amendment ID: `V4-015-TRAINING-TASK-001`
 Status: **GOVERNANCE ACTIVE / EXECUTION IDENTITY RESOLVED**

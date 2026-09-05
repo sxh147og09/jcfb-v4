@@ -1,4 +1,9 @@
-# JCFB V4 BATCH-15 MODEL TRAINING TASK REGISTRY & INFRASTRUCTURE ENTRY REPORT
+# Historical snapshot: JCFB V4 BATCH-15 MODEL TRAINING TASK REGISTRY & INFRASTRUCTURE ENTRY REPORT
+
+This pre-EWP-002 entry report is retained as historical evidence. Its
+`REGISTRY_AMENDMENT_NOT_RESOLVED` and dataset-unavailable findings are
+superseded by the approved EWP-002 closure and the EWP-003 `r002` contract
+remediation/re-entry review.
 
 Review date: `2026-09-05` (`Asia/Shanghai`)
 

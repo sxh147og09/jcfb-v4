@@ -20,7 +20,7 @@
   "admission_blockers": [
     "PREDICTION_MODEL_ARTIFACT_NOT_APPROVED",
     "TRAINING_PIPELINE_NOT_IMPLEMENTED",
-    "TRAINING_DATASET_NOT_AVAILABLE",
+    "TRAINING_DATA_INSUFFICIENT",
     "FROZEN_INPUT_NOT_IMPLEMENTED"
   ],
   "canonicalization": {
@@ -28,5 +28,5 @@
     "profile": "v4-canonical-json@1.0",
     "self_hash_field": "canonical_hash is omitted during hash computation"
   },
-  "canonical_hash": "sha256:ff95d673fb40946bf3587f98ad3c31f0f0e0b16ba1f08a7a259e54d953d584b9"
+  "canonical_hash": "sha256:5cd69478e0367c51c9f3205d2c137a3cd2e441557b553f19280e048fc993570a"
 }

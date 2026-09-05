@@ -1,5 +1,9 @@
 # JCFB V4 BATCH-15 Model Training Dependency Amendment
 
+Active status cross-reference: EWP-001 and EWP-002 are `COMPLETE`; EWP-003
+contract revision `r002` is ready for implementation review but remains
+`execution_authorized=false`; EWP-004 and EWP-005 remain unauthorized.
+
 Amendment identity: `v4-batch15-training-dependency-amendment@1.0.0`
 
 Status: **APPROVED GOVERNANCE DAG / IMPLEMENTATION BLOCKED**
@@ -16,8 +20,8 @@ the V4-001 through V4-100 namespace remain unchanged by this amendment.
 | Work package | Parent scope | Dependency | Current state |
 |---|---|---|---|
 | `B15-EWP-001` | BATCH-15; V4-076, V4-052..055 | none | `COMPLETE; EWP-001 execution authorized only` |
-| `B15-EWP-002` | BATCH-15; V4-076, V4-052..055 | `B15-EWP-001` | `REGISTERED_NOT_EXECUTABLE` |
-| `B15-EWP-003` | BATCH-15; V4-076, V4-052..055 | `B15-EWP-002` | `REGISTERED_NOT_EXECUTABLE` |
+| `B15-EWP-002` | BATCH-15; V4-076, V4-052..055 | `B15-EWP-001` | `COMPLETE; execution authorized for Historical As-Of Dataset Builder only` |
+| `B15-EWP-003` | BATCH-15; V4-076, V4-052..055 | `B15-EWP-002` | `REGISTERED_NOT_EXECUTABLE; contract r002 READY_FOR_IMPLEMENTATION` |
 | `B15-EWP-004` | BATCH-15; V4-052..055 | `B15-EWP-003` | `REGISTERED_NOT_EXECUTABLE` |
 | `B15-EWP-005` | BATCH-15; V4-052..055 | `B15-EWP-004` | `SEPARATE_APPROVAL_REQUIRED` |
 

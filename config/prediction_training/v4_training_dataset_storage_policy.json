@@ -13,10 +13,16 @@
   },
   "zero_data_boundary": {
     "archive_match_count": 0,
+    "candidate_sample_count": 0,
     "usable_training_sample_count": 0,
     "reason": "ZERO_ARCHIVED_CANDIDATES",
     "synthetic_fixtures_are_formal_training_data": false,
-    "dataset_builder_execution": "COMPLETE_ZERO_CANDIDATE_BUILD"
+    "dataset_builder_execution": "COMPLETE_ZERO_CANDIDATE_BUILD",
+    "temporal_split_status": "NOT_PERFORMABLE",
+    "readiness_state": "BLOCKED",
+    "readiness_reason": "TRAINING_DATA_INSUFFICIENT",
+    "formal_split_artifact_generated": false,
+    "blocked_readiness_report": "config/prediction_training/v4_batch15_ewp003_readiness_report.json"
   },
-  "canonical_hash": "sha256:69e6d1dcff26a32def3e82a358f0e70b5abf219ee49221fed9f4d8ba3601d1be"
+  "canonical_hash": "sha256:5bf32bd90fca41ac8f37edf9d95505981bd0e2ac181bca1a1603825e18f26c84"
 }

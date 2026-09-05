@@ -1,5 +1,8 @@
 # JCFB V4 BATCH-15 Scope & Entry Review After Governance
 
+Active training cross-reference: EWP-003 contract remediation `r002` is
+complete, while runtime authorization and formal model fit remain blocked.
+
 Review date: `2026-09-05`
 Result: **BLOCKED**
 Decision: **BATCH-15 NOT READY FOR CONTINUOUS EXECUTION**
@@ -25,12 +28,18 @@ Decision: **BATCH-15 NOT READY FOR CONTINUOUS EXECUTION**
 |---|---|---|
 | `PREDICTION_MODEL_ARTIFACT_NOT_APPROVED` | BLOCKED | No four-engine approved trained/parameterized artifact exists. |
 | `TRAINING_PIPELINE_NOT_IMPLEMENTED` | BLOCKED | No repository training/fitting runtime exists. |
-| `TRAINING_DATASET_NOT_AVAILABLE` | BLOCKED | No canonical historical as-of dataset artifact exists; sample counts and coverage are `UNKNOWN`. |
+| `TRAINING_DATA_INSUFFICIENT` | BLOCKED | Active EWP-002 dataset is hash-bound but has candidate samples `0` and usable samples `0` (`ZERO_ARCHIVED_CANDIDATES`). |
+| `LEAGUE_SCOPE_NOT_DECLARED` | BLOCKED | EWP-003 requires an explicit dataset-manifest league scope; an empty dataset cannot declare or infer one. |
 | `FROZEN_INPUT_NOT_IMPLEMENTED` | BLOCKED | V4-076 is ordered correctly but implementation is not authorized in this review. |
 
 `UPSTREAM_IMPLEMENTATION_NOT_ACCEPTED` is **RESOLVED** by the live
-V4-038..V4-048 acceptance reconciliation. It is retained only as historical
-evidence, not as a current blocker.
+  V4-038..V4-048 acceptance reconciliation. It is retained only as historical
+  evidence, not as a current blocker.
+
+EWP-003 scope/contract entry is `READY FOR IMPLEMENTATION`, but
+`execution_authorized=false` remains frozen. The current real-dataset split
+readiness is `BLOCKED / TRAINING_DATA_INSUFFICIENT`, and formal model-fit
+readiness remains `BLOCKED`.
 
 The review therefore does not authorize V4-052/V4-053/V4-054/V4-055
 implementation, BATCH-16, Score, Simulation, Consensus, Risk/Abstention,

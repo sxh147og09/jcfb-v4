@@ -1,5 +1,9 @@
 # JCFB V4 BATCH-15 Prediction Training Readiness Review
 
+This document is the active training readiness cross-reference after EWP-002
+completion and EWP-003 contract remediation. The earlier dataset-unavailable
+wording is superseded by the current empty dataset evidence below.
+
 Review ID: `V4-015-READINESS-001`
 Review date: `2026-09-05`
 Decision: **PREDICTION_TRAINING_READINESS_BLOCKED**
@@ -12,40 +16,46 @@ formal model. The machine-readable review is
 
 | Readiness question | Result | Evidence |
 |---|---|---|
-| Can historical as-of dataset be built now? | `NO` | No training/fitting runtime or canonical dataset artifact exists |
-| Outcome target constructible now? | `BLOCKED` | No dataset artifact; usable count/class distribution unknown |
-| Handicap target constructible now? | `BLOCKED` | No cutoff-bound official RQSPF training samples available |
-| Goals target constructible now? | `BLOCKED` | No dataset artifact; class coverage cannot be measured |
-| HTFT target constructible now? | `BLOCKED` | No dataset artifact; nine-class coverage cannot be measured |
-| Usable samples by engine | `UNKNOWN` | No eligibility evaluation has run |
-| Class distribution by engine | `UNKNOWN` | No label artifact has been built |
-| Temporal coverage | `UNKNOWN` | No temporal split artifact exists |
-| League coverage | `UNKNOWN` | No dataset scope/partition artifact exists |
-| Required feature coverage | `UNKNOWN` | No as-of reconstruction has run |
+| Can historical as-of dataset be built now? | `NO` | EWP-002 produced an available, hash-bound empty dataset; no EWP-003 runtime is authorized |
+| Outcome target constructible now? | `BLOCKED` | Zero candidate/usable samples; class minimums cannot pass |
+| Handicap target constructible now? | `BLOCKED` | Zero cutoff-bound official RQSPF training samples |
+| Goals target constructible now? | `BLOCKED` | Zero candidate/usable samples; eight-class coverage cannot pass |
+| HTFT target constructible now? | `BLOCKED` | Zero candidate/usable samples; nine-class coverage cannot pass |
+| Usable samples by engine | `0` | Current EWP-002 dataset manifest; reason `ZERO_ARCHIVED_CANDIDATES` |
+| Class distribution by engine | `UNKNOWN` | No partition exists from which support can be computed |
+| Temporal coverage | `UNKNOWN` | Formal split is `NOT_PERFORMABLE` |
+| League coverage | `LEAGUE_SCOPE_NOT_DECLARED` | League scope is required and is not inferred from empty content |
+| Required feature coverage | `UNKNOWN` | No eligible samples exist |
 | Training pipeline | `NOT_READY` | `TRAINING_PIPELINE_NOT_IMPLEMENTED` |
 | Model registry | `READY_AS_EMPTY_GOVERNANCE_REGISTRY` | Registry exists with zero artifacts |
 
-The result is not a claim of insufficient historical football data; it is a
-fail-closed statement that no legal dataset artifact exists from which those
-quantities can be computed. Counts are recorded as `UNKNOWN`, never invented
-as zero or a fabricated sample total.
+The result is a fail-closed statement about the current formal dataset: its
+candidate sample count and usable sample count are both explicitly `0`, with
+reason `ZERO_ARCHIVED_CANDIDATES`. Synthetic fixtures do not contribute to
+these counts. No split is created when the readiness contract cannot be met.
 
 ## Four-engine disposition
 
 All four roles remain `NO_TRAINING_PIPELINE` and have no approved artifact:
 
 ```text
-Outcome  = BLOCKED / UNKNOWN samples / UNKNOWN classes
-Handicap = BLOCKED / UNKNOWN samples / UNKNOWN classes
-Goals    = BLOCKED / UNKNOWN samples / UNKNOWN classes
-HTFT     = BLOCKED / UNKNOWN samples / UNKNOWN classes
+Outcome  = BLOCKED / 0 usable samples / UNKNOWN classes
+Handicap = BLOCKED / 0 usable samples / UNKNOWN classes
+Goals    = BLOCKED / 0 usable samples / UNKNOWN classes
+HTFT     = BLOCKED / 0 usable samples / UNKNOWN classes
 ```
 
 `PREDICTION_MODEL_ARTIFACT_NOT_APPROVED`,
-`TRAINING_PIPELINE_NOT_IMPLEMENTED`, `TRAINING_DATASET_NOT_AVAILABLE`, and
-`FROZEN_INPUT_NOT_IMPLEMENTED` remain active blockers. The earlier
+`TRAINING_PIPELINE_NOT_IMPLEMENTED`, `TRAINING_DATA_INSUFFICIENT`,
+`LEAGUE_SCOPE_NOT_DECLARED`, and `FROZEN_INPUT_NOT_IMPLEMENTED` remain active
+blockers. The earlier
 `PREDICTION_MODEL_TRAINING_GOVERNANCE_GAP` is resolved by the governance
 decision; it must not be silently relabeled as a fitted model.
+
+EWP-003 contract entry is separately `READY FOR IMPLEMENTATION`; that result
+does not authorize execution and does not change the blocked real-dataset or
+formal model-fit decisions. See
+`docs/JCFB_V4_BATCH_15_B15_EWP_003_REMEDIATION_AND_REENTRY_REVIEW.md`.
 
 ## Only permitted next scope
 

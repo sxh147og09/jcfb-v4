@@ -38,23 +38,30 @@ $requiredDocs = @(
     'docs/JCFB_V4_BATCH_15_PREDICTION_MODEL_TRAINING_GOVERNANCE_DECISION.md',
     'docs/V4_BATCH_15_MODEL_TRAINING_TASK_REGISTRY_AMENDMENT.md',
     'docs/V4_BATCH_15_ENGINE_TRAINING_PROFILES.md',
-    'docs/V4_BATCH_15_PREDICTION_TRAINING_READINESS_REVIEW.md'
+    'docs/V4_BATCH_15_PREDICTION_TRAINING_READINESS_REVIEW.md',
+    'docs/JCFB_V4_BATCH_15_B15_EWP_003_REMEDIATION_AND_REENTRY_REVIEW.md'
 )
 foreach ($relativePath in $requiredDocs) { $null = Read-RepoFile $relativePath }
 
 $trainingConfigPaths = @(
     'config/prediction_training/v4_prediction_training_governance.json',
     'config/prediction_training/v4_prediction_model_registry.json',
-    'config/prediction_training/v4_prediction_training_readiness_review.json'
+    'config/prediction_training/v4_prediction_training_readiness_review.json',
+    'config/prediction_training/v4_batch15_ewp003_temporal_split_contract.json',
+    'config/prediction_training/v4_batch15_ewp003_readiness_report.json'
 )
 foreach ($relativePath in $trainingConfigPaths) { $null = Read-RepoFile $relativePath }
 
 $trainingGovernance = $null
 $modelRegistry = $null
 $readinessReview = $null
+$ewp003Contract = $null
+$ewp003Readiness = $null
 try { $trainingGovernance = Get-Content -LiteralPath (Join-Path $repoRoot $trainingConfigPaths[0]) -Raw -Encoding utf8 | ConvertFrom-Json } catch { Add-Failure "INVALID_JSON: $($trainingConfigPaths[0])" }
 try { $modelRegistry = Get-Content -LiteralPath (Join-Path $repoRoot $trainingConfigPaths[1]) -Raw -Encoding utf8 | ConvertFrom-Json } catch { Add-Failure "INVALID_JSON: $($trainingConfigPaths[1])" }
 try { $readinessReview = Get-Content -LiteralPath (Join-Path $repoRoot $trainingConfigPaths[2]) -Raw -Encoding utf8 | ConvertFrom-Json } catch { Add-Failure "INVALID_JSON: $($trainingConfigPaths[2])" }
+try { $ewp003Contract = Get-Content -LiteralPath (Join-Path $repoRoot $trainingConfigPaths[3]) -Raw -Encoding utf8 | ConvertFrom-Json } catch { Add-Failure "INVALID_JSON: $($trainingConfigPaths[3])" }
+try { $ewp003Readiness = Get-Content -LiteralPath (Join-Path $repoRoot $trainingConfigPaths[4]) -Raw -Encoding utf8 | ConvertFrom-Json } catch { Add-Failure "INVALID_JSON: $($trainingConfigPaths[4])" }
 
 $frozen = Read-RepoFile 'docs/V4_FROZEN_INPUT_CONTRACT.md'
 $decision = Read-RepoFile 'docs/JCFB_V4_BATCH_15_PREDICTION_ARCHITECTURE_GOVERNANCE_DECISION.md'
@@ -113,6 +120,25 @@ if ($null -ne $trainingGovernance) {
     foreach ($role in @('OUTCOME','HANDICAP','GOALS','HTFT')) {
         if ($null -eq $trainingGovernance.engine_training_profiles.$role) { Add-Failure "ENGINE_TRAINING_PROFILE_MISSING: $role" }
     }
+    if ($trainingGovernance.temporal_split_contract.strategy_selection -ne 'EXPLICIT_CONFIG_REQUIRED') { Add-Failure 'TEMPORAL_SPLIT_CONFIG_MUST_BE_EXPLICIT' }
+    if ($trainingGovernance.temporal_split_contract.default_strategy -ne $null) { Add-Failure 'TEMPORAL_SPLIT_DEFAULT_MUST_BE_NULL' }
+    if ($trainingGovernance.temporal_split_contract.group_assignment_unit -ne 'match_id') { Add-Failure 'SAME_MATCH_GROUPING_ROOT_MUST_BE_MATCH_ID' }
+    if ($trainingGovernance.league_scope_contract.canonical_source -ne 'DATASET_MANIFEST' -or $trainingGovernance.league_scope_contract.scope_not_declared_result -ne 'LEAGUE_SCOPE_NOT_DECLARED') { Add-Failure 'LEAGUE_SCOPE_CONTRACT_INVALID' }
+    if ($trainingGovernance.minimum_sample_readiness_rule.class_minimums.train -ne 5 -or $trainingGovernance.minimum_sample_readiness_rule.class_minimums.validation -ne 3 -or $trainingGovernance.minimum_sample_readiness_rule.class_minimums.holdout -ne 3) { Add-Failure 'CLASS_MINIMUMS_CHANGED' }
+    if ($trainingGovernance.minimum_sample_readiness_rule.feature_availability.required_value -ne 1) { Add-Failure 'REQUIRED_FEATURE_AVAILABILITY_MUST_BE_100_PERCENT' }
+    if ($trainingGovernance.dataset_revision_binding.superseded_revision_consumption -ne 'REJECT') { Add-Failure 'SUPERSEDED_DATASET_REVISION_MUST_BE_REJECTED' }
+}
+if ($null -ne $ewp003Contract) {
+    if ($ewp003Contract.status -ne 'CONTRACT_FROZEN_IMPLEMENTATION_NOT_AUTHORIZED' -or $ewp003Contract.execution_authorized -ne $false) { Add-Failure 'EWP003_CONTRACT_AUTHORIZATION_BOUNDARY_INVALID' }
+    if ($ewp003Contract.strategy_contract.random_split -ne 'FORBIDDEN') { Add-Failure 'EWP003_RANDOM_SPLIT_NOT_FORBIDDEN' }
+    if ($ewp003Contract.strategy_contract.walk_forward_rolling_origin.missing_parameter_action -ne 'SPLIT_CONFIG_NOT_DECLARED') { Add-Failure 'EWP003_WALK_FORWARD_MISSING_CONFIG_NOT_FAIL_CLOSED' }
+    if ($ewp003Contract.split_artifact_contract.zero_or_insufficient_data -notmatch 'DO_NOT_CREATE_FORMAL_SPLIT_ARTIFACT') { Add-Failure 'EWP003_ZERO_DATA_SPLIT_ARTIFACT_BOUNDARY_INVALID' }
+}
+if ($null -ne $ewp003Readiness) {
+    if ($ewp003Readiness.split_status -ne 'NOT_PERFORMABLE' -or $ewp003Readiness.readiness_state -ne 'BLOCKED') { Add-Failure 'EWP003_ZERO_DATA_READINESS_NOT_BLOCKED' }
+    if ($ewp003Readiness.reason_codes -notcontains 'TRAINING_DATA_INSUFFICIENT') { Add-Failure 'EWP003_ZERO_DATA_REASON_INVALID' }
+    if ($ewp003Readiness.sample_counts.candidate_samples -ne 0 -or $ewp003Readiness.sample_counts.usable_samples -ne 0) { Add-Failure 'EWP003_ZERO_DATA_COUNTS_INVALID' }
+    if ($ewp003Readiness.split_artifact_generated -ne $false) { Add-Failure 'EWP003_ZERO_DATA_MUST_NOT_GENERATE_SPLIT' }
 }
 if ($null -ne $modelRegistry) {
     if ($modelRegistry.status -ne 'NO_APPROVED_ARTIFACTS_PRESENT') { Add-Failure 'MODEL_REGISTRY_STATUS_INVALID' }
@@ -127,10 +153,11 @@ if ($null -ne $readinessReview) {
     if ($readinessReview.pipeline_readiness.formal_model_fit_allowed -ne $false) { Add-Failure 'FORMAL_MODEL_FIT_MUST_BE_BLOCKED' }
     if ($readinessReview.pipeline_readiness.formal_engine_implementation_allowed -ne $false) { Add-Failure 'FORMAL_ENGINE_IMPLEMENTATION_MUST_BE_BLOCKED' }
     if ($readinessReview.historical_as_of_dataset.constructible_now -ne $false) { Add-Failure 'DATASET_MUST_NOT_BE_CLAIMED_CONSTRUCTIBLE' }
+    if ($readinessReview.historical_as_of_dataset.candidate_sample_count -ne 0 -or $readinessReview.historical_as_of_dataset.usable_training_sample_count -ne 0) { Add-Failure 'CURRENT_DATASET_ZERO_COUNTS_MUST_BE_EXPLICIT' }
     if ($readinessReview.canonical_hash -notmatch '^sha256:[0-9a-f]{64}$') { Add-Failure 'READINESS_CANONICAL_HASH_INVALID' }
     foreach ($role in @('OUTCOME','HANDICAP','GOALS','HTFT')) {
         if ($readinessReview.engine_readiness.$role.status -ne 'BLOCKED') { Add-Failure "ENGINE_READINESS_NOT_BLOCKED: $role" }
-        if ($readinessReview.engine_readiness.$role.usable_sample_count -ne 'UNKNOWN') { Add-Failure "ENGINE_SAMPLE_COUNT_MUST_BE_UNKNOWN: $role" }
+        if ($readinessReview.engine_readiness.$role.usable_sample_count -ne 0) { Add-Failure "ENGINE_SAMPLE_COUNT_MUST_BE_ZERO: $role" }
     }
 }
 
@@ -173,4 +200,7 @@ Write-Output 'V4 BATCH-15 GOVERNANCE VALIDATION: PASS'
 Write-Output 'Ordering: V4-076 -> V4-052/V4-053/V4-054/V4-055'
 Write-Output 'BATCH-14 status consistency: COMPLETE / Closure Gate PASS'
 Write-Output 'Entry Review: BLOCKED with explicit remaining blockers'
+Write-Output 'EWP-003 contract: frozen for implementation review / runtime unauthorized'
+Write-Output 'EWP-003 real dataset readiness: BLOCKED / TRAINING_DATA_INSUFFICIENT'
+Write-Output 'Formal model fit readiness: BLOCKED'
 Write-Output 'Safety boundary: no engine implementation, Score/Risk/Production/Supabase/migration/V3.3.3 change'

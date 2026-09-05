@@ -130,3 +130,12 @@ drift by the live V4-038..V4-048 reconciliation.
 - V3.3.3: no source, path, data, contract, or runtime modified.
 - Git boundary: changes are governance documents, a static validator, and
   focused governance tests only.
+
+## 9. Current BATCH-15 training cross-reference
+
+The current active training status is maintained by the EWP-003 `r002`
+contract remediation review. Its runtime contract entry is
+`B15-EWP-003 READY FOR IMPLEMENTATION`, but no execution authorization is
+granted. The current EWP-002 dataset is hash-bound with zero candidate and
+zero usable samples (`ZERO_ARCHIVED_CANDIDATES`); real-data split readiness
+and formal model-fit readiness remain `BLOCKED`.

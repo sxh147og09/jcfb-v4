@@ -1,0 +1,151 @@
+{
+  "$id": "b15-ewp003-temporal-split-and-readiness-contract@1.0.0",
+  "work_package_id": "B15-EWP-003",
+  "work_package_revision": "r002",
+  "status": "CONTRACT_FROZEN_IMPLEMENTATION_NOT_AUTHORIZED",
+  "execution_authorized": false,
+  "implementation_entry": "CONTRACT_ONLY_REMEDIATION; separate authorization remains required",
+  "strategy_contract": {
+    "version": "prediction-training-temporal-split@1.1.0",
+    "allowed_strategies": ["EXPLICIT_TEMPORAL_BOUNDARIES", "WALK_FORWARD_ROLLING_ORIGIN"],
+    "default_strategy": null,
+    "strategy_selection": "EXPLICIT_CONFIG_REQUIRED",
+    "random_split": "FORBIDDEN",
+    "explicit_temporal_boundaries": {
+      "required_config_fields": ["strategy", "train_end", "validation_start", "validation_end", "holdout_start", "holdout_end", "ordering_field", "identical_timestamp_tie_break", "minimum_chronological_separation", "partition_inclusivity_exclusivity"],
+      "strategy": "EXPLICIT_TEMPORAL_BOUNDARIES",
+      "ordering_field": "prediction_cutoff_at",
+      "identical_timestamp_tie_break": ["match_id_group_key", "sample_id_within_group"],
+      "minimum_chronological_separation": "REQUIRED_POSITIVE_DURATION_IN_CONFIG; NO_DEFAULT",
+      "partition_inclusivity_exclusivity": {
+        "train": "(-infinity, train_end]",
+        "validation": "[validation_start, validation_end]",
+        "holdout": "[holdout_start, holdout_end]"
+      },
+      "strict_relations": [
+        "max(train.prediction_cutoff_at) < min(validation.prediction_cutoff_at)",
+        "max(validation.prediction_cutoff_at) < min(holdout.prediction_cutoff_at)",
+        "train_end + minimum_chronological_separation <= validation_start",
+        "validation_end + minimum_chronological_separation <= holdout_start"
+      ],
+      "overlap_action": "REJECT_SPLIT_CONFIG",
+      "ratio_boundary_policy": "FORBIDDEN_UNLESS_DETERMINISTIC_TIME_BOUNDARY_DERIVATION_IS_DECLARED"
+    },
+    "walk_forward_rolling_origin": {
+      "required_config_fields": ["mode", "initial_train_period", "origin_step", "validation_horizon", "holdout_horizon", "minimum_folds", "incomplete_final_fold_policy", "same_match_grouping_policy", "fold_level_minimum_readiness_policy"],
+      "mode_values": ["expanding", "sliding"],
+      "mode": "EXPLICIT_CONFIG_REQUIRED",
+      "initial_train_period": "EXPLICIT_CONFIG_REQUIRED",
+      "origin_step": "EXPLICIT_CONFIG_REQUIRED",
+      "validation_horizon": "EXPLICIT_CONFIG_REQUIRED",
+      "holdout_horizon": "EXPLICIT_CONFIG_REQUIRED_OR_NOT_APPLICABLE_IF_NO_HOLDOUT_FOLD",
+      "sliding_window_width": "REQUIRED_WHEN_MODE_IS_SLIDING; FORBIDDEN_AS_IMPLICIT_DEFAULT",
+      "minimum_folds": "EXPLICIT_POSITIVE_INTEGER_REQUIRED",
+      "incomplete_final_fold_policy_values": ["REJECT", "DROP_INCOMPLETE_FINAL_FOLD"],
+      "same_match_grouping_policy": "GROUP_BY_MATCH_ID_BEFORE_FOLD_ASSIGNMENT",
+      "fold_level_minimum_readiness_policy": "EACH_REQUIRED_FOLD_MUST_PASS_DECLARED_READINESS_RULE",
+      "missing_parameter_action": "SPLIT_CONFIG_NOT_DECLARED",
+      "numeric_defaults": "NONE"
+    },
+    "grouping_contract": {
+      "assignment_unit": "match_id",
+      "grouping_root": "match_id",
+      "same_match_multi_cutoff": "ALL_CUTOFF_VARIANTS_OF_ONE_MATCH_STAY_IN_ONE_PARTITION_OR_FOLD",
+      "engine_role_views": "MAY_CREATE_MULTIPLE_VIEWS_BUT_MUST_NOT_CROSS_PARTITIONS",
+      "cross_partition_action": "REJECT_SPLIT"
+    },
+    "leakage_contract": {
+      "train_before_validation": true,
+      "validation_before_holdout": true,
+      "holdout_in_fitting": "FORBIDDEN",
+      "holdout_in_candidate_selection": "FORBIDDEN",
+      "holdout_in_early_stopping": "FORBIDDEN",
+      "future_revision_in_earlier_partition": "FORBIDDEN",
+      "same_match_cross_partition": "FORBIDDEN"
+    }
+  },
+  "league_scope_contract": {
+    "version": "prediction-training-league-scope@1.0.0",
+    "canonical_source": "DATASET_MANIFEST",
+    "source_conflict_action": "REJECT_UNTIL_CANONICAL_SOURCE_IS_RECONCILED",
+    "scope_required": true,
+    "scope_not_declared_result": "LEAGUE_SCOPE_NOT_DECLARED",
+    "scope_types": {
+      "SINGLE_LEAGUE": {
+        "required_fields": ["scope_type", "league_id", "scope_declaration_hash"],
+        "cross_league_generalization_claim": "FORBIDDEN"
+      },
+      "DECLARED_MULTI_LEAGUE": {
+        "required_fields": ["scope_type", "league_ids", "scope_declaration_hash", "partition_coverage_requirements", "fold_coverage_requirements"],
+        "league_ids_must_be_explicit": true,
+        "cross_league_generalization_claim": "REQUIRES_SEPARATE_APPROVAL"
+      }
+    },
+    "sample_content_inference": "FORBIDDEN",
+    "coverage_failure_action": "BLOCK_READINESS"
+  },
+  "minimum_sample_readiness_contract": {
+    "version": "prediction-training-readiness-rule@1.1.0",
+    "class_minimums": {"train": 5, "validation": 3, "holdout": 3},
+    "diagnostic_windows": {
+      "source": ["each_required_temporal_partition", "each_required_walk_forward_fold"],
+      "window_definition": "THE_DECLARED_PARTITION_OR_FOLD_MEMBERSHIP_AFTER_MATCH_GROUPING",
+      "minimum_window_count": "DERIVED_FROM_DECLARED_SPLIT_CONFIG; NO_UNDECLARED_DEFAULT"
+    },
+    "class_rate": {
+      "formula": "class_support_in_window / eligible_samples_in_window",
+      "undefined_when": ["eligible_samples_in_window = 0", "class_support_is_unavailable"],
+      "undefined_state": "UNKNOWN"
+    },
+    "required_feature_availability": {
+      "formula": "samples_with_all_declared_required_features_available_at_cutoff / eligible_samples_in_window",
+      "pass_value": 1.0,
+      "missing_or_undefined_action": "UNKNOWN"
+    },
+    "stability_status_values": ["PASS", "UNSTABLE", "UNKNOWN"],
+    "stability_rule": "STRUCTURAL_ONLY_UNTIL_NUMERIC_THRESHOLD_APPROVED",
+    "structural_pass": ["EVERY_DECLARED_CLASS_REPRESENTED_IN_EVERY_REQUIRED_WINDOW", "REQUIRED_FEATURE_AVAILABILITY_EQUALS_100_PERCENT", "NO_WINDOW_HAS_UNDEFINED_CLASS_SUPPORT"],
+    "numeric_stability_threshold": "NOT_APPROVED; IF_REQUIRED_REMAINS_AN_INDEPENDENT_BLOCKER",
+    "small_sample_behavior": "FAIL_CLOSED_TO_UNKNOWN_OR_TRAINING_DATA_INSUFFICIENT; NEVER_INVENT_THRESHOLD",
+    "insufficient_data_result": "TRAINING_DATA_INSUFFICIENT"
+  },
+  "dataset_revision_binding": {
+    "version": "prediction-training-dataset-revision-binding@1.0.0",
+    "required_identity": ["dataset_id", "dataset_revision", "dataset_manifest_hash", "dataset_substantive_hash"],
+    "single_revision_per_split": true,
+    "superseded_revision_consumption": "REJECT",
+    "active_revision_policy": "ONLY_ACTIVE_DATASET_REVISION_MAY_BE_CONSUMED",
+    "historical_replay": "EXPLICIT_REPLAY_MODE_REQUIRED_WITH_EXACT_IDENTITY; NEVER_IMPLICIT",
+    "mixed_revision_action": "REJECT_SPLIT",
+    "superseded_and_active_coexistence": "MUST_NOT_BE_SILENTLY_CONSUMED_TOGETHER"
+  },
+  "readiness_report_contract": {
+    "identity": "training-readiness-report@1.0.0",
+    "required_fields": ["dataset_identity_and_hashes", "split_strategy_and_config_identity_hash", "split_status", "readiness_state", "reason_codes", "per_engine_counts", "per_class_support_by_partition", "temporal_coverage", "league_coverage", "required_feature_coverage", "statistical_stability_diagnostic_state", "same_match_leakage_check", "future_leakage_check", "deterministic_report_hash"],
+    "split_status_values": ["PERFORMABLE", "NOT_PERFORMABLE"],
+    "readiness_state_values": ["READY", "BLOCKED"],
+    "zero_data_output": {
+      "split_status": "NOT_PERFORMABLE",
+      "readiness_state": "BLOCKED",
+      "reason_code": "TRAINING_DATA_INSUFFICIENT",
+      "split_artifact_generated": false
+    },
+    "model_accuracy_fields": "FORBIDDEN_BEFORE_MODEL_FIT"
+  },
+  "split_artifact_contract": {
+    "identity": "temporal-split-artifact@1.0.0",
+    "required_fields": ["split_artifact_id", "dataset_id", "dataset_revision", "dataset_manifest_hash", "dataset_substantive_hash", "strategy", "config_version", "config_hash", "train_match_refs", "train_sample_refs", "validation_match_refs", "validation_sample_refs", "holdout_match_refs", "holdout_sample_refs", "folds", "boundaries", "grouping_identity", "ordering_identity", "artifact_hash", "revision", "supersedes"],
+    "zero_or_insufficient_data": "DO_NOT_CREATE_FORMAL_SPLIT_ARTIFACT; EMIT_BLOCKED_READINESS_REPORT_ONLY",
+    "substantive_hash_inputs": ["exact_dataset_identity_and_hashes", "strategy", "boundaries", "walk_forward_parameters", "league_scope", "grouping_rules", "readiness_rule_version_and_hash", "sample_membership_by_partition"],
+    "volatile_exclusions": ["execution_timestamp", "absolute_path", "logging_metadata", "host_name", "process_id"]
+  },
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "encoding": "UTF-8",
+    "key_order": "LEXICOGRAPHIC_RECURSIVE",
+    "array_order": "PRESERVE_SEMANTIC_ORDER",
+    "self_hash_field": "canonical_hash is omitted during hash computation"
+  },
+  "canonical_hash": "sha256:1958ae6a27a64f6e03829503a5c8399f207da46eac5993cff2f2eabef51245f8"
+}

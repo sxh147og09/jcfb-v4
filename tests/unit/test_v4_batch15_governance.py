@@ -202,11 +202,11 @@ class V4Batch15GovernanceTests(unittest.TestCase):
         for role in ("OUTCOME", "HANDICAP", "GOALS", "HTFT"):
             report = self.readiness["engine_readiness"][role]
             self.assertEqual("BLOCKED", report["status"])
-            self.assertEqual("UNKNOWN", report["usable_sample_count"])
+            self.assertEqual(0, report["usable_sample_count"])
             self.assertEqual("UNKNOWN", report["class_distribution"])
-            self.assertEqual("UNKNOWN", report["temporal_coverage"])
-            self.assertEqual("UNKNOWN", report["league_coverage"])
-            self.assertEqual("UNKNOWN", report["required_feature_coverage"])
+            self.assertEqual("UNKNOWN_NO_PARTITIONS", report["temporal_coverage"])
+            self.assertEqual("LEAGUE_SCOPE_NOT_DECLARED", report["league_coverage"])
+            self.assertEqual("UNKNOWN_NO_SAMPLES", report["required_feature_coverage"])
 
     def test_no_manual_weights_quality_feature_or_v3_reuse(self):
         boundaries = self.training_config["boundary_rules"]

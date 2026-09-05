@@ -1,4 +1,7 @@
-# JCFB V4 BATCH-15 B15-EWP-003 Scope & Entry Review
+# Historical snapshot: JCFB V4 BATCH-15 B15-EWP-003 Scope & Entry Review
+
+This `r001` review is retained as historical evidence and is superseded by
+`docs/JCFB_V4_BATCH_15_B15_EWP_003_REMEDIATION_AND_REENTRY_REVIEW.md` (`r002`).
 
 Review mode: **READ-ONLY**
 
