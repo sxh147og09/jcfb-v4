@@ -1,0 +1,73 @@
+{
+  "contract_identity": "official-odds-ai-visual-review@1.0.0",
+  "schema_version": "official-odds-review-evidence@1.0.0",
+  "status": "FROZEN",
+  "review_methods": [
+    "AI_VISUAL_FROM_ORIGINAL_IMAGE",
+    "AI_VISUAL_FROM_DETERMINISTIC_CROP",
+    "HUMAN_VISUAL_FROM_ORIGINAL_IMAGE"
+  ],
+  "allowed_ai_statuses": [
+    "AI_CONFIRMED",
+    "AI_CORRECTED",
+    "AI_REVIEW_AMBIGUOUS",
+    "CONFLICT",
+    "HUMAN_ESCALATION_REQUIRED"
+  ],
+  "protocol": {
+    "pass_a": {
+      "method": "AI_VISUAL_FROM_DETERMINISTIC_CROP",
+      "input": "deterministic_crop_only",
+      "must_read_cell_label_and_value": true
+    },
+    "pass_b": {
+      "method": "AI_VISUAL_FROM_ORIGINAL_IMAGE",
+      "input": "original_image_with_locator_context",
+      "must_read_cell_label_and_value": true
+    },
+    "ocr_cross_check": "A_AND_B_MUST_AGREE_WITH_OCR_WHEN_OCR_IS_READABLE",
+    "ocr_empty_rule": "A_AND_B_MUST_AGREE_AND_LABEL_MAPPING_MUST_BE_UNAMBIGUOUS",
+    "inference": "FORBIDDEN",
+    "adjacent_cell_inference": "FORBIDDEN",
+    "later_snapshot_filling": "FORBIDDEN",
+    "duplicate_image_inference": "FORBIDDEN",
+    "baseline_or_probability_guessing": "FORBIDDEN",
+    "conflict_resolution": "FAIL_CLOSED"
+  },
+  "required_bindings": [
+    "raw_image_sha256",
+    "crop_evidence_hash",
+    "market",
+    "cell_label",
+    "selected_profile_identity",
+    "selected_profile_version",
+    "locator_identity",
+    "locator_version",
+    "locator_hash",
+    "ocr_evidence_id",
+    "ocr_evidence_hash",
+    "prior_trace_id",
+    "prior_trace_hash",
+    "pass_a",
+    "pass_b",
+    "cross_check_decision",
+    "review_status",
+    "review_implementation_identity",
+    "review_implementation_version",
+    "review_implementation_hash",
+    "canonical_review_record_hash"
+  ],
+  "human_contract_compatibility": {
+    "human_review_method_unchanged": true,
+    "ai_must_not_impersonate_human": true,
+    "accepted_payload_requires_active_contract_and_validator": true
+  },
+  "no_write_boundary": {
+    "source_trace_mutation": false,
+    "source_ocr_mutation": false,
+    "accepted_official_odds_payload": false,
+    "historical_source_archive": false,
+    "training_or_model_artifact": false,
+    "production_shadow_public_supabase": false
+  }
+}

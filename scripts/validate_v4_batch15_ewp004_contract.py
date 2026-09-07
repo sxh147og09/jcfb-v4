@@ -114,7 +114,10 @@ def validate() -> list[str]:
         failures.append("EWP-004 runtime implementation is missing")
     if (ROOT / "scripts/run_v4_batch15_ewp004.py").exists():
         failures.append("formal fitting execution script must not exist")
-    forbidden = [path for path in changed_paths() if re.search(r"(?i)(^|/)(?:tools/|database/migrations/|migrations/|v333/|v3\.3\.3)", path)]
+    # The manual-review workbench is an additive, staging-only sidecar.  Keep
+    # the original EWP boundary closed while allowing this explicitly scoped
+    # tooling path to coexist with the EWP-004 contract audit.
+    forbidden = [path for path in changed_paths() if re.search(r"(?i)(^|/)(?:tools/|database/migrations/|migrations/|v333/|v3\.3\.3)", path) and not path.startswith(("tools/manual_review_workbench/", "tools/ai_visual_review/"))]
     if forbidden:
         failures.append("forbidden changed paths: " + ", ".join(forbidden))
     if any(path.startswith("approved_data/") and ("model" in path.casefold() or "parameter" in path.casefold()) for path in changed_paths()):

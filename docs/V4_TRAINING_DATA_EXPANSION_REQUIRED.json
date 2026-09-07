@@ -1,0 +1,398 @@
+{
+  "report_identity": "jcfb-v4-training-data-expansion-required@1.0.0",
+  "status": "TRAINING_DATA_EXPANSION_REQUIRED",
+  "contract_identity": "b15-ewp003-temporal-split-and-readiness-contract@1.0.0",
+  "contract_hash": "sha256:a283b6fd08074e8a301b756ab7de4c3f9ef2e6346a94449a78c5456b75c5a9d3",
+  "active_dataset": {
+    "dataset_id": "dataset-13c4b050dc50e2de3ec8a961a9c9b029",
+    "dataset_revision": 1,
+    "candidate_sample_count": 0,
+    "usable_training_sample_count": 0,
+    "reason": "ZERO_ARCHIVED_CANDIDATES"
+  },
+  "current_approved_archive": {
+    "eligible_archive_record_count": 0,
+    "source_archive_files_present": false,
+    "r002_package_accepted": false,
+    "reason": "AI_VISUAL_REVIEW_BLOCKED_AND_NO_ACCEPTED_ARCHIVE_RECORDS"
+  },
+  "readiness": {
+    "roles_that_can_proceed_now": [],
+    "roles_blocked_now": [
+      "OUTCOME",
+      "HANDICAP",
+      "GOALS",
+      "HTFT"
+    ],
+    "minimums_are_unchanged": true,
+    "random_split": "FORBIDDEN",
+    "same_match_grouping": "REQUIRED",
+    "league_scope": "MUST_BE_EXPLICITLY_DECLARED"
+  },
+  "per_engine": {
+    "OUTCOME": {
+      "classes": [
+        "H",
+        "D",
+        "A"
+      ],
+      "class_support_required": {
+        "H": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "D": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "A": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        }
+      },
+      "minimum_additional_eligible_samples_lower_bound": 33,
+      "minimum_additional_matches_lower_bound": 33,
+      "partition_match_lower_bounds": {
+        "train": 15,
+        "validation": 9,
+        "holdout": 9
+      },
+      "status": "BLOCKED_NO_APPROVED_ELIGIBLE_SAMPLES"
+    },
+    "HANDICAP": {
+      "classes": [
+        "H",
+        "D",
+        "A"
+      ],
+      "class_support_required": {
+        "H": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "D": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "A": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        }
+      },
+      "minimum_additional_eligible_samples_lower_bound": 33,
+      "minimum_additional_matches_lower_bound": 33,
+      "partition_match_lower_bounds": {
+        "train": 15,
+        "validation": 9,
+        "holdout": 9
+      },
+      "status": "BLOCKED_NO_APPROVED_ELIGIBLE_SAMPLES"
+    },
+    "GOALS": {
+      "classes": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7+"
+      ],
+      "class_support_required": {
+        "0": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "1": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "2": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "3": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "4": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "5": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "6": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "7+": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        }
+      },
+      "minimum_additional_eligible_samples_lower_bound": 88,
+      "minimum_additional_matches_lower_bound": 88,
+      "partition_match_lower_bounds": {
+        "train": 40,
+        "validation": 24,
+        "holdout": 24
+      },
+      "status": "BLOCKED_NO_APPROVED_ELIGIBLE_SAMPLES"
+    },
+    "HTFT": {
+      "classes": [
+        "H/H",
+        "H/D",
+        "H/A",
+        "D/H",
+        "D/D",
+        "D/A",
+        "A/H",
+        "A/D",
+        "A/A"
+      ],
+      "class_support_required": {
+        "H/H": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "H/D": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "H/A": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "D/H": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "D/D": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "D/A": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "A/H": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "A/D": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "A/A": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        }
+      },
+      "minimum_additional_eligible_samples_lower_bound": 99,
+      "minimum_additional_matches_lower_bound": 99,
+      "partition_match_lower_bounds": {
+        "train": 45,
+        "validation": 27,
+        "holdout": 27
+      },
+      "status": "BLOCKED_NO_APPROVED_ELIGIBLE_SAMPLES"
+    }
+  },
+  "joint_acquisition_lower_bound": {
+    "distinct_matches": 99,
+    "basis": "HTFT has 9 classes and dominates: 9 * (5 train + 3 validation + 3 holdout)",
+    "partition_targets": {
+      "train": 45,
+      "validation": 27,
+      "holdout": 27
+    },
+    "caveat": "This is a contractual lower bound assuming every acquired match supplies one valid sample per role and exact class quotas. Actual need may be higher after league, feature, cutoff, and source-quality gates."
+  },
+  "additional_library_backfill_request": {
+    "request_identity": "ADDITIONAL_LIBRARY_BACKFILL_REQUEST",
+    "status": "READY_TO_PACKAGE_FROM_LIBRARY",
+    "distinct_match_count_minimum": 99,
+    "date_buckets": [
+      {
+        "bucket": "TRAIN",
+        "minimum_distinct_matches": 45,
+        "date_rule": "earliest chronological bucket; exact calendar dates must come from source metadata"
+      },
+      {
+        "bucket": "VALIDATION",
+        "minimum_distinct_matches": 27,
+        "date_rule": "strictly after TRAIN with declared positive separation"
+      },
+      {
+        "bucket": "HOLDOUT",
+        "minimum_distinct_matches": 27,
+        "date_rule": "strictly after VALIDATION with declared positive separation"
+      }
+    ],
+    "class_quotas": {
+      "OUTCOME": {
+        "H": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "D": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "A": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        }
+      },
+      "HANDICAP": "same three-class quota as OUTCOME",
+      "GOALS": {
+        "0": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "1": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "2": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "3": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "4": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "5": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "6": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "7+": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        }
+      },
+      "HTFT": {
+        "H/H": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "H/D": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "H/A": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "D/H": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "D/D": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "D/A": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "A/H": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "A/D": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        },
+        "A/A": {
+          "train": 5,
+          "validation": 3,
+          "holdout": 3
+        }
+      }
+    },
+    "required_fields": [
+      "data_date",
+      "official_match_no",
+      "canonical_match_identity",
+      "league_id",
+      "kickoff_at",
+      "prediction_cutoff_at",
+      "source_availability_at",
+      "official_pre_match_screenshot_or_source_bytes",
+      "SPF",
+      "RQSPF",
+      "TOTAL_GOALS",
+      "EXACT_SCORE",
+      "HTFT",
+      "final_result",
+      "halftime_result",
+      "raw_image_sha256",
+      "source_reference",
+      "artifact_hash",
+      "capture_or_publication_time_if_available"
+    ],
+    "prohibited_inputs": [
+      "V3.3.3 predictions",
+      "V3.3.3 models",
+      "V3.3.3 parameters",
+      "post_match_features",
+      "guessed_or_inferred_odds"
+    ]
+  },
+  "canonical_hash": "sha256:434936730dbf083fece8bdf914122d1436de63075ae88a0f92f9922eb5f5b2cf"
+}
