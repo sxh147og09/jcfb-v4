@@ -143,6 +143,7 @@ The only allowed next step is a separately reviewed and explicitly executed OCR 
 ## 11. Commit, HEAD, and working tree
 
 - Starting/frozen HEAD observed: `89e784bd7247d2cd10b14b7f7924b6383ffc4ff7`.
-- Final commit and final HEAD: `f79ede0ee51d836dfcf2cadf27994691d9731523`.
+- Implementation commit lineage: `1fc1564ec00594eaf8e3af25e482b535f98d9d9d`.
+- The report-finalization commit is the final HEAD reported in the task handoff; its parent is the implementation commit above.
 - Existing user-owned untracked staging and `work/` content was preserved; no existing approved-data history was rewritten.
 - F-drive boundary remained active; no `database/migrations/` or V3.3.3 path was changed.
