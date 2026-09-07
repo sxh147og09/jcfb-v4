@@ -21,11 +21,11 @@
     "scope": "Freeze and implement reusable official screenshot cell extraction contract, layout profile registry, deterministic parser runtime, trace hashing, unresolved derivation, fixtures, and validators. No historical replay or accepted odds integration is authorized.",
     "definition_of_done": ["additive registry amendment is approved and bound to the immutable five-package base registry hash", "contract and trace schema are frozen with complete five-market inventories", "layout and locator registries fail closed on unsupported profiles", "parser status and OCR evidence semantics are executable", "trace hash and unresolved derivation replay deterministically", "focused tests and boundary validators pass", "no archive, accepted payload, r002, EWP-002/003, EWP-005, model, production, migration, or V3.3.3 action occurs"],
     "evidence_manifest": ["architecture-amendment-approval", "cell-extraction-contract", "cell-trace-schema", "deterministic-runtime", "focused-tests", "focused-validator", "implementation-report"],
-    "commit_lineage": {"required": true, "status": "PENDING_FOCUSED_COMMIT", "commit_ids": []},
+    "commit_lineage": {"required": true, "status": "COMPLETE", "commit_ids": ["28e81e7"]},
     "output_artifacts": ["official-odds-cell-extraction-contract", "official-odds-cell-trace-schema", "official-odds-cell-layout-registry", "official-odds-cell-parser-runtime", "unresolved-cell-trace-derivation-runtime", "focused-validator", "architecture-amendment-report"],
     "artifact_hash": "sha256:667ea47c37cd4c9975aeed714fab45134e4b4c34f165d5a1414d7a4a77154ee7",
     "authorization_boundary": {"historical_replay": false, "accepted_odds_payload_write": false, "archive_write": false, "r002_generation": false, "ewp002_rerun": false, "ewp003_rerun": false, "ewp005_execution_authorized": false, "v333_modification": false}
   },
   "canonicalization": {"algorithm": "SHA-256", "profile": "v4-canonical-json@1.0", "self_hash_field": "canonical_hash is omitted during hash computation"},
-  "canonical_hash": "sha256:b68be5b000055226b7cee030ae3c4b604d87f3822fddd78e7010b512fe762b58"
+  "canonical_hash": "sha256:53e6f7ae0047529c82ad1913f1fc74badfd64db6ea474af7d9c2450204cf5168"
 }

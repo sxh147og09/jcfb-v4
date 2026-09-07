@@ -177,8 +177,9 @@ boundary. It must not begin manual review or r002 generation automatically.
 
 ## 14. Commits, HEAD, and working tree
 
-Implementation commit lineage is recorded in the additive EWP-006 sidecar after
-the focused commit is created. The user-owned pre-existing staging directory
+Implementation commit lineage is recorded in the additive EWP-006 sidecar as
+`28e81e7` (`feat(v4): add official odds cell extraction runtime`). The closure
+commit is the final handoff commit for this review. The user-owned pre-existing staging directory
 under `approved_data/historical_backfill_staging/CHATGPT-20260901-20260904-R001/`
 was not modified. No V3.3.3 path or database migration was changed.
 
