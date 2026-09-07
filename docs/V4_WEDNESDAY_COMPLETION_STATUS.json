@@ -11,7 +11,10 @@
       "B15-EWP-004 training infrastructure and contract validators",
       "official odds extraction/OCR/layout profiles",
       "manual review Workbench Git fail-safe",
-      "additive AI visual review contract/runtime"
+      "additive AI visual review contract/runtime",
+      "provider-neutral Pass A/Pass B adapter and provider hash bindings",
+      "four fail-closed engine shells, model loader, Frozen Input scaffold, and synthetic E2E",
+      "append-only Library staging, canonical identity mapping, dedupe, and backfill request"
     ],
     "not_completed": [
       "formal model artifacts",
@@ -21,14 +24,17 @@
       "V4-054 Goals",
       "V4-055 HTFT"
     ],
-    "reason": "Downstream engine implementation is correctly gated on approved model artifacts and frozen input; no artifacts exist."
+    "reason": "Infrastructure is ready, but downstream formal engine implementation is correctly gated on approved model artifacts and Frozen Input; no artifacts exist."
   },
+  "SYSTEM_INFRASTRUCTURE_READINESS": "PASS",
   "DATA_PIPELINE_COMPLETE_PARTIAL": {
     "value": "PARTIAL",
     "complete": [
       "immutable source handoff inventory",
       "OCR traces and evidence",
       "432-cell AI review sidecar with canonical bindings",
+      "provider-neutral vision adapter",
+      "append-only Library staging/package preparation",
       "zero-data EWP-003 readiness rerun"
     ],
     "blocked": [
@@ -47,8 +53,13 @@
     },
     "provider_available": false,
     "evidence_manifest_hash": "sha256:b697908da9d25d636582a1cc75447e35cba8675e2472ad28ac821490c5c55c77",
-    "quality_statement": "No OCR-only value was accepted as AI visual evidence; all 432 candidates are escalated because the repeatable visual provider is unavailable."
+    "quality_statement": "No OCR-only value was accepted as AI visual evidence; candidates remain fail-closed until a repeatable visual provider is connected."
   },
+  "VISION_PROVIDER_ADAPTER_READY": true,
+  "VISION_PROVIDER_CONNECTION_REQUIRED": true,
+  "ADDITIONAL_LIBRARY_BACKFILL_REQUEST_STATUS": "COMPLETE",
+  "DATA_PIPELINE_PREP_STATUS": "READY_FOR_NEXT_VALIDATED_LIBRARY_PACKAGE",
+  "FORMAL_MODEL_TRAINING": "NOT_STARTED",
   "ENGINE_ROLE_READINESS_TRAINING": {
     "OUTCOME": {
       "readiness": "BLOCKED",
@@ -91,7 +102,7 @@
     },
     {
       "code": "ADDITIONAL_LIBRARY_BACKFILL_FILES_REQUIRED",
-      "action": "Supply an approved Library package satisfying the machine-readable 99-match request in V4_TRAINING_DATA_EXPANSION_REQUIRED.json; the current package contains only 40 match identities and is not accepted into the archive.",
+      "action": "Supply an approved Library package satisfying ADDITIONAL_LIBRARY_BACKFILL_REQUEST.json and the machine-readable 99-match request; the current package contains only 40 match identities and is not accepted into the archive.",
       "scope": "historical source acquisition only"
     }
   ],
@@ -119,7 +130,8 @@
     "thresholds_lowered": false,
     "formal_training_executed": false,
     "model_artifacts_written": false,
-    "accepted_archive_records_written": false
+    "accepted_archive_records_written": false,
+    "formal_prediction_binding_executed": false
   },
-  "canonical_hash": "sha256:e03964a051ef1d25b35c1c1450ff7374b67a1a734ae65e874675779e38e5daf4"
+  "canonical_hash": "sha256:2f52b46197dcfafba7d5ff3492cec41e03d27d22051ea27e9d8acfb633bd1ced"
 }

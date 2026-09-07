@@ -399,9 +399,12 @@ def dry_run_validate(package: Mapping[str, Any], *, staging_path: str | Path = S
     return {"state": "VALID_FOR_INTAKE", "write_performed": False, "reason_codes": ["EXPORT_PACKAGE_VALID_FOR_SEPARATE_INTAKE_AUTHORIZATION"]}
 
 
+from .staging import AppendOnlyStaging, DedupeIndex, build_identity_index, canonical_identity_key
+
+
 __all__ = [
     "ACQUISITION_MODE", "ARCHIVE_ROOT", "DRY_RUN_STATES", "EXPORT_PACKAGE_CONTRACT", "IntakeValidationError",
     "MANIFEST_CONTRACT", "SOURCE_ORIGIN", "STAGING_ROOT", "UNKNOWN", "canonical_json_bytes", "duplicate_semantics",
     "dry_run_validate", "evaluate_timestamp_evidence", "sha256_bytes", "sha256_json", "validate_export_package",
-    "validate_manifest", "validate_staging_path",
+    "validate_manifest", "validate_staging_path", "AppendOnlyStaging", "DedupeIndex", "build_identity_index", "canonical_identity_key",
 ]

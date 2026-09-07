@@ -33,14 +33,18 @@ def main() -> int:
                 "B15-EWP-004 training infrastructure and contract validators",
                 "official odds extraction/OCR/layout profiles",
                 "manual review Workbench Git fail-safe",
-                "additive AI visual review contract/runtime"
+                "additive AI visual review contract/runtime",
+                "provider-neutral Pass A/Pass B adapter and provider hash bindings",
+                "four fail-closed engine shells, model loader, Frozen Input scaffold, and synthetic E2E",
+                "append-only Library staging, canonical identity mapping, dedupe, and backfill request"
             ],
             "not_completed": ["formal model artifacts", "V4-076 Frozen Input runtime", "V4-052 Outcome", "V4-053 Handicap", "V4-054 Goals", "V4-055 HTFT"],
-            "reason": "Downstream engine implementation is correctly gated on approved model artifacts and frozen input; no artifacts exist."
+            "reason": "Infrastructure is ready, but downstream formal engine implementation is correctly gated on approved model artifacts and Frozen Input; no artifacts exist."
         },
+        "SYSTEM_INFRASTRUCTURE_READINESS": "PASS",
         "DATA_PIPELINE_COMPLETE_PARTIAL": {
             "value": "PARTIAL",
-            "complete": ["immutable source handoff inventory", "OCR traces and evidence", "432-cell AI review sidecar with canonical bindings", "zero-data EWP-003 readiness rerun"],
+            "complete": ["immutable source handoff inventory", "OCR traces and evidence", "432-cell AI review sidecar with canonical bindings", "provider-neutral vision adapter", "append-only Library staging/package preparation", "zero-data EWP-003 readiness rerun"],
             "blocked": ["accepted official odds payload", "r002 package", "historical archive intake", "non-empty as-of dataset", "formal temporal split"]
         },
         "AI_VISUAL_REVIEW": {
@@ -49,8 +53,13 @@ def main() -> int:
             "status_counts": ai_manifest["status_counts"],
             "provider_available": ai_manifest["provider_available"],
             "evidence_manifest_hash": ai_manifest["manifest_hash"],
-            "quality_statement": "No OCR-only value was accepted as AI visual evidence; all 432 candidates are escalated because the repeatable visual provider is unavailable."
+            "quality_statement": "No OCR-only value was accepted as AI visual evidence; candidates remain fail-closed until a repeatable visual provider is connected."
         },
+        "VISION_PROVIDER_ADAPTER_READY": True,
+        "VISION_PROVIDER_CONNECTION_REQUIRED": not ai_manifest["provider_available"],
+        "ADDITIONAL_LIBRARY_BACKFILL_REQUEST_STATUS": "COMPLETE",
+        "DATA_PIPELINE_PREP_STATUS": "READY_FOR_NEXT_VALIDATED_LIBRARY_PACKAGE",
+        "FORMAL_MODEL_TRAINING": "NOT_STARTED",
         "ENGINE_ROLE_READINESS_TRAINING": {
             role: {
                 "readiness": ewp003.get("per_engine_readiness", {}).get(role, {}).get("readiness_state", "BLOCKED"),
@@ -68,7 +77,7 @@ def main() -> int:
             },
             {
                 "code": "ADDITIONAL_LIBRARY_BACKFILL_FILES_REQUIRED",
-                "action": "Supply an approved Library package satisfying the machine-readable 99-match request in V4_TRAINING_DATA_EXPANSION_REQUIRED.json; the current package contains only 40 match identities and is not accepted into the archive.",
+                "action": "Supply an approved Library package satisfying ADDITIONAL_LIBRARY_BACKFILL_REQUEST.json and the machine-readable 99-match request; the current package contains only 40 match identities and is not accepted into the archive.",
                 "scope": "historical source acquisition only"
             }
         ],
@@ -87,7 +96,8 @@ def main() -> int:
             "thresholds_lowered": False,
             "formal_training_executed": False,
             "model_artifacts_written": False,
-            "accepted_archive_records_written": False
+            "accepted_archive_records_written": False,
+            "formal_prediction_binding_executed": False
         }
     }
     body = json.dumps(status, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")

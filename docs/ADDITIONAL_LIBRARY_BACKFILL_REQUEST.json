@@ -1,0 +1,128 @@
+{
+  "request_identity": "ADDITIONAL_LIBRARY_BACKFILL_REQUEST",
+  "request_version": "jcfb-v4-library-backfill-request@1.0.0",
+  "status": "COMPLETE",
+  "purpose": "Acquire additional auditable historical source packages for independent V4 re-ingestion; this request is not an archive approval and does not authorize training.",
+  "current_data_state": {
+    "approved_archive_records": 0,
+    "current_candidate_match_identities": 40,
+    "additional_distinct_match_lower_bound": 99,
+    "minimums_unchanged": true,
+    "formal_model_training": "NOT_STARTED"
+  },
+  "priority_date_buckets": [
+    {
+      "priority": 1,
+      "date_scope": "2026-08-05",
+      "discovery_status": "CANDIDATE_DISCOVERY_ONLY",
+      "known_candidate_basis": "Historical Library material was reported as containing original screenshot paths and per-market visible times.",
+      "library_file_id_or_external_ref": "UNKNOWN_UNTIL_LIBRARY_EXPORT",
+      "requested_output": "Original official screenshot/source bytes plus auditable metadata and separate post-match labels."
+    },
+    {
+      "priority": 2,
+      "date_scope": "2026-08-13",
+      "discovery_status": "CANDIDATE_DISCOVERY_ONLY",
+      "known_candidate_basis": "Historical Library material was reported as containing 10 complete matches with SPF, handicap, score, total goals, and HTFT coverage.",
+      "library_file_id_or_external_ref": "UNKNOWN_UNTIL_LIBRARY_EXPORT",
+      "requested_output": "Prefer complete cards with all four engine roles represented."
+    },
+    {
+      "priority": 3,
+      "date_scope": "2026-08-21",
+      "discovery_status": "CANDIDATE_DISCOVERY_ONLY",
+      "known_candidate_basis": "Historical Library material was reported as containing official score, total-goals, and HTFT odds with source/capture metadata.",
+      "library_file_id_or_external_ref": "UNKNOWN_UNTIL_LIBRARY_EXPORT",
+      "requested_output": "Prioritize records with explicit official source identity and pre-match availability time."
+    },
+    {
+      "priority": 4,
+      "date_scope": "2026-08-23",
+      "discovery_status": "CANDIDATE_DISCOVERY_ONLY",
+      "known_candidate_basis": "Historical Library material was reported as containing 16 matches with lottery odds, total-goals, HTFT, and an official screenshot source declaration.",
+      "library_file_id_or_external_ref": "UNKNOWN_UNTIL_LIBRARY_EXPORT",
+      "requested_output": "Prefer broad market coverage and raw source bytes over prior structured summaries."
+    },
+    {
+      "priority": 5,
+      "date_scope": "2026-08-24..2026-08-31",
+      "discovery_status": "DISCOVERY_REQUIRED",
+      "known_candidate_basis": "Search the complete late-August Library range for distinct matches not already present in R001.",
+      "library_file_id_or_external_ref": "UNKNOWN_UNTIL_LIBRARY_EXPORT",
+      "requested_output": "Fill class-support gaps after deterministic identity mapping; do not select by a predicted outcome."
+    },
+    {
+      "priority": 6,
+      "date_scope": "2026-09-05..2026-09-06",
+      "discovery_status": "DISCOVERY_REQUIRED",
+      "known_candidate_basis": "Search reported September Library material only when the source was available before each match kickoff and the observation can be independently audited.",
+      "library_file_id_or_external_ref": "UNKNOWN_UNTIL_LIBRARY_EXPORT",
+      "requested_output": "Use as later temporal buckets only after earlier buckets and cutoff semantics are proven."
+    }
+  ],
+  "quantity_targets": {
+    "distinct_matches": 99,
+    "partitions": {"train": 45, "validation": 27, "holdout": 27},
+    "per_engine_minimum_additional_eligible_samples": {"OUTCOME": 33, "HANDICAP": 33, "GOALS": 88, "HTFT": 99},
+    "class_support": {"train": 5, "validation": 3, "holdout": 3},
+    "allocation_rule": "Chronological, match-grouped temporal allocation after eligibility; no random split and no class-targeted leakage."
+  },
+  "required_per_match_fields": [
+    "data_date",
+    "official_match_no",
+    "canonical_match_identity",
+    "league_id",
+    "kickoff_at",
+    "prediction_cutoff_at",
+    "source_availability_at",
+    "source_timestamp_semantics",
+    "official_pre_match_screenshot_or_source_bytes",
+    "SPF",
+    "RQSPF",
+    "TOTAL_GOALS",
+    "EXACT_SCORE",
+    "HTFT",
+    "final_result",
+    "halftime_result",
+    "raw_image_sha256",
+    "source_reference",
+    "library_file_id_or_external_ref",
+    "capture_or_publication_time_if_available",
+    "artifact_hash"
+  ],
+  "provenance_rules": {
+    "source_priority": ["official_raw_bytes", "auditable_derivative_bound_to_raw_bytes", "prior_structured_extraction_as_candidate_only"],
+    "v3_reingestion": "V3-era raw factual source or prior structured extraction may be a candidate, but must be independently re-ingested under V4 contracts.",
+    "timestamp_semantics": "Preserve created/upload/source/capture/publication/observed/ingested timestamps separately; UNKNOWN is valid, substitution is forbidden.",
+    "identity": "Canonical match identity must be explicit and deterministically hashable; display-name similarity cannot resolve identity.",
+    "labels": "Post-match final_result, halftime_result, and derived labels are stored separately from pre-match odds/features.",
+    "cutoff": "Every pre-match source used by a sample must have source availability at or before prediction_cutoff_at, which precedes kickoff_at.",
+    "market_unavailability": "Missing SPF/RQSPF/TOTAL_GOALS/HTFT remains explicit UNAVAILABLE or NOT_VERIFIED; odds are never guessed."
+  },
+  "class_support_priority": [
+    {"rank": 1, "target": "HTFT", "reason": "Nine classes dominate the 99-match joint lower bound; acquire complete HTFT cards first."},
+    {"rank": 2, "target": "GOALS", "reason": "Eight classes require 88 eligible samples; retain explicit 7+ tail labels."},
+    {"rank": 3, "target": "OUTCOME/HANDICAP", "reason": "Three-class roles require 33 samples each; keep RQSPF cutoff/line evidence separate from SPF."},
+    {"rank": 4, "target": "RARE_OBSERVED_CLASSES", "reason": "After ingestion, use actual class counts to identify shortages; never choose source files using V4 predictions or probabilities."}
+  ],
+  "package_requirements": {
+    "contract": "verified-historical-backfill-export-package@1.1.0",
+    "source_origin": "CHATGPT_LIBRARY_EXPORT",
+    "acquisition_mode": "VERIFIED_HISTORICAL_BACKFILL",
+    "staging_only_until_governance_review": true,
+    "append_only_revision_directories": true,
+    "dedupe_key": "raw bytes + external source identity + canonical match identity + observation timestamp + extracted market payload",
+    "archive_write": "FORBIDDEN until the real package validates and separate intake authorization exists"
+  },
+  "prohibited_inputs": [
+    "V3.3.3 predictions",
+    "V3.3.3 models",
+    "V3.3.3 parameters",
+    "post_match_features",
+    "guessed_or_inferred_odds",
+    "fabricated_library_ids",
+    "fabricated_timestamps",
+    "synthetic_matches_as_training_samples"
+  ],
+  "blocker": "REAL_LIBRARY_EXPORT_OR_AUDITABLE_SOURCE_PACKAGE_REQUIRED"
+}
