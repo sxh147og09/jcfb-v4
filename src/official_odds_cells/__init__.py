@@ -9,6 +9,15 @@ from .runtime import (
     derive_unresolved_trace,
     trace_record_hash,
 )
+from .remediation import (
+    AvailabilityResolution,
+    RemediatedCellLocatorRegistry,
+    RemediatedLayoutProfileRegistry,
+    extract_structural_features,
+    load_profile_config,
+    load_remediated_contract,
+    resolve_availability_aliases,
+)
 
 __all__ = [
     "CONTRACT_IDENTITY",
@@ -27,4 +36,11 @@ __all__ = [
     "build_full_trace",
     "derive_unresolved_trace",
     "trace_record_hash",
+    "AvailabilityResolution",
+    "RemediatedCellLocatorRegistry",
+    "RemediatedLayoutProfileRegistry",
+    "extract_structural_features",
+    "load_profile_config",
+    "load_remediated_contract",
+    "resolve_availability_aliases",
 ]

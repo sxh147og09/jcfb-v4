@@ -96,6 +96,8 @@ def build_full_trace(
     evidence: Optional[Mapping[Any, Any]] = None,
     market_availability: Optional[Mapping[str, str]] = None,
     cell_presence: Optional[Mapping[Any, bool]] = None,
+    structural_features: Optional[Mapping[str, Any]] = None,
+    market_availability_fields: Optional[Mapping[str, Any]] = None,
     source_timestamps: Optional[Mapping[str, Any]] = None,
     contract: Optional[Mapping[str, Any]] = None,
 ) -> FullTraceResult:
@@ -105,28 +107,67 @@ def build_full_trace(
         raise ValueError("source_width and source_height must be positive source-pixel integers")
     frozen_contract = dict(contract or load_contract())
     raw_hash = _image_hash(raw_image)
-    layout_registry = LayoutProfileRegistry(frozen_contract)
-    locator_registry = CellLocatorRegistry(frozen_contract)
-    detection = layout_registry.detect(layout_profile_id, layout_regions)
+    remediated = "layout_profile_remediation" in frozen_contract
+    if remediated:
+        from .remediation import RemediatedCellLocatorRegistry, RemediatedLayoutProfileRegistry
+
+        layout_registry = RemediatedLayoutProfileRegistry(frozen_contract)
+        locator_registry = RemediatedCellLocatorRegistry(frozen_contract)
+        detection = layout_registry.detect(raw_image if structural_features is None else None, structural_features)
+    else:
+        layout_registry = LayoutProfileRegistry(frozen_contract)
+        locator_registry = CellLocatorRegistry(frozen_contract)
+        detection = layout_registry.detect(layout_profile_id, layout_regions)
     timestamps = _timestamps(source_timestamps)
     availability = {market: "AVAILABLE" for market in MARKETS}
+    if remediated and detection.status == "SELECTED":
+        profile = layout_registry.profile(detection.profile_id)
+        availability.update(profile.get("market_presence", {}))
     if market_availability:
         for market, state in market_availability.items():
             if market not in MARKETS or state not in {"AVAILABLE", "UNAVAILABLE", "UNKNOWN", "BLOCKED"}:
                 raise ValueError(f"invalid market availability: {market}={state}")
             availability[market] = state
+    if market_availability_fields is not None:
+        from .remediation import resolve_availability_aliases
+
+        alias_spec = frozen_contract.get("market_contract", {}).get("source_field_aliases", {}).get("HTFT", {})
+        resolution = resolve_availability_aliases(
+            market_availability_fields,
+            canonical_field=alias_spec.get("canonical_field", "htft"),
+            legacy_aliases=tuple(alias_spec.get("legacy_aliases", ["half_full"])),
+        )
+        availability["HTFT"] = resolution.state
     implementation_hash = "sha256:" + hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     config_hash = parser_config_hash(frozen_contract)
+    selected_profile_id = detection.profile_id if remediated and detection.status == "SELECTED" else layout_profile_id
     records: list[dict[str, Any]] = []
     for market in MARKETS:
         for item in locator_registry.inventory(market):
             label = item["source_visible_label"]
-            if detection.status == "MATCHED":
-                locator = locator_registry.locate(layout_profile_id, market, label, source_width, source_height)
+            layout_matched = detection.status in {"MATCHED", "SELECTED"}
+            if layout_matched:
+                locator = locator_registry.locate(selected_profile_id, market, label, source_width, source_height)
                 region_coordinates = locator["region_coordinates"]
                 cell_coordinates = locator["cell_coordinates"]
             else:
-                locator = locator_registry.unsupported_locator(layout_profile_id, market, item)
+                locator = locator_registry.unsupported_locator(layout_profile_id, market, item) if hasattr(locator_registry, "unsupported_locator") else {
+                    "locator_version": "official-odds-grid-locator@1.1.0",
+                    "locator_key": f"{layout_profile_id}|{market}|{label}|official-odds-grid-locator@1.1.0",
+                    "layout_profile_id": layout_profile_id,
+                    "layout_profile_version": "UNKNOWN",
+                    "market": market,
+                    "source_visible_label": label,
+                    "canonical_outcome_label": item["canonical_outcome_label"],
+                    "ordering_index": item["ordering_index"],
+                    "row": item["row"],
+                    "column": item["column"],
+                    "region_coordinates": None,
+                    "cell_coordinates": None,
+                    "region_pixel_coordinates": None,
+                    "cell_pixel_coordinates": None,
+                    "geometry_status": "UNSUPPORTED_LAYOUT",
+                }
                 region_coordinates = None
                 cell_coordinates = None
             item_evidence = _evidence_for(evidence, market, label)
@@ -141,7 +182,7 @@ def build_full_trace(
             normalized_evidence = None
             reason = detection.reason
             contradiction = "NONE"
-            if detection.status == "MATCHED":
+            if layout_matched:
                 status, parsed_value, normalized_evidence, reason = parse_value(
                     market,
                     item["value_kind"],

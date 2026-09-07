@@ -1,0 +1,84 @@
+{
+  "$id": "v4-batch15-layout-profile-remediation-amendment@1.0.0",
+  "amendment_type": "ADDITIVE_EXECUTION_WORK_PACKAGE_SCOPE_EXTENSION",
+  "status": "APPROVED_FOR_IMPLEMENTATION_ONLY",
+  "parent_batch": "BATCH-15",
+  "base_registry_identity": "v4-batch-prerequisite-workpackages@1.0.0",
+  "base_registry_hash": "sha256:2e8cc439675702173266398e632c6efbec3a283f769ac20db5432a9dece225e9",
+  "base_ewp006_amendment": {
+    "identity": "v4-batch-prerequisite-workpackages-amendment-001@1.0.0",
+    "canonical_hash": "sha256:53e6f7ae0047529c82ad1913f1fc74badfd64db6ea474af7d9c2450204cf5168",
+    "status_unchanged": "COMPLETE"
+  },
+  "base_facts_preserved": {
+    "ewp001_to_ewp006_history_unchanged": true,
+    "ewp001_to_ewp004_reopened": false,
+    "ewp005_execution_authorized": false,
+    "v4_task_namespace_modified": false,
+    "v333_modified": false
+  },
+  "work_package": {
+    "sequence": 7,
+    "work_package_key": "official-odds-multi-layout-profile-and-cell-geometry-remediation",
+    "work_package_id": "B15-EWP-007",
+    "revision": "r001",
+    "entity_type": "EXECUTION_WORK_PACKAGE",
+    "parent_batch": "BATCH-15",
+    "parent_task_scope": ["V4-076", "V4-052", "V4-053", "V4-054", "V4-055"],
+    "status": "COMPLETE",
+    "execution_authorized": true,
+    "authorization_basis": "EXPLICIT_REMEDIATION_TASK_SCOPE;ADDITIVE_ONLY;NO_HISTORICAL_REPLAY",
+    "dependencies": ["B15-EWP-006"],
+    "scope": "Implement additive versioned official screenshot multi-layout profiles, observable structural detector, full 55-cell geometry, HTFT schema alias compatibility, trace/hash compatibility, fixture tests, validators, and read-only profile coverage smoke test.",
+    "definition_of_done": [
+      "two versioned profiles are frozen without changing official-odds-cell-extraction@1.0.0",
+      "detector selects exactly one profile or fails closed on unsupported/ambiguous layouts",
+      "each profile binds the complete five-market 55-cell inventory and explicit geometry",
+      "HTFT htft/half_full alias precedence, missing, unknown, and conflict behavior is executable",
+      "trace identity binds selected profile and locator/config hashes",
+      "focused tests, validators, and the permitted no-write 64-artifact profile smoke test pass",
+      "OCR evidence, accepted odds, manual review, r002, archive, training, and downstream tasks remain outside scope"
+    ],
+    "evidence_manifest": [
+      "layout-profile-remediation-registry",
+      "multi-layout-detector-runtime",
+      "full-cell-geometry-validator",
+      "htft-schema-alias-runtime",
+      "focused-remediation-tests",
+      "no-write-profile-coverage-smoke-test",
+      "implementation-report"
+    ],
+    "output_artifacts": [
+      "layout_profile_remediation_1_1_0.json",
+      "official-odds-layout-profile-remediation-runtime",
+      "B15-EWP-007-validation",
+      "JCFB_V4_OFFICIAL_ODDS_MULTI_LAYOUT_PROFILE_AND_CELL_GEOMETRY_REMEDIATION_REPORT"
+    ],
+    "authorization_boundary": {
+      "profile_detection": true,
+      "geometry_validation": true,
+      "historical_profile_smoke_test": true,
+      "ocr_evidence_generation": false,
+      "full_ocr_replay": false,
+      "manual_review_value_confirmation": false,
+      "accepted_official_odds_payload_write": false,
+      "historical_source_archive_write": false,
+      "archive_record_or_revision_write": false,
+      "r002_package_generation": false,
+      "ewp002_rerun": false,
+      "ewp003_rerun": false,
+      "ewp005_execution_authorized": false,
+      "v4_076_execution": false,
+      "v4_052_to_v4_055_execution": false,
+      "model_fit_or_calibration": false,
+      "production_shadow_public_supabase_migration": false,
+      "v333_modification": false
+    }
+  },
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "self_hash_field": "canonical_hash is omitted during hash computation"
+  },
+  "canonical_hash": "sha256:0dd03981dc03d24ea51aeaaf465e15c862898ce1fc5f733ef947e83ac77f61bb"
+}

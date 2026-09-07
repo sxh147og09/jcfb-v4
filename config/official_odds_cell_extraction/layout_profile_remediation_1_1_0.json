@@ -1,0 +1,95 @@
+{
+  "$id": "official-odds-layout-profiles@1.1.0",
+  "status": "FROZEN_ADDITIVE",
+  "compatibility": "ADDITIVE_WITH_OFFICIAL_ODDS_CELL_EXTRACTION@1.0.0",
+  "supersedes": "official-odds-layout-profiles@1.0.0",
+  "supported_source_identity": "CHINA_SPORTS_LOTTERY_OFFICIAL_SCREENSHOT",
+  "source_dimension_policy": {
+    "width": 440,
+    "height": 982,
+    "raw_bytes_are_immutable": true,
+    "normalization": "pixel_edges_divided_by_source_dimensions; 9 decimal places; no rescale"
+  },
+  "detector_contract": {
+    "input": "raw_png_bytes_and_observable_structural_features",
+    "forbidden_inputs": ["filename", "upload_date", "match_number", "aggregate_baseline", "baseline_fitting", "manual_artifact_slot_list"],
+    "match_rule": "exactly_one_profile_within_declared_anchor_tolerance_is_selected",
+    "zero_matches": "UNSUPPORTED_LAYOUT",
+    "multiple_matches": "AMBIGUOUS_LAYOUT",
+    "anchor_tolerance_pixels": 1,
+    "observable_anchors": ["source_dimensions", "dark_section_bar_spans"]
+  },
+  "schema_aliases": {
+    "HTFT": {
+      "canonical_field": "htft",
+      "legacy_aliases": ["half_full"],
+      "precedence": ["htft", "half_full"],
+      "missing_state": "UNKNOWN",
+      "conflict_state": "BLOCKED",
+      "conflict_action": "FAIL_CLOSED",
+      "unknown_is_unavailable": false
+    }
+  },
+  "locator": {
+    "identity": "official-odds-grid-locator@1.1.0",
+    "geometry_mode": "EXPLICIT_PROFILE_CELL_RECTANGLES",
+    "rectangle_semantics": "left_top_inclusive_right_bottom_exclusive",
+    "hash_inputs": ["profile_identity", "market", "ordering_index", "source_visible_label", "normalized_rectangle", "source_pixel_rectangle"]
+  },
+  "inventory_binding": "base_contract.market_contract.inventories[market] ordered by ordering_index; canonical_outcome_label and source_visible_label are not rewritten",
+  "profiles": [
+    {
+      "layout_profile_id": "china-sports-lottery-official-standard",
+      "layout_profile_version": "1.1.0",
+      "layout_profile_identity": "china-sports-lottery-official-standard@1.1.0",
+      "status": "SUPPORTED",
+      "locator_version": "official-odds-grid-locator@1.1.0",
+      "market_presence": {"SPF": "AVAILABLE", "RQSPF": "AVAILABLE", "TOTAL_GOALS": "AVAILABLE", "EXACT_SCORE": "AVAILABLE", "HTFT": "AVAILABLE"},
+      "detector_rules": {
+        "source_dimensions": {"width": 440, "height": 982},
+        "dark_section_bar_spans": {"EXACT_SCORE": [220, 248], "TOTAL_GOALS": [517, 545], "HTFT": [622, 650]}
+      },
+      "market_regions": {
+        "SPF": {"left": 17, "top": 114, "right": 423, "bottom": 162, "grid_rows": 1, "grid_columns": 3, "geometry_supported": true},
+        "RQSPF": {"left": 17, "top": 162, "right": 423, "bottom": 208, "grid_rows": 1, "grid_columns": 4, "geometry_supported": true},
+        "TOTAL_GOALS": {"left": 15, "top": 545, "right": 425, "bottom": 610, "grid_rows": 2, "grid_columns": 4, "geometry_supported": true},
+        "EXACT_SCORE": {"left": 15, "top": 248, "right": 425, "bottom": 506, "grid_rows": 7, "grid_columns": 5, "geometry_supported": true},
+        "HTFT": {"left": 15, "top": 650, "right": 425, "bottom": 761, "grid_rows": 3, "grid_columns": 3, "geometry_supported": true}
+      },
+      "cell_geometry_pixels": {
+        "SPF": [[80, 114, 196, 162], [196, 114, 309, 162], [309, 114, 423, 162]],
+        "RQSPF": [[17, 162, 80, 208], [80, 162, 196, 208], [196, 162, 309, 208], [309, 162, 423, 208]],
+        "TOTAL_GOALS": [[35, 545, 132, 578], [132, 545, 229, 578], [229, 545, 327, 578], [327, 545, 425, 578], [35, 578, 132, 610], [132, 578, 229, 610], [229, 578, 327, 610], [327, 578, 425, 610]],
+        "EXACT_SCORE": [[43, 248, 119, 285], [119, 248, 196, 285], [196, 248, 273, 285], [273, 248, 349, 285], [349, 248, 425, 285], [43, 285, 119, 322], [119, 285, 196, 322], [196, 285, 273, 322], [273, 285, 349, 322], [349, 285, 425, 322], [43, 322, 119, 359], [119, 322, 196, 359], [196, 322, 425, 359], [43, 359, 119, 396], [119, 359, 196, 396], [196, 359, 273, 396], [273, 359, 349, 396], [349, 359, 425, 396], [43, 396, 119, 433], [119, 396, 196, 433], [196, 396, 273, 433], [273, 396, 349, 433], [349, 396, 425, 433], [43, 433, 119, 470], [119, 433, 196, 470], [196, 433, 273, 470], [273, 433, 349, 470], [349, 433, 425, 470], [43, 470, 119, 506], [119, 470, 196, 506], [196, 470, 425, 506]],
+        "HTFT": [[43, 650, 170, 687], [170, 650, 297, 687], [297, 650, 425, 687], [43, 687, 170, 724], [170, 687, 297, 724], [297, 687, 425, 724], [43, 724, 170, 761], [170, 724, 297, 761], [297, 724, 425, 761]]
+      }
+    },
+    {
+      "layout_profile_id": "china-sports-lottery-official-spf-absent",
+      "layout_profile_version": "1.0.0",
+      "layout_profile_identity": "china-sports-lottery-official-spf-absent@1.0.0",
+      "status": "SUPPORTED",
+      "locator_version": "official-odds-grid-locator@1.1.0",
+      "market_presence": {"SPF": "UNAVAILABLE", "RQSPF": "AVAILABLE", "TOTAL_GOALS": "AVAILABLE", "EXACT_SCORE": "AVAILABLE", "HTFT": "AVAILABLE"},
+      "detector_rules": {
+        "source_dimensions": {"width": 440, "height": 982},
+        "dark_section_bar_spans": {"EXACT_SCORE": [203, 231], "TOTAL_GOALS": [500, 528], "HTFT": [605, 633]}
+      },
+      "market_regions": {
+        "SPF": {"left": 17, "top": 114, "right": 423, "bottom": 144, "grid_rows": 1, "grid_columns": 3, "geometry_supported": false},
+        "RQSPF": {"left": 17, "top": 114, "right": 423, "bottom": 190, "grid_rows": 1, "grid_columns": 4, "geometry_supported": true},
+        "TOTAL_GOALS": {"left": 15, "top": 528, "right": 425, "bottom": 595, "grid_rows": 2, "grid_columns": 4, "geometry_supported": true},
+        "EXACT_SCORE": {"left": 15, "top": 231, "right": 425, "bottom": 490, "grid_rows": 7, "grid_columns": 5, "geometry_supported": true},
+        "HTFT": {"left": 15, "top": 633, "right": 425, "bottom": 743, "grid_rows": 3, "grid_columns": 3, "geometry_supported": true}
+      },
+      "cell_geometry_pixels": {
+        "SPF": [null, null, null],
+        "RQSPF": [[17, 114, 80, 190], [80, 144, 196, 190], [196, 144, 309, 190], [309, 144, 423, 190]],
+        "TOTAL_GOALS": [[35, 528, 132, 562], [132, 528, 229, 562], [229, 528, 327, 562], [327, 528, 425, 562], [35, 562, 132, 595], [132, 562, 229, 595], [229, 562, 327, 595], [327, 562, 425, 595]],
+        "EXACT_SCORE": [[43, 231, 119, 268], [119, 231, 196, 268], [196, 231, 273, 268], [273, 231, 349, 268], [349, 231, 425, 268], [43, 268, 119, 305], [119, 268, 196, 305], [196, 268, 273, 305], [273, 268, 349, 305], [349, 268, 425, 305], [43, 305, 119, 342], [119, 305, 196, 342], [196, 305, 425, 342], [43, 342, 119, 379], [119, 342, 196, 379], [196, 342, 273, 379], [273, 342, 349, 379], [349, 342, 425, 379], [43, 379, 119, 416], [119, 379, 196, 416], [196, 379, 273, 416], [273, 379, 349, 416], [349, 379, 425, 416], [43, 416, 119, 453], [119, 416, 196, 453], [196, 416, 273, 453], [273, 416, 349, 453], [349, 416, 425, 453], [43, 453, 119, 490], [119, 453, 196, 490], [196, 453, 425, 490]],
+        "HTFT": [[43, 633, 170, 670], [170, 633, 297, 670], [297, 633, 425, 670], [43, 670, 170, 706], [170, 670, 297, 706], [297, 670, 425, 706], [43, 706, 170, 743], [170, 706, 297, 743], [297, 706, 425, 743]]
+      }
+    }
+  ],
+  "canonical_hash": "sha256:53fefc744aecfff947b46bd95caff7066d373fdc4bff5c4121108fc72b6e87d3"
+}

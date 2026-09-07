@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Mapping, Optional
 
 from .contract import MARKETS, load_contract
@@ -58,6 +58,7 @@ class LayoutDetection:
     profile_version: str
     reason: str
     region_rects: Mapping[str, NormalizedRect]
+    evidence: Mapping[str, Any] = field(default_factory=dict)
 
 
 def _rect(raw: Mapping[str, Any]) -> NormalizedRect:
