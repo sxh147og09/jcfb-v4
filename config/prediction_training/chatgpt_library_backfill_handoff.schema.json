@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "chatgpt-library-backfill-handoff@1.0.0",
+  "type": "object",
+  "required": ["contract_identity", "handoff_id", "source_origin", "distinct_match_target", "source_artifacts", "candidate_manifest", "archive_write_allowed", "training_write_allowed"],
+  "properties": {
+    "contract_identity": {"const": "chatgpt-library-backfill-handoff@1.0.0"},
+    "handoff_id": {"type": "string", "minLength": 1},
+    "source_origin": {"const": "CHATGPT_LIBRARY_EXPORT_PENDING_LOCAL_MATERIALIZATION"},
+    "distinct_match_target": {"const": 99},
+    "source_artifacts": {"type": "array", "items": {"$ref": "#/$defs/sourceArtifact"}},
+    "candidate_manifest": {"type": "array", "items": {"$ref": "#/$defs/candidate"}},
+    "archive_write_allowed": {"const": false},
+    "training_write_allowed": {"const": false}
+  },
+  "$defs": {
+    "sourceArtifact": {
+      "type": "object",
+      "required": ["artifact_id", "role", "sha256"],
+      "properties": {
+        "artifact_id": {"type": "string", "minLength": 1},
+        "role": {"enum": ["RAW_SCREENSHOT", "AUDITABLE_DERIVATIVE", "POSTMATCH_RESULT_EVIDENCE"]},
+        "sha256": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "candidate": {
+      "type": "object",
+      "required": ["candidate_id", "file_id_or_external_ref", "filename", "sha256", "timestamp_semantics", "match_identity_candidate", "market_coverage", "source_type", "provenance_confidence", "eligible_for_raw_reingestion", "excluded_reasons"],
+      "properties": {
+        "candidate_id": {"type": "string", "minLength": 1},
+        "file_id_or_external_ref": {"type": "string", "minLength": 1},
+        "filename": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string"},
+        "timestamp_semantics": {"enum": ["CREATED", "UPLOADED", "CAPTURED", "PUBLISHED", "OBSERVED", "UNKNOWN"]},
+        "match_identity_candidate": {"type": "object"},
+        "market_coverage": {"type": "array", "items": {"enum": ["SPF", "RQSPF", "TOTAL_GOALS", "EXACT_SCORE", "HTFT"]}},
+        "source_type": {"enum": ["RAW_SCREENSHOT", "AUDITABLE_DERIVATIVE", "POSTMATCH_RESULT_EVIDENCE", "STRUCTURED_OFFICIAL_ODDS_CANDIDATE"]},
+        "provenance_confidence": {"enum": ["HIGH", "MEDIUM", "LOW", "UNKNOWN"]},
+        "eligible_for_raw_reingestion": {"type": "boolean"},
+        "excluded_reasons": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,11 @@
+{
+  "contract_identity": "chatgpt-library-backfill-handoff@1.0.0",
+  "handoff_id": "CHATGPT-LIBRARY-BACKFILL-YYYYMMDD-R001",
+  "source_origin": "CHATGPT_LIBRARY_EXPORT_PENDING_LOCAL_MATERIALIZATION",
+  "distinct_match_target": 99,
+  "source_artifacts": [],
+  "candidate_manifest": [],
+  "archive_write_allowed": false,
+  "training_write_allowed": false,
+  "notes": "Template only. Replace with real Library materialized metadata and bytes; UNKNOWN is allowed where evidence is absent, but fabrication is forbidden."
+}
