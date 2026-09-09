@@ -1,0 +1,689 @@
+{
+  "$id": "model-training-minimum-feature-set@2.0.0",
+  "profile_name": "MODEL_TRAINING_MINIMUM_FEATURE_SET",
+  "profile_version": "model-training-minimum-feature-set@2.0.0",
+  "profile_revision": "r002",
+  "status": "ACTIVE",
+  "supersedes": "b15-ewp004-training-infrastructure-contract@1.0.0/engine_training_profiles",
+  "prediction_time_full_readiness": {
+    "identity": "PREDICTION_TIME_FULL_READINESS",
+    "status": "UNCHANGED",
+    "authoritative_contracts": [
+      "V4_FEATURE_BUNDLE_CONTRACT",
+      "V4_BATCH14_FULL_GATE"
+    ]
+  },
+  "inference_time_richer_overlay": {
+    "identity": "INFERENCE_TIME_RICHER_OVERLAY",
+    "missing_overlay_action": "MASK_AND_RETAIN_BASE_FEATURE_VECTOR",
+    "allowed_overlay_domains": [
+      "TACTICAL",
+      "LINEUP",
+      "EXTERNAL_MARKET",
+      "ADDITIONAL_CONTEXT"
+    ],
+    "feature_vector_mutation": "FORBIDDEN"
+  },
+  "availability_states": [
+    "AVAILABLE",
+    "UNAVAILABLE",
+    "UNKNOWN"
+  ],
+  "required_feature_provenance": [
+    "source_availability_at",
+    "information_time",
+    "source_refs",
+    "source_hashes",
+    "reconstruction_rule",
+    "reconstruction_version",
+    "reconstruction_hash",
+    "missingness_mask"
+  ],
+  "deterministic_reconstruction_policy": {
+    "as_of_predicate": "source_availability_at <= prediction_cutoff_at < kickoff_at",
+    "silent_imputation": "FORBIDDEN",
+    "default_mean_zero_fill": "FORBIDDEN",
+    "derived_feature_requires_rule_version_hash": true
+  },
+  "tactical_status": "OPTIONAL_AVAILABILITY_AWARE_OVERLAY_NO_MANDATORY_NUMERIC_ENCODING",
+  "engine_profiles": {
+    "OUTCOME": {
+      "profile_id": "outcome-training-minimum@2.0.0",
+      "profile_revision": "r002",
+      "engine_role": "OUTCOME",
+      "required_features": [
+        {
+          "feature_id": "statistical_strength_home",
+          "type": "number",
+          "domain": "STATISTICAL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "statistical_strength_away",
+          "type": "number",
+          "domain": "STATISTICAL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "football_form_home",
+          "type": "number",
+          "domain": "FOOTBALL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "football_form_away",
+          "type": "number",
+          "domain": "FOOTBALL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "market_official_1x2_home",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "SPF"
+        },
+        {
+          "feature_id": "market_official_1x2_draw",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "SPF"
+        },
+        {
+          "feature_id": "market_official_1x2_away",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "SPF"
+        }
+      ],
+      "optional_features": [
+        {
+          "feature_id": "tactical_context_overlay",
+          "type": "categorical_or_relational",
+          "domain": "TACTICAL",
+          "missing": "MASK",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "external_market_overlay",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "MASK",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        }
+      ],
+      "market_core": {
+        "source": "official SPF",
+        "vector": [
+          "H",
+          "D",
+          "A"
+        ]
+      },
+      "profile_hash": "sha256:a571ed515dcd4f8310b5c4426013d825994f8539594345ff46243ec4c7558f4e"
+    },
+    "HANDICAP": {
+      "profile_id": "handicap-training-minimum@2.0.0",
+      "profile_revision": "r002",
+      "engine_role": "HANDICAP",
+      "required_features": [
+        {
+          "feature_id": "statistical_strength_home",
+          "type": "number",
+          "domain": "STATISTICAL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "statistical_strength_away",
+          "type": "number",
+          "domain": "STATISTICAL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "football_form_home",
+          "type": "number",
+          "domain": "FOOTBALL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "football_form_away",
+          "type": "number",
+          "domain": "FOOTBALL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "official_rqspf_handicap_value_at_cutoff",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "RQSPF"
+        },
+        {
+          "feature_id": "market_handicap_home",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "RQSPF"
+        },
+        {
+          "feature_id": "market_handicap_draw",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "RQSPF"
+        },
+        {
+          "feature_id": "market_handicap_away",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "RQSPF"
+        }
+      ],
+      "optional_features": [
+        {
+          "feature_id": "tactical_context_overlay",
+          "type": "categorical_or_relational",
+          "domain": "TACTICAL",
+          "missing": "MASK",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "external_asian_handicap_overlay",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "MASK",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        }
+      ],
+      "market_core": {
+        "source": "official RQSPF",
+        "vector": [
+          "official_handicap",
+          "H",
+          "D",
+          "A"
+        ],
+        "sign_convention": "home_minus_away"
+      },
+      "profile_hash": "sha256:614cf7491d9b8ddc2dcc9564b72660b59a67cc1e01e12e5c524f7944abaa4553"
+    },
+    "GOALS": {
+      "profile_id": "goals-training-minimum@2.0.0",
+      "profile_revision": "r002",
+      "engine_role": "GOALS",
+      "required_features": [
+        {
+          "feature_id": "statistical_goals_rate_home",
+          "type": "number",
+          "domain": "STATISTICAL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "statistical_goals_rate_away",
+          "type": "number",
+          "domain": "STATISTICAL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "football_goals_form_home",
+          "type": "number",
+          "domain": "FOOTBALL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "football_goals_form_away",
+          "type": "number",
+          "domain": "FOOTBALL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "market_official_total_goals_0",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "TOTAL_GOALS"
+        },
+        {
+          "feature_id": "market_official_total_goals_1",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "TOTAL_GOALS"
+        },
+        {
+          "feature_id": "market_official_total_goals_2",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "TOTAL_GOALS"
+        },
+        {
+          "feature_id": "market_official_total_goals_3",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "TOTAL_GOALS"
+        },
+        {
+          "feature_id": "market_official_total_goals_4",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "TOTAL_GOALS"
+        },
+        {
+          "feature_id": "market_official_total_goals_5",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "TOTAL_GOALS"
+        },
+        {
+          "feature_id": "market_official_total_goals_6",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "TOTAL_GOALS"
+        },
+        {
+          "feature_id": "market_official_total_goals_7_plus",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "TOTAL_GOALS"
+        }
+      ],
+      "optional_features": [
+        {
+          "feature_id": "tactical_context_overlay",
+          "type": "categorical_or_relational",
+          "domain": "TACTICAL",
+          "missing": "MASK",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "external_over_under_overlay",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "MASK",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        }
+      ],
+      "market_core": {
+        "source": "official Total Goals",
+        "vector": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7+"
+        ]
+      },
+      "profile_hash": "sha256:727ab75963fde2c11eaaee5ac47a2873ee461ede1c44813d56290b7898e1ca90"
+    },
+    "HTFT": {
+      "profile_id": "htft-training-minimum@2.0.0",
+      "profile_revision": "r002",
+      "engine_role": "HTFT",
+      "required_features": [
+        {
+          "feature_id": "statistical_strength_home",
+          "type": "number",
+          "domain": "STATISTICAL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "statistical_strength_away",
+          "type": "number",
+          "domain": "STATISTICAL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "football_first_half_form_home",
+          "type": "number",
+          "domain": "FOOTBALL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "football_first_half_form_away",
+          "type": "number",
+          "domain": "FOOTBALL",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "market_official_htft_h_h",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "HTFT"
+        },
+        {
+          "feature_id": "market_official_htft_h_d",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "HTFT"
+        },
+        {
+          "feature_id": "market_official_htft_h_a",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "HTFT"
+        },
+        {
+          "feature_id": "market_official_htft_d_h",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "HTFT"
+        },
+        {
+          "feature_id": "market_official_htft_d_d",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "HTFT"
+        },
+        {
+          "feature_id": "market_official_htft_d_a",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "HTFT"
+        },
+        {
+          "feature_id": "market_official_htft_a_h",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "HTFT"
+        },
+        {
+          "feature_id": "market_official_htft_a_d",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "HTFT"
+        },
+        {
+          "feature_id": "market_official_htft_a_a",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "REJECT",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ],
+          "native_market_source": "HTFT"
+        }
+      ],
+      "optional_features": [
+        {
+          "feature_id": "tactical_context_overlay",
+          "type": "categorical_or_relational",
+          "domain": "TACTICAL",
+          "missing": "MASK",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        },
+        {
+          "feature_id": "market_official_1x2_context",
+          "type": "number",
+          "domain": "MARKET",
+          "missing": "MASK",
+          "availability_states": [
+            "AVAILABLE",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
+        }
+      ],
+      "market_core": {
+        "source": "official HTFT",
+        "vector": [
+          "H/H",
+          "H/D",
+          "H/A",
+          "D/H",
+          "D/D",
+          "D/A",
+          "A/H",
+          "A/D",
+          "A/A"
+        ]
+      },
+      "profile_hash": "sha256:73cd08b819820051c3b9bdf4d40b2ba164f6e5fc4ee38c305609672032bc03a8"
+    }
+  },
+  "profile_hash": "sha256:a151baef96951e2b124a7fbe9b476bcde833ff2ba7d6c295d4f6e37ccb1b0dd6"
+}

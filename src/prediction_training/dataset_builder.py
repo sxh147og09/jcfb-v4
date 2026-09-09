@@ -31,6 +31,15 @@ from src.prediction_training_contract import (
     substantive_hash,
     validate_training_sample,
 )
+from .training_eligibility import (
+    PROFILE_ID,
+    TRAINING_GATE_ID,
+    TrainingEligibilityError,
+    evaluate_training_eligibility,
+    load_training_gate,
+    load_training_profile,
+    make_training_gate_record,
+)
 
 
 BUILD_STATUS = "B15-EWP-002"
@@ -56,6 +65,8 @@ ROLE_LABEL_TYPES = {
     "HTFT": {"htft_label", "halftime_result", "final_result"},
 }
 FORBIDDEN_SOURCE_TERMS = ("v3.3.3", "v333", "src/data", "tests/fixtures", ".runtime/data")
+PREDICTION_FULL_MODE = "PREDICTION_FULL_READINESS"
+TRAINING_MINIMUM_MODE = "MODEL_TRAINING_MINIMUM_FEATURE_SET"
 
 
 def _canonical_bytes(value: Any) -> bytes:
@@ -240,10 +251,18 @@ class HistoricalAsOfDatasetBuilder:
     @staticmethod
     def _group_candidates(entries: Iterable[Mapping[str, Any]]) -> tuple[dict[str, Any], ...]:
         grouped: dict[tuple[Any, ...], dict[str, Any]] = {}
+
+        def canonical_time(value: Any) -> Any:
+            parsed = _parse_timestamp(value)
+            # Candidate identity is temporal, not the source's chosen string
+            # spelling.  Invalid timestamps remain distinct so fail-closed
+            # validation still reports the original candidate problem.
+            return parsed.isoformat() if parsed is not None else value
+
         for entry in entries:
             key = (
                 entry.get("match_id"), entry.get("cutoff_profile"),
-                entry.get("prediction_cutoff_at"), entry.get("kickoff_at"),
+                canonical_time(entry.get("prediction_cutoff_at")), canonical_time(entry.get("kickoff_at")),
             )
             grouped.setdefault(key, {"match_id": key[0], "cutoff_profile": key[1], "prediction_cutoff_at": key[2], "kickoff_at": key[3]})
         return tuple(sorted(grouped.values(), key=lambda item: tuple(str(item.get(field) or "") for field in ("match_id", "cutoff_profile", "prediction_cutoff_at", "kickoff_at"))))
@@ -406,24 +425,50 @@ class HistoricalAsOfDatasetBuilder:
 
     @staticmethod
     def _rqspf(pre: Sequence[Mapping[str, Any]]) -> Optional[Mapping[str, Any]]:
+        """Return the exact official RQSPF line from supported payload shapes.
+
+        Historical Library captures use the canonical ``RQSPF`` list shape,
+        while the original adapter only handled a legacy nested mapping.  The
+        parser remains fail-closed: it accepts only an official odds artifact
+        and a value explicitly bound to the ``official_handicap`` cell.
+        """
+
+        def find_handicap(value: Any) -> Any:
+            if isinstance(value, Mapping):
+                for key, child in value.items():
+                    if str(key).casefold() in {"rqspf", "official_rqspf", "rqspf_snapshot"}:
+                        if isinstance(child, Mapping):
+                            handicap = child.get("official_handicap", child.get("handicap"))
+                            if handicap is not None:
+                                return handicap
+                        if isinstance(child, list):
+                            for item in child:
+                                if not isinstance(item, Mapping):
+                                    continue
+                                label = str(item.get("canonical_cell_label", "")).casefold()
+                                if label == "official_handicap":
+                                    handicap = item.get("value", item.get("official_handicap", item.get("handicap")))
+                                    if handicap is not None:
+                                        return handicap
+                    nested = find_handicap(child)
+                    if nested is not None:
+                        return nested
+            elif isinstance(value, list):
+                for item in value:
+                    nested = find_handicap(item)
+                    if nested is not None:
+                        return nested
+            return None
+
         for entry in pre:
             if entry.get("artifact_type") not in {"official_odds_snapshot", "official_odds_screenshot"}:
                 continue
             payload = entry.get("payload") if isinstance(entry.get("payload"), Mapping) else {}
             if payload.get("source_is_official") is False:
                 continue
-            stack: list[Any] = [payload]
-            while stack:
-                value = stack.pop()
-                if isinstance(value, Mapping):
-                    for key, child in value.items():
-                        if str(key).casefold() in {"rqspf", "official_rqspf", "rqspf_snapshot"} and isinstance(child, Mapping):
-                            handicap = child.get("official_handicap", child.get("handicap"))
-                            if handicap is not None:
-                                return {"entry": entry, "value": handicap}
-                        stack.append(child)
-                elif isinstance(value, list):
-                    stack.extend(value)
+            handicap = find_handicap(payload)
+            if handicap is not None:
+                return {"entry": entry, "value": handicap}
         return None
 
     def _sample(
@@ -525,6 +570,101 @@ class HistoricalAsOfDatasetBuilder:
             raise DatasetBuildError("DATASET_SAMPLE_CONTRACT_INVALID", ";".join(failures))
         return sample
 
+    def _sample_training(
+        self,
+        candidate: Mapping[str, Any],
+        role: str,
+        evaluation: Mapping[str, Any],
+        label: Mapping[str, Any],
+        gate_record: Mapping[str, Any],
+        gate_record_ref: str,
+        entries: Sequence[Mapping[str, Any]],
+        prior: Optional[Mapping[str, Any]],
+        dataset_version: str,
+    ) -> dict[str, Any]:
+        """Build a v2 minimum-feature sample without prediction-time artifacts."""
+
+        match_id = str(candidate["match_id"])
+        cutoff_profile = str(candidate["cutoff_profile"])
+        logical = {"match_id": match_id, "cutoff_profile": cutoff_profile, "engine_role": role}
+        training_sample_id = "ts-" + sha256_json({"mode": TRAINING_MINIMUM_MODE, **logical})[7:39]
+        envelope = evaluation["feature_envelope"]
+        feature_snapshot_hash = sha256_json(envelope)
+        market_entry = evaluation.get("market_source_refs", {}).get("market_entry")
+        official_entry = evaluation.get("market_source_refs", {}).get("official_entry")
+        market = next((item for item in entries if item.get("record_ref") == market_entry), None)
+        official = next((item for item in entries if item.get("record_ref") == official_entry), None)
+        statistical = next((item for item in entries if item.get("artifact_type") == "statistical_feature_artifact_ref"), None)
+        football = next((item for item in entries if item.get("artifact_type") == "football_intelligence_ref"), None)
+        tactical_sentinel = "NOT_REQUIRED_BY_TRAINING_PROFILE@2.0.0"
+        tactical_sentinel_hash = sha256_json({"tactical_required": False, "profile": PROFILE_ID})
+        available_times = [_parse_timestamp(item.get("source_availability_at")) for item in envelope.values() if isinstance(item, Mapping)]
+        availability = min((value for value in available_times if value is not None), default=_required_timestamp(candidate["prediction_cutoff_at"]))
+        source_refs = sorted(set(str(value) for value in evaluation.get("source_refs", ()) if value))
+        pre_input = {"match_id": match_id, "cutoff_profile": cutoff_profile, "prediction_cutoff_at": candidate["prediction_cutoff_at"], "kickoff_at": candidate["kickoff_at"], "engine_role": role, "training_profile": PROFILE_ID, "feature_envelope": envelope, "source_refs": source_refs}
+        input_hash = sha256_json(pre_input)
+        provenance_hash = sha256_json({"feature_envelope": envelope, "source_refs": source_refs, "label_partition": evaluation["label_partition"], "deterministic_reconstruction": evaluation["deterministic_reconstruction"]})
+        revision = int(prior.get("revision", 0)) + 1 if prior else 1
+        sample: dict[str, Any] = {
+            "training_sample_id": training_sample_id,
+            "match_id": match_id,
+            "cutoff_profile": cutoff_profile,
+            "prediction_cutoff_at": candidate["prediction_cutoff_at"],
+            "kickoff_at": candidate["kickoff_at"],
+            "source_availability_at": availability.isoformat(),
+            "feature_bundle_ref": f"training-minimum-feature-envelope/{gate_record['training_gate_record_id']}",
+            "feature_bundle_hash": feature_snapshot_hash,
+            "feature_snapshot_hash": feature_snapshot_hash,
+            "statistical_ref": str(statistical.get("record_ref")) if statistical else "MISSING_REQUIRED_STATISTICAL_FEATURES",
+            "statistical_hash": str(statistical.get("artifact_hash")) if statistical else sha256_json({"state": "MISSING", "domain": "STATISTICAL"}),
+            "football_ref": str(football.get("record_ref")) if football else "MISSING_REQUIRED_FOOTBALL_FEATURES",
+            "football_hash": str(football.get("artifact_hash")) if football else sha256_json({"state": "MISSING", "domain": "FOOTBALL"}),
+            "market_ref": str(market.get("record_ref")) if market else "MISSING_NATIVE_MARKET_SOURCE_REF",
+            "market_hash": str(market.get("artifact_hash")) if market else sha256_json({"state": "MISSING", "domain": "MARKET"}),
+            "tactical_ref": tactical_sentinel,
+            "tactical_hash": tactical_sentinel_hash,
+            "gate_record_ref": gate_record_ref,
+            "gate_record_hash": gate_record["record_hash"],
+            "training_gate_record_ref": gate_record_ref,
+            "training_gate_record_hash": gate_record["record_hash"],
+            "source_refs": source_refs,
+            "evidence_refs": sorted(str(item.get("record_ref")) for item in entries if item.get("artifact_type") == "evidence_graph_ref"),
+            "provenance_refs": sorted(str(item.get("manifest_ref")) for item in entries if item.get("manifest_ref")),
+            "engine_role": role,
+            "eligibility_state": "ELIGIBLE",
+            "exclusion_or_block_reason": None,
+            "label_ref": str(label.get("record_ref")),
+            "label_hash": str(label.get("artifact_hash")),
+            "builder_version": self.builder_version,
+            "builder_hash": self.builder_hash,
+            "dataset_version": dataset_version,
+            "training_profile_id": PROFILE_ID,
+            "training_profile_hash": evaluation["profile_hash"],
+            "training_gate_version": TRAINING_GATE_ID,
+            "feature_envelope": envelope,
+            "availability_mask": evaluation["availability_mask"],
+            "domain_coverage": evaluation["domain_coverage"],
+            "input_hash": input_hash,
+            "provenance_hash": provenance_hash,
+            "revision": revision,
+            "supersedes": prior.get("sample_hash") if prior else None,
+        }
+        if role == "HANDICAP":
+            if not official:
+                raise DatasetBuildError("OFFICIAL_RQSPF_REQUIRED", "HANDICAP sample requires official RQSPF")
+            handicap = envelope["official_rqspf_handicap_value_at_cutoff"]
+            sample.update({
+                "official_rqspf_snapshot_ref": official["record_ref"],
+                "official_rqspf_snapshot_hash": official["artifact_hash"],
+                "official_handicap_value": handicap["value"],
+                "handicap_sign_convention": "home_minus_away",
+            })
+        sample["sample_hash"] = sha256_json(sample)
+        failures = validate_training_sample(sample)
+        if failures:
+            raise DatasetBuildError("DATASET_SAMPLE_CONTRACT_INVALID", ";".join(failures))
+        return sample
+
     @staticmethod
     def _prior_sample(approved_root: Path, dataset_id: str, logical: Mapping[str, Any]) -> Optional[Mapping[str, Any]]:
         manifests = approved_root / "manifests"
@@ -543,8 +683,23 @@ class HistoricalAsOfDatasetBuilder:
                     found.append(sample)
         return max(found, key=lambda item: int(item.get("revision", 0))) if found else None
 
-    def build(self, *, cutoff_profile: Optional[str] = None) -> DatasetBuildResult:
+    def build(
+        self,
+        *,
+        cutoff_profile: Optional[str] = None,
+        eligibility_mode: str = PREDICTION_FULL_MODE,
+    ) -> DatasetBuildResult:
         self._validate_execution()
+        if eligibility_mode not in {PREDICTION_FULL_MODE, TRAINING_MINIMUM_MODE}:
+            raise DatasetBuildError("ELIGIBILITY_MODE_INVALID", eligibility_mode)
+        training_profile: Mapping[str, Any] | None = None
+        training_gate: Mapping[str, Any] | None = None
+        if eligibility_mode == TRAINING_MINIMUM_MODE:
+            try:
+                training_profile = load_training_profile(self.config_root)
+                training_gate = load_training_gate(self.config_root)
+            except TrainingEligibilityError as exc:
+                raise DatasetBuildError(exc.code, exc.message) from exc
         try:
             all_entries = self.reader.enumerate_approved_archive_records()
         except (ArchiveReadError, OSError, json.JSONDecodeError) as exc:
@@ -557,7 +712,10 @@ class HistoricalAsOfDatasetBuilder:
             if item.get("artifact_domain") == "post_match":
                 post_by_candidate[(str(item.get("match_id")), str(item.get("cutoff_profile")))].append(item)
         candidates = self._group_candidates(pre_entries)
-        dataset_id = "dataset-" + sha256_json({"archive_snapshot_hash": archive_snapshot_hash, "cutoff_profile": cutoff_profile, "builder_version": self.builder_version, "builder_hash": self.builder_hash, "contract_hash": self.contract_hash})[7:39]
+        dataset_identity = {"archive_snapshot_hash": archive_snapshot_hash, "cutoff_profile": cutoff_profile, "builder_version": self.builder_version, "builder_hash": self.builder_hash, "contract_hash": self.contract_hash}
+        if training_profile is not None and training_gate is not None:
+            dataset_identity.update({"eligibility_mode": eligibility_mode, "training_profile_hash": training_profile["profile_hash"], "training_gate_hash": training_gate["gate_hash"]})
+        dataset_id = "dataset-" + sha256_json(dataset_identity)[7:39]
         existing_manifests = sorted((self.approved_root / "manifests").glob(f"{dataset_id}-r*.json")) if (self.approved_root / "manifests").is_dir() else []
         existing_manifest = _load_json(existing_manifests[-1]) if existing_manifests else None
         dataset_revision = int(existing_manifest.get("revision", 0)) + 1 if existing_manifest and candidates else 1
@@ -565,6 +723,7 @@ class HistoricalAsOfDatasetBuilder:
         sample_records: list[dict[str, Any]] = []
         sample_refs: list[dict[str, Any]] = []
         lineage_candidates: list[dict[str, Any]] = []
+        training_gate_refs: list[dict[str, Any]] = []
         counts: dict[str, Counter[str]] = {role: Counter() for role in ENGINE_ROLES}
         for candidate in candidates:
             candidate_key = (str(candidate.get("match_id")), str(candidate.get("cutoff_profile")))
@@ -578,6 +737,61 @@ class HistoricalAsOfDatasetBuilder:
                 lineage_candidates.append(role_audit)
                 continue
             visible_pre = self.reader.enumerate_approved_archive_records(match_id=candidate_key[0], cutoff_profile=candidate_key[1], domain="pre_match", prediction_cutoff_at=str(candidate["prediction_cutoff_at"]))
+            if training_profile is not None and training_gate is not None:
+                labels, label_reasons = self._labels(post_by_candidate[candidate_key], kickoff, all_entry_map)
+                for role in ENGINE_ROLES:
+                    evaluation = evaluate_training_eligibility(
+                        role,
+                        training_profile,
+                        visible_pre,
+                        match_id=candidate_key[0],
+                        cutoff_profile=candidate_key[1],
+                        prediction_cutoff_at=str(candidate["prediction_cutoff_at"]),
+                        kickoff_at=str(candidate["kickoff_at"]),
+                        label=labels.get(role),
+                    )
+                    reasons = sorted(set(list(evaluation["reasons"]) + list(label_reasons.get(role, []))))
+                    if reasons:
+                        evaluation = dict(evaluation, reasons=reasons, eligibility_state="INELIGIBLE")
+                    gate_id = "tgr-" + sha256_json({"match_id": candidate_key[0], "cutoff_profile": candidate_key[1], "engine_role": role, "profile_hash": training_profile["profile_hash"]})[7:39]
+                    gate_directory = self.approved_root / "training_gate_records" / archive_snapshot_identity / _safe_component(candidate_key[0], "match_id") / _safe_component(candidate_key[1], "cutoff_profile") / role
+                    gate_directory.mkdir(parents=True, exist_ok=True)
+                    prior_gate_paths = sorted(gate_directory.glob(f"r*-{gate_id}.json"))
+                    gate_revision = 1
+                    gate_supersedes = None
+                    gate_relative = f"training_gate_records/{archive_snapshot_identity}/{_safe_component(candidate_key[0], 'match_id')}/{_safe_component(candidate_key[1], 'cutoff_profile')}/{role}/r001-{gate_id}.json"
+                    gate_record = make_training_gate_record(evaluation, gate_document=training_gate, record_ref=gate_relative)
+                    if prior_gate_paths:
+                        previous_gate = _load_json(prior_gate_paths[-1])
+                        if previous_gate.get("record_hash") != gate_record.get("record_hash"):
+                            gate_revision = max(int(re.search(r"r(\d+)-", path.name).group(1)) for path in prior_gate_paths) + 1
+                            gate_supersedes = previous_gate.get("record_hash")
+                            gate_relative = f"training_gate_records/{archive_snapshot_identity}/{_safe_component(candidate_key[0], 'match_id')}/{_safe_component(candidate_key[1], 'cutoff_profile')}/{role}/r{gate_revision:03d}-{gate_id}.json"
+                            gate_record = make_training_gate_record(evaluation, gate_document=training_gate, record_ref=gate_relative, revision=gate_revision, supersedes=gate_supersedes)
+                    self._write_append_only(gate_relative, gate_record)
+                    training_gate_refs.append({"training_gate_record_id": gate_record["training_gate_record_id"], "engine_role": role, "match_id": candidate_key[0], "cutoff_profile": candidate_key[1], "record_hash": gate_record["record_hash"], "record_ref": gate_relative})
+                    status = "ELIGIBLE" if not reasons else "INELIGIBLE"
+                    role_audit["roles"][role] = {"eligibility_state": status, "reasons": reasons, "feature_refs": sorted(evaluation.get("source_refs", [])), "training_gate_record_ref": gate_relative, "required_minimum_feature_ids": [item["feature_id"] for item in training_profile["engine_profiles"][role]["required_features"]], "tactical_required": False}
+                    counts[role][status] += 1
+                    if status != "ELIGIBLE":
+                        continue
+                    try:
+                        logical = {"match_id": candidate_key[0], "cutoff_profile": candidate_key[1], "engine_role": role}
+                        prior = self._prior_sample(self.approved_root, dataset_id, logical)
+                        sample = self._sample_training(candidate, role, evaluation, labels[role], gate_record, gate_relative, visible_pre, prior, f"{DATASET_CONTRACT_ID}/training-minimum/{PROFILE_ID}#r{dataset_revision:03d}")
+                    except DatasetBuildError as exc:
+                        role_audit["roles"][role]["eligibility_state"] = "BLOCKED"
+                        role_audit["roles"][role]["reasons"] = sorted(set(role_audit["roles"][role]["reasons"] + [exc.code]))
+                        counts[role]["ELIGIBLE"] -= 1
+                        counts[role]["BLOCKED"] += 1
+                        continue
+                    sample_records.append(sample)
+                    relative = f"artifacts/{archive_snapshot_identity}/{_safe_component(candidate_key[0], 'match_id')}/{_safe_component(candidate_key[1], 'cutoff_profile')}/{role}/r{int(sample['revision']):03d}-{sample['training_sample_id']}.json"
+                    sample_ref = {"training_sample_id": sample["training_sample_id"], "match_id": sample["match_id"], "cutoff_profile": sample["cutoff_profile"], "engine_role": role, "revision": sample["revision"], "sample_hash": sample["sample_hash"], "artifact_ref": relative}
+                    self._write_append_only(relative, sample)
+                    sample_refs.append(sample_ref)
+                lineage_candidates.append(role_audit)
+                continue
             domains, common_reasons, reconstruction_paths = self._feature_domains(visible_pre, cutoff, kickoff, all_entry_map)
             labels, label_reasons = self._labels(post_by_candidate[candidate_key], kickoff, all_entry_map)
             rqspf = self._rqspf(visible_pre)
@@ -625,6 +839,16 @@ class HistoricalAsOfDatasetBuilder:
             "eligibility": role_counts,
             "label_refs_and_hashes": sorted([{"training_sample_id": item["training_sample_id"], "label_ref": item["label_ref"], "label_hash": item["label_hash"]} for item in sample_records], key=lambda item: item["training_sample_id"]),
         }
+        if training_profile is not None and training_gate is not None:
+            stable_manifest.update({
+                "eligibility_mode": eligibility_mode,
+                "training_profile_id": PROFILE_ID,
+                "training_profile_hash": training_profile["profile_hash"],
+                "training_gate_id": TRAINING_GATE_ID,
+                "training_gate_hash": training_gate["gate_hash"],
+                "training_gate_record_refs": sorted(training_gate_refs, key=lambda item: (item["match_id"], item["cutoff_profile"], item["engine_role"])),
+                "prediction_time_full_readiness": "UNCHANGED_NOT_USED_BY_TRAINING_PATH",
+            })
         manifest_hash = substantive_hash(stable_manifest)
         substantive_manifest = dict(stable_manifest, dataset_substantive_hash=manifest_hash)
         dataset_artifact = {
@@ -645,6 +869,8 @@ class HistoricalAsOfDatasetBuilder:
             "revision": dataset_revision,
             "supersedes": existing_manifest.get("dataset_artifact_hash") if existing_manifest and dataset_revision > 1 else None,
         }
+        if training_profile is not None and training_gate is not None:
+            dataset_artifact.update({"eligibility_mode": eligibility_mode, "training_profile_id": PROFILE_ID, "training_profile_hash": training_profile["profile_hash"], "training_gate_id": TRAINING_GATE_ID, "training_gate_hash": training_gate["gate_hash"]})
         dataset_artifact_hash = sha256_json(dataset_artifact)
         dataset_artifact["artifact_hash"] = dataset_artifact_hash
         artifact_relative = f"artifacts/{dataset_id}/dataset.json" if dataset_revision == 1 else f"artifacts/{dataset_id}/revisions/r{dataset_revision:03d}/dataset.json"
@@ -659,6 +885,8 @@ class HistoricalAsOfDatasetBuilder:
             "candidate_sample_count": len(candidates) * len(ENGINE_ROLES),
             "candidates": lineage_candidates,
         }
+        if training_profile is not None and training_gate is not None:
+            lineage_manifest.update({"eligibility_mode": eligibility_mode, "training_profile_id": PROFILE_ID, "training_profile_hash": training_profile["profile_hash"], "training_gate_id": TRAINING_GATE_ID, "training_gate_hash": training_gate["gate_hash"], "training_gate_record_refs": sorted(training_gate_refs, key=lambda item: (item["match_id"], item["cutoff_profile"], item["engine_role"]))})
         lineage_hash = sha256_json(lineage_manifest)
         lineage_manifest["lineage_manifest_hash"] = lineage_hash
         lineage_relative = f"lineage_manifests/{dataset_id}.json" if dataset_revision == 1 else f"lineage_manifests/{dataset_id}-r{dataset_revision:03d}.json"
@@ -704,6 +932,8 @@ class HistoricalAsOfDatasetBuilder:
             "supersedes": existing_manifest.get("manifest_hash") if existing_manifest and dataset_revision > 1 else None,
             "zero_archive_reason": "ZERO_ARCHIVED_CANDIDATES" if not candidates else None,
         }
+        if training_profile is not None and training_gate is not None:
+            manifest.update({"eligibility_mode": eligibility_mode, "training_profile_id": PROFILE_ID, "training_profile_hash": training_profile["profile_hash"], "training_gate_id": TRAINING_GATE_ID, "training_gate_hash": training_gate["gate_hash"], "training_gate_record_refs": sorted(training_gate_refs, key=lambda item: (item["match_id"], item["cutoff_profile"], item["engine_role"])), "prediction_time_full_readiness": "UNCHANGED_NOT_USED_BY_TRAINING_PATH"})
         manifest_hash_value = sha256_json(manifest)
         manifest["manifest_hash"] = manifest_hash_value
         manifest_relative = f"manifests/{dataset_id}-r{dataset_revision:03d}.json"

@@ -1,0 +1,32 @@
+{
+  "$id": "training-eligibility-profile-registry@1.0.0",
+  "registry_name": "JCFB_V4_TRAINING_ELIGIBILITY_PROFILES",
+  "registry_version": "training-eligibility-profile-registry@1.0.0",
+  "status": "ACTIVE",
+  "active_training_profile": {
+    "profile_name": "MODEL_TRAINING_MINIMUM_FEATURE_SET",
+    "profile_version": "model-training-minimum-feature-set@2.0.0",
+    "profile_path": "config/prediction_training/v4_model_training_minimum_feature_set_v2.json"
+  },
+  "active_training_gate": {
+    "gate_name": "TRAINING_ELIGIBILITY_GATE",
+    "gate_version": "training-eligibility-gate@2.0.0",
+    "gate_path": "config/prediction_training/v4_training_eligibility_gate_v2.json"
+  },
+  "historical_revisions": [
+    {
+      "revision": "r001",
+      "contract_identity": "b15-ewp004-training-infrastructure-contract@1.0.0",
+      "profile_location": "engine_training_profiles",
+      "compatibility": "READ_ONLY_BACKWARD_COMPATIBLE"
+    }
+  ],
+  "prediction_time_contracts": {
+    "feature_bundle": "UNCHANGED",
+    "batch14_full_gate": "UNCHANGED"
+  },
+  "formal_model_training": "NOT_STARTED",
+  "ewp005": "NOT_AUTHORIZED",
+  "append_only": true,
+  "canonical_hash": "sha256:5b2ce584dab19e55484d06a21b548a15eb2c1f480b651ec66df4da783169a281"
+}

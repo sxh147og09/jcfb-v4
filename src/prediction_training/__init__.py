@@ -43,6 +43,19 @@ from .ewp004_runtime import (
     canonical_bytes,
     sha256_value,
 )
+from .training_eligibility import (
+    AVAILABILITY_STATES,
+    PROFILE_ID,
+    TRAINING_GATE_ID,
+    TrainingEligibilityError,
+    evaluate_training_eligibility,
+    load_training_gate,
+    load_training_profile,
+    make_training_gate_record,
+    validate_training_gate,
+    validate_training_profile,
+)
+from src.prediction_training_contract import ENGINE_ROLES
 
 __all__ = [
     "BUILD_STATUS",
@@ -80,4 +93,15 @@ __all__ = [
     "FormalFitGateResult",
     "canonical_bytes",
     "sha256_value",
+    "AVAILABILITY_STATES",
+    "PROFILE_ID",
+    "TRAINING_GATE_ID",
+    "TrainingEligibilityError",
+    "evaluate_training_eligibility",
+    "load_training_gate",
+    "load_training_profile",
+    "make_training_gate_record",
+    "validate_training_gate",
+    "validate_training_profile",
+    "ENGINE_ROLES",
 ]

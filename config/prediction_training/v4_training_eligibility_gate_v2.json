@@ -1,0 +1,60 @@
+{
+  "$id": "training-eligibility-gate@2.0.0",
+  "gate_name": "TRAINING_ELIGIBILITY_GATE",
+  "gate_version": "training-eligibility-gate@2.0.0",
+  "gate_revision": "r002",
+  "status": "ACTIVE",
+  "profile_ref": "model-training-minimum-feature-set@2.0.0",
+  "prediction_gate_ref": "V4_BATCH14_FULL_GATE",
+  "prediction_gate_semantics": "UNCHANGED_AND_NOT_REUSED_FOR_TRAINING",
+  "required_checks": [
+    "canonical_identity",
+    "cutoff_binding",
+    "native_market_source_refs",
+    "required_minimum_feature_provenance",
+    "postmatch_label_partition_separation",
+    "temporal_no_leakage",
+    "deterministic_reconstruction_metadata"
+  ],
+  "optional_overlay_policy": "MISSING_OPTIONAL_OVERLAY_MASKS_ONLY",
+  "tactical_policy": "NOT_REQUIRED_FOR_TRAINING_MINIMUM",
+  "market_native_alignment": {
+    "OUTCOME": "official SPF",
+    "HANDICAP": "official RQSPF handicap + RQSPF odds",
+    "GOALS": "official Total Goals 0-7+ vector",
+    "HTFT": "official HTFT 9-state odds",
+    "EXACT_SCORE": "NOT_MANDATORY",
+    "external_markets": "OPTIONAL_OVERLAY_ONLY"
+  },
+  "fail_closed": {
+    "required_feature_missing": "INELIGIBLE",
+    "required_provenance_missing": "INELIGIBLE",
+    "optional_overlay_missing": "ELIGIBLE_WITH_MASK",
+    "imputation_detected": "INELIGIBLE"
+  },
+  "record_schema": {
+    "required_fields": [
+      "training_gate_record_id",
+      "gate_version",
+      "profile_hash",
+      "match_id",
+      "cutoff_profile",
+      "prediction_cutoff_at",
+      "kickoff_at",
+      "engine_role",
+      "eligibility_state",
+      "reasons",
+      "feature_envelope",
+      "availability_mask",
+      "domain_coverage",
+      "source_refs",
+      "label_partition",
+      "deterministic_reconstruction",
+      "record_hash",
+      "revision",
+      "supersedes"
+    ],
+    "append_only": true
+  },
+  "gate_hash": "sha256:fec05691e26235d38fc181008a5eb0fe861dd5def916560bd69bf3d54d423765"
+}
