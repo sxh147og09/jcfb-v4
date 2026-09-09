@@ -1,0 +1,102 @@
+{
+  "$id": "v4-batch15-verified-historical-backfill-intake-authorization@1.0.0",
+  "amendment_id": "B15-EWP-001-ADDENDUM-003",
+  "amends": "B15-EWP-001-ADDENDUM-002",
+  "amendment_revision": "r003",
+  "contract_status": "ACTIVE_GOVERNANCE_AUTHORIZATION",
+  "implementation_status": "AUTHORIZED_FOR_LOCAL_EXECUTION",
+  "reopens_completed_work_package": false,
+  "additive_only": true,
+  "authorization_basis": [
+    "EXPLICIT_USER_AUTHORIZATION_2026-09-09",
+    "CHATGPT_REVIEW_IMPORT_432_OF_432_CONFIRMED",
+    "EXACT_SCORE_MAPPING_121_OF_121_CONFIRMED",
+    "REVIEW_INTEGRATION_PASS",
+    "V3_3_3_ISOLATION_PASS"
+  ],
+  "historical_fact_preservation": {
+    "ewp001_status": "COMPLETE",
+    "addendum_001_status": "COMPLETE",
+    "addendum_002_status": "COMPLETE",
+    "original_closure_facts_immutable": true,
+    "frozen_1_0_semantics_unchanged": true,
+    "transport_1_1_semantics_unchanged": true
+  },
+  "execution_authorized": true,
+  "authorized_scope": {
+    "reviewed_extraction_trace_generation": true,
+    "accepted_official_odds_payload_candidate_generation": true,
+    "r002_deterministic_rebuild": true,
+    "no_write_intake_dry_run": true,
+    "historical_archive_append_only_intake": true,
+    "historical_archive_root": "F:\\Projects\\jcfb-v4\\approved_data\\historical_source_archive\\",
+    "ewp002_real_historical_dataset_rerun": true,
+    "ewp003_real_temporal_readiness_rerun": true,
+    "wednesday_fast_track_status_update": true,
+    "usable_sample_count_update": true
+  },
+  "conditional_gates": {
+    "stop_on_any_failure": true,
+    "archive_write_requires_no_write_intake_pass": true,
+    "ewp002_requires_archive_intake_success": true,
+    "ewp003_requires_ewp002_real_dataset_pass": true,
+    "archive_records_must_be_append_only": true,
+    "existing_archive_revisions_must_not_be_overwritten": true,
+    "unknown_identity_or_time_is_fail_closed": true,
+    "post_match_leakage_is_fail_closed": true
+  },
+  "active_contract_bindings": {
+    "transport_contract": "verified-historical-backfill-export-package@1.1.0",
+    "import_manifest_contract": "verified-historical-backfill-import-manifest@1.0.0",
+    "archive_contract": "historical-source-archive@1.0.0",
+    "official_extraction_contracts": ["V4-025", "V4-026", "V4-027"],
+    "r002_zip_profile": "v4-deterministic-zip@1.0"
+  },
+  "training_lock": {
+    "formal_model_training": "NOT_STARTED",
+    "ewp005_execution_authorized": false,
+    "training_requires_separate_explicit_authorization": true,
+    "training_requires_real_ewp002_pass": true,
+    "training_requires_real_ewp003_pass": true,
+    "training_requires_minimum_class_support": true,
+    "training_requires_feature_availability_100_percent": true,
+    "training_requires_leakage_lineage_pass": true
+  },
+  "not_authorized": [
+    "EWP-005_FORMAL_MODEL_FIT",
+    "FORMAL_TRAINING",
+    "FORMAL_MODEL_ARTIFACT_GENERATION",
+    "MODEL_PROMOTION",
+    "V4-076_FORMAL_FROZEN_INPUT_EMISSION",
+    "V4-052_FORMAL_PRODUCTION_MODEL_BINDING",
+    "V4-053_FORMAL_PRODUCTION_MODEL_BINDING",
+    "V4-054_FORMAL_PRODUCTION_MODEL_BINDING",
+    "V4-055_FORMAL_PRODUCTION_MODEL_BINDING",
+    "PRODUCTION",
+    "SUPABASE",
+    "PUBLIC_DEPLOYMENT",
+    "MIGRATIONS",
+    "V3.3.3_READ_OR_WRITE",
+    "THRESHOLD_LOWERING",
+    "DATA_SUFFICIENCY_RELAXATION",
+    "POST_MATCH_LEAKAGE"
+  ],
+  "no_write_boundary": {
+    "v3_3_3_modified": false,
+    "production_modified": false,
+    "supabase_modified": false,
+    "public_modified": false,
+    "model_artifacts_generated": false,
+    "formal_training_started": false,
+    "thresholds_lowered": false
+  },
+  "canonicalization": {
+    "algorithm": "SHA-256",
+    "profile": "v4-canonical-json@1.0",
+    "encoding": "UTF-8",
+    "key_order": "LEXICOGRAPHIC_RECURSIVE",
+    "array_order": "PRESERVE_SEMANTIC_ORDER",
+    "self_hash_field": "canonical_hash is omitted during hash computation"
+  },
+  "canonical_hash": "sha256:89c2907d1b5f63e16a175c73c36552cdc763f58051751e57c731d3626864c2e7"
+}
